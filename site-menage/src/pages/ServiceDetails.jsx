@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getServiceById } from '../api-supabase';
+import getServiceIcon from '../utils/serviceIcons';
 import './ServiceDetails.css';
 
 export default function ServiceDetails() {
@@ -92,7 +93,7 @@ export default function ServiceDetails() {
           </button>
           <div className="service-header-content">
             <div className="service-icon" data-aos="zoom-in" data-aos-delay="200">
-              {service.icon}
+              {getServiceIcon(service)}
             </div>
             <div className="service-title-section">
               <h1 className="service-title" data-aos="fade-up" data-aos-delay="300">

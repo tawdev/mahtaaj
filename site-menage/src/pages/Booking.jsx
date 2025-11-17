@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { postContact, getServices, getTypes, getTypeById, getServiceById, createReservation, getCategoryHouseById, getTypeOptions } from '../api-supabase';
 import PromoCode from '../components/PromoCode';
+import getServiceIcon from '../utils/serviceIcons';
 import './Booking.css';
 
 export default function Booking() {
@@ -910,7 +911,7 @@ export default function Booking() {
                     const serviceValue = service.name || service.title || '';
                     return (
                       <option key={service.id} value={serviceValue}>
-                        {service.icon} {displayName}
+                        {getServiceIcon(service)} {displayName}
                       </option>
                     );
                   })}

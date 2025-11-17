@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LanguageFields from '../../components/LanguageFields';
 import { getServicesAdmin, createServiceAdmin, updateServiceAdmin, deleteServiceAdmin } from '../../api-supabase';
+import getServiceIcon from '../../utils/serviceIcons';
 import './AdminServicesCrud.css';
 
 export default function AdminServicesCrud({ token }) {
@@ -10,11 +11,8 @@ export default function AdminServicesCrud({ token }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
-  const [showIconPicker, setShowIconPicker] = useState(false);
-  const [iconSearch, setIconSearch] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({ 
-    icon: '', 
     title: '', 
     description: '', 
     name_ar: '',
@@ -29,21 +27,6 @@ export default function AdminServicesCrud({ token }) {
     order: 0
   });
 
-  // Liste d'icônes disponibles avec des icônes de ménage spécifiques
-  const availableIcons = [
-    '🏠', '🏢', '🪟', '👕', '🧽', '🧴', '✨', '🌟', '💎', '🎯',
-    '🚿', '🛁', '🚽', '🧼', '🧻', '🧹', '🧺', '🗑️', '🧽', '🧴',
-    '🏆', '⭐', '💫', '🔥', '💧', '🌊', '☀️', '🌙', '🌈', '🌸',
-    '🌺', '🌻', '🌷', '🌹', '🌿', '🍃', '🌱', '🌳', '🌲', '🌴',
-    '🏡', '🏘️', '🏙️', '🏗️', '🏭', '🏬', '🏪', '🏫', '🏩', '🏨',
-    '🚗', '🚙', '🚐', '🚚', '🚛', '🚜', '🚲', '🛴', '🛵', '🏍️',
-    '💼', '📁', '📂', '📋', '📊', '📈', '📉', '📌', '📍', '📎',
-    '🔧', '🔨', '⚒️', '🛠️', '⚙️', '🔩', '⚡', '🔌', '💡', '🕯️',
-    '🎨', '🖌️', '🖍️', '✏️', '✒️', '🖊️', '🖋️', '📝', '📄', '📃',
-    '🎭', '🎪', '🎨', '🎬', '🎤', '🎧', '🎵', '🎶', '🎸', '🎹',
-    '🧺', '🧽', '🧴', '🧼', '🧻', '🧹', '🗑️', '🚿', '🛁', '🚽',
-    '🏠', '🏢', '🪟', '👕', '✨', '🌟', '💎', '🎯', '🏆', '⭐'
-  ];
 
   useEffect(() => {
     loadServices();
@@ -67,13 +50,6 @@ export default function AdminServicesCrud({ token }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation
-    if (!formData.icon || formData.icon.trim() === '') {
-      setError('Veuillez sélectionner une icône');
-      setTimeout(() => setError(''), 3000);
-      return;
-    }
-
     // At least one name field is required
     if (!formData.name_fr && !formData.name_ar && !formData.name_en && !formData.title) {
       setError('Veuillez entrer au moins un nom (FR, AR, EN ou titre)');
@@ -88,7 +64,6 @@ export default function AdminServicesCrud({ token }) {
     try {
       // Prepare data - remove empty strings and null values
       const cleanData = {
-        icon: formData.icon.trim(),
         name_fr: formData.name_fr?.trim() || null,
         name_ar: formData.name_ar?.trim() || null,
         name_en: formData.name_en?.trim() || null,
@@ -119,7 +94,7 @@ export default function AdminServicesCrud({ token }) {
       
       setShowForm(false);
       setEditingService(null);
-      setFormData({ icon: '', title: '', description: '', name_ar:'', name_fr:'', name_en:'', description_ar:'', description_fr:'', description_en:'', slug:'', is_active: true, sort_order: 0, order: 0 });
+      setFormData({ title: '', description: '', name_ar:'', name_fr:'', name_en:'', description_ar:'', description_fr:'', description_en:'', slug:'', is_active: true, sort_order: 0, order: 0 });
       
       setTimeout(() => {
         setSuccessMessage('');
@@ -138,7 +113,6 @@ export default function AdminServicesCrud({ token }) {
   const handleEdit = (service) => {
     setEditingService(service);
     setFormData({
-      icon: service.icon || '',
       title: service.title || '',
       description: service.description || '',
       name_ar: service.name_ar || '',
@@ -203,20 +177,9 @@ export default function AdminServicesCrud({ token }) {
   const handleCancel = () => {
     setShowForm(false);
     setEditingService(null);
-    setShowIconPicker(false);
-    setIconSearch('');
-    setFormData({ icon: '', title: '', description: '', name_ar:'', name_fr:'', name_en:'', description_ar:'', description_fr:'', description_en:'', slug:'', is_active: true, sort_order: 0, order: 0 });
+    setFormData({ title: '', description: '', name_ar:'', name_fr:'', name_en:'', description_ar:'', description_fr:'', description_en:'', slug:'', is_active: true, sort_order: 0, order: 0 });
   };
 
-  const handleIconSelect = (icon) => {
-    setFormData({...formData, icon});
-    setShowIconPicker(false);
-    setIconSearch('');
-  };
-
-  const filteredIcons = availableIcons.filter(icon => 
-    iconSearch === '' || icon.includes(iconSearch)
-  );
 
   const toggleActive = async (service) => {
     setError('');
@@ -274,57 +237,20 @@ export default function AdminServicesCrud({ token }) {
             <h3>{editingService ? 'Modifier' : 'Créer'} un Service</h3>
             <form onSubmit={handleSubmit}>
               <div className="admin-services-field">
-                <label htmlFor="icon">Icône *</label>
-                <div className="admin-services-icon-input-container">
-                  <div className="admin-services-icon-display">
-                    <span className="admin-services-selected-icon" title={formData.icon || 'Aucune icône sélectionnée'}>
-                      {formData.icon || '🎯'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowIconPicker(!showIconPicker)}
-                      className="admin-services-icon-picker-button"
-                    >
-                      {formData.icon ? 'Changer' : 'Choisir'} l'icône
-                    </button>
-                  </div>
-                  
-                  {showIconPicker && (
-                    <div className="admin-services-icon-picker">
-                      <div className="admin-services-icon-search">
-                        <input
-                          type="text"
-                          placeholder="Rechercher une icône..."
-                          value={iconSearch}
-                          onChange={(e) => setIconSearch(e.target.value)}
-                          className="admin-services-icon-search-input"
-                        />
-                      </div>
-                      <div className="admin-services-icon-grid">
-                        {filteredIcons.map((icon, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleIconSelect(icon)}
-                            className={`admin-services-icon-option ${formData.icon === icon ? 'selected' : ''}`}
-                            title={`Icône: ${icon}`}
-                            aria-label={`Sélectionner l'icône ${icon}`}
-                          >
-                            <span className="icon-emoji">{icon}</span>
-                          </button>
-                        ))}
-                      </div>
-                      <div className="admin-services-icon-picker-footer">
-                        <button
-                          type="button"
-                          onClick={() => setShowIconPicker(false)}
-                          className="admin-services-icon-picker-close"
-                        >
-                          Fermer
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                <label>Icône affichée</label>
+                <div className="admin-services-icon-display">
+                  <span className="admin-services-selected-icon" title="Icône dérivée automatiquement">
+                    {getServiceIcon({
+                      slug: formData.slug,
+                      name_fr: formData.name_fr,
+                      name_en: formData.name_en,
+                      name_ar: formData.name_ar,
+                      title: formData.title
+                    })}
+                  </span>
+                  <small style={{color:'#64748b'}}>
+                    L'icône est déterminée automatiquement selon le nom/slug du service.
+                  </small>
                 </div>
               </div>
               
@@ -438,8 +364,8 @@ export default function AdminServicesCrud({ token }) {
             return (
               <div key={service.id} className={`admin-services-card ${!service.is_active ? 'inactive' : ''}`}>
                 <div className="admin-services-card-header">
-                  <span className="admin-services-icon" title={service.icon || 'Icône par défaut'}>
-                    {service.icon || '🏠'}
+                  <span className="admin-services-icon" title="Icône dérivée automatiquement">
+                    {getServiceIcon(service)}
                   </span>
                   <div className="admin-services-actions">
                     <button 

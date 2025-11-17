@@ -129,6 +129,17 @@ export default function BebeSetting() {
       }
 
       console.log('[BebeSetting] Loaded settings:', data?.length || 0);
+      // Log first setting to verify data structure (for debugging)
+      if (data && data.length > 0 && process.env.NODE_ENV === 'development') {
+        console.log('[BebeSetting] First setting sample:', {
+          id: data[0].id,
+          nom: data[0].nom,
+          description: data[0].description,
+          description_ar: data[0].description_ar,
+          description_fr: data[0].description_fr,
+          description_en: data[0].description_en
+        });
+      }
       setSettings(Array.isArray(data) ? data : []);
       setSelectedCategory(categories.find(cat => cat.id === categoryId));
     } catch (err) {
@@ -166,6 +177,54 @@ export default function BebeSetting() {
 
   const handleReservationCancel = () => {
     setShowReservationForm(false);
+  };
+
+  // Helper function to get localized description
+  const getLocalizedDescription = (setting) => {
+    if (!setting) {
+      console.warn('[BebeSetting] getLocalizedDescription: setting is null/undefined');
+      return t('bebe_setting.description_not_available');
+    }
+    
+    const lang = (i18n.language || 'fr').toString().split(/[-_]/)[0].toLowerCase();
+    
+    // Try language-specific description first
+    if (lang === 'ar' && setting.description_ar && setting.description_ar.trim()) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[BebeSetting] Using description_ar for setting:', setting.id);
+      }
+      return setting.description_ar.trim();
+    }
+    if (lang === 'fr' && setting.description_fr && setting.description_fr.trim()) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[BebeSetting] Using description_fr for setting:', setting.id);
+      }
+      return setting.description_fr.trim();
+    }
+    if (lang === 'en' && setting.description_en && setting.description_en.trim()) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[BebeSetting] Using description_en for setting:', setting.id);
+      }
+      return setting.description_en.trim();
+    }
+    
+    // Fallback to main description field
+    if (setting.description && setting.description.trim()) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[BebeSetting] Using description (fallback) for setting:', setting.id);
+      }
+      return setting.description.trim();
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[BebeSetting] No description found for setting:', setting.id, 'Available fields:', {
+        description: setting.description,
+        description_ar: setting.description_ar,
+        description_fr: setting.description_fr,
+        description_en: setting.description_en
+      });
+    }
+    return t('bebe_setting.description_not_available');
   };
 
   if (loading) {
@@ -289,7 +348,7 @@ export default function BebeSetting() {
                       </div>
                       <div className="setting-content">
                         <h3 className="setting-name">{setting.nom || setting.name || t('bebe_setting.category_not_available')}</h3>
-                        <p className="setting-description">{setting.description || t('bebe_setting.description_not_available')}</p>
+                        <p className="setting-description">{getLocalizedDescription(setting)}</p>
                         <div className="setting-details">
                           <div className="price-info">
                             <span className="price-label">{t('bebe_setting.services.price')}</span>
@@ -388,7 +447,7 @@ export default function BebeSetting() {
             {/* Service Description */}
             <div className="service-details-description">
               <p className="service-description-text">
-                {selectedService.description || t('bebe_setting.description_not_available')}
+                {getLocalizedDescription(selectedService)}
               </p>
             </div>
 
