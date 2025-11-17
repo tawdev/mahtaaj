@@ -1,0 +1,142 @@
+.language-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+.language-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.language-button:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.language-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.language-button .flag {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.language-button .language-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+}
+
+.language-button .dropdown-arrow {
+  font-size: 8px;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-top: 2px;
+  list-style: none;
+  padding: 0;
+  margin: 2px 0 0 0;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.language-option:hover {
+  background: #f8fafc;
+}
+
+.language-option.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.language-option .flag {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.language-option .language-name {
+  flex: 1;
+}
+
+/* Mobile responsive for language switcher */
+@media (max-width: 768px) {
+  .language-button {
+    width: 100%;
+    justify-content: space-between;
+    min-width: auto;
+  }
+  
+  .language-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 50vh;
+    border-radius: 12px 12px 0 0;
+    margin-top: 0;
+  }
+  
+  .language-option {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* RTL Support for language switcher */
+[dir="rtl"] .language-button {
+  text-align: right;
+}
+
+[dir="rtl"] .language-button .language-name {
+  text-align: right;
+}
+
+[dir="rtl"] .language-dropdown {
+  right: 0;
+  left: auto;
+}
+
+[dir="rtl"] .language-option {
+  text-align: right;
+}
+

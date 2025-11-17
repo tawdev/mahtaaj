@@ -1,0 +1,346 @@
+/* Admin Bebe Employees Styles */
+.bebe-employees-page {
+  padding: 24px;
+}
+
+.bebe-employees-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #fef3f2 0%, #fee2e2 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.bebe-employees-header h1 {
+  margin: 0;
+  color: #be185d;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bebe-employees-header h1::before {
+  content: '🍼';
+  font-size: 32px;
+}
+
+.bebe-employees-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.bebe-employees-filter {
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+}
+
+.bebe-employees-filter:focus {
+  outline: none;
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+}
+
+.bebe-employees-refresh-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bebe-employees-refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+}
+
+.bebe-employees-refresh-btn:active {
+  transform: translateY(0);
+}
+
+.bebe-employees-alert {
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bebe-employees-alert.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
+.bebe-employees-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 500;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.bebe-employees-table-wrapper {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.bebe-employees-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.bebe-employees-table thead {
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+}
+
+.bebe-employees-table th {
+  padding: 18px 20px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 14px;
+  color: #be185d;
+  border-bottom: 2px solid #f9a8d4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.bebe-employees-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.bebe-employees-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.bebe-employees-table tbody tr:hover {
+  background: #f9fafb;
+  transform: scale(1.001);
+}
+
+.bebe-employees-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.bebe-employees-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #ec4899;
+  transition: transform 0.2s ease;
+}
+
+.bebe-employees-checkbox:hover {
+  transform: scale(1.1);
+}
+
+.bebe-employees-delete-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.bebe-employees-delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.bebe-employees-delete-btn:active {
+  transform: translateY(0);
+}
+
+.bebe-employees-validate-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+}
+
+.bebe-employees-validate-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.bebe-employees-validate-btn:active {
+  transform: translateY(0);
+}
+
+.bebe-employees-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 16px;
+}
+
+.bebe-employees-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.bebe-employees-email {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.bebe-employees-email:hover {
+  text-decoration: underline;
+}
+
+.bebe-employees-expertise {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(236, 72, 153, 0.1);
+  color: #db2777;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.bebe-employees-location {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.bebe-employees-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bebe-employees-status.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.bebe-employees-status.inactive {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .bebe-employees-table {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bebe-employees-page {
+    padding: 16px;
+  }
+  
+  .bebe-employees-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+    padding: 16px 20px;
+  }
+  
+  .bebe-employees-header h1 {
+    font-size: 24px;
+  }
+  
+  .bebe-employees-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .bebe-employees-filter,
+  .bebe-employees-refresh-btn {
+    width: 100%;
+  }
+  
+  .bebe-employees-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .bebe-employees-table th,
+  .bebe-employees-table td {
+    padding: 14px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bebe-employees-page {
+    padding: 12px;
+  }
+  
+  .bebe-employees-header {
+    padding: 12px 16px;
+  }
+  
+  .bebe-employees-header h1 {
+    font-size: 20px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .bebe-employees-table th,
+  .bebe-employees-table td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+  
+  .bebe-employees-delete-btn,
+  .bebe-employees-validate-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+
+

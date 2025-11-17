@@ -1,0 +1,19 @@
+.promo-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 16px rgba(2,6,23,0.06);
+}
+.promo-title { margin: 0 0 8px 0; color: #0f172a; }
+.promo-body { display: flex; gap: 8px; }
+.promo-input { flex: 1; border: 2px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; outline: none; }
+.promo-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+.promo-apply { background: #10b981; color: white; border: none; border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer; }
+.promo-apply:hover { background: #059669; }
+.promo-message { margin-top: 8px; padding: 8px 10px; border-radius: 10px; animation: promoFade .2s ease-in; }
+.promo-message.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.promo-message.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+@keyframes promoFade { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+
+

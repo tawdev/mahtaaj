@@ -1,0 +1,26 @@
+.security-employees-page { padding: 16px; }
+.security-employees-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.security-employees-header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+.security-employees-actions { display: flex; gap: 8px; align-items: center; }
+.security-employees-filter { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; }
+.security-employees-refresh-btn { padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f8fafc; cursor: pointer; }
+.security-employees-refresh-btn:hover { background: #eef2ff; }
+.security-employees-table-wrapper { overflow: auto; background: #fff; border: 1px solid #eee; border-radius: 8px; }
+.security-employees-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.security-employees-table thead th { background: #f3f4f6; text-align: left; padding: 10px; border-bottom: 1px solid #e5e7eb; }
+.security-employees-table tbody td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+.security-employees-table tbody tr:nth-child(odd) { background: #fcfdff; }
+.security-employees-table tbody tr:hover { background: #f9fafb; }
+.security-employees-alert.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 10px; border-radius: 6px; margin-bottom: 10px; display: flex; gap: 8px; align-items: center; }
+.security-employees-loading { padding: 16px; }
+.security-employees-checkbox { cursor: pointer; }
+.security-employees-status { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.security-employees-status.active { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.security-employees-status.inactive { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.security-employees-delete-btn { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+.security-employees-delete-btn:hover { background: #fecaca; }
+.security-employees-validate-btn { background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+.security-employees-validate-btn:hover { background: #bbf7d0; }
+.security-employees-email { color: #2563eb; text-decoration: none; }
+.security-employees-email:hover { text-decoration: underline; }
+

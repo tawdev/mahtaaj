@@ -1,0 +1,159 @@
+/* RegisterEmployee1 - Modern, professional CSS (no Tailwind, no React) */
+
+:root {
+  --re1-bg: #f6f8fb;
+  --re1-card-bg: #ffffff;
+  --re1-card-border: rgba(15, 23, 42, 0.08);
+  --re1-card-shadow: 0 6px 18px rgba(2, 6, 23, 0.10);
+  --re1-card-shadow-hover: 0 12px 28px rgba(2, 6, 23, 0.16);
+  --re1-primary: #2563eb;
+  --re1-primary-soft: #e8eefc;
+  --re1-muted: #64748b;
+  --re1-title: #0f172a;
+  --re1-radius: 16px;
+  --re1-radius-pill: 9999px;
+  --re1-transition: 220ms cubic-bezier(.2,.65,.3,1);
+}
+
+/* Ensure navbar is visible on this page */
+.navbar1,
+header.navbar1 {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Page wrapper */
+.re1-page {
+  background: var(--re1-bg);
+  min-height: 70vh;
+  padding-top: 70px; /* Account for fixed navbar */
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+@media (max-width: 768px) {
+  .re1-page {
+    padding-top: 60px; /* Smaller navbar height on mobile */
+  }
+}
+
+/* Header */
+.re1-header {
+  text-align: center;
+}
+
+.re1-header h1 {
+  margin: 0;
+  color: var(--re1-title);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.re1-header p {
+  margin: .5rem 0 0 0;
+  color: var(--re1-muted);
+  font-weight: 500;
+}
+
+/* Grid helper: 2 cards per row by default, 1 card on small screens */
+.re1-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 639.98px) {
+  .re1-grid { grid-template-columns: 1fr; }
+}
+
+/* Card */
+.re1-card {
+  border-radius: var(--re1-radius);
+  border: 1px solid var(--re1-card-border);
+  background: var(--re1-card-bg);
+  padding: 1.5rem;
+  box-shadow: var(--re1-card-shadow);
+  transition: transform var(--re1-transition), box-shadow var(--re1-transition),
+    border-color var(--re1-transition), background var(--re1-transition);
+  text-decoration: none;
+  display: block;
+}
+
+.re1-card:hover,
+.re1-card:focus-visible {
+  transform: translateY(-4px) scale(1.045);
+  box-shadow: var(--re1-card-shadow-hover);
+  border-color: rgba(37, 99, 235, 0.35);
+  outline: none;
+}
+
+/* Card content */
+.re1-card-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: .5rem;
+}
+
+.re1-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--re1-radius-pill);
+  background: #eef2f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--re1-primary);
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .08);
+}
+
+.re1-card-title {
+  margin: 0;
+  color: var(--re1-title);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.re1-card-desc {
+  margin: 0;
+  color: var(--re1-muted);
+  font-size: .95rem;
+  line-height: 1.55;
+}
+
+/* Soft badge helper (optional) */
+.re1-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .35rem .7rem;
+  border-radius: 10px;
+  background: var(--re1-primary-soft);
+  color: var(--re1-primary);
+  font-weight: 700;
+  font-size: .8rem;
+}
+
+/* RTL support */
+[dir="rtl"] .re1-header h1,
+[dir="rtl"] .re1-header p,
+[dir="rtl"] .re1-card-inner,
+[dir="rtl"] .re1-card-title,
+[dir="rtl"] .re1-card-desc {
+  text-align: center; /* cards are centered either way */
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .re1-card { transition: none; }
+}
+
+

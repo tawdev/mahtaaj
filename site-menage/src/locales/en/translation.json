@@ -1,0 +1,1389 @@
+{
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "house_keeping": "Housekeeping",
+    "security": "Security",
+    "shop": "Shop",
+    "contact": "Contact",
+    "employees": "Employees",
+    "languages": "Languages",
+    "book": "Book",
+    "login": "Login",
+    "logout": "Logout",
+    "gallery": "Gallery",
+    "info": "Info",
+    "testimonials": "Testimonials",
+    "profile": "My Profile",
+    "menu": "Menu",
+    "close": "Close",
+    "baby_setting": "Baby Setting",
+    "gardening": "Gardening",
+    "hand_workers": "Hand Workers",
+    "brand_name": "ForNowSolution",
+    "all_services": "All our services"
+  },
+  "home": {
+    "title": "ForNowSolution",
+    "subtitle": "Your trusted partner for all your cleaning needs.",
+    "hero": {
+      "title": "Professional Cleaning",
+      "subtitle": "Quality services for your home and business",
+      "cta": "Discover our services"
+    },
+    "services": {
+      "title": "Our Services",
+      "subtitle": "Choose the service that meets your needs",
+      "cleaning": {
+        "title": "Housekeeping and kitchen",
+        "description": "Complete cleaning services for your home and kitchen."
+      },
+      "office": {
+        "title": "Office or factory cleaning",
+        "description": "Professional cleaning for offices and industrial environments."
+      },
+      "windows": {
+        "title": "Window cleaning",
+        "description": "Impeccable cleaning of your windows, interior and exterior."
+      },
+      "laundry": {
+        "title": "Laundry and ironing",
+        "description": "Laundry and ironing services for your clothes."
+      },
+      "hotel": {
+        "title": "Airbnb Cleaning",
+        "description": "Specialized cleaning services for Airbnb rentals."
+      },
+      "pool": {
+        "title": "Pool cleaning",
+        "description": "Professional maintenance and cleaning of your pool."
+      }
+    },
+    "about": {
+      "title": "About us",
+      "subtitle": "More than 10 years of experience in the cleaning industry"
+    }
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "Choose the service that meets your needs",
+    "book_now": "Book Now",
+    "learn_more": "Learn More",
+    "loading": "Loading services...",
+    "loading_error": "Unable to load services",
+    "minimum_price": "Minimum: 150 MAD for 4 hours",
+    "additional_hour": "Each additional hour: 40 MAD",
+    "main_categories": "Main Categories",
+    "cleaning": "Cleaning",
+    "kitchen": "Kitchen",
+    "offices": "Offices",
+    "factory": "Factory",
+    "interior": "Interior",
+    "exterior": "Exterior",
+    "washing": "Washing",
+    "ironing": "Ironing",
+    "check_in": "Check-in",
+    "check_out": "Check-out",
+    "standard": "Standard",
+    "deep": "Deep Cleaning",
+    "subcategories": "Subcategories",
+    "details": "Details",
+    "surface": "Surface",
+    "price": "Price",
+    "back": "Back",
+    "subcategories_details": {
+      "villa": "Villa",
+      "riad": "Riad",
+      "maison": "House",
+      "appartement": "Apartment",
+      "hotel": "Hotel",
+      "resort_hotel": "Resort Hotel",
+      "italienne": "Italian",
+      "marocaine": "Moroccan",
+      "francaise": "French",
+      "golfe": "Gulf"
+    },
+    "service_details": {
+      "office_cleaning": "Office Cleaning",
+      "industrial_cleaning": "Industrial Cleaning",
+      "office_description": "Professional cleaning service for offices and workspaces with special attention to common areas, shared equipment and workstations.",
+      "industrial_description": "Specialized industrial cleaning service for factories and production environments with treatment of heavy equipment and technical surfaces.",
+      "estimated_surface": "Estimated surface (m²)",
+      "estimated_price": "Estimated price:",
+      "book": "Book",
+      "back_to_services": "Back to services"
+    }
+  },
+  "security": {
+    "title": "Security Team",
+    "subtitle": "Trained, experienced and available agents for the protection of your spaces.",
+    "loading": "Loading...",
+    "error": "Error",
+    "role_not_available": "Role not available",
+    "click_to_see_agents": "Click to see agents",
+    "description_not_available": "Description not available",
+    "security_role": "Security role",
+    "back_to_roles": "← Back to roles",
+    "available_agents": "Available agents",
+    "chef_de_securite": "Security Manager",
+    "agent_de_surete": "Specialized Security Agent", 
+    "agent_de_securite": "General Security Agent",
+    "superviseur_securite": "Security Team Supervisor",
+    "name_not_available": "Name not available",
+    "security_agent": "Security agent",
+    "years_experience": "years of experience",
+    "average": "Average",
+    "reviews": "reviews",
+    "no_evaluation": "No evaluation for this agent",
+    "latest_reviews": "Latest reviews",
+    "show_all_reviews": "Show all reviews",
+    "hide_reviews": "Hide reviews",
+    "evaluate_agent": "Evaluate this agent",
+    "reserve_agent": "Reserve this agent",
+    "no_agents_available": "No agents available for this role.",
+    "evaluate": "Evaluate",
+    "evaluation_already_submitted": "Evaluation already submitted",
+    "evaluation_already_submitted_text": "You have already evaluated this security agent. You can only submit one review per agent.",
+    "close": "Close",
+    "rating": "Rating (1-5 stars) *",
+    "click_star_to_select": "Click on a star to select your rating",
+    "stars_selected": "star(s) selected",
+    "comment": "Comment",
+    "share_experience": "Share your experience with this agent...",
+    "cancel": "Cancel",
+    "submit_evaluation": "Submit evaluation",
+    "reserve": "Reserve",
+    "reservation_type": "Reservation type",
+    "daily": "Daily",
+    "hourly": "Hourly",
+    "date": "Date",
+    "security_agent_selection": "Security agent",
+    "choose_agent": "— Choose an agent —",
+    "phone_number": "Phone number *",
+    "phone_placeholder": "Ex: 06 12 34 56 78",
+    "phone_validation": "Please enter a valid phone number",
+    "start_time": "Start time",
+    "end_time": "End time",
+    "total_price": "Total price:",
+    "confirming": "Confirming...",
+    "confirm_reservation": "Confirm reservation"
+  },
+  "shop": {
+    "title": "Shop",
+    "subtitle": "Discover our professional cleaning products",
+    "add_to_cart": "Add to cart",
+    "price": "Price",
+    "category": "Category",
+    "quantity": "Quantity",
+    "total": "Total",
+    "checkout": "Checkout",
+    "empty": "Your cart is empty"
+  },
+  "booking": {
+    "title": "Book a Service",
+    "subtitle": "Fill out this form to book your cleaning service. We will contact you as soon as possible to confirm your appointment.",
+    "service_label": "Desired Service",
+    "select_service": "Choose a service",
+    "loading_services": "Loading services...",
+    "firstname": "First Name",
+    "firstname_placeholder": "Your first name",
+    "phone": "Phone",
+    "phone_placeholder": "Ex: +212 6 12 34 56 78",
+    "phone_help": "Please specify if +33 or +212",
+    "location": "Service Location",
+    "location_placeholder": "City / Full Address",
+    "use_location": "📍 Use my location",
+    "locating": "Locating...",
+    "size_label": "Surface Size (m²)",
+    "size_placeholder": "Ex: 50",
+    "size_help": "Indicate the surface to clean for a more accurate quote",
+    "type_label": "Type (optional)",
+    "type_placeholder": "Ex: Villa, Apartment, Moroccan, etc.",
+    "type_help": "Enter the type if relevant (e.g., Villa, Italian…)",
+    "select_type": "Choose a type (optional)",
+    "loading_types": "Loading types...",
+    "type_help_auto": "The associated service will be automatically selected",
+    "types_load_error": "Error loading types",
+    "no_service_for_type": "No service associated with this type",
+    "service_not_found": "Service not found",
+    "service_not_in_list": "The associated service is not available in the list",
+    "error_loading_service": "Error loading service",
+    "message_label": "Service Details",
+    "message_placeholder": "Describe the desired service: specific location, surfaces to clean, pet hair, smoker, heavily stained seats, sand, etc.",
+    "message_help": "The more specific you are, the better we can serve you",
+    "email_label": "Email (optional)",
+    "email_placeholder": "your@email.com",
+    "email_help": "To receive confirmation by email",
+    "estimated_price": "Estimated Price:",
+    "price_breakdown": "Estimate based on {{size}} m² × {{rate}} DH/m² + added services",
+    "submit": "Send Request",
+    "submitting": "Sending...",
+    "add_service": "+ Add a Service",
+    "success_title": "Request Sent Successfully!",
+    "success_message": "Thank you for your trust. We will contact you as soon as possible to confirm your appointment.",
+    "new_request": "New Request",
+    "extra_services": "Added Services",
+    "select_date": "Select date",
+    "select_time": "Select time",
+    "book_now": "Book now",
+    "geolocation_not_supported": "Geolocation is not supported.",
+    "location_error": "Unable to retrieve location.",
+    "permission_error": "Permission denied or unavailable.",
+    "price_breakdown_simple": "Estimate based on {{size}} m² × 2.5 DH/m²{{extras}}"
+  },
+  "cart": {
+    "title": "Cart",
+    "subtitle": "Check your items",
+    "item": "Item",
+    "quantity": "Quantity",
+    "price": "Price",
+    "total": "Total",
+    "checkout": "Checkout",
+    "empty": "Your cart is empty"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm": "Confirm",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "sending": "Sending…",
+    "submit": "Submit",
+    "unexpected_error": "An unexpected error occurred"
+  },
+  "employees": {
+    "register": {
+      "join_team": "Join our team",
+      "fill_form": "Please fill out the form below",
+      "required_fields": "Please fill in the required fields",
+      "submit_failed": "Failed to submit the form",
+      "submit_success": "Form sent successfully",
+      "first_name": "First Name",
+      "first_name_ph": "Enter first name",
+      "last_name": "Last Name",
+      "last_name_ph": "Enter last name",
+      "age": "Age",
+      "age_ph": "Age",
+      "email": "Email",
+      "email_ph": "example@mail.com",
+      "phone": "Phone",
+      "phone_ph": "Ex: +212 6 12 34 56 78",
+      "address": "Address",
+      "address_ph": "Enter address",
+      "location": "Location",
+      "location_ph": "Enter your location",
+      "photo_optional": "Photo (optional)",
+      "expertise": "Field of expertise",
+      "expertise_select": "Choose expertise",
+      "auto_entrepreneur": "Self-employed",
+      "last_experience": "Last work experience",
+      "last_experience_ph": "Describe your last work experience",
+      "company_name": "Company name",
+      "company_name_ph": "Enter company name",
+      "available_days": "Available days",
+      "start": "Start",
+      "end": "End",
+      "birth_date": "Date of birth",
+      "birth_date_ph": "Select birth date"
+    },
+    "days": {
+      "sat": "Saturday",
+      "sun": "Sunday",
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday"
+    },
+    "bebe": {
+      "expertise": {
+        "newborn": "Newborn care",
+        "home_nursery": "Home nursery",
+        "nanny": "Nanny",
+        "home_assistant": "Home assistant for child"
+      }
+    },
+    "jardinage": {
+      "expertise": {
+        "planting": "Planting",
+        "pruning": "Pruning",
+        "maintenance": "Garden maintenance"
+      }
+    },
+    "landing": {
+      "title": "Register as Employee",
+      "subtitle": "Choose a department to start your application"
+    }
+  },
+  "home_page": {
+    "services": {
+      "cleaning_kitchen": {
+        "title": "Housekeeping and kitchen",
+        "description": "Complete cleaning of your home with special attention to the kitchen and living spaces",
+        "icon": "House"
+      },
+      "office_factory": {
+        "title": "Office or factory cleaning",
+        "description": "Professional services for offices and industrial environments with specialized equipment",
+        "icon": "Office"
+      },
+      "window_cleaning": {
+        "title": "Window cleaning",
+        "description": "Impeccable cleaning of interior and exterior windows with professional equipment",
+        "icon": "Windows"
+      },
+      "laundry_ironing": {
+        "title": "Laundry and ironing",
+        "description": "Complete washing and ironing service with products adapted to all types of textiles",
+        "icon": "Clothes"
+      },
+      "airbnb_cleaning": {
+        "title": "Airbnb Cleaning",
+        "description": "Complete preparation for your Airbnb rentals with professional check-in and check-out",
+        "icon": "Airbnb"
+      },
+      "pool_cleaning": {
+        "title": "Pool Cleaning",
+        "description": "Pool maintenance and cleaning with water treatment and complete maintenance",
+        "icon": "Pool"
+      }
+    },
+    "gallery": {
+      "images": {
+        "professional_cleaning": "Professional cleaning",
+        "cleaning_service": "Cleaning service",
+        "complete_cleaning": "Complete cleaning",
+        "our_team": "Our team",
+        "qualified_professionals": "Qualified professionals",
+        "experienced_team": "Experienced team",
+        "impeccable_result": "Impeccable result",
+        "quality_work": "Quality work",
+        "customer_satisfaction": "Customer satisfaction"
+      }
+    },
+    "about": {
+      "title": "About us",
+      "tagline": "German quality at a Moroccan price",
+      "description": "ForNowSolution is a passionate and versatile team specializing in multiple services: housekeeping, cooking, security, gardening, childcare, handwork, and a curated product shop.\n\nWe operate with professionalism, using eco-friendly products and a keen eye for detail to ensure your comfort and the quality of our work.\n\nOur goal is to provide you with reliable, timely, and top-quality service that meets all your everyday needs.",
+      "highlights": {
+        "guaranteed_quality": {
+          "title": "Guaranteed Quality",
+          "description": "We deliver top-quality services with regular quality checks and a strong focus on customer satisfaction."
+        },
+        "ecological_products": {
+          "title": "Eco-Friendly Products",
+          "description": "Safe, sustainable solutions that protect your health and the environment."
+        },
+        "rapid_intervention": {
+          "title": "Fast & Reliable Service",
+          "description": "Always ready to respond quickly and on time, adapting to your lifestyle and schedule."
+        }
+      }
+    },
+    "process": {
+      "eyebrow": "Your Trust, Our Commitment",
+      "title": "All your essential services at your fingertips",
+      "intro": "From housekeeping and cooking to security, gardening, childcare, and handwork — ForNowSolution brings all your essential services to your fingertips.\n\nWith hundreds of satisfied clients, our team has become a trusted name in professional home and lifestyle services.\n\nOur dedication to quality, reliability, and customer satisfaction is what sets us apart.",
+      "steps": {
+        "step1": "An online reservation",
+        "step2": "A call with our agency for more information",
+        "step3": "Enjoy our promotion"
+      }
+    },
+    "expertise": {
+      "title": "Our Expertise – Your Eco-Friendly Experience",
+      "description": "At ForNowSolution, we bring together professional expertise and ecological responsibility across all our services — from housekeeping, cooking, and security to gardening, childcare, and handwork.\n\nWe use only eco-friendly, biodegradable, and safe products — gentle solutions specially formulated for the health of your family and the well-being of your pets.\n\nBecause taking care of your home also means taking care of the planet.",
+      "image_alt": "Ecological cleaning products"
+    },
+    "gallery_section": {
+      "title": "Photo Gallery",
+      "description": "Discover our achievements and our know-how through these photos of our interventions.",
+      "view_all": "View all gallery"
+    },
+    "buttons": {
+      "book_now": "Book now",
+      "scroll_to_top": "Back to top"
+    }
+  },
+  "services_page": {
+    "title": "Our Services",
+    "subtitle": "Discover our professional cleaning services",
+    "loading": "Loading services...",
+    "loading_error": "Unable to load services",
+    "minimum_price": "Minimum: 150 MAD for 4 hours",
+    "additional_hour": "Each additional hour: 40 MAD",
+    "main_categories": "Main categories",
+    "subcategories": "Subcategories",
+    "details": "Details",
+    "back": "Back",
+    "back_to_services": "Back to services",
+    "back_to_types": "← Types",
+    "choose_type": "Choose a type",
+    "choose_interior_exterior": "Choose: Interior or exterior washing",
+    "choose_laundry_ironing": "Choose: Washing or ironing",
+    "choose_checkin_checkout": "Choose: Check-in or Check-out",
+    "choose_standard_deep": "Choose: Standard or Deep cleaning",
+    "inactive": "Inactive",
+    "categories": {
+      "menage": "Housekeeping",
+      "cuisine": "Kitchen",
+      "bureaux": "Offices",
+      "usine": "Factory",
+      "interieur": "Interior",
+      "exterieur": "Exterior",
+      "lavage": "Washing",
+      "repassage": "Ironing",
+      "check_in": "Check-in",
+      "check_out": "Check-out",
+      "standard": "Standard",
+      "profond": "Deep cleaning"
+    },
+    "subcategories_menage": {
+      "villa": "Villa",
+      "riad": "Guest house",
+      "maison": "House",
+      "appartement": "Apartment",
+      "hotel": "Hotel",
+      "resort_hotel": "Resort Hotel"
+    },
+    "subcategories_cuisine": {
+      "italienne": "Italian",
+      "marocaine": "Moroccan",
+      "francaise": "French",
+      "golfe": "Gulf Arab"
+    },
+    "service_details": {
+      "office_cleaning": "Office Cleaning",
+      "industrial_cleaning": "Industrial Cleaning",
+      "office_description": "Professional cleaning service for offices and workspaces with special attention to common areas, shared equipment and workstations.",
+      "industrial_description": "Specialized industrial cleaning service for factories and production environments with treatment of heavy equipment and technical surfaces.",
+      "window_interior": "Window cleaning – Interior",
+      "window_exterior": "Window cleaning – Exterior",
+      "window_interior_description": "Thorough cleaning of interior windows, frames and sills.",
+      "window_exterior_description": "Exterior washing with adapted equipment, safety and streak-free finishes.",
+      "laundry_washing": "Laundry washing",
+      "laundry_ironing": "Laundry ironing",
+      "laundry_washing_description": "Sorting, washing and drying with products adapted to your textiles.",
+      "laundry_ironing_description": "Careful ironing with impeccable finishes and folding.",
+      "airbnb_checkin": "Check-in preparation",
+      "airbnb_checkout": "Check-out cleaning",
+      "airbnb_checkin_description": "Complete preparation before arrival: bedding, towels, impeccable cleanliness.",
+      "airbnb_checkout_description": "Complete cleaning after departure: restoration and quick inventory.",
+      "pool_standard": "Regular maintenance",
+      "pool_deep": "Deep cleaning",
+      "pool_standard_description": "Regular maintenance: filtration, skimming, pH adjustment.",
+      "pool_deep_description": "Complete disinfection, brushing, partial draining and shock treatment."
+    },
+    "forms": {
+      "estimated_surface": "Estimated surface (m²)",
+      "surface_placeholder": "Ex: 60",
+      "estimated_price": "Estimated price:",
+      "reserve": "Reserve",
+      "view_service_sheet": "View service sheet",
+      "reserve_this_type": "Reserve this type",
+      "description": "Description:",
+      "description_text": "Complete preparation before arrival: bedding, towels, impeccable cleanliness."
+    },
+    "category_details": {
+      "title": "Category Details",
+      "description_label": "Description:",
+      "description_text": "Complete preparation before arrival: bedding, towels, impeccable cleanliness.",
+      "available_types": "Available Types:",
+      "back_to_services": "Back to services"
+    },
+    "type_details": {
+      "title": "Type Details",
+      "description": "Description:",
+      "reserve": "Book",
+      "back_to_services": "Back to services",
+      "back_to_category": "Back to category"
+    },
+    "service_types": {
+      "menage": {
+        "name": "menage",
+        "description": "Home cleaning service adapted to your daily needs.",
+        "features": ["Dust and floors", "Bathrooms", "Living areas"]
+      },
+      "cussin": {
+        "name": "cussin",
+        "description": "Targeted cleaning for kitchen, work surfaces and appliances.",
+        "features": ["Work surfaces", "Sink and plates", "Appliances (exterior)"]
+      },
+      "standard": {
+        "name": "Standard",
+        "description": "Essential service covering common needs, ideal for regular maintenance.",
+        "features": ["Main areas", "Adapted products", "Optimized duration"]
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "Extended coverage with careful finishes and increased attention to detail.",
+        "features": ["Extended areas", "Dedicated equipment", "Quality control"]
+      },
+      "deluxe": {
+        "name": "Deluxe",
+        "description": "Complete experience with deep treatment and personalized options.",
+        "features": ["Deep cleaning", "Specific treatments", "Personalization"]
+      }
+    },
+    "menage_cuisine": {
+      "selection_hint": "You can choose only one cleaning type and one cooking type."
+    }
+  },
+  "security_page": {
+    "title": "Security Team",
+    "subtitle": "Trained, experienced and available agents for the protection of your spaces.",
+    "loading": "Loading...",
+    "error": "Error",
+    "role_not_available": "Role not available",
+    "click_to_see_agents": "Click to see agents",
+    "description_not_available": "Description not available",
+    "security_role": "Security role",
+    "back_to_roles": "← Back to roles",
+    "available_agents": "Available agents",
+    "chef_de_securite": "Security Manager",
+    "agent_de_surete": "Specialized Security Agent", 
+    "agent_de_securite": "General Security Agent",
+    "superviseur_securite": "Security Team Supervisor",
+    "name_not_available": "Name not available",
+    "security_agent": "Security agent",
+    "years_experience": "years of experience",
+    "average": "Average",
+    "reviews": "reviews",
+    "no_evaluation": "No evaluation for this agent",
+    "latest_reviews": "Latest reviews",
+    "show_all_reviews": "Show all reviews",
+    "hide_reviews": "Hide reviews",
+    "evaluate_agent": "Evaluate this agent",
+    "reserve_agent": "Reserve this agent",
+    "no_agents_available": "No agents available for this role.",
+    "evaluate": "Evaluate",
+    "evaluation_already_submitted": "Evaluation already submitted",
+    "evaluation_already_submitted_text": "You have already evaluated this security agent. You can only submit one review per agent.",
+    "close": "Close",
+    "rating": "Rating (1-5 stars) *",
+    "click_star_to_select": "Click on a star to select your rating",
+    "stars_selected": "star(s) selected",
+    "comment": "Comment",
+    "share_experience": "Share your experience with this agent...",
+    "cancel": "Cancel",
+    "submit_evaluation": "Submit evaluation",
+    "reserve": "Reserve",
+    "reservation_type": "Reservation type",
+    "daily": "Daily",
+    "hourly": "Hourly",
+    "date": "Date",
+    "security_agent_selection": "Security agent",
+    "choose_agent": "— Choose an agent —",
+    "phone_number": "Phone number *",
+    "phone_placeholder": "Ex: 06 12 34 56 78",
+    "phone_validation": "Please enter a valid phone number",
+    "start_time": "Start time",
+    "end_time": "End time",
+    "total_price": "Total price:",
+    "confirming": "Confirming...",
+    "confirm_reservation": "Confirm reservation",
+    "thank_you_evaluation": "Thank you for your evaluation!",
+    "reservation_confirmed": "Reservation confirmed ✓",
+    "please_login_to_reserve": "! Please log in to reserve.",
+    "please_select_date": "Please select a date.",
+    "please_enter_phone": "Please enter your phone number.",
+    "agent_not_selected": "Agent not selected. Please try again.",
+    "please_select_hours": "Please select start and end hours.",
+    "end_time_after_start": "End time must be after start time.",
+    "please_login": "Please log in to reserve.",
+    "network_error": "Network error during reservation",
+    "already_evaluated": "You have already evaluated this security agent!",
+    "evaluation_error": "Error submitting evaluation",
+    "load_roles_error": "Unable to load security roles",
+    "load_personnel_error": "Unable to load security team",
+    "book_role_now": "Book this role now",
+    "night_day_work": "Night and day work",
+    "available_locations": "Available work locations",
+    "languages_spoken": "Languages spoken",
+    "role_not_selected": "Role not selected"
+  },
+  "shop_page": {
+    "title": "ForNowSolution Shop",
+    "subtitle": "Discover our quality professional products and equipment for all your cleaning needs.",
+    "loading": "Loading products...",
+    "error": "Loading error",
+    "retry": "Retry",
+    "no_products": "No products found",
+    "modify_search": "Try modifying your search criteria",
+    "all_categories": "All",
+    "image_not_available": "Image not available",
+    "out_of_stock": "Out of stock",
+    "type": "Type",
+    "category": "Category",
+    "stock": "Stock",
+    "date_added": "Date added",
+    "price": "Price",
+    "description": "Description",
+    "not_defined": "Not defined",
+    "evaluate_product": "Evaluate this product",
+    "stars": "stars",
+    "your_review": "Your review (optional)",
+    "send": "Send",
+    "view_evaluations": "View evaluations",
+    "already_evaluated": "You have already evaluated this product",
+    "rating_submitted": "Thank you! Your rating has been submitted successfully",
+    "rating_submitted_success": "Thank you! You have evaluated this product",
+    "rating_error": "Error submitting rating. Please try again",
+    "delivery_returns": "Delivery and Returns",
+    "fast_delivery": "Fast Delivery",
+    "fast_delivery_desc": "Delivery within 24-48h throughout the Rabat region",
+    "easy_returns": "Easy Returns",
+    "easy_returns_desc": "Free return within 14 days if you are not satisfied",
+    "secure_payment": "Secure Payment",
+    "secure_payment_desc": "Secure online payment or on delivery",
+    "quality_guarantee": "Quality Guarantee",
+    "quality_guarantee_desc": "All our products are guaranteed professional quality",
+    "reviews_title": "Reviews –",
+    "loading_reviews": "Loading…",
+    "no_evaluations": "No evaluations for this product",
+    "user": "User",
+    "login_required": "Please log in to access this feature",
+    "login_first": "Please log in first to continue the operation",
+    "login": "Log in",
+    "cancel": "Cancel",
+    "loading_cart": "Adding...",
+    "view_details": "View details",
+    "average_rating": "Average Rating",
+    "based_on": "Based on",
+    "reviews_count": "reviews",
+    "product_category": "Product",
+    "accessory_category": "Accessory"
+  },
+  "cart_page": {
+    "title": "Shopping Cart",
+    "my_cart": "My Cart",
+    "loading": "Loading cart...",
+    "error": "Error",
+    "retry": "Retry",
+    "must_login": "You must be logged in to view your cart",
+    "empty": "Your cart is empty",
+    "empty_description": "Add products to start shopping",
+    "description": "Find all your items added to the cart and finalize your order",
+    "article": "item",
+    "continue_shopping": "Continue Shopping",
+    "discover_shop": "Discover the shop",
+    "articles": "Items",
+    "delivery": "Delivery",
+    "free": "Free",
+    "total": "Total",
+    "clear_cart": "Clear Cart",
+    "checkout": "Checkout",
+    "product_deleted": "Product deleted",
+    "update_error": "Error updating cart",
+    "remove_error": "Error removing item",
+    "clear_error": "Error clearing cart",
+    "confirm_clear": "Are you sure you want to clear your cart?",
+    "articles_in_cart": "Items in your cart",
+    "description_unavailable": "Description unavailable",
+    "unit_price": "Unit price",
+    "quantity": "Quantity",
+    "remove": "Remove",
+    "remove_from_cart": "Remove from cart",
+    "update_success": "Quantity updated successfully",
+    "remove_success": "Product removed from cart",
+    "order_summary": "Order Summary",
+    "subtotal": "Subtotal",
+    "view_summary": "View summary",
+    "free_shipping_note": "Free shipping on orders over 50 DH",
+    "fast_delivery": "Fast delivery 24-48h",
+    "secure_payment": "Secure payment",
+    "free_return": "Free return within 14 days"
+  },
+  "order_summary": {
+    "title": "Order Summary",
+    "description": "Verify the details of your order before proceeding to payment",
+    "loading": "Loading summary...",
+    "error": "Loading error",
+    "retry": "Retry",
+    "must_login": "You must be logged in to view your order summary",
+    "empty": "Your cart is empty",
+    "empty_description": "Add products before continuing",
+    "discover_shop": "Discover the shop",
+    "ordered_items": "Ordered Items",
+    "article": "item",
+    "product_deleted": "Product deleted",
+    "quantity": "Quantity",
+    "promo_code": "Promo Code",
+    "enter_promo": "Enter your promo code",
+    "apply": "Apply",
+    "applying": "Applying...",
+    "code": "Code",
+    "order_summary_label": "Order Summary",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "delivery": "Delivery",
+    "free": "Free",
+    "free_shipping_note": "Free shipping on orders over 50 DH",
+    "total": "Total",
+    "proceed_payment": "Proceed to Payment",
+    "back_to_cart": "Back to Cart",
+    "fast_delivery": "Fast delivery 24-48h",
+    "secure_payment": "Secure payment",
+    "free_return": "Free return within 14 days"
+  },
+  "checkout": {
+    "title": "Order Confirmation",
+    "description": "Fill in your information and choose your payment method.",
+    "loading": "Loading…",
+    "error": "Error",
+    "must_login": "You must be logged in to confirm your order",
+    "load_cart_error": "Error loading cart",
+    "order_confirmed": "Order confirmed",
+    "thanks": "Thank you",
+    "order_saved": "! Your order has been recorded.",
+    "response_24h": "You will receive our response within 24h after your order",
+    "items": "Items",
+    "total": "Total",
+    "back_to_shop": "Back to shop",
+    "shipping_info": "Shipping Information",
+    "full_name": "Full name",
+    "phone": "Phone",
+    "city": "City",
+    "address": "Address",
+    "locate": "Locate",
+    "zip": "Postal code",
+    "notes": "Notes (optional)",
+    "payment_mode": "Payment method",
+    "pay_online": "Pay online (card)",
+    "pay_on_delivery": "Pay on delivery",
+    "card_number": "Card number",
+    "card_expiry": "Expiry date",
+    "card_cvv": "CVV",
+    "card_holder": "Card holder name",
+    "card_holder_placeholder": "Name on card",
+    "validating": "Validating…",
+    "confirm_order": "Confirm order",
+    "summary": "Summary",
+    "product": "Product",
+    "confirm_error": "An error occurred while confirming",
+    "geo_not_supported": "Geolocation is not supported.",
+    "geo_unavailable": "Unable to retrieve location.",
+    "geo_error": "Location error"
+  },
+  "employee_register": {
+    "title": "Employee Registration",
+    "subtitle": "Join our team. Fill out the form below.",
+    "form": {
+      "name": "Last Name",
+      "first_name": "First Name",
+      "birth_date": "Date of birth",
+      "age": "Age",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "photo": "Photo (optional)",
+      "competency": "Field of expertise",
+      "available_days": "Available days",
+      "select_competency": "Select…",
+      "phone_placeholder": "Ex: +212 6 12 34 56 78",
+      "use_location": "Use my location",
+      "locating": "Locating…",
+      "locate": "Locate",
+      "auto_entrepreneur": "Self-employed (auto-entrepreneur)",
+      "last_experience": "Last work experience",
+      "last_experience_ph": "Describe your last work experience",
+      "company_name": "Company name",
+      "company_name_ph": "Enter company name",
+      "yes": "Yes",
+      "no": "No",
+      "preferred_work_time": "Preferred work time",
+      "work_morning": "I prefer morning",
+      "work_night": "I prefer evening"
+    },
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "start_time": "Start",
+      "end_time": "End",
+      "start_placeholder": "08:00",
+      "end_placeholder": "17:00"
+    },
+    "competencies": {
+      "baby_sitting": "👶 Baby Sitting",
+      "gardening": "🌱 Gardening",
+      "cleaning": "🏠 Housekeeping",
+      "ironing": "👕 Ironing",
+      "airbnb": "🏨 Airbnb",
+      "pool": "🏊 Pool"
+    },
+    "validation": {
+      "all_fields_required": "All fields are required",
+      "select_at_least_one_day": "Select at least one day with schedules",
+      "end_time_after_start": "End time must be after start time"
+    },
+    "submit": {
+      "button": "Register",
+      "submitting": "Submitting…",
+      "success": "Registration successful. Thank you!",
+      "error": "Error during registration"
+    },
+    "success_modal": {
+      "title": "Thank you for your application, we will contact you soon!",
+      "ok": "OK"
+    },
+    "location": {
+      "not_supported": "Geolocation is not supported by this browser.",
+      "error": "Unable to retrieve position",
+      "location_error": "Location error"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "loading": "Loading profile...",
+    "user": {
+      "anonymous": "Anonymous User"
+    },
+    "tabs": {
+      "personal_info": "Personal Information",
+      "orders": "Orders",
+      "reservations": "My Reservations",
+      "security_reservations": "My Security Reservations"
+    },
+    "personal_info": {
+      "title": "Personal Information",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "fields": {
+        "full_name": "Full Name",
+        "email": "Email Address",
+        "new_password": "New Password",
+        "confirm_password": "Confirm Password",
+        "password_placeholder": "Leave empty to not change",
+        "confirm_password_placeholder": "Confirm new password"
+      },
+      "messages": {
+        "passwords_dont_match": "Passwords do not match",
+        "profile_updated": "Profile updated successfully!",
+        "update_error": "Error updating profile",
+        "connection_error": "Server connection error",
+        "loading_error": "Error loading data"
+      }
+    },
+    "orders": {
+      "title": "My Orders",
+      "filters": {
+        "all": "All Orders",
+        "pending": "Pending",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "empty": {
+        "title": "No Orders",
+        "message": "You haven't placed any orders yet",
+        "button": "Shop Now"
+      },
+      "details": {
+        "order_number": "Order #",
+        "date": "Order Date:",
+        "status": "Status:",
+        "total": "Total:",
+        "products": "Products",
+        "quantity": "Quantity:",
+        "view_details": "View Details"
+      }
+    },
+    "reservations": {
+      "title": "My Reservations",
+      "subtitle": "Services you have booked",
+      "empty": {
+        "title": "No Reservations",
+        "message": "You haven't made any reservations yet",
+        "button": "Discover Our Services"
+      },
+      "details": {
+        "reservation_number": "Reservation #",
+        "service": "Service:",
+        "type": "Type:",
+        "surface": "Surface:",
+        "estimated_price": "Estimated Price:",
+        "view_details": "View Details"
+      }
+    },
+    "security_reservations": {
+      "title": "My Security Reservations",
+      "subtitle": "Security services you have booked",
+      "empty": {
+        "title": "No Security Reservations",
+        "message": "You haven't made any security service reservations yet",
+        "button": "Discover Our Security Services"
+      },
+      "details": {
+        "reservation_number": "Security Reservation #",
+        "service": "Service:",
+        "type": "Type:",
+        "duration": "Duration:",
+        "location": "Location:",
+        "estimated_price": "Estimated Price:",
+        "view_details": "View Details"
+      }
+    },
+    "modal": {
+      "close": "Close",
+      "order_details": "Order Details #"
+    },
+    "toast": {
+      "close": "Close notification"
+    }
+  },
+  "bebe_setting": {
+    "title": "Baby Setting",
+    "subtitle": "Create the perfect environment for your baby with our specialized services",
+    "back_to_home": "Back to home",
+    "category_not_available": "Category not available",
+    "description_not_available": "Description not available",
+    "baby_furniture": "Baby Furniture",
+    "baby_furniture_desc": "Furniture adapted for babies",
+    "baby_decoration": "Baby Decoration",
+    "baby_decoration_desc": "Decoration for a cozy environment",
+    "baby_room": "Baby Room",
+    "baby_room_desc": "Room setup for baby",
+    "loading": {
+      "categories": "Loading categories...",
+      "services": "Loading services..."
+    },
+    "errors": {
+      "categories": "Error loading categories",
+      "details": "Error loading details",
+      "connection": "Connection error",
+      "retry": "Retry"
+    },
+    "categories": {
+      "title": "Our Categories",
+      "view_details": "View details"
+    },
+    "services": {
+      "back_to_categories": "Back to categories",
+      "no_services": "No services available for this category",
+      "price": "Price:",
+      "duration": "Duration:",
+      "view_details": "View details",
+      "reserve": "Reserve",
+      "reserve_service": "Reserve this service"
+    },
+    "details": {
+      "back_to_services": "← Back to services list",
+      "reserve_caregiver": "Reserve this caregiver now"
+    },
+    "success": {
+      "reservation": "Reservation created successfully! We will contact you soon."
+    }
+  },
+  "jardinage": {
+    "title": "Gardening",
+    "subtitle": "Transform your outdoor space with our professional gardening services",
+    "back_to_home": "Back to home",
+    "category_not_available": "Category not available",
+    "description_not_available": "Description not available",
+    "plantation": "Planting",
+    "plantation_desc": "Planting of trees, shrubs and flowers",
+    "garden_maintenance": "Garden Maintenance",
+    "garden_maintenance_desc": "Regular maintenance for your garden",
+    "landscaping": "Landscaping",
+    "landscaping_desc": "Design and development of green spaces",
+    "mowing_pruning": "Mowing and Pruning",
+    "mowing_pruning_desc": "Mowing and pruning grass and trees",
+    "loading": {
+      "categories": "Loading categories...",
+      "services": "Loading services..."
+    },
+    "errors": {
+      "categories": "Error loading categories",
+      "details": "Error loading details",
+      "connection": "Connection error",
+      "retry": "Retry"
+    },
+    "categories": {
+      "title": "Our Gardening Services",
+      "view_services": "View services"
+    },
+    "services": {
+      "back_to_categories": "Back to categories",
+      "no_services": "No services available for this category",
+      "price": "Price:",
+      "duration": "Duration:",
+      "view_details": "View details",
+      "reserve": "Reserve",
+      "reserve_service": "Reserve this service"
+    },
+    "success": {
+      "reservation": "Reservation created successfully! We will contact you soon."
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "For any quote request or service inquiry, please fill out the form with as many details as possible so we can assist you efficiently.🔹 Examples of helpful information:\nService location, type of service (housekeeping, cooking, security, gardening, childcare, handwork...), size of the area, condition of furniture or equipment, and any special notes.\n\nThe more precise your information, the more accurate and tailored our quote will be.",
+    "form": {
+      "success": {
+        "title": "Thank you, your request has been sent",
+        "message": "We will get back to you as soon as possible."
+      },
+      "firstname": "First Name",
+      "firstname_placeholder": "Your first name",
+      "phone": "Phone",
+      "phone_title": "Numbers only (and spaces / dashes). Must start with +33, +212 or 0.",
+      "phone_placeholder": "Ex: +212 6 12 34 56 78",
+      "phone_note": "Please specify if +33 or +212",
+      "location": "Location",
+      "location_placeholder": "City / Address",
+      "geolocation_not_supported": "Geolocation is not supported.",
+      "location_error": "Unable to retrieve location.",
+      "permission_error": "Permission denied or unavailable.",
+      "locating": "Locating...",
+      "use_location": "Use my location",
+      "service": "Service",
+      "select_service": "Choose a service",
+      "services": {
+        "home_cleaning": "Home cleaning",
+        "office_cleaning": "Office cleaning",
+        "window_cleaning": "Window cleaning",
+        "ironing": "Ironing"
+      },
+      "message": "Message",
+      "message_placeholder": "Describe the service: location, dog hair, smoker, stained seats, sand, etc.",
+      "submit": "Send the form",
+      "submit_error": "Error sending. Please check the fields."
+    }
+  },
+  "info": {
+    "title": "About ProServices Ménage",
+    "subtitle": "Your trusted partner for all your professional cleaning needs",
+    "sections": {
+      "history": {
+        "title": "Our History",
+        "content": "Since our creation, ProServices Ménage has established itself as a reference in the field of professional cleaning. Our experienced and passionate team puts all its expertise at the service of your satisfaction."
+      },
+      "mission": {
+        "title": "Our Mission",
+        "content": "To offer high-quality cleaning services, respectful of the environment, with a personalized approach for each client. We are committed to exceeding your expectations with every intervention."
+      },
+      "values": {
+        "title": "Our Values",
+        "quality": "Quality",
+        "quality_desc": "Excellence in every detail",
+        "reliability": "Reliability",
+        "reliability_desc": "Punctuality and respect for commitments",
+        "ecology": "Ecology",
+        "ecology_desc": "Environmentally friendly products",
+        "innovation": "Innovation",
+        "innovation_desc": "Modern techniques and equipment",
+        "customer_service": "Customer Service",
+        "customer_service_desc": "Personalized support"
+      },
+      "team": {
+        "title": "Our Team",
+        "content": "Our team consists of qualified professionals, trained in the latest cleaning techniques. Each member shares our vision of excellence and our commitment to customer satisfaction."
+      },
+      "ecology": {
+        "title": "Ecological Commitment",
+        "content": "We use exclusively biodegradable and environmentally friendly products. Our ecological approach guarantees the safety of your family and pets."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "phone": "Phone",
+        "email": "Email",
+        "hours": "Hours",
+        "hours_value": "Mon-Fri: 8am-6pm | Sat: 8am-4pm",
+        "zone": "Service area",
+        "zone_value": "Rabat and surroundings"
+      }
+    }
+  },
+  "gallery": {
+    "title": "Photo Gallery",
+    "description": "Discover our achievements and expertise through these photos of our interventions.",
+    "categories": {
+      "all": "All",
+      "cleaning": "Cleaning",
+      "team": "Team",
+      "results": "Results"
+    }
+  },
+  "testimonials": {
+    "title": "All testimonials",
+    "testimonial1": {
+      "alt": "Smiling client",
+      "text": "Impeccable service! My house has never been so clean.",
+      "author": "Sarah D."
+    },
+    "testimonial2": {
+      "alt": "Satisfied client",
+      "text": "Professional, punctual and efficient. I highly recommend.",
+      "author": "Julien M."
+    },
+    "testimonial3": {
+      "alt": "Satisfied couple",
+      "text": "A precious time saver for our family. Thank you!",
+      "author": "Nora & Ali"
+    }
+  },
+  "services": {
+    "lavage_de_vitres": {
+      "title": "Window Cleaning",
+      "description": "Spotless windows for maximum brightness. Specialized service with professional equipment and ecological products"
+    },
+    "nettoyage_bureaux_ou_usine": {
+      "title": "Office or Factory Cleaning",
+      "description": "Impeccable workspaces for more well-being and productivity. Service adapted to professional schedules with specialized equipment"
+    },
+    "ménage_et_cuisine": {
+      "title": "Housekeeping and Kitchen",
+      "description": "Complete cleaning of your home with environmentally friendly products. Professional service including cleaning of all rooms, sanitary facilities, kitchen, and common areas"
+    },
+    "menage_et_cuisine": {
+      "title": "Housekeeping and Kitchen",
+      "description": "Complete cleaning of your home with environmentally friendly products. Professional service including cleaning of all rooms, sanitary facilities, kitchen, and common areas"
+    },
+    "pool_cleaning": {
+      "title": "Pool Cleaning",
+      "description": "Complete maintenance of your pool for clear and healthy water"
+    },
+    "airbnb_cleaning": {
+      "title": "Airbnb Cleaning",
+      "description": "Complete cleaning service for your rental, to guarantee comfort and satisfaction for your guests"
+    },
+    "lange_et_repassage": {
+      "title": "Laundry and Ironing",
+      "description": "Clean home, neat laundry: our expertise guarantees an impeccable and comfortable environment"
+    }
+  },
+  "security_roles": {
+    "chef_de_sécurité": {
+      "title": "Security Manager",
+      "description": "Security manager responsible for coordination and supervision"
+    },
+    "chef_de_securite": {
+      "title": "Security Manager",
+      "description": "Security manager responsible for coordination and supervision"
+    },
+    "agent_de_sûreté": {
+      "title": "Specialized Security Agent",
+      "description": "Agent specialized in security and safety"
+    },
+    "agent_de_surete": {
+      "title": "Specialized Security Agent",
+      "description": "Agent specialized in security and safety"
+    },
+    "agent_de_sécurité": {
+      "title": "General Security Agent",
+      "description": "General security agent for surveillance and protection"
+    },
+    "agent_de_securite": {
+      "title": "General Security Agent",
+      "description": "General security agent for surveillance and protection"
+    },
+    "superviseur_sécurité": {
+      "title": "Security Team Supervisor",
+      "description": "Security team supervisor responsible for oversight"
+    },
+    "superviseur_securite": {
+      "title": "Security Team Supervisor",
+      "description": "Security team supervisor responsible for oversight"
+    }
+  },
+  "hand_workers": {
+    "title": "Hand Workers",
+    "subtitle": "Professional craftsmen for all your manual work needs",
+    "loading": "Loading categories...",
+    "loading_error": "Error loading categories. Please try again.",
+    "choose_category": "Choose a Category",
+    "price_per_hour": "Price per hour",
+    "minimum_hours": "Minimum hours",
+    "back_to_categories": "Back to Categories",
+    "available_workers": "Available Workers",
+    "experience": "Experience",
+    "years": "years",
+    "rating": "Rating",
+    "status": {
+      "available": "Available",
+      "busy": "Busy",
+      "unavailable": "Unavailable"
+    },
+    "no_workers_available": "No workers available for this category",
+    "book_service": "Book Service",
+    "book_service_description": "Ready to book this service? Fill out the form to get started.",
+    "book_now": "Book Now",
+    "register_as_worker": "Register as Worker",
+    "categories": {
+      "maçon": {
+        "title": "Mason",
+        "description": "Masonry and construction work"
+      },
+      "électricien": {
+        "title": "Electrician",
+        "description": "Electrical installations and repairs"
+      },
+      "carreleur": {
+        "title": "Tiler",
+        "description": "Tiling and floor coverings"
+      },
+      "plâtrier": {
+        "title": "Plasterer",
+        "description": "Plastering and wall finishing"
+      },
+      "peintre": {
+        "title": "Painter",
+        "description": "Interior and exterior painting"
+      },
+      "menuisier": {
+        "title": "Carpenter",
+        "description": "Woodwork and construction"
+      },
+      "plombier": {
+        "title": "Plumber",
+        "description": "Plumbing and repairs"
+      },
+      "serrurier": {
+        "title": "Locksmith",
+        "description": "Locksmithing and security"
+      }
+    }
+  },
+  "hand_worker_booking": {
+    "title": "Book Hand Worker Service",
+    "subtitle": "Fill out the form below to book your hand worker service",
+    "loading": "Loading...",
+    "loading_error": "Error loading data. Please try again.",
+    "select_category_error": "Please select a category first",
+    "submission_error": "Error submitting reservation. Please try again.",
+    "success_title": "Reservation Submitted Successfully!",
+    "success_message": "Your hand worker service reservation has been submitted. We will contact you soon to confirm the details.",
+    "back_to_hand_workers": "Back to Hand Workers",
+    "personal_info": "Personal Information",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "service_selection": "Service Selection",
+    "category": "Category",
+    "select_category": "Select a category",
+    "preferred_worker": "Preferred Worker",
+    "no_preference": "No preference",
+    "service_details": "Service Details",
+    "service_description": "Service Description",
+    "service_description_placeholder": "Describe the work you need done...",
+    "duration_hours": "Duration (hours)",
+    "preferred_date": "Preferred Date",
+    "preferred_time": "Preferred Time",
+    "location": "Location",
+    "location_name": "Location Name",
+    "location_placeholder": "e.g., My Home, Office Building",
+    "address": "Address",
+    "address_placeholder": "Enter your full address",
+    "city": "City",
+    "additional_notes": "Additional Notes",
+    "client_notes": "Additional Notes",
+    "client_notes_placeholder": "Any additional information or special requirements...",
+    "price_summary": "Price Summary",
+    "hourly_rate": "Hourly Rate",
+    "duration": "Duration",
+    "total_price": "Total Price",
+    "submitting": "Submitting...",
+    "submit": "Submit Reservation"
+  },
+  "hand_worker_registration": {
+    "title": "Hand Worker Registration",
+    "subtitle": "Join our team of professional craftsmen",
+    "loading": "Loading categories...",
+    "loading_error": "Error loading categories. Please try again.",
+    "submission_error": "Error submitting registration. Please try again.",
+    "success_title": "Registration Submitted!",
+    "success_message": "Your registration has been submitted successfully. We will review your application and contact you soon.",
+    "back_to_home": "Back to Home",
+    "personal_info": "Personal Information",
+    "password_section": "Password",
+    "work_info": "Professional Information",
+    "location": "Location",
+    "files_section": "Files",
+    "full_name": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "password": "Password",
+    "password_confirmation": "Confirm Password",
+    "category": "Work Type",
+    "address": "Address",
+    "city": "City",
+    "photo": "Profile Photo",
+    "work_samples": "Work Samples",
+    "bio": "Biography",
+    "experience_years": "Years of Experience",
+    "submit": "Register",
+    "submitting": "Submitting...",
+    "full_name_placeholder": "Enter your full name",
+    "email_placeholder": "your@email.com",
+    "phone_placeholder": "+212 6XX XXX XXX",
+    "password_placeholder": "Minimum 8 characters",
+    "password_confirmation_placeholder": "Repeat your password",
+    "select_category": "Select your specialty",
+    "address_placeholder": "Your complete address",
+    "city_placeholder": "Your city",
+    "bio_placeholder": "Tell us about your experience and skills...",
+    "photo_help": "Profile photo (optional, max 2MB)",
+    "work_samples_help": "Photos of your work (optional, max 5 files)",
+    "full_name_required": "Full name is required",
+    "email_required": "Email is required",
+    "email_invalid": "Invalid email format",
+    "phone_required": "Phone is required",
+    "password_required": "Password is required",
+    "password_min_length": "Password must contain at least 8 characters",
+    "password_mismatch": "Passwords do not match",
+    "category_required": "Please select your specialty",
+    "experience_invalid": "Experience must be a positive number"
+  },
+  "tous_les_services": {
+    "title": "All our services",
+    "menage": {
+      "name": "Cleaning and kitchen",
+      "name_fr": "Ménage et cuisine"
+    },
+    "security": {
+      "name": "Security",
+      "name_fr": "Sécurité"
+    },
+    "bebe_setting": {
+      "name": "Baby Setting",
+      "name_fr": "Bébé Setting"
+    },
+    "jardinage": {
+      "name": "Gardening",
+      "name_fr": "Jardinage"
+    },
+    "hand_workers": {
+      "name": "Hand Workers",
+      "name_fr": "Travaux Manuels"
+    }
+  },
+  "support": {
+    "title": "Support & Assistance",
+    "intro": "If you encounter any issue while using the platform or have any questions, you can contact us via the following phone number or email.",
+    "message": "Our support team is available at any time to assist you. Don’t hesitate to reach out.",
+    "phone_label": "Phone",
+    "email_label": "Email",
+    "hours_label": "Working Hours",
+    "hours_value": "Monday to Friday – 9:00 AM to 6:00 PM",
+    "call_now": "Call Now",
+    "send_message": "Send a Message"
+  }
+}

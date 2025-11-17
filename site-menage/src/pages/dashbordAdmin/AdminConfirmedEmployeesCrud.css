@@ -1,0 +1,414 @@
+/* AdminConfirmedEmployeesCrud.css */
+
+/* Styles spécifiques pour la page des employés confirmés */
+
+.admin-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin: 20px 0;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.admin-toolbar h2 {
+  color: #1f2937;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.admin-search {
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.admin-search:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.admin-search::placeholder {
+  color: #9ca3af;
+}
+
+.admin-crud-add-button {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.admin-crud-add-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.admin-crud-add-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.admin-crud-error {
+  background: linear-gradient(135deg, #fef2f2, #fecaca);
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+/* Table Styles */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.admin-thead {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+}
+
+.admin-th {
+  padding: 16px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.admin-td {
+  padding: 12px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+  color: #4b5563;
+  vertical-align: middle;
+}
+
+.admin-td:first-child {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* Employee Avatar Styles */
+.employee-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.employee-avatar.placeholder {
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #9ca3af;
+  border: 2px solid #d1d5db;
+}
+
+.employee-avatar:hover {
+  border-color: #3b82f6;
+  transform: scale(1.05);
+}
+
+/* Action Buttons */
+.admin-action-button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.supreme-button {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.supreme-button:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.download-button {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.download-button:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Disponibilités Styles */
+.employee-json {
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  margin: 0;
+  border: 1px solid #e2e8f0;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .admin-table {
+    font-size: 13px;
+  }
+  
+  .admin-th,
+  .admin-td {
+    padding: 10px 8px;
+  }
+  
+  .admin-action-button {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-card {
+    padding: 16px;
+    margin: 10px 0;
+  }
+  
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .admin-toolbar h2 {
+    font-size: 20px;
+    text-align: center;
+  }
+  
+  .admin-search {
+    min-width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .admin-table {
+    font-size: 12px;
+  }
+  
+  .admin-th,
+  .admin-td {
+    padding: 8px 6px;
+  }
+  
+  .employee-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  
+  .admin-action-button {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+  
+  /* Hide some columns on mobile */
+  .admin-th:nth-child(n+6),
+  .admin-td:nth-child(n+6) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-card {
+    padding: 12px;
+  }
+  
+  .admin-toolbar h2 {
+    font-size: 18px;
+  }
+  
+  .admin-table {
+    font-size: 11px;
+  }
+  
+  .admin-th,
+  .admin-td {
+    padding: 6px 4px;
+  }
+  
+  .employee-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+  
+  .admin-action-button {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+  
+  /* Show only essential columns on very small screens */
+  .admin-th:nth-child(n+4),
+  .admin-td:nth-child(n+4) {
+    display: none;
+  }
+}
+
+/* Loading States */
+.admin-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Status Badge */
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-accepted {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-rejected {
+  background: #fecaca;
+  color: #991b1b;
+}
+
+/* Animation for actions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-td {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .admin-card {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .admin-toolbar h2 {
+    color: #f9fafb;
+  }
+  
+  .admin-search {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .admin-search:focus {
+    border-color: #60a5fa;
+  }
+  
+  .admin-search::placeholder {
+    color: #9ca3af;
+  }
+  
+  .admin-table {
+    background: #1f2937;
+  }
+  
+  .admin-thead {
+    background: linear-gradient(135deg, #374151, #4b5563);
+  }
+  
+  .admin-th {
+    color: #f9fafb;
+    border-bottom-color: #4b5563;
+  }
+  
+  .admin-td {
+    color: #d1d5db;
+    border-bottom-color: #374151;
+  }
+  
+  .admin-td:first-child {
+    color: #9ca3af;
+  }
+  
+  .employee-avatar.placeholder {
+    background: linear-gradient(135deg, #374151, #4b5563);
+    border-color: #6b7280;
+    color: #9ca3af;
+  }
+  
+  .employee-json {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+  }
+  
+  .admin-table tbody tr:hover {
+    background-color: #374151;
+  }
+}

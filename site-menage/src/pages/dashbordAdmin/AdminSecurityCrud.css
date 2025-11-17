@@ -1,0 +1,303 @@
+/* AdminSecurityCrud specific styles */
+
+.security-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.security-admin-table th,
+.security-admin-table td {
+  padding: 12px 8px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.security-admin-table th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.security-admin-table tr:hover {
+  background-color: #f9fafb;
+}
+
+.security-agent-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.security-agent-photo.placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  color: #6b7280;
+  font-size: 18px;
+  border: 2px solid #e5e7eb;
+}
+
+.security-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.security-status-badge.active {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.security-status-badge.inactive {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.security-experience {
+  font-weight: 500;
+  color: #059669;
+}
+
+.security-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.security-edit-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.security-edit-btn:hover {
+  background-color: #2563eb;
+}
+
+.security-delete-btn {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.security-delete-btn:hover {
+  background-color: #dc2626;
+}
+
+.security-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.security-form {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: securityFormSlideIn 0.3s ease-out;
+}
+
+@keyframes securityFormSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.security-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.security-form-header h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.security-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.security-modal-close:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.security-form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.security-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.security-form-group label {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.security-form-group input,
+.security-form-group textarea,
+.security-form-group select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: white;
+}
+
+.security-form-group input:focus,
+.security-form-group textarea:focus,
+.security-form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.security-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.security-form-group input[type="file"] {
+  padding: 8px;
+  border: 2px dashed #d1d5db;
+  background-color: #f9fafb;
+}
+
+.security-form-group input[type="file"]:hover {
+  border-color: #3b82f6;
+  background-color: #f0f9ff;
+}
+
+.security-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.security-save-btn {
+  background-color: #059669;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.security-save-btn:hover {
+  background-color: #047857;
+}
+
+.security-cancel-btn {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.security-cancel-btn:hover {
+  background-color: #4b5563;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .security-form {
+    width: 95%;
+    padding: 16px;
+    margin: 20px;
+  }
+  
+  .security-form-grid {
+    gap: 12px;
+  }
+  
+  .security-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .security-edit-btn,
+  .security-delete-btn {
+    width: 100%;
+  }
+  
+  .security-form-actions {
+    flex-direction: column;
+  }
+  
+  .security-save-btn,
+  .security-cancel-btn {
+    width: 100%;
+  }
+}

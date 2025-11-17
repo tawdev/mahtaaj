@@ -1,0 +1,42 @@
+@import './base.css';
+
+/* Page backdrop */
+.emp-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  background: radial-gradient(1200px 400px at 50% -10%, #eaf2ff 0%, rgba(234,242,255,0) 70%) , var(--emp-bg);
+}
+
+/* Card */
+.emp-login {
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+}
+
+.emp-login-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.emp-brand-dot {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--emp-primary);
+}
+
+.emp-subtitle { color: var(--emp-muted); margin-bottom: 16px; }
+
+/* Inputs */
+.emp-field .emp-input { background: #fff; }
+.emp-field .emp-input::placeholder { color: #a6a6a6; }
+
+/* Submit button */
+.emp-submit { width: 100%; }
+
+/* Minor helpers */
+.emp-inline { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.emp-hint { color: var(--emp-muted); font-size: 13px; }
+

@@ -1,0 +1,9 @@
+<!-- Default placeholder images for Bébé Setting and Jardinage -->
+<!-- These are placeholder SVG images that will be used when actual images are not available -->
+
+<!-- Bébé Setting default image -->
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="300" height="200" fill="#f8fafc"/>
+  <circle cx="150" cy="100" r="40" fill="#3b82f6" opacity="0.1"/>
+  <text x="150" y="105" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#64748b">👶 Bébé Setting</text>
+</svg>

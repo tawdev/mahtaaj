@@ -1,0 +1,322 @@
+/* Admin Jardinage Employees Styles */
+.jardinage-employees-page {
+  padding: 24px;
+}
+
+.jardinage-employees-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.jardinage-employees-header h1 {
+  margin: 0;
+  color: #166534;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jardinage-employees-header h1::before {
+  content: '🌿';
+  font-size: 32px;
+}
+
+.jardinage-employees-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.jardinage-employees-filter {
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  background: white;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+}
+
+.jardinage-employees-filter:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.jardinage-employees-refresh-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jardinage-employees-refresh-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.jardinage-employees-refresh-btn:active {
+  transform: translateY(0);
+}
+
+.jardinage-employees-alert {
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jardinage-employees-alert.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
+.jardinage-employees-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+  font-size: 16px;
+  font-weight: 500;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.jardinage-employees-table-wrapper {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.jardinage-employees-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.jardinage-employees-table thead {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.jardinage-employees-table th {
+  padding: 18px 20px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 14px;
+  color: #166534;
+  border-bottom: 2px solid #bbf7d0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.jardinage-employees-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.jardinage-employees-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.jardinage-employees-table tbody tr:hover {
+  background: #f9fafb;
+  transform: scale(1.001);
+}
+
+.jardinage-employees-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.jardinage-employees-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #10b981;
+  transition: transform 0.2s ease;
+}
+
+.jardinage-employees-checkbox:hover {
+  transform: scale(1.1);
+}
+
+.jardinage-employees-delete-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.jardinage-employees-delete-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.jardinage-employees-delete-btn:active {
+  transform: translateY(0);
+}
+
+.jardinage-employees-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 16px;
+}
+
+.jardinage-employees-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.jardinage-employees-email {
+  color: #3b82f6;
+  text-decoration: none;
+}
+
+.jardinage-employees-email:hover {
+  text-decoration: underline;
+}
+
+.jardinage-employees-expertise {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.jardinage-employees-location {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.jardinage-employees-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.jardinage-employees-status.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+
+.jardinage-employees-status.inactive {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .jardinage-employees-table {
+    min-width: 800px;
+  }
+}
+
+@media (max-width: 768px) {
+  .jardinage-employees-page {
+    padding: 16px;
+  }
+  
+  .jardinage-employees-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+    padding: 16px 20px;
+  }
+  
+  .jardinage-employees-header h1 {
+    font-size: 24px;
+  }
+  
+  .jardinage-employees-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .jardinage-employees-filter,
+  .jardinage-employees-refresh-btn {
+    width: 100%;
+  }
+  
+  .jardinage-employees-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .jardinage-employees-table th,
+  .jardinage-employees-table td {
+    padding: 14px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .jardinage-employees-page {
+    padding: 12px;
+  }
+  
+  .jardinage-employees-header {
+    padding: 12px 16px;
+  }
+  
+  .jardinage-employees-header h1 {
+    font-size: 20px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .jardinage-employees-table th,
+  .jardinage-employees-table td {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+  
+  .jardinage-employees-delete-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}
+

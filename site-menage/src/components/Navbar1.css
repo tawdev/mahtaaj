@@ -1,0 +1,1540 @@
+.navbar1 {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 999999 !important;
+  background: rgba(255,255,255,0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+  transition: all 0.3s ease !important;
+  height: 70px !important;
+  display: flex !important;
+  align-items: center !important;
+  transform: translateZ(0) !important;
+  isolation: isolate !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure body has padding to account for fixed navbar (handled in App.css per page) */
+/* Removed global padding to avoid gaps on admin pages */
+
+/* Language Switcher Styles */
+.language-switcher-item {
+  margin-left: 8px;
+}
+
+.language-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+.language-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.language-button:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.language-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.language-button .flag {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.language-button .language-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+}
+
+.language-button .dropdown-arrow {
+  font-size: 8px;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-top: 2px;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.language-option:hover {
+  background: #f8fafc;
+}
+
+.language-option.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.language-option .flag {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.language-option .language-name {
+  flex: 1;
+}
+
+/* Mobile responsive for language switcher */
+@media (max-width: 768px) {
+  .language-switcher-item {
+    margin-left: 0;
+    margin-top: 8px;
+    width: 100%;
+  }
+  
+  .language-button {
+    width: 100%;
+    justify-content: space-between;
+    min-width: auto;
+  }
+  
+  .language-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 50vh;
+    border-radius: 12px 12px 0 0;
+    margin-top: 0;
+  }
+  
+  .language-option {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* RTL Support for language switcher */
+[dir="rtl"] .language-switcher-item,
+.navbar1.rtl .language-switcher-item {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+[dir="rtl"] .language-button {
+  text-align: right;
+}
+
+[dir="rtl"] .language-button .language-name {
+  text-align: right;
+}
+
+[dir="rtl"] .language-dropdown {
+  right: 0;
+  left: auto;
+}
+
+[dir="rtl"] .language-option {
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  [dir="rtl"] .language-switcher-item {
+    margin-right: 0;
+  }
+}
+
+/* Scrolled state for navbar */
+.navbar1.scrolled {
+  background: rgba(255,255,255,0.98) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+  backdrop-filter: blur(15px) !important;
+}
+
+.navbar1__inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  gap: 20px;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure hamburger and nav work together harmoniously */
+.navbar1__inner {
+  position: relative;
+  gap: 16px; /* Consistent gap when both are visible */
+}
+
+/* Position hamburger to align nicely with navigation on all screen sizes */
+.navbar1__hamburger {
+  order: 0; /* Place hamburger first */
+  margin-left: 0;
+  margin-right: 0;
+  flex-shrink: 0;
+}
+
+.navbar1__brand {
+  order: 1; /* Brand after hamburger */
+}
+
+.navbar1__nav {
+  order: 2; /* Place nav after hamburger and brand */
+  flex: 1;
+}
+
+/* RTL Support for navbar inner - Keep normal direction, use order */
+.navbar1.rtl .navbar1__inner,
+.navbar1__inner.rtl-inner {
+  /* Keep normal flex-direction, use order for positioning */
+  flex-direction: row;
+}
+
+/* RTL Visual Order: Logo → Menu/Links → Icons (Burger hidden on desktop) */
+/* RTL Support - Logo positioning (first in RTL) - but keep centered */
+.navbar1.rtl .navbar1__brand,
+.navbar1__brand.rtl-brand {
+  order: 1; /* First after burger (which is hidden on desktop) */
+  justify-content: center !important;
+  text-align: center !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* RTL Support - Navigation menu positioning (after logo in RTL) */
+.navbar1.rtl .navbar1__nav,
+.navbar1__nav.rtl-nav {
+  order: 2; /* After logo */
+  flex: 1; /* Take remaining space */
+  justify-content: flex-start; /* Align menu links to start (right in RTL) */
+}
+
+/* Burger menu positioning - hidden on desktop, visible on mobile */
+.navbar1.rtl .navbar1__hamburger {
+  order: 0; /* First but hidden on desktop */
+}
+
+/* RTL Support - Links order: display in normal order (right to left reading) */
+.navbar1.rtl .navbar1__links,
+.navbar1__links.rtl {
+  flex-direction: row !important; /* Normal order, RTL text direction handles reading */
+  justify-content: flex-start; /* Start from right in RTL */
+  gap: 34px !important; /* Beaucoup plus d'espace pour le mode arabe */
+}
+
+/* RTL Support - Keep icons (language, login/logout) at the visual end (left in RTL) */
+/* With flex-direction: row-reverse, these will appear first visually (left side) */
+/* Spacing is handled by gap property, no additional margin needed */
+
+/* RTL Support - Ensure proper spacing and alignment - gap handles uniform spacing */
+.navbar1.rtl .navbar1__links li,
+.navbar1__links.rtl li {
+  margin: 0; /* gap handles spacing */
+}
+
+/* RTL Support - Text alignment */
+.navbar1.rtl .navbar1__links a,
+.navbar1__links.rtl a {
+  text-align: right;
+  direction: rtl;
+}
+
+.navbar1__brand {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--color-text);
+  text-decoration: none;
+  font-weight: 800;
+  visibility: visible !important;
+  opacity: 1 !important;
+  text-align: center;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.navbar1__logo {
+  width: 28px;
+  height: 28px;
+  color: var(--color-primary);
+}
+
+.navbar1__title {
+  font-size: 18px;
+}
+
+.navbar1__nav {
+  display: none;
+  background: transparent;
+  flex: 1;
+  justify-content: flex-end;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.navbar1__links {
+  list-style: none;
+  display: flex !important;
+  align-items: center;
+  gap: 16px; /* Espacement uniforme entre tous les éléments */
+  margin: 0;
+  padding: 0;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* RTL Support - Reverse order for Arabic */
+.navbar1__links.rtl {
+  flex-direction: row-reverse;
+}
+
+.navbar1__links .icon {
+  font-size: 16px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.navbar1__links a {
+  text-decoration: none;
+  color: #64748b;
+  padding: 0.6em 1em;
+  border-radius: 100vw;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.navbar1__links a:hover {
+  color: #0f172a;
+  text-shadow: none;
+  transform: translateY(0);
+}
+
+.navbar1__links a:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.navbar1__links a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.navbar1__links li:focus-within:has(:focus-visible) {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* Responsive design - Show only hamburger and logo on mobile */
+@media (max-width: 768px) {
+  /* Hide navigation menu on mobile - only show logo and burger */
+  .navbar1__nav {
+    display: none !important;
+  }
+  
+  /* Show hamburger on mobile - improved visibility and positioning */
+  .navbar1__hamburger {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 10 !important;
+    width: 48px !important;
+    height: 40px !important;
+    min-width: 48px !important;
+    min-height: 40px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(229, 231, 235, 0.8) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 8px !important;
+    padding: 8px 10px !important;
+  }
+  
+  /* RTL Support - Position hamburger on the right in RTL mode */
+  .navbar1.rtl .navbar1__hamburger,
+  [dir="rtl"] .navbar1__hamburger {
+    left: auto !important;
+    right: 12px !important;
+  }
+  
+  /* Center logo on mobile - perfect centering both horizontally and vertically */
+  .navbar1__brand {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: auto !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    z-index: 5 !important;
+    text-align: center !important;
+  }
+  
+  /* RTL Support - Center logo in RTL mode on mobile - always centered (same as LTR) */
+  .navbar1.rtl .navbar1__brand,
+  .navbar1__brand.rtl-brand,
+  [dir="rtl"] .navbar1__brand {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: auto !important;
+    z-index: 5 !important;
+  }
+  
+  /* Adjust navbar inner layout for mobile - ensure proper spacing */
+  .navbar1__inner {
+    position: relative !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
+  }
+  
+  /* RTL Support - Adjust inner layout for RTL mode */
+  .navbar1.rtl .navbar1__inner,
+  .navbar1__inner.rtl-inner,
+  [dir="rtl"] .navbar1__inner {
+    flex-direction: row !important;
+  }
+  
+  /* Ensure hamburger bars are visible on mobile */
+  .navbar1__hamburger {
+    gap: 5px !important;
+  }
+  
+  .navbar1__hamburger .bar {
+    width: 24px !important;
+    height: 3px !important;
+    background: rgb(56, 9, 223) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    border-radius: 2px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Ensure bars spacing is even */
+  .navbar1__hamburger .bar-1 {
+    margin-bottom: 0 !important;
+  }
+  
+  .navbar1__hamburger .bar-2 {
+    margin: 0 !important;
+  }
+  
+  .navbar1__hamburger .bar-3 {
+    margin-top: 0 !important;
+  }
+  
+  /* Improve hamburger hover state on mobile */
+  .navbar1__hamburger:hover {
+    background: #ffffff !important;
+    border-color: #d1d5db !important;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.06) !important;
+    transform: translateY(-50%) !important;
+  }
+  
+  .navbar1__hamburger:active {
+    background: #f9fafb !important;
+    border-color: #9ca3af !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-50%) scale(0.98) !important;
+  }
+  
+  /* Ensure smooth drawer animation on mobile */
+  .navbar1__drawer {
+    display: none;
+  }
+  
+  .navbar1__drawer.open {
+    display: block;
+  }
+  
+  /* Improve drawer opening animation on mobile */
+  .navbar1__drawer.open .navbar1__drawer-inner {
+    animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* RTL drawer animation on mobile */
+  .navbar1__drawer.rtl.open .navbar1__drawer-inner {
+    animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Desktop - show navigation menu and hamburger */
+@media (min-width: 992px) {
+  .navbar1__nav {
+    display: flex !important;
+    background: transparent;
+  }
+  
+  /* Show hamburger on desktop - visible on all devices */
+  .navbar1__hamburger {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Reset logo positioning on desktop - but keep it centered */
+  .navbar1__brand {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Ensure logo stays centered in RTL mode on desktop */
+  .navbar1.rtl .navbar1__brand,
+  [dir="rtl"] .navbar1__brand {
+    flex: 1 !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Reset navbar inner layout on desktop */
+  .navbar1__inner {
+    justify-content: space-between;
+  }
+}
+
+.navbar1__hamburger {
+  width: 32px;
+  height: 32px;
+  display: inline-flex !important; /* Visible on all devices */
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  visibility: visible !important;
+  opacity: 1 !important;
+  border-radius: 6px;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+  z-index: 10;
+  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); */
+}
+
+.navbar1__hamburger:hover {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* .navbar1__hamburger:hover { 
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+} */
+
+.navbar1__hamburger:active {
+  background: #f3f4f6 !important;
+  border-color: #9ca3af !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(0) !important;
+}
+
+.navbar1__hamburger .bar {
+  width: 24px;
+  height: 4px;
+  background: rgb(56, 9, 223);
+  color: #111827;
+  margin: 3px 0;
+  border-radius: 1px;
+  transition: transform .3s ease, opacity .3s ease, background .2s ease;
+  display: block;
+}
+
+/* spacing between bars */
+.navbar1__hamburger .bar-1 { margin-bottom: 2px; }
+.navbar1__hamburger .bar-2 { margin: 2px 0; }
+.navbar1__hamburger .bar-3 { margin-top: 2px; }
+
+/* ensure bars are visible */
+.navbar1__hamburger .bar-1,
+.navbar1__hamburger .bar-2,
+.navbar1__hamburger .bar-3 {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+.navbar1__hamburger:hover .bar { background: #333333; }
+
+.navbar1__hamburger.is-open .bar-1 { transform: translateY(6px) rotate(45deg); }
+
+.navbar1__hamburger.is-open .bar-2 { opacity: 0; }
+
+.navbar1__hamburger.is-open .bar-3 { transform: translateY(-6px) rotate(-45deg); }
+
+.navbar1__hamburger.is-open:hover { background: #f9fafb; }
+
+
+/* Drawer */
+.navbar1__drawer {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 1000000 !important;
+  /* منع تحرك الصفحة عند فتح القائمة */
+  overscroll-behavior: contain;
+}
+
+.navbar1__drawer.open { display: block; }
+/* Backdrop background color for the drawer tronsparon */
+.navbar1__backdrop {
+  /* position: absolute; */
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  transition: opacity .3s ease;
+  /* تحسينات للإغلاق التلقائي */
+  cursor: pointer;
+  z-index: 1;
+}
+
+.navbar1__drawer.open .navbar1__backdrop { opacity: 1; }
+
+.navbar1__drawer-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 320px;
+  max-width: 90vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-right: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  transform: translateX(-100%);
+  transition: transform .3s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+  /* تحسينات للإغلاق التلقائي */
+  pointer-events: auto;
+  overflow: hidden; /* منع overflow من الحاوية الرئيسية */
+  animation: none; /* Reset animation when closed */
+}
+
+.navbar1__drawer.open .navbar1__drawer-inner { 
+  transform: translateX(0);
+  animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* RTL Support - القائمة تنزلق من اليمين */
+.navbar1__drawer.rtl .navbar1__drawer-inner {
+  left: auto !important;
+  right: 0 !important;
+  border-right: none !important;
+  border-left: 1px solid rgba(148, 163, 184, 0.2) !important;
+  transform: translateX(100%) !important;
+}
+
+.navbar1__drawer.rtl.open .navbar1__drawer-inner {
+  transform: translateX(0) !important;
+  animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animations for drawer */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.navbar1__drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 2px solid rgba(148, 163, 184, 0.1);
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  flex-shrink: 0; /* منع تقلص الهيدر */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar1__drawer-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.navbar1__close-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  color: #ef4444;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.navbar1__close-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.navbar1__drawer-links {
+  list-style: none;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  flex: 1; /* أخذ المساحة المتبقية */
+  overflow-y: auto; /* إضافة scroll عمودي عند الحاجة */
+  overflow-x: hidden; /* منع scroll أفقي */
+  scrollbar-width: thin; /* scrollbar رفيع للمتصفحات التي تدعمه */
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent; /* لون scrollbar */
+}
+
+.navbar1__drawer-links .icon {
+  font-size: 18px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.navbar1__drawer-links a {
+  text-decoration: none;
+  color: var(--color-muted);
+  padding: 16px 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  margin: 4px 0;
+}
+
+.navbar1__drawer-links a:hover {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  color: #1e293b;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-weight: 700;
+}
+
+.navbar1__drawer-links a:active {
+  transform: translateX(2px) scale(0.98);
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+}
+
+.navbar1__drawer-links a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* تنسيقات scrollbar للقائمة الجانبية */
+.navbar1__drawer-links::-webkit-scrollbar {
+  width: 6px;
+}
+
+.navbar1__drawer-links::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.navbar1__drawer-links::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.navbar1__drawer-links::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* تحسينات إضافية للقائمة */
+.navbar1__drawer-links {
+  /* إضافة padding إضافي في الأسفل لضمان عدم قطع العناصر الأخيرة */
+  padding-bottom: 20px;
+  /* تحسين الأداء */
+  will-change: scroll-position;
+  /* منع اختيار النص أثناء السحب */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* تحسينات للأجهزة التي تدعم اللمس */
+@media (hover: none) and (pointer: coarse) {
+  .navbar1__drawer-links {
+    /* تحسين السحب للأجهزة التي تعمل باللمس */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  .navbar1__drawer-links a {
+    /* زيادة منطقة اللمس للأجهزة التي تعمل باللمس */
+    min-height: 48px;
+    padding: 16px 20px;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar1 {
+    height: 60px;
+  }
+  
+  body {
+    padding-top: 60px !important;
+  }
+  
+  .navbar1__inner {
+    padding: 0 16px;
+    position: relative;
+  }
+  
+  .navbar1__title {
+    font-size: 16px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  
+  .navbar1__logo {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Ensure burger menu doesn't overlap with logo */
+  .navbar1__hamburger {
+    margin: 0 !important;
+  }
+  
+  /* Ensure logo is perfectly centered and doesn't overlap */
+  .navbar1__brand {
+    pointer-events: auto !important;
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: auto !important;
+    z-index: 5 !important;
+    text-align: center !important;
+  }
+  
+  /* Ensure logo stays centered in RTL mode on mobile - same as LTR */
+  .navbar1.rtl .navbar1__brand,
+  [dir="rtl"] .navbar1__brand {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: auto !important;
+    z-index: 5 !important;
+    text-align: center !important;
+  }
+  
+  /* تحسينات القائمة المنبثقة للشاشات الصغيرة */
+  .navbar1__drawer-inner {
+    width: 280px;
+    max-width: 85vw; /* تحسين العرض للشاشات الصغيرة جداً */
+  }
+  
+  .navbar1__drawer-header {
+    padding: 16px 20px; /* تقليل padding للشاشات الصغيرة */
+  }
+  
+  .navbar1__drawer-links {
+    padding: 16px 12px; /* تقليل padding للشاشات الصغيرة */
+    padding-bottom: 16px; /* تقليل padding السفلي */
+  }
+  
+  .navbar1__drawer-links a {
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+  
+  .navbar1__drawer-links .icon {
+    font-size: 16px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* تحسين scrollbar للشاشات الصغيرة */
+  .navbar1__drawer-links::-webkit-scrollbar {
+    width: 4px; /* scrollbar أرفع للشاشات الصغيرة */
+  }
+}
+
+/* keep original responsive behavior via media queries only */
+
+/* Show regular nav on large screens, keep hamburger visible */
+@media (min-width: 992px) {
+  .navbar1__nav { 
+    display: flex !important;
+    background: transparent;
+    flex: 1;
+    justify-content: flex-end;
+  }
+  
+  /* Show hamburger on large screens - visible on all devices */
+  .navbar1__hamburger {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* ضمان ظهور أزرار تسجيل الدخول والخروج في القائمة الرئيسية */
+  .navbar1__links .icon-btn {
+    display: flex !important;
+    visibility: visible !important;
+  }
+}
+
+@media (max-width: 991px) {
+  /* Hide nav on tablet and mobile - only show on desktop */
+  .navbar1__nav { 
+    display: none !important;
+  }
+  
+  /* Show hamburger on smaller screens (mobile and tablet) */
+  .navbar1__hamburger {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Center logo on tablet and mobile - but only apply absolute positioning on mobile */
+  .navbar1__brand {
+    flex: 1;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Ensure logo stays centered in RTL mode on tablet */
+  .navbar1.rtl .navbar1__brand,
+  [dir="rtl"] .navbar1__brand {
+    flex: 1 !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Adjust navbar inner layout for tablet and mobile */
+  .navbar1__inner {
+    justify-content: space-between;
+  }
+}
+
+/* Tablet specific styles (between 769px and 991px) - keep original layout */
+@media (min-width: 769px) and (max-width: 991px) {
+  .navbar1__hamburger {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+    order: 0;
+  }
+  
+  .navbar1__brand {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    flex: 1 !important;
+    order: 1;
+  }
+}
+
+
+/* Icon buttons base style */
+.icon-btn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Logout button red style */
+.logout-btn {
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  background: rgba(254, 242, 242, 0.9);
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(135deg, #fff1f2, #fecaca);
+  color: #b91c1c;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+  transform: translateY(-1px);
+  font-weight: 700;
+}
+
+/* Login button style */
+.login-btn {
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  color: #2563eb;
+  background: rgba(239, 246, 255, 0.9);
+  font-weight: 600;
+}
+
+.login-btn:hover {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+  font-weight: 700;
+}
+
+/* تنسيقات خاصة لأزرار تسجيل الدخول والخروج في القائمة الجانبية */
+.navbar1__drawer-links .icon-btn {
+  width: 100%;
+  margin: 8px 0;
+  padding: 16px 20px;
+  font-size: 16px;
+  min-height: 48px;
+}
+
+/* تنسيقات خاصة لأزرار تسجيل الدخول والخروج في القائمة الرئيسية */
+.navbar1__links .icon-btn {
+  margin: 0; /* gap handles spacing */
+  padding: 12px 16px;
+  font-size: 15px;
+  min-height: 44px;
+}
+
+/* ضمان ظهور أزرار تسجيل الدخول والخروج */
+.navbar1__links li {
+  display: flex;
+  align-items: center;
+  margin: 0; /* gap handles spacing between items */
+  border-radius: 100vw;
+  position: relative;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 0 0.5px 1.5px transparent;
+  white-space: nowrap;
+}
+
+.navbar1__drawer-links li {
+  display: flex;
+  align-items: center;
+}
+
+/* ضمان ظهور أزرار تسجيل الدخول والخروج بشكل صحيح */
+.navbar1__links .logout-btn,
+.navbar1__links .login-btn {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.navbar1__drawer-links .logout-btn,
+.navbar1__drawer-links .login-btn {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* تنسيقات إضافية لضمان ظهور الزر */
+.icon-btn {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.logout-btn {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.navbar1__drawer-links .logout-btn {
+  background: rgba(254, 242, 242, 0.9);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.navbar1__drawer-links .logout-btn:hover {
+  background: linear-gradient(135deg, #fff1f2, #fecaca);
+  color: #b91c1c;
+  transform: translateX(4px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+}
+
+.navbar1__drawer-links .login-btn {
+  background: rgba(239, 246, 255, 0.9);
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.35);
+}
+
+.navbar1__drawer-links .login-btn:hover {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
+  transform: translateX(4px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+}
+
+/* تنسيقات إضافية لضمان المسافات بين العناصر */
+/* Uniform spacing using gap - all elements have equal spacing */
+.navbar1__links {
+  gap: 16px !important; /* Espacement uniforme entre tous les éléments */
+}
+
+.navbar1__links li {
+  margin: 0 !important; /* gap handles all spacing */
+}
+
+.navbar1__links a,
+.navbar1__links .icon-btn {
+  margin: 0 !important; /* gap handles all spacing */
+}
+
+/* Espacement adaptatif selon la taille d'écran */
+@media (max-width: 768px) {
+  .navbar1__links {
+    gap: 12px !important; /* Espacement légèrement réduit sur mobile */
+  }
+  
+  /* Mode arabe sur mobile */
+  .navbar1.rtl .navbar1__links,
+  .navbar1__links.rtl {
+    gap: 32px !important; /* Beaucoup plus d'espace pour mobile en mode arabe */
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar1__links {
+    gap: 20px !important; /* Espacement plus large sur grand écran */
+  }
+  
+  /* Mode arabe sur grand écran */
+  .navbar1.rtl .navbar1__links,
+  .navbar1__links.rtl {
+    gap: 40px !important; /* Espacement maximal pour le mode arabe sur grand écran */
+  }
+}
+
+/* تنسيقات إضافية لضمان المسافات */
+
+.navbar1__links a,
+.navbar1__links .icon-btn {
+  white-space: nowrap;
+}
+
+/* Pill Effect */
+.navbar1__links li::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 100vw;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.navbar1__links li:hover::after,
+.navbar1__links li:active::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.navbar1__links li:hover a,
+.navbar1__links li:active a {
+  color: #0f172a;
+  text-shadow: none;
+}
+
+/* Particle Colors */
+:root {
+  --color-1: #ffffff;
+  --color-2: #e8f4f8;
+  --color-3: #d6e9f0;
+  --color-4: #c4e0e8;
+}
+
+/* Global rules to ensure navbar is always visible */
+header.navbar1,
+.navbar1 {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure navbar is not hidden by parent containers */
+body > .App > header.navbar1,
+body > .App > .navbar1 {
+  position: fixed !important;
+  z-index: 999999 !important;
+}
+
+/* Ensure navbar inner content is visible */
+.navbar1__inner,
+.navbar1__brand,
+.navbar1__nav,
+.navbar1__links {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Mobile Language Switcher Button - Custom Design */
+.navbar1__mobile-lang-btn {
+  display: none; /* Hidden by default, shown only on mobile */
+  position: absolute;
+  right: 12px; /* Default: right side for LTR (FR/EN) */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0;
+  z-index: 10;
+  flex-direction: row;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+}
+
+/* Move button to left side when Arabic (RTL) is selected */
+.navbar1.rtl .navbar1__mobile-lang-btn,
+[dir="rtl"] .navbar1__mobile-lang-btn {
+  right: auto;
+  left: 12px; /* Left side for RTL (AR) */
+}
+
+.navbar1__mobile-lang-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.06);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.navbar1__mobile-lang-btn:active {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transform: translateY(-50%) scale(0.98);
+}
+
+/* Globe Icon */
+.mobile-lang-globe-icon {
+  color: rgb(56, 9, 223);
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* Language Code */
+.mobile-lang-code {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgb(56, 9, 223);
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Chevron Down Icon */
+.mobile-lang-chevron {
+  color: rgb(56, 9, 223);
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+  width: 12px;
+  height: 12px;
+}
+
+.mobile-lang-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* Language Dropdown Menu */
+.navbar1__mobile-lang-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  padding: 8px;
+  z-index: 100000;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Language Option */
+.mobile-lang-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  color: #0f172a;
+  width: 100%;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.mobile-lang-option:hover {
+  background: #f8fafc;
+}
+
+.mobile-lang-option.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.mobile-lang-option-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mobile-lang-option-code {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.mobile-lang-option.active .mobile-lang-option-code {
+  color: #1d4ed8;
+}
+
+/* RTL Support for Mobile Language Button - Already handled above */
+/* Dropdown positioning for RTL */
+.navbar1.rtl .navbar1__mobile-lang-dropdown,
+[dir="rtl"] .navbar1__mobile-lang-dropdown {
+  right: auto;
+  left: 0;
+}
+
+.navbar1.rtl .mobile-lang-option,
+[dir="rtl"] .mobile-lang-option {
+  text-align: right;
+}
+
+/* Show mobile language button only on mobile */
+@media (max-width: 768px) {
+  .navbar1__mobile-lang-btn {
+    display: flex !important;
+    position: absolute !important;
+    right: 12px !important; /* Default: right for LTR (FR/EN) */
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+  
+  /* Move button to left when Arabic (RTL) is selected */
+  .navbar1.rtl .navbar1__mobile-lang-btn,
+  [dir="rtl"] .navbar1__mobile-lang-btn {
+    right: auto !important;
+    left: 12px !important; /* Left side for RTL (AR) */
+  }
+  
+  /* Ensure logo stays perfectly centered - no margins that affect centering */
+  .navbar1__brand {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: auto !important;
+    z-index: 5 !important;
+  }
+  
+  /* Ensure logo stays centered in RTL mode - same centering as LTR */
+  .navbar1.rtl .navbar1__brand,
+  [dir="rtl"] .navbar1__brand {
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: auto !important;
+    z-index: 5 !important;
+  }
+}
+
+/* Hide on desktop and tablet */
+@media (min-width: 769px) {
+  .navbar1__mobile-lang-btn {
+    display: none !important;
+  }
+}
+

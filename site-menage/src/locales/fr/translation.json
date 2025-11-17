@@ -1,0 +1,1389 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "services": "Services",
+    "house_keeping": "Ménage",
+    "security": "Sécurité",
+    "shop": "Boutique",
+    "contact": "Contact",
+    "employees": "Employés",
+    "languages": "Langues",
+    "book": "Réserver",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "gallery": "Galerie",
+    "info": "Info",
+    "testimonials": "Témoignages",
+    "profile": "Mon Profil",
+    "menu": "Menu",
+    "close": "Fermer",
+    "baby_setting": "Bébé Setting",
+    "gardening": "Jardinage",
+    "hand_workers": "Travaux Manuels",
+    "brand_name": "SolutionPourMaintenant",
+    "all_services": "Tous nos services"
+  },
+  "home": {
+    "title": "SolutionPourMaintenant",
+    "subtitle": "Votre partenaire de confiance pour tous vos besoins de nettoyage.",
+    "hero": {
+      "title": "Nettoyage Professionnel",
+      "subtitle": "Services de qualité pour votre maison et votre entreprise",
+      "cta": "Découvrez nos services"
+    },
+    "services": {
+      "title": "Nos Services",
+      "subtitle": "Choisissez le service qui correspond à vos besoins",
+      "cleaning": {
+        "title": "Ménage et cuisine",
+        "description": "Services de nettoyage complets pour votre maison et cuisine."
+      },
+      "office": {
+        "title": "Nettoyage bureaux ou usine",
+        "description": "Nettoyage professionnel pour bureaux et environnements industriels."
+      },
+      "windows": {
+        "title": "Lavage de vitres",
+        "description": "Nettoyage impeccable de vos vitres, intérieur et extérieur."
+      },
+      "laundry": {
+        "title": "Linge et repassage",
+        "description": "Services de blanchisserie et de repassage pour vos vêtements."
+      },
+      "hotel": {
+        "title": "Airbnb Cleaning",
+        "description": "Services de nettoyage spécialisés pour les locations Airbnb."
+      },
+      "pool": {
+        "title": "Nettoyage de piscine",
+        "description": "Entretien et nettoyage professionnels de votre piscine."
+      }
+    },
+    "about": {
+      "title": "À propos de nous",
+      "subtitle": "Plus de 10 ans d'expérience dans l'industrie du nettoyage"
+    }
+  },
+  "services": {
+    "title": "Nos Services",
+    "subtitle": "Choisissez le service qui correspond à vos besoins",
+    "book_now": "Réserver Maintenant",
+    "learn_more": "En Savoir Plus",
+    "loading": "Chargement des services...",
+    "loading_error": "Impossible de charger les services",
+    "minimum_price": "Minimum: 150 MAD pour 4 heures",
+    "additional_hour": "Chaque heure additionnelle: 40 MAD",
+    "main_categories": "Catégories Principales",
+    "cleaning": "Ménage",
+    "kitchen": "Cuisine",
+    "offices": "Bureaux",
+    "factory": "Usine",
+    "interior": "Intérieur",
+    "exterior": "Extérieur",
+    "washing": "Lavage",
+    "ironing": "Repassage",
+    "check_in": "Check-in",
+    "check_out": "Check-out",
+    "standard": "Standard",
+    "deep": "Nettoyage Profond",
+    "subcategories": "Sous-catégories",
+    "details": "Détails",
+    "surface": "Surface",
+    "price": "Prix",
+    "back": "Retour",
+    "subcategories_details": {
+      "villa": "Villa",
+      "riad": "Riad",
+      "maison": "Maison",
+      "appartement": "Appartement",
+      "hotel": "Hôtel",
+      "resort_hotel": "Hôtel Resort",
+      "italienne": "Italienne",
+      "marocaine": "Marocaine",
+      "francaise": "Française",
+      "golfe": "Golfe"
+    },
+    "service_details": {
+      "office_cleaning": "Nettoyage de Bureaux",
+      "industrial_cleaning": "Nettoyage Industriel",
+      "office_description": "Service de nettoyage professionnel pour bureaux et espaces de travail avec attention particulière aux zones communes, équipements partagés et postes de travail.",
+      "industrial_description": "Service de nettoyage industriel spécialisé pour usines et environnements de production avec traitement des équipements lourds et surfaces techniques.",
+      "estimated_surface": "Surface estimée (m²)",
+      "estimated_price": "Prix estimé:",
+      "book": "Réserver",
+      "back_to_services": "Retour aux services"
+    }
+  },
+  "security": {
+    "title": "Équipe Sécurité",
+    "subtitle": "Agents formés, expérimentés et disponibles pour la protection de vos espaces.",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "role_not_available": "Rôle non disponible",
+    "click_to_see_agents": "Cliquez pour voir les agents",
+    "description_not_available": "Description non disponible",
+    "security_role": "Rôle de sécurité",
+    "back_to_roles": "← Retour aux rôles",
+    "available_agents": "Agents disponibles",
+    "chef_de_securite": "Chef de sécurité",
+    "agent_de_surete": "Agent de sûreté", 
+    "agent_de_securite": "Agent de sécurité",
+    "superviseur_securite": "Superviseur sécurité",
+    "name_not_available": "Nom non disponible",
+    "security_agent": "Agent de sécurité",
+    "years_experience": "ans d'expérience",
+    "average": "Moyenne",
+    "reviews": "avis",
+    "no_evaluation": "Aucune évaluation pour cet agent",
+    "latest_reviews": "Derniers avis",
+    "show_all_reviews": "Voir tous les avis",
+    "hide_reviews": "Masquer les avis",
+    "evaluate_agent": "Évaluer cet agent",
+    "reserve_agent": "Réserver cet agent",
+    "no_agents_available": "Aucun agent disponible pour ce rôle.",
+    "evaluate": "Évaluer",
+    "evaluation_already_submitted": "Évaluation déjà soumise",
+    "evaluation_already_submitted_text": "Vous avez déjà évalué cet agent de sécurité. Vous ne pouvez soumettre qu'un seul avis par agent.",
+    "close": "Fermer",
+    "rating": "Note (1-5 étoiles) *",
+    "click_star_to_select": "Cliquez sur une étoile pour sélectionner votre note",
+    "stars_selected": "étoile(s) sélectionnée(s)",
+    "comment": "Commentaire",
+    "share_experience": "Partagez votre expérience avec cet agent...",
+    "cancel": "Annuler",
+    "submit_evaluation": "Soumettre l'évaluation",
+    "reserve": "Réserver",
+    "reservation_type": "Type de réservation",
+    "daily": "À la journée",
+    "hourly": "À l'heure",
+    "date": "Date",
+    "security_agent_selection": "Agent de sécurité",
+    "choose_agent": "— Choisir un agent —",
+    "phone_number": "Numéro de téléphone *",
+    "phone_placeholder": "Ex: 06 12 34 56 78",
+    "phone_validation": "Veuillez entrer un numéro de téléphone valide",
+    "start_time": "Heure début",
+    "end_time": "Heure fin",
+    "total_price": "Prix total:",
+    "confirming": "Confirmation...",
+    "confirm_reservation": "Confirmer la réservation"
+  },
+  "shop": {
+    "title": "Boutique",
+    "subtitle": "Découvrez nos produits de nettoyage professionnel",
+    "add_to_cart": "Ajouter au panier",
+    "price": "Prix",
+    "category": "Catégorie",
+    "quantity": "Quantité",
+    "total": "Total",
+    "checkout": "Commander",
+    "empty": "Votre panier est vide"
+  },
+  "booking": {
+    "title": "Réserver un Service",
+    "subtitle": "Remplissez ce formulaire pour réserver votre service de nettoyage. Nous vous contacterons dans les plus brefs délais pour confirmer votre rendez-vous.",
+    "service_label": "Service souhaité",
+    "select_service": "Choisir un service",
+    "loading_services": "Chargement des services...",
+    "firstname": "Prénom",
+    "firstname_placeholder": "Votre prénom",
+    "phone": "Téléphone",
+    "phone_placeholder": "Ex: +212 6 12 34 56 78",
+    "phone_help": "Veuillez préciser si +33 ou +212",
+    "location": "Lieu de la prestation",
+    "location_placeholder": "Ville / Adresse complète",
+    "use_location": "📍 Utiliser ma localisation",
+    "locating": "Localisation...",
+    "size_label": "Taille de la surface (m²)",
+    "size_placeholder": "Ex: 50",
+    "size_help": "Indiquez la surface à nettoyer pour un devis plus précis",
+    "type_label": "Type (optionnel)",
+    "type_placeholder": "Ex: Villa, Appartement, Marocaine, etc.",
+    "type_help": "Renseignez le type si pertinent (ex: Villa, Italienne…)",
+    "select_type": "Choisir un type (optionnel)",
+    "loading_types": "Chargement des types...",
+    "type_help_auto": "Le service associé sera sélectionné automatiquement",
+    "types_load_error": "Erreur lors du chargement des types",
+    "no_service_for_type": "Aucun service associé à ce type",
+    "service_not_found": "Service non trouvé",
+    "service_not_in_list": "Le service associé n'est pas disponible dans la liste",
+    "error_loading_service": "Erreur lors du chargement du service",
+    "message_label": "Détails de la prestation",
+    "message_placeholder": "Décrivez la prestation souhaitée : lieu précis, surfaces à nettoyer, poils d'animaux, fumeur, sièges très tachés, sable, etc.",
+    "message_help": "Plus vous êtes précis, mieux nous pourrons vous servir",
+    "email_label": "Email (optionnel)",
+    "email_placeholder": "votre@email.com",
+    "email_help": "Pour recevoir la confirmation par email",
+    "estimated_price": "Prix estimé :",
+    "price_breakdown": "Estimation basée sur {{size}} m² × {{rate}} DH/m² + services ajoutés",
+    "submit": "Envoyer la demande",
+    "submitting": "Envoi en cours...",
+    "add_service": "+ Ajouter un service",
+    "success_title": "Demande envoyée avec succès !",
+    "success_message": "Merci pour votre confiance. Nous vous contacterons dans les plus brefs délais pour confirmer votre rendez-vous.",
+    "new_request": "Nouvelle demande",
+    "extra_services": "Services ajoutés",
+    "select_date": "Sélectionner une date",
+    "select_time": "Sélectionner une heure",
+    "book_now": "Réserver maintenant",
+    "geolocation_not_supported": "La géolocalisation n'est pas supportée.",
+    "location_error": "Impossible de récupérer la localisation.",
+    "permission_error": "Permission refusée ou indisponible.",
+    "price_breakdown_simple": "Estimation basée sur {{size}} m² × 2.5 DH/m²{{extras}}"
+  },
+  "cart": {
+    "title": "Panier",
+    "subtitle": "Vérifiez vos articles",
+    "item": "Article",
+    "quantity": "Quantité",
+    "price": "Prix",
+    "total": "Total",
+    "checkout": "Commander",
+    "empty": "Votre panier est vide"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "yes": "Oui",
+    "no": "Non",
+    "sending": "Envoi…",
+    "submit": "Envoyer",
+    "unexpected_error": "Une erreur inattendue est survenue"
+  },
+  "employees": {
+    "register": {
+      "join_team": "Rejoignez notre équipe",
+      "fill_form": "Veuillez remplir le formulaire ci-dessous",
+      "required_fields": "Veuillez remplir les champs requis",
+      "submit_failed": "Échec de l'envoi du formulaire",
+      "submit_success": "Formulaire envoyé avec succès",
+      "first_name": "Prénom",
+      "first_name_ph": "Entrez le prénom",
+      "last_name": "Nom",
+      "last_name_ph": "Entrez le nom",
+      "age": "Âge",
+      "age_ph": "Âge",
+      "email": "Email",
+      "email_ph": "example@mail.com",
+      "phone": "Téléphone",
+      "phone_ph": "Ex: +212 6 12 34 56 78",
+      "address": "Adresse",
+      "address_ph": "Entrez l'adresse",
+      "location": "Localisation",
+      "location_ph": "Entrez votre localisation",
+      "photo_optional": "Photo (optionnel)",
+      "expertise": "Domaine d'expertise",
+      "expertise_select": "Choisissez le domaine",
+      "auto_entrepreneur": "Auto-entrepreneur",
+      "last_experience": "Dernière expérience professionnelle",
+      "last_experience_ph": "Décrivez votre dernière expérience professionnelle",
+      "company_name": "Nom de l'entreprise",
+      "company_name_ph": "Entrez le nom de l'entreprise",
+      "available_days": "Jours disponibles",
+      "start": "Début",
+      "end": "Fin",
+      "birth_date": "Date de naissance",
+      "birth_date_ph": "Sélectionnez la date de naissance"
+    },
+    "days": {
+      "sat": "Samedi",
+      "sun": "Dimanche",
+      "mon": "Lundi",
+      "tue": "Mardi",
+      "wed": "Mercredi",
+      "thu": "Jeudi",
+      "fri": "Vendredi"
+    },
+    "bebe": {
+      "expertise": {
+        "newborn": "Soins du nouveau-né",
+        "home_nursery": "Garde à domicile",
+        "nanny": "Nounou",
+        "home_assistant": "Assistante à domicile pour enfant"
+      }
+    },
+    "jardinage": {
+      "expertise": {
+        "planting": "Plantation",
+        "pruning": "Taille",
+        "maintenance": "Entretien de jardin"
+      }
+    },
+    "landing": {
+      "title": "S'inscrire comme Employé(e)",
+      "subtitle": "Choisissez un département pour commencer votre candidature"
+    }
+  },
+  "home_page": {
+    "services": {
+      "cleaning_kitchen": {
+        "title": "Ménage et cuisine",
+        "description": "Nettoyage complet de votre maison avec attention particulière à la cuisine et aux espaces de vie",
+        "icon": "Maison"
+      },
+      "office_factory": {
+        "title": "Nettoyage bureaux ou usine",
+        "description": "Services professionnels pour bureaux et environnements industriels avec équipements spécialisés",
+        "icon": "Bureau"
+      },
+      "window_cleaning": {
+        "title": "Lavage de vitres",
+        "description": "Nettoyage impeccable des vitres intérieures et extérieures avec matériel professionnel",
+        "icon": "Fenêtres"
+      },
+      "laundry_ironing": {
+        "title": "Linge et repassage",
+        "description": "Service complet de lavage et repassage avec produits adaptés à tous types de textiles",
+        "icon": "Vêtements"
+      },
+      "airbnb_cleaning": {
+        "title": "Airbnb Cleaning",
+        "description": "Préparation complète pour vos locations Airbnb avec check-in et check-out professionnels",
+        "icon": "Airbnb"
+      },
+      "pool_cleaning": {
+        "title": "Pool Cleaning",
+        "description": "Entretien et nettoyage de piscines avec traitement de l'eau et maintenance complète",
+        "icon": "Piscine"
+      }
+    },
+    "gallery": {
+      "images": {
+        "professional_cleaning": "Ménage professionnel",
+        "cleaning_service": "Service de ménage",
+        "complete_cleaning": "Nettoyage complet",
+        "our_team": "Notre équipe",
+        "qualified_professionals": "Professionnels qualifiés",
+        "experienced_team": "Équipe expérimentée",
+        "impeccable_result": "Résultat impeccable",
+        "quality_work": "Travail de qualité",
+        "customer_satisfaction": "Satisfaction client"
+      }
+    },
+    "about": {
+      "title": "À propos de nous",
+      "tagline": "Qualité allemande et prix marocain",
+      "description": "ForNowSolution est une équipe passionnée et polyvalente, experte dans plusieurs domaines : ménage, cuisine, sécurité, jardinage, garde d’enfants, travaux manuels et boutique de produits.\n\nNous intervenons avec professionnalisme, en utilisant des produits écologiques et en accordant une attention particulière aux détails pour assurer votre confort et la qualité de nos services.\n\nNotre objectif : vous offrir un service fiable, ponctuel et d’excellente qualité pour répondre à tous vos besoins quotidiens.",
+      "highlights": {
+        "guaranteed_quality": {
+          "title": "Qualité garantie",
+          "description": "Nous offrons des prestations de haute qualité avec un suivi régulier et une priorité donnée à la satisfaction de nos clients."
+        },
+        "ecological_products": {
+          "title": "Produits écologiques",
+          "description": "Des solutions sûres et respectueuses de la santé et de l’environnement."
+        },
+        "rapid_intervention": {
+          "title": "Intervention rapide et efficace",
+          "description": "Toujours disponibles pour un service ponctuel et adapté à votre rythme de vie."
+        }
+      }
+    },
+    "process": {
+      "eyebrow": "Votre confiance, notre engagement",
+      "title": "Tous vos services essentiels à portée de main",
+      "intro": "Du ménage et de la cuisine à la sécurité, au jardinage, à la garde d’enfants et aux travaux manuels — ForNowSolution vous propose tous les services essentiels à portée de main.\n\nAvec des centaines de clients satisfaits, notre équipe est devenue une référence en matière de services domestiques et de bien-être.\n\nNotre engagement envers la qualité, la fiabilité et la satisfaction de nos clients fait toute la différence.",
+      "steps": {
+        "step1": "Une réservation en ligne",
+        "step2": "Un appel avec notre agence pour plus d'informations",
+        "step3": "Profitez de notre promotion"
+      }
+    },
+    "expertise": {
+      "title": "Notre savoir-faire – Votre expérience écologique",
+      "description": "Chez ForNowSolution, nous allions professionnalisme et responsabilité écologique dans tous nos services : ménage, cuisine, sécurité, jardinage, garde d’enfants et travaux manuels.\n\nNous utilisons exclusivement des produits respectueux de l’environnement, biodégradables et sûrs — des solutions douces spécialement conçues pour la santé de votre famille et le bien-être de vos animaux de compagnie.\n\nParce que prendre soin de votre maison, c’est aussi prendre soin de la planète.",
+      "image_alt": "Produits de nettoyage écologiques"
+    },
+    "gallery_section": {
+      "title": "Galerie Photos",
+      "description": "Découvrez nos réalisations et notre savoir-faire à travers ces photos de nos interventions.",
+      "view_all": "Voir toute la galerie"
+    },
+    "buttons": {
+      "book_now": "Réserver maintenant",
+      "scroll_to_top": "Retour en haut"
+    }
+  },
+  "services_page": {
+    "title": "Nos Services",
+    "subtitle": "Découvrez nos services de nettoyage professionnel",
+    "loading": "Chargement des services...",
+    "loading_error": "Impossible de charger les services",
+    "minimum_price": "Minimum : 150 MAD pour 4 heures",
+    "additional_hour": "Chaque heure supplémentaire : 40 MAD",
+    "main_categories": "Catégories principales",
+    "subcategories": "Sous-catégories",
+    "details": "Détails",
+    "back": "Retour",
+    "back_to_services": "Retour aux services",
+    "back_to_types": "← Types",
+    "choose_type": "Choisissez un type",
+    "choose_interior_exterior": "Choisissez: Lavage intérieur ou extérieur",
+    "choose_laundry_ironing": "Choisissez: Lavage ou Repassage",
+    "choose_checkin_checkout": "Choisissez: Check-in ou Check-out",
+    "choose_standard_deep": "Choisissez: Standard ou Nettoyage profond",
+    "inactive": "Inactif",
+    "categories": {
+      "menage": "Ménage",
+      "cuisine": "Cuisine",
+      "bureaux": "Bureaux",
+      "usine": "Usine",
+      "interieur": "Intérieur",
+      "exterieur": "Extérieur",
+      "lavage": "Lavage",
+      "repassage": "Repassage",
+      "check_in": "Check-in",
+      "check_out": "Check-out",
+      "standard": "Standard",
+      "profond": "Nettoyage profond"
+    },
+    "subcategories_menage": {
+      "villa": "Villa",
+      "riad": "Maison d'hôte",
+      "maison": "Maison",
+      "appartement": "Appartement",
+      "hotel": "Hôtel",
+      "resort_hotel": "Resort Hôtel"
+    },
+    "subcategories_cuisine": {
+      "italienne": "Italienne",
+      "marocaine": "Marocaine",
+      "francaise": "Française",
+      "golfe": "Arabe du Golfe"
+    },
+    "service_details": {
+      "office_cleaning": "Nettoyage de Bureaux",
+      "industrial_cleaning": "Nettoyage Industriel",
+      "office_description": "Service de nettoyage professionnel pour bureaux et espaces de travail avec attention particulière aux zones communes, équipements partagés et postes de travail.",
+      "industrial_description": "Service de nettoyage industriel spécialisé pour usines et environnements de production avec traitement des équipements lourds et surfaces techniques.",
+      "window_interior": "Lavage des vitres – Intérieur",
+      "window_exterior": "Lavage des vitres – Extérieur",
+      "window_interior_description": "Nettoyage minutieux des vitres intérieures, encadrements et rebords.",
+      "window_exterior_description": "Lavage extérieur avec matériel adapté, sécurité et finitions sans traces.",
+      "laundry_washing": "Lavage du linge",
+      "laundry_ironing": "Repassage du linge",
+      "laundry_washing_description": "Tri, lavage et séchage avec produits adaptés à vos textiles.",
+      "laundry_ironing_description": "Repassage soigné avec finitions impeccables et pliage.",
+      "airbnb_checkin": "Préparation Check-in",
+      "airbnb_checkout": "Nettoyage Check-out",
+      "airbnb_checkin_description": "Préparation complète avant l'arrivée: literie, serviettes, propreté impeccable.",
+      "airbnb_checkout_description": "Nettoyage complet après départ: remise en état et inventaire rapide.",
+      "pool_standard": "Entretien courant",
+      "pool_deep": "Nettoyage en profondeur",
+      "pool_standard_description": "Entretien régulier: filtration, écumage, ajustement du pH.",
+      "pool_deep_description": "Désinfection complète, brossage, vidange partielle et traitement choc."
+    },
+    "forms": {
+      "estimated_surface": "Surface estimée (m²)",
+      "surface_placeholder": "Ex: 60",
+      "estimated_price": "Prix estimé:",
+      "reserve": "Réserver",
+      "view_service_sheet": "Voir la fiche service",
+      "reserve_this_type": "Réserver ce type",
+      "description": "Description:",
+      "description_text": "Préparation complète avant l'arrivée: literie, serviettes, propreté impeccable."
+    },
+    "category_details": {
+      "title": "Détails de la catégorie",
+      "description_label": "Description:",
+      "description_text": "Préparation complète avant l'arrivée: literie, serviettes, propreté impeccable.",
+      "available_types": "Types disponibles:",
+      "back_to_services": "Retour aux services"
+    },
+    "type_details": {
+      "title": "Détails du type",
+      "description": "Description:",
+      "reserve": "Réserver",
+      "back_to_services": "Retour aux services",
+      "back_to_category": "Retour à la catégorie"
+    },
+    "service_types": {
+      "menage": {
+        "name": "menage",
+        "description": "Prestation de ménage à domicile adaptée à vos besoins quotidiens.",
+        "features": ["Poussière et sols", "Sanitaires", "Pièces de vie"]
+      },
+      "cussin": {
+        "name": "cussin",
+        "description": "Nettoyage ciblé pour la cuisine, plans de travail et électroménagers.",
+        "features": ["Plans de travail", "Évier et plaques", "Électroménager (extérieur)"]
+      },
+      "standard": {
+        "name": "Standard",
+        "description": "Prestation essentielle couvrant les besoins courants, idéale pour un entretien régulier.",
+        "features": ["Zones principales", "Produits adaptés", "Durée optimisée"]
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "Couverture étendue avec finitions soignées et attention accrue aux détails.",
+        "features": ["Zones élargies", "Matériel dédié", "Contrôle qualité"]
+      },
+      "deluxe": {
+        "name": "Deluxe",
+        "description": "Expérience complète avec traitement en profondeur et options personnalisées.",
+        "features": ["Nettoyage en profondeur", "Traitements spécifiques", "Personnalisation"]
+      }
+    },
+    "menage_cuisine": {
+      "selection_hint": "Vous pouvez choisir un seul type de nettoyage et un seul type de cuisine."
+    }
+  },
+  "security_page": {
+    "title": "Équipe Sécurité",
+    "subtitle": "Agents formés, expérimentés et disponibles pour la protection de vos espaces.",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "role_not_available": "Rôle non disponible",
+    "click_to_see_agents": "Cliquez pour voir les agents",
+    "description_not_available": "Description non disponible",
+    "security_role": "Rôle de sécurité",
+    "back_to_roles": "← Retour aux rôles",
+    "available_agents": "Agents disponibles",
+    "chef_de_securite": "Chef de sécurité",
+    "agent_de_surete": "Agent de sûreté", 
+    "agent_de_securite": "Agent de sécurité",
+    "superviseur_securite": "Superviseur sécurité",
+    "name_not_available": "Nom non disponible",
+    "security_agent": "Agent de sécurité",
+    "years_experience": "ans d'expérience",
+    "average": "Moyenne",
+    "reviews": "avis",
+    "no_evaluation": "Aucune évaluation pour cet agent",
+    "latest_reviews": "Derniers avis",
+    "show_all_reviews": "Voir tous les avis",
+    "hide_reviews": "Masquer les avis",
+    "evaluate_agent": "Évaluer cet agent",
+    "reserve_agent": "Réserver cet agent",
+    "no_agents_available": "Aucun agent disponible pour ce rôle.",
+    "evaluate": "Évaluer",
+    "evaluation_already_submitted": "Évaluation déjà soumise",
+    "evaluation_already_submitted_text": "Vous avez déjà évalué cet agent de sécurité. Vous ne pouvez soumettre qu'un seul avis par agent.",
+    "close": "Fermer",
+    "rating": "Note (1-5 étoiles) *",
+    "click_star_to_select": "Cliquez sur une étoile pour sélectionner votre note",
+    "stars_selected": "étoile(s) sélectionnée(s)",
+    "comment": "Commentaire",
+    "share_experience": "Partagez votre expérience avec cet agent...",
+    "cancel": "Annuler",
+    "submit_evaluation": "Soumettre l'évaluation",
+    "reserve": "Réserver",
+    "reservation_type": "Type de réservation",
+    "daily": "À la journée",
+    "hourly": "À l'heure",
+    "date": "Date",
+    "security_agent_selection": "Agent de sécurité",
+    "choose_agent": "— Choisir un agent —",
+    "phone_number": "Numéro de téléphone *",
+    "phone_placeholder": "Ex: 06 12 34 56 78",
+    "phone_validation": "Veuillez entrer un numéro de téléphone valide",
+    "start_time": "Heure début",
+    "end_time": "Heure fin",
+    "total_price": "Prix total:",
+    "confirming": "Confirmation...",
+    "confirm_reservation": "Confirmer la réservation",
+    "thank_you_evaluation": "Merci pour votre évaluation !",
+    "reservation_confirmed": "Réservation confirmée ✓",
+    "please_login_to_reserve": "! Veuillez vous connecter pour réserver.",
+    "please_select_date": "Veuillez sélectionner une date.",
+    "please_enter_phone": "Veuillez entrer votre numéro de téléphone.",
+    "agent_not_selected": "Agent non sélectionné. Veuillez réessayer.",
+    "please_select_hours": "Veuillez sélectionner les heures de début et fin.",
+    "end_time_after_start": "L'heure de fin doit être après l'heure de début.",
+    "please_login": "Veuillez vous connecter pour réserver.",
+    "network_error": "Erreur réseau lors de la réservation",
+    "already_evaluated": "Vous avez déjà évalué cet agent de sécurité !",
+    "evaluation_error": "Erreur lors de la soumission de l'évaluation",
+    "load_roles_error": "Impossible de charger les rôles de sécurité",
+    "load_personnel_error": "Impossible de charger l'équipe sécurité",
+    "book_role_now": "Réserver ce rôle maintenant",
+    "night_day_work": "Travail jour et nuit",
+    "available_locations": "Sites disponibles pour le travail",
+    "languages_spoken": "Langues parlées",
+    "role_not_selected": "Rôle non sélectionné"
+  },
+  "shop_page": {
+    "title": "Boutique ForNowSolution",
+    "subtitle": "Découvrez nos produits et équipements professionnels de qualité pour tous vos besoins de nettoyage.",
+    "loading": "Chargement des produits...",
+    "error": "Erreur de chargement",
+    "retry": "Réessayer",
+    "no_products": "Aucun produit trouvé",
+    "modify_search": "Essayez de modifier vos critères de recherche",
+    "all_categories": "Tous",
+    "image_not_available": "Image non disponible",
+    "out_of_stock": "Rupture de stock",
+    "type": "Type",
+    "category": "Catégorie",
+    "stock": "Stock",
+    "date_added": "Date d'ajout",
+    "price": "Prix",
+    "description": "Description",
+    "not_defined": "Non défini",
+    "evaluate_product": "Évaluer ce produit",
+    "stars": "étoiles",
+    "your_review": "Votre avis (optionnel)",
+    "send": "Envoyer",
+    "view_evaluations": "Voir les évaluations",
+    "already_evaluated": "Vous avez déjà évalué ce produit",
+    "rating_submitted": "Merci ! Votre évaluation a été soumise avec succès",
+    "rating_submitted_success": "Merci ! Vous avez évalué ce produit",
+    "rating_error": "Erreur lors de l'envoi de l'évaluation. Veuillez réessayer",
+    "delivery_returns": "Livraison et Retours",
+    "fast_delivery": "Livraison Rapide",
+    "fast_delivery_desc": "Livraison sous 24-48h dans toute la région de Rabat",
+    "easy_returns": "Retours Faciles",
+    "easy_returns_desc": "Retour gratuit sous 14 jours si vous n'êtes pas satisfait",
+    "secure_payment": "Paiement Sécurisé",
+    "secure_payment_desc": "Paiement en ligne sécurisé ou à la livraison",
+    "quality_guarantee": "Garantie Qualité",
+    "quality_guarantee_desc": "Tous nos produits sont garantis qualité professionnelle",
+    "reviews_title": "Avis –",
+    "loading_reviews": "Chargement…",
+    "no_evaluations": "Aucune évaluation pour ce produit",
+    "user": "Utilisateur",
+    "login_required": "Veuillez vous connecter pour accéder à cette fonctionnalité",
+    "login_first": "Veuillez vous connecter d'abord pour continuer l'opération",
+    "login": "Se connecter",
+    "cancel": "Annuler",
+    "loading_cart": "Ajout...",
+    "view_details": "Voir les détails",
+    "average_rating": "Note moyenne",
+    "based_on": "Basé sur",
+    "reviews_count": "avis",
+    "product_category": "Produit",
+    "accessory_category": "Accessoire"
+  },
+  "cart_page": {
+    "title": "Panier",
+    "my_cart": "Mon Panier",
+    "loading": "Chargement du panier...",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "must_login": "Vous devez être connecté pour voir votre panier",
+    "empty": "Votre panier est vide",
+    "empty_description": "Ajoutez des produits pour commencer vos achats",
+    "description": "Retrouvez tous vos articles ajoutés au panier et finalisez votre commande",
+    "article": "article",
+    "continue_shopping": "Continuer mes achats",
+    "discover_shop": "Découvrir la boutique",
+    "articles": "Articles",
+    "delivery": "Livraison",
+    "free": "Gratuite",
+    "total": "Total",
+    "clear_cart": "Vider le panier",
+    "checkout": "Commander",
+    "product_deleted": "Produit supprimé",
+    "update_error": "Erreur lors de la mise à jour",
+    "remove_error": "Erreur lors de la suppression",
+    "clear_error": "Erreur lors du vidage du panier",
+    "confirm_clear": "Êtes-vous sûr de vouloir vider votre panier ?",
+    "articles_in_cart": "Articles dans votre panier",
+    "description_unavailable": "Description non disponible",
+    "unit_price": "Prix unitaire",
+    "quantity": "Quantité",
+    "remove": "Retirer",
+    "remove_from_cart": "Retirer du panier",
+    "update_success": "Quantité mise à jour avec succès",
+    "remove_success": "Produit retiré du panier",
+    "order_summary": "Résumé de la commande",
+    "subtotal": "Sous-total",
+    "view_summary": "Voir le résumé",
+    "free_shipping_note": "Livraison gratuite à partir de 50DH",
+    "fast_delivery": "Livraison rapide 24-48h",
+    "secure_payment": "Paiement sécurisé",
+    "free_return": "Retour gratuit 14 jours"
+  },
+  "order_summary": {
+    "title": "Résumé de la commande",
+    "description": "Vérifiez les détails de votre commande avant de procéder au paiement",
+    "loading": "Chargement du résumé...",
+    "error": "Erreur de chargement",
+    "retry": "Réessayer",
+    "must_login": "Vous devez être connecté pour voir votre résumé de commande",
+    "empty": "Votre panier est vide",
+    "empty_description": "Ajoutez des produits avant de continuer",
+    "discover_shop": "Découvrir la boutique",
+    "ordered_items": "Articles commandés",
+    "article": "article",
+    "product_deleted": "Produit supprimé",
+    "quantity": "Quantité",
+    "promo_code": "Code promo",
+    "enter_promo": "Entrez votre code promo",
+    "apply": "Appliquer",
+    "applying": "Application...",
+    "code": "Code",
+    "order_summary_label": "Résumé de la commande",
+    "subtotal": "Sous-total",
+    "discount": "Remise",
+    "delivery": "Livraison",
+    "free": "Gratuite",
+    "free_shipping_note": "Livraison gratuite à partir de 50DH",
+    "total": "Total",
+    "proceed_payment": "Procéder au paiement",
+    "back_to_cart": "Retour au panier",
+    "fast_delivery": "Livraison rapide 24-48h",
+    "secure_payment": "Paiement sécurisé",
+    "free_return": "Retour gratuit 14 jours"
+  },
+  "checkout": {
+    "title": "Confirmation de commande",
+    "description": "Renseignez vos informations et choisissez votre mode de paiement.",
+    "loading": "Chargement…",
+    "error": "Erreur",
+    "must_login": "Vous devez être connecté pour confirmer votre commande",
+    "load_cart_error": "Erreur lors du chargement du panier",
+    "order_confirmed": "Commande confirmée",
+    "thanks": "Merci",
+    "order_saved": "! Votre commande a été bien enregistrée.",
+    "response_24h": "Vous recevrez notre réponse dans les 24h suivant votre commande",
+    "items": "Articles",
+    "total": "Total",
+    "back_to_shop": "Retour à la boutique",
+    "shipping_info": "Informations de livraison",
+    "full_name": "Nom complet",
+    "phone": "Téléphone",
+    "city": "Ville",
+    "address": "Adresse",
+    "locate": "Localiser",
+    "zip": "Code postal",
+    "notes": "Notes (optionnel)",
+    "payment_mode": "Mode de paiement",
+    "pay_online": "Payer en ligne (carte)",
+    "pay_on_delivery": "Payer à la livraison",
+    "card_number": "Numéro de carte",
+    "card_expiry": "Date d’expiration",
+    "card_cvv": "CVV",
+    "card_holder": "Nom du titulaire",
+    "card_holder_placeholder": "Nom sur la carte",
+    "validating": "Validation…",
+    "confirm_order": "Confirmer la commande",
+    "summary": "Résumé",
+    "product": "Produit",
+    "confirm_error": "Une erreur est survenue lors de la confirmation",
+    "geo_not_supported": "La géolocalisation n'est pas supportée.",
+    "geo_unavailable": "Impossible de récupérer la localisation.",
+    "geo_error": "Erreur de localisation"
+  },
+  "employee_register": {
+    "title": "Inscription des Employé(e)s",
+    "subtitle": "Rejoignez notre équipe. Remplissez le formulaire ci-dessous.",
+    "form": {
+      "name": "Nom",
+      "first_name": "Prénom",
+      "birth_date": "Date de naissance",
+      "age": "Âge",
+      "email": "Email",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "photo": "Photo (optionnel)",
+      "competency": "Domaine de compétence",
+      "available_days": "Jours disponibles",
+      "select_competency": "Sélectionner…",
+      "phone_placeholder": "Ex: +212 6 12 34 56 78",
+      "use_location": "Utiliser ma position",
+      "locating": "Localisation…",
+      "locate": "Localiser",
+      "auto_entrepreneur": "Auto-entrepreneur",
+      "last_experience": "Dernière expérience professionnelle",
+      "last_experience_ph": "Décrivez votre dernière expérience professionnelle",
+      "company_name": "Nom de l'entreprise",
+      "company_name_ph": "Entrez le nom de l'entreprise",
+      "yes": "Oui",
+      "no": "Non",
+      "preferred_work_time": "Temps de travail préféré",
+      "work_morning": "Je préfère le matin",
+      "work_night": "Je préfère le soir"
+    },
+    "days": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche",
+      "start_time": "Début",
+      "end_time": "Fin",
+      "start_placeholder": "08:00",
+      "end_placeholder": "17:00"
+    },
+    "competencies": {
+      "baby_sitting": "👶 Bebe Setting",
+      "gardening": "🌱 Jardinage",
+      "cleaning": "🏠 Ménage",
+      "ironing": "👕 Repassage",
+      "airbnb": "🏨 Airbnb",
+      "pool": "🏊 Piscine"
+    },
+    "validation": {
+      "all_fields_required": "Tous les champs sont obligatoires",
+      "select_at_least_one_day": "Sélectionnez au moins un jour avec des horaires",
+      "end_time_after_start": "L'heure de fin doit être après l'heure de début"
+    },
+    "submit": {
+      "button": "S'inscrire",
+      "submitting": "Envoi…",
+      "success": "Inscription réussie. Merci !",
+      "error": "Erreur lors de l'inscription"
+    },
+    "success_modal": {
+      "title": "Merci pour votre demande, nous vous contacterons bientôt !",
+      "ok": "OK"
+    },
+    "location": {
+      "not_supported": "La géolocalisation n'est pas supportée par ce navigateur.",
+      "error": "Impossible de récupérer la position",
+      "location_error": "Erreur localisation"
+    }
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "loading": "Chargement du profil...",
+    "user": {
+      "anonymous": "Utilisateur anonyme"
+    },
+    "tabs": {
+      "personal_info": "Informations personnelles",
+      "orders": "Commandes",
+      "reservations": "Mes réservations",
+      "security_reservations": "Mes réservations sécurité"
+    },
+    "personal_info": {
+      "title": "Informations personnelles",
+      "edit": "Modifier",
+      "cancel": "Annuler",
+      "save": "Sauvegarder les modifications",
+      "saving": "Sauvegarde en cours...",
+      "fields": {
+        "full_name": "Nom complet",
+        "email": "Adresse e-mail",
+        "new_password": "Nouveau mot de passe",
+        "confirm_password": "Confirmer le mot de passe",
+        "password_placeholder": "Laissez vide pour ne pas changer",
+        "confirm_password_placeholder": "Confirmez le nouveau mot de passe"
+      },
+      "messages": {
+        "passwords_dont_match": "Les mots de passe ne correspondent pas",
+        "profile_updated": "Profil mis à jour avec succès !",
+        "update_error": "Erreur lors de la mise à jour du profil",
+        "connection_error": "Erreur de connexion au serveur",
+        "loading_error": "Erreur lors du chargement des données"
+      }
+    },
+    "orders": {
+      "title": "Mes commandes",
+      "filters": {
+        "all": "Toutes les commandes",
+        "pending": "En attente",
+        "processing": "En préparation",
+        "shipped": "En route",
+        "delivered": "Livré",
+        "cancelled": "Annulé"
+      },
+      "empty": {
+        "title": "Aucune commande",
+        "message": "Vous n'avez pas encore passé de commande",
+        "button": "Acheter maintenant"
+      },
+      "details": {
+        "order_number": "Commande #",
+        "date": "Date de commande:",
+        "status": "Statut:",
+        "total": "Total:",
+        "products": "Produits",
+        "quantity": "Quantité:",
+        "view_details": "Voir les détails"
+      }
+    },
+    "reservations": {
+      "title": "Mes réservations",
+      "subtitle": "Services que vous avez réservés",
+      "empty": {
+        "title": "Aucune réservation",
+        "message": "Vous n'avez pas encore fait de réservation",
+        "button": "Découvrir nos services"
+      },
+      "details": {
+        "reservation_number": "Réservation #",
+        "service": "Service:",
+        "type": "Type:",
+        "surface": "Surface:",
+        "estimated_price": "Prix estimé:",
+        "view_details": "Voir les détails"
+      }
+    },
+    "security_reservations": {
+      "title": "Mes réservations sécurité",
+      "subtitle": "Services de sécurité que vous avez réservés",
+      "empty": {
+        "title": "Aucune réservation sécurité",
+        "message": "Vous n'avez pas encore fait de réservation pour les services de sécurité",
+        "button": "Découvrir nos services sécurité"
+      },
+      "details": {
+        "reservation_number": "Réservation sécurité #",
+        "service": "Service:",
+        "type": "Type:",
+        "duration": "Durée:",
+        "location": "Lieu:",
+        "estimated_price": "Prix estimé:",
+        "view_details": "Voir les détails"
+      }
+    },
+    "modal": {
+      "close": "Fermer",
+      "order_details": "Détails de la commande #"
+    },
+    "toast": {
+      "close": "Fermer la notification"
+    }
+  },
+  "bebe_setting": {
+    "title": "Bébé Setting",
+    "subtitle": "Créez l'environnement parfait pour votre bébé avec nos services spécialisés",
+    "back_to_home": "Retour à l'accueil",
+    "category_not_available": "Catégorie non disponible",
+    "description_not_available": "Description non disponible",
+    "baby_furniture": "Mobilier Bébé",
+    "baby_furniture_desc": "Mobilier adapté aux bébés",
+    "baby_decoration": "Décoration Bébé",
+    "baby_decoration_desc": "Décoration pour un environnement douillet",
+    "baby_room": "Chambre Bébé",
+    "baby_room_desc": "Aménagement de chambre pour bébé",
+    "loading": {
+      "categories": "Chargement des catégories...",
+      "services": "Chargement des services..."
+    },
+    "errors": {
+      "categories": "Erreur lors du chargement des catégories",
+      "details": "Erreur lors du chargement des détails",
+      "connection": "Erreur de connexion",
+      "retry": "Réessayer"
+    },
+    "categories": {
+      "title": "Nos Catégories",
+      "view_details": "Voir les détails"
+    },
+    "services": {
+      "back_to_categories": "Retour aux catégories",
+      "no_services": "Aucun service disponible pour cette catégorie",
+      "price": "Prix:",
+      "duration": "Durée:",
+      "view_details": "Voir les détails",
+      "reserve": "Réserver",
+      "reserve_service": "Réserver ce service"
+    },
+    "details": {
+      "back_to_services": "← Retour à la liste des services",
+      "reserve_caregiver": "Réservez ce garde d'enfants maintenant"
+    },
+    "success": {
+      "reservation": "Réservation créée avec succès ! Nous vous contacterons bientôt."
+    }
+  },
+  "jardinage": {
+    "title": "Jardinage",
+    "subtitle": "Transformez votre espace extérieur avec nos services de jardinage professionnels",
+    "back_to_home": "Retour à l'accueil",
+    "category_not_available": "Catégorie non disponible",
+    "description_not_available": "Description non disponible",
+    "plantation": "Plantation",
+    "plantation_desc": "Plantation d'arbres, arbustes et fleurs",
+    "garden_maintenance": "Entretien Jardin",
+    "garden_maintenance_desc": "Entretien régulier pour votre jardin",
+    "landscaping": "Aménagement Paysager",
+    "landscaping_desc": "Aménagement d'espaces verts",
+    "mowing_pruning": "Tonte et Taille",
+    "mowing_pruning_desc": "Tonte et taille de gazon et arbres",
+    "loading": {
+      "categories": "Chargement des catégories...",
+      "services": "Chargement des services..."
+    },
+    "errors": {
+      "categories": "Erreur lors du chargement des catégories",
+      "details": "Erreur lors du chargement des détails",
+      "connection": "Erreur de connexion",
+      "retry": "Réessayer"
+    },
+    "categories": {
+      "title": "Nos Services de Jardinage",
+      "view_services": "Voir les services"
+    },
+    "services": {
+      "back_to_categories": "Retour aux catégories",
+      "no_services": "Aucun service disponible pour cette catégorie",
+      "price": "Prix:",
+      "duration": "Durée:",
+      "view_details": "Voir les détails",
+      "reserve": "Réserver",
+      "reserve_service": "Réserver ce service"
+    },
+    "success": {
+      "reservation": "Réservation créée avec succès ! Nous vous contacterons bientôt."
+    }
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "description": "Pour toute demande de devis ou d’information sur nos services, veuillez remplir le formulaire avec le maximum de détails possibles afin de nous aider à mieux répondre à vos besoins.\n\n🔹 Exemples d’informations utiles :\nLieu d’intervention, type de service souhaité (ménage, cuisine, sécurité, jardinage, garde d’enfants, travaux manuels...), taille de l’espace, état du matériel ou des meubles, remarques particulières.\n\nPlus les informations sont précises, plus notre offre sera adaptée à vos attentes.",
+    "form": {
+      "success": {
+        "title": "Merci, votre demande a été envoyée",
+        "message": "Nous revenons vers vous au plus vite."
+      },
+      "firstname": "Prénom",
+      "firstname_placeholder": "Votre prénom",
+      "phone": "Téléphone",
+      "phone_title": "Uniquement des chiffres (et espaces / tirets). Doit commencer par +33, +212 ou 0.",
+      "phone_placeholder": "Ex: +212 6 12 34 56 78",
+      "phone_note": "Veuillez préciser si +33 ou +212",
+      "location": "Lieu",
+      "location_placeholder": "Ville / Adresse",
+      "geolocation_not_supported": "La géolocalisation n'est pas supportée.",
+      "location_error": "Impossible de récupérer la localisation.",
+      "permission_error": "Permission refusée ou indisponible.",
+      "locating": "Localisation...",
+      "use_location": "Utiliser ma localisation",
+      "service": "Service",
+      "select_service": "Choisir un service",
+      "services": {
+        "home_cleaning": "Ménage à domicile",
+        "office_cleaning": "Nettoyage de bureaux",
+        "window_cleaning": "Lavage de vitres",
+        "ironing": "Repassage"
+      },
+      "message": "Message",
+      "message_placeholder": "Décrivez la prestation: lieu, poils de chien, fumeur, sièges tachés, sable, etc.",
+      "submit": "Envoyez le formulaire",
+      "submit_error": "Erreur lors de l'envoi. Vérifiez les champs."
+    }
+  },
+  "info": {
+    "title": "À Propos de ProServices Ménage",
+    "subtitle": "Votre partenaire de confiance pour tous vos besoins de nettoyage professionnel",
+    "sections": {
+      "history": {
+        "title": "Notre Histoire",
+        "content": "Depuis notre création, ProServices Ménage s'est imposé comme une référence dans le domaine du nettoyage professionnel. Notre équipe expérimentée et passionnée met tout son savoir-faire au service de votre satisfaction."
+      },
+      "mission": {
+        "title": "Notre Mission",
+        "content": "Offrir des services de nettoyage de haute qualité, respectueux de l'environnement, avec une approche personnalisée pour chaque client. Nous nous engageons à dépasser vos attentes à chaque intervention."
+      },
+      "values": {
+        "title": "Nos Valeurs",
+        "quality": "Qualité",
+        "quality_desc": "Excellence dans chaque détail",
+        "reliability": "Fiabilité",
+        "reliability_desc": "Ponctualité et respect des engagements",
+        "ecology": "Écologie",
+        "ecology_desc": "Produits respectueux de l'environnement",
+        "innovation": "Innovation",
+        "innovation_desc": "Techniques et équipements modernes",
+        "customer_service": "Service client",
+        "customer_service_desc": "Accompagnement personnalisé"
+      },
+      "team": {
+        "title": "Notre Équipe",
+        "content": "Notre équipe est composée de professionnels qualifiés, formés aux dernières techniques de nettoyage. Chaque membre partage notre vision d'excellence et notre engagement envers la satisfaction client."
+      },
+      "ecology": {
+        "title": "Engagement Écologique",
+        "content": "Nous utilisons exclusivement des produits biodégradables et respectueux de l'environnement. Notre approche écologique garantit la sécurité de votre famille et de vos animaux de compagnie."
+      },
+      "contact": {
+        "title": "Contactez-Nous",
+        "phone": "Téléphone",
+        "email": "Email",
+        "hours": "Horaires",
+        "hours_value": "Lun-Ven : 8h-18h | Sam : 8h-16h",
+        "zone": "Zone d'intervention",
+        "zone_value": "Rabat et environs"
+      }
+    }
+  },
+  "gallery": {
+    "title": "Galerie Photos",
+    "description": "Découvrez nos réalisations et notre savoir-faire à travers ces photos de nos interventions.",
+    "categories": {
+      "all": "Tous",
+      "cleaning": "Ménage",
+      "team": "Équipe",
+      "results": "Résultats"
+    }
+  },
+  "testimonials": {
+    "title": "Tous les témoignages",
+    "testimonial1": {
+      "alt": "Cliente souriante",
+      "text": "Service impeccable ! Ma maison n'a jamais été aussi propre.",
+      "author": "Sarah D."
+    },
+    "testimonial2": {
+      "alt": "Client satisfait",
+      "text": "Professionnels, ponctuels et efficaces. Je recommande vivement.",
+      "author": "Julien M."
+    },
+    "testimonial3": {
+      "alt": "Couple satisfait",
+      "text": "Un gain de temps précieux pour notre famille. Merci !",
+      "author": "Nora & Ali"
+    }
+  },
+  "services": {
+    "lavage_de_vitres": {
+      "title": "Lavage de vitres",
+      "description": "Des vitres sans traces pour une luminosité maximale. Service spécialisé avec matériel professionnel et produits écologiques"
+    },
+    "nettoyage_bureaux_ou_usine": {
+      "title": "Nettoyage bureaux ou usine",
+      "description": "Des espaces de travail impeccables pour plus de bien-être et de productivité. Service adapté aux horaires professionnels avec équipements spécialisés"
+    },
+    "ménage_et_cuisine": {
+      "title": "Ménage et cuisine",
+      "description": "Nettoyage complet de votre maison avec des produits respectueux de l'environnement. Service professionnel incluant le nettoyage de toutes les pièces, sanitaires, cuisine et espaces communs"
+    },
+    "menage_et_cuisine": {
+      "title": "Ménage et cuisine",
+      "description": "Nettoyage complet de votre maison avec des produits respectueux de l'environnement. Service professionnel incluant le nettoyage de toutes les pièces, sanitaires, cuisine et espaces communs"
+    },
+    "pool_cleaning": {
+      "title": "Pool Cleaning",
+      "description": "Entretien complet de votre piscine pour une eau claire et saine"
+    },
+    "airbnb_cleaning": {
+      "title": "Airbnb Cleaning",
+      "description": "Service complet de nettoyage pour votre location, pour garantir confort et satisfaction à vos invités"
+    },
+    "lange_et_repassage": {
+      "title": "Lange et repassage",
+      "description": "Maison propre, linge soigné : notre expertise garantit un environnement impeccable et confortable"
+    }
+  },
+  "security_roles": {
+    "chef_de_sécurité": {
+      "title": "Chef de sécurité",
+      "description": "Responsable de la sécurité"
+    },
+    "chef_de_securite": {
+      "title": "Chef de sécurité",
+      "description": "Responsable de la sécurité"
+    },
+    "agent_de_sûreté": {
+      "title": "Agent de sûreté",
+      "description": "Agent spécialisé en sûreté"
+    },
+    "agent_de_surete": {
+      "title": "Agent de sûreté",
+      "description": "Agent spécialisé en sûreté"
+    },
+    "agent_de_sécurité": {
+      "title": "Agent de sécurité",
+      "description": "Agent de sécurité général"
+    },
+    "agent_de_securite": {
+      "title": "Agent de sécurité",
+      "description": "Agent de sécurité général"
+    },
+    "superviseur_sécurité": {
+      "title": "Superviseur sécurité",
+      "description": "Superviseur d'équipe de sécurité"
+    },
+    "superviseur_securite": {
+      "title": "Superviseur sécurité",
+      "description": "Superviseur d'équipe de sécurité"
+    }
+  },
+  "hand_workers": {
+    "title": "Travaux Manuels",
+    "subtitle": "Artisans professionnels pour tous vos besoins de travaux manuels",
+    "loading": "Chargement des catégories...",
+    "loading_error": "Erreur lors du chargement des catégories. Veuillez réessayer.",
+    "choose_category": "Choisir une Catégorie",
+    "price_per_hour": "Prix par heure",
+    "minimum_hours": "Heures minimum",
+    "back_to_categories": "Retour aux Catégories",
+    "available_workers": "Ouvriers Disponibles",
+    "experience": "Expérience",
+    "years": "années",
+    "rating": "Note",
+    "status": {
+      "available": "Disponible",
+      "busy": "Occupé",
+      "unavailable": "Indisponible"
+    },
+    "no_workers_available": "Aucun ouvrier disponible pour cette catégorie",
+    "book_service": "Réserver le Service",
+    "book_service_description": "Prêt à réserver ce service ? Remplissez le formulaire pour commencer.",
+    "book_now": "Réserver Maintenant",
+    "register_as_worker": "S'inscrire comme Ouvrier",
+    "categories": {
+      "maçon": {
+        "title": "Maçon",
+        "description": "Maçonnerie et construction"
+      },
+      "électricien": {
+        "title": "Électricien",
+        "description": "Installations et réparations électriques"
+      },
+      "carreleur": {
+        "title": "Carreleur",
+        "description": "Carrelage et revêtements de sol"
+      },
+      "plâtrier": {
+        "title": "Plâtrier",
+        "description": "Plâtrerie et finition des murs"
+      },
+      "peintre": {
+        "title": "Peintre",
+        "description": "Peinture intérieure et extérieure"
+      },
+      "menuisier": {
+        "title": "Menuisier",
+        "description": "Menuiserie en bois et construction"
+      },
+      "plombier": {
+        "title": "Plombier",
+        "description": "Plomberie et réparations"
+      },
+      "serrurier": {
+        "title": "Serrurier",
+        "description": "Serrurerie et sécurité"
+      }
+    }
+  },
+  "hand_worker_booking": {
+    "title": "Réserver un Service de Travaux Manuels",
+    "subtitle": "Remplissez le formulaire ci-dessous pour réserver votre service de travaux manuels",
+    "loading": "Chargement...",
+    "loading_error": "Erreur lors du chargement des données. Veuillez réessayer.",
+    "select_category_error": "Veuillez d'abord sélectionner une catégorie",
+    "submission_error": "Erreur lors de la soumission de la réservation. Veuillez réessayer.",
+    "success_title": "Réservation Soumise avec Succès !",
+    "success_message": "Votre réservation de service de travaux manuels a été soumise. Nous vous contacterons bientôt pour confirmer les détails.",
+    "back_to_hand_workers": "Retour aux Travaux Manuels",
+    "personal_info": "Informations Personnelles",
+    "first_name": "Prénom",
+    "last_name": "Nom",
+    "email": "Email",
+    "phone": "Téléphone",
+    "service_selection": "Sélection du Service",
+    "category": "Catégorie",
+    "select_category": "Sélectionner une catégorie",
+    "preferred_worker": "Ouvrier Préféré",
+    "no_preference": "Aucune préférence",
+    "service_details": "Détails du Service",
+    "service_description": "Description du Service",
+    "service_description_placeholder": "Décrivez le travail à effectuer...",
+    "duration_hours": "Durée (heures)",
+    "preferred_date": "Date Préférée",
+    "preferred_time": "Heure Préférée",
+    "location": "Lieu",
+    "location_name": "Nom du Lieu",
+    "location_placeholder": "ex: Ma Maison, Immeuble de Bureau",
+    "address": "Adresse",
+    "address_placeholder": "Entrez votre adresse complète",
+    "city": "Ville",
+    "additional_notes": "Notes Supplémentaires",
+    "client_notes": "Notes Supplémentaires",
+    "client_notes_placeholder": "Toute information supplémentaire ou exigence particulière...",
+    "price_summary": "Résumé des Prix",
+    "hourly_rate": "Tarif Horaire",
+    "duration": "Durée",
+    "total_price": "Prix Total",
+    "submitting": "Soumission...",
+    "submit": "Soumettre la Réservation"
+  },
+  "hand_worker_registration": {
+    "title": "Inscription Travailleur Manuel",
+    "subtitle": "Rejoignez notre équipe d'artisans professionnels",
+    "loading": "Chargement des catégories...",
+    "loading_error": "Erreur lors du chargement des catégories. Veuillez réessayer.",
+    "submission_error": "Erreur lors de l'envoi de l'inscription. Veuillez réessayer.",
+    "success_title": "Inscription Soumise !",
+    "success_message": "Votre inscription a été soumise avec succès. Nous examinerons votre candidature et vous contacterons bientôt.",
+    "back_to_home": "Retour à l'Accueil",
+    "personal_info": "Informations Personnelles",
+    "password_section": "Mot de Passe",
+    "work_info": "Informations Professionnelles",
+    "location": "Localisation",
+    "files_section": "Fichiers",
+    "full_name": "Nom Complet",
+    "email": "Email",
+    "phone": "Téléphone",
+    "password": "Mot de Passe",
+    "password_confirmation": "Confirmer le Mot de Passe",
+    "category": "Type de Travail",
+    "address": "Adresse",
+    "city": "Ville",
+    "photo": "Photo de Profil",
+    "work_samples": "Échantillons de Travail",
+    "bio": "Biographie",
+    "experience_years": "Années d'Expérience",
+    "submit": "S'inscrire",
+    "submitting": "Envoi en cours...",
+    "full_name_placeholder": "Entrez votre nom complet",
+    "email_placeholder": "votre@email.com",
+    "phone_placeholder": "+212 6XX XXX XXX",
+    "password_placeholder": "Minimum 8 caractères",
+    "password_confirmation_placeholder": "Répétez votre mot de passe",
+    "select_category": "Sélectionnez votre spécialité",
+    "address_placeholder": "Votre adresse complète",
+    "city_placeholder": "Votre ville",
+    "bio_placeholder": "Parlez-nous de votre expérience et de vos compétences...",
+    "photo_help": "Photo de profil (optionnel, max 2MB)",
+    "work_samples_help": "Photos de vos réalisations (optionnel, max 5 fichiers)",
+    "full_name_required": "Le nom complet est requis",
+    "email_required": "L'email est requis",
+    "email_invalid": "Format d'email invalide",
+    "phone_required": "Le téléphone est requis",
+    "password_required": "Le mot de passe est requis",
+    "password_min_length": "Le mot de passe doit contenir au moins 8 caractères",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "category_required": "Veuillez sélectionner votre spécialité",
+    "experience_invalid": "L'expérience doit être un nombre positif"
+  },
+  "tous_les_services": {
+    "title": "Tous nos services",
+    "menage": {
+      "name": "Ménage et cuisine",
+      "name_fr": "Ménage et cuisine"
+    },
+    "security": {
+      "name": "Sécurité",
+      "name_fr": "Sécurité"
+    },
+    "bebe_setting": {
+      "name": "Bébé Setting",
+      "name_fr": "Bébé Setting"
+    },
+    "jardinage": {
+      "name": "Jardinage",
+      "name_fr": "Jardinage"
+    },
+    "hand_workers": {
+      "name": "Travaux Manuels",
+      "name_fr": "Travaux Manuels"
+    }
+  },
+  "support": {
+    "title": "Support et Assistance",
+    "intro": "Si vous rencontrez un problème lors de l’utilisation de la plateforme ou si vous avez une question, vous pouvez nous contacter via les numéros ou l’email suivants.",
+    "message": "Notre équipe de support est disponible à tout moment pour vous aider. N’hésitez pas à nous contacter.",
+    "phone_label": "Téléphone",
+    "email_label": "Email",
+    "hours_label": "Horaires",
+    "hours_value": "Du lundi au vendredi – de 9h00 à 18h00",
+    "call_now": "Appelez maintenant",
+    "send_message": "Envoyez un message"
+  }
+}

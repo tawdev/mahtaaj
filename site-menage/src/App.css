@@ -1,0 +1,264 @@
+/* Page Transition Styles */
+.page-transition {
+  animation: pageFadeIn 0.6s ease-out;
+  padding-top: 70px; /* Account for fixed navbar */
+}
+
+/* Ensure navbar is always visible on non-dashboard pages */
+.App > header.navbar1,
+.App > .navbar1 {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Admin pages don't need navbar padding */
+.admin-page {
+  padding-top: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .page-transition {
+    padding-top: 60px; /* Smaller navbar height on mobile */
+  }
+  
+  /* Remove padding-top for Home page on mobile to eliminate gap between Navbar and Hero */
+  .page-transition:has(.Home),
+  .page-transition > .Home {
+    padding-top: 0 !important;
+  }
+  
+  /* تقليل padding-top لصفحة Services في الموبايل - مسافة صغيرة فقط */
+  .page-transition:has(.services-page),
+  .page-transition > .services-page {
+    padding-top: 0.5rem !important;
+  }
+  
+  .admin-page {
+    padding-top: 0 !important;
+  }
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ensure Hand Workers page header is always visible immediately */
+.page-transition:has(.hand-workers-page) .hand-workers-header,
+.page-transition > .hand-workers-page .hand-workers-header {
+  animation: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+.page-transition:has(.hand-workers-page) .hand-workers-title-section,
+.page-transition > .hand-workers-page .hand-workers-title-section {
+  animation: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+.page-transition:has(.hand-workers-page) .hand-workers-title-section h1,
+.page-transition > .hand-workers-page .hand-workers-title-section h1,
+.page-transition:has(.hand-workers-page) .hand-workers-subtitle,
+.page-transition > .hand-workers-page .hand-workers-subtitle,
+.page-transition:has(.hand-workers-page) .hand-workers-actions,
+.page-transition > .hand-workers-page .hand-workers-actions {
+  animation: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Enhanced Button Animations */
+.home-primary-button,
+.gallery-link-button,
+.add-to-cart-btn,
+.filter-button,
+.mode-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reusable button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-2) 100%);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.btn-primary:active { transform: translateY(0); }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255,255,255,0.9);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.icon-btn:hover { background: #fff; box-shadow: var(--shadow-md); }
+
+.home-primary-button::before,
+.gallery-link-button::before,
+.add-to-cart-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.home-primary-button:hover::before,
+.gallery-link-button:hover::before,
+.add-to-cart-btn:hover::before {
+  left: 100%;
+}
+
+/* Card Hover Enhancements */
+.home-service-card,
+.info-card,
+.product-card,
+.gallery-item {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+.home-service-card:hover,
+.info-card:hover,
+.product-card:hover,
+.gallery-item:hover {
+  transform: translateY(-8px) scale(1.02);
+}
+
+/* Smooth Scroll Enhancement */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Loading State Animation */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.1rem;
+  color: #64748b;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Error State Animation */
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.1rem;
+  color: #ef4444;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* Performance Optimizations (scoped to avoid breaking position: fixed) */
+.home-service-card,
+.info-card,
+.product-card,
+.gallery-item,
+.btn,
+.icon-btn {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+img {
+  will-change: transform;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .page-transition {
+    animation: none;
+  }
+}
+
+/* Mobile Performance */
+@media (max-width: 768px) {
+  .home-service-card:hover,
+  .info-card:hover,
+  .product-card:hover,
+  .gallery-item:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+  
+  .home-primary-button:hover,
+  .gallery-link-button:hover,
+  .add-to-cart-btn:hover {
+    transform: translateY(-1px);
+  }
+}
