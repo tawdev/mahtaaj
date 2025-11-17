@@ -244,7 +244,33 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
 );
 
 -- ============================================
--- 13. جدول الأدمن (Admins)
+-- 13. جدول المستخدمين (Users)
+-- ============================================
+-- هذا الجدول يخزن معلومات إضافية عن المستخدمين
+-- مرتبط بجدول auth.users في Supabase
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT,
+  phone TEXT,
+  address TEXT,
+  city TEXT,
+  zip_code TEXT,
+  country TEXT DEFAULT 'Morocco',
+  avatar_url TEXT,
+  date_of_birth DATE,
+  gender TEXT CHECK (gender IN ('male', 'female', 'other')),
+  language_preference TEXT DEFAULT 'fr' CHECK (language_preference IN ('fr', 'ar', 'en')),
+  email_verified BOOLEAN DEFAULT false,
+  phone_verified BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  last_login TIMESTAMPTZ,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- 14. جدول الأدمن (Admins)
 -- ============================================
 -- ملاحظة: يمكن استخدام Supabase Auth بدلاً من هذا الجدول
 -- أو استخدام جدول منفصل مع RLS
@@ -260,7 +286,7 @@ CREATE TABLE IF NOT EXISTS admins (
 );
 
 -- ============================================
--- 14. جدول الموظفين (Employees)
+-- 15. جدول الموظفين (Employees)
 -- ============================================
 CREATE TABLE IF NOT EXISTS employees (
   id BIGSERIAL PRIMARY KEY,
@@ -277,7 +303,7 @@ CREATE TABLE IF NOT EXISTS employees (
 );
 
 -- ============================================
--- 15. جدول أنواع فئات المعرض (Type Category Gallery)
+-- 16. جدول أنواع فئات المعرض (Type Category Gallery)
 -- ============================================
 CREATE TABLE IF NOT EXISTS type_category_gallery (
   id BIGSERIAL PRIMARY KEY,
@@ -291,7 +317,7 @@ CREATE TABLE IF NOT EXISTS type_category_gallery (
 );
 
 -- ============================================
--- 16. جدول فئات المعرض (Category Gallery)
+-- 17. جدول فئات المعرض (Category Gallery)
 -- ============================================
 CREATE TABLE IF NOT EXISTS category_gallery (
   id BIGSERIAL PRIMARY KEY,
@@ -761,6 +787,8 @@ CREATE INDEX IF NOT EXISTS idx_security_roles_order ON security_roles("order");
 CREATE INDEX IF NOT EXISTS idx_reserve_security_user_id ON reserve_security(user_id);
 CREATE INDEX IF NOT EXISTS idx_reserve_security_security_id ON reserve_security(security_id);
 CREATE INDEX IF NOT EXISTS idx_reserve_security_status ON reserve_security(status);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone) WHERE phone IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
 
 -- ============================================
 -- إنشاء Functions لتحديث updated_at تلقائياً
@@ -787,6 +815,9 @@ CREATE TRIGGER update_type_options_updated_at BEFORE UPDATE ON type_options
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_reservations_updated_at BEFORE UPDATE ON reservations
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_ratings_updated_at BEFORE UPDATE ON ratings
@@ -858,6 +889,75 @@ ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE carts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contact_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- Policies للمستخدمين (Users)
+-- ============================================
+-- السماح للمستخدمين بقراءة بياناتهم فقط
+CREATE POLICY "Users can view own profile"
+  ON users
+  FOR SELECT
+  USING (auth.uid() = id);
+
+-- السماح للمستخدمين بتحديث بياناتهم فقط
+CREATE POLICY "Users can update own profile"
+  ON users
+  FOR UPDATE
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- السماح للمستخدمين بإدراج بياناتهم فقط (عند التسجيل)
+CREATE POLICY "Users can insert own profile"
+  ON users
+  FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+-- السماح للأدمن بقراءة جميع المستخدمين
+CREATE POLICY "Admins can view all users"
+  ON users
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM admins
+      WHERE admins.email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      AND admins.is_active = true
+    )
+  );
+
+-- السماح للأدمن بتحديث جميع المستخدمين
+CREATE POLICY "Admins can update all users"
+  ON users
+  FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM admins
+      WHERE admins.email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      AND admins.is_active = true
+    )
+  );
+
+-- ============================================
+-- Trigger لإنشاء سجل في users عند إنشاء مستخدم جديد في auth.users
+-- ============================================
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, full_name, email_verified)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
+    NEW.email_confirmed_at IS NOT NULL
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- إنشاء Trigger على auth.users
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION handle_new_user();
 
 -- ============================================
 -- Policies للخدمات (Services)

@@ -211,6 +211,17 @@ export default function LoginRegister() {
             localStorage.removeItem('remembered_email');
           }
           
+          // Update last_login in users table
+          try {
+            await supabase
+              .from('users')
+              .update({ last_login: new Date().toISOString() })
+              .eq('id', data.user.id);
+          } catch (loginUpdateErr) {
+            console.error('Error updating last_login:', loginUpdateErr);
+            // Don't fail login if this fails
+          }
+          
           setSuccess('Connexion réussie !');
           setTimeout(() => {
             navigate(returnUrl);
@@ -287,7 +298,7 @@ export default function LoginRegister() {
         }
 
         if (data.user) {
-          // Save user data
+          // Save user data in localStorage
           const userData = {
             id: data.user.id,
             name: formData.name.trim(),
@@ -297,12 +308,38 @@ export default function LoginRegister() {
           localStorage.setItem('user_data', JSON.stringify(userData));
           localStorage.setItem('user', JSON.stringify(userData));
             
-            // Save email for "Remember Me" functionality
-            if (rememberMe) {
+          // Save email for "Remember Me" functionality
+          if (rememberMe) {
             localStorage.setItem('remembered_email', trimmedEmail);
+          } else {
+            localStorage.removeItem('remembered_email');
+          }
+          
+          // Save user data in the users table
+          try {
+            const { error: userTableError } = await supabase
+              .from('users')
+              .upsert({
+                id: data.user.id,
+                full_name: formData.name.trim(),
+                email_verified: data.user.email_confirmed_at ? true : false,
+                is_active: true,
+                language_preference: 'fr' // Default language
+              }, {
+                onConflict: 'id'
+              });
+
+            if (userTableError) {
+              console.error('Error saving user to users table:', userTableError);
+              // Don't fail the registration if this fails, just log it
+              // The trigger should handle it, but we try to save explicitly
             } else {
-              localStorage.removeItem('remembered_email');
+              console.log('User data saved to users table successfully');
             }
+          } catch (userTableErr) {
+            console.error('Exception saving user to users table:', userTableErr);
+            // Continue with registration even if this fails
+          }
             
           // Vérifier si l'email confirmation est requise
           if (data.session) {

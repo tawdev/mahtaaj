@@ -10,6 +10,7 @@ export default function Navbar1() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem('user') || localStorage.getItem('adminToken')));
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isLoginDropdownOpen, setIsLoginDropdownOpen] = useState(false);
   const handleChangeLanguage = (lng, event) => {
     // Prevent event propagation
     if (event) {
@@ -37,6 +38,30 @@ export default function Navbar1() {
   function closeMenu() {
     setIsOpen(false);
     setIsLangOpen(false);
+    setIsLoginDropdownOpen(false);
+  }
+
+  function handleLoginClick(e) {
+    e.stopPropagation();
+    setIsLoginDropdownOpen(!isLoginDropdownOpen);
+    setIsLangOpen(false); // Close language dropdown if open
+  }
+
+  function handleLanguageClick() {
+    setIsLangOpen(!isLangOpen);
+    setIsLoginDropdownOpen(false); // Close login dropdown if open
+  }
+
+  function handleLoginAsClient() {
+    setIsLoginDropdownOpen(false);
+    closeMenu();
+    navigate('/login-register');
+  }
+
+  function handleLoginForJob() {
+    setIsLoginDropdownOpen(false);
+    closeMenu();
+    navigate('/employees/register');
   }
 
   async function handleLogout() {
@@ -111,6 +136,16 @@ export default function Navbar1() {
           setIsLangOpen(false);
         }
       }
+
+      // Close login dropdown when clicking outside
+      if (isLoginDropdownOpen) {
+        const loginBtn = event.target.closest('.login-btn');
+        const loginDropdown = event.target.closest('.login-dropdown');
+        
+        if (!loginBtn && !loginDropdown) {
+          setIsLoginDropdownOpen(false);
+        }
+      }
     };
 
     const handleKeyDown = (event) => {
@@ -120,10 +155,13 @@ export default function Navbar1() {
       if (isLangOpen && event.key === 'Escape') {
         setIsLangOpen(false);
       }
+      if (isLoginDropdownOpen && event.key === 'Escape') {
+        setIsLoginDropdownOpen(false);
+      }
     };
 
-    // Add event listeners when menu or language dropdown is open
-    if (isOpen || isLangOpen) {
+    // Add event listeners when menu, language dropdown, or login dropdown is open
+    if (isOpen || isLangOpen || isLoginDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
       document.addEventListener('keydown', handleKeyDown);
@@ -135,7 +173,7 @@ export default function Navbar1() {
       document.removeEventListener('touchstart', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, isLangOpen]);
+  }, [isOpen, isLangOpen, isLoginDropdownOpen]);
 
   useEffect(() => {
     // Handle scroll effect
@@ -235,7 +273,7 @@ export default function Navbar1() {
           title={t('nav.languages', 'Languages')}
           aria-label={t('nav.languages', 'Languages')}
           aria-expanded={isLangOpen}
-          onClick={() => setIsLangOpen(v => !v)}
+          onClick={handleLanguageClick}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
@@ -298,7 +336,7 @@ export default function Navbar1() {
         {/* Navigation menu - links in normal order */}
         <nav className={`navbar1__nav ${isRTL ? 'rtl-nav' : ''}`} aria-label="Navigation principale">
           <ul className={`navbar1__links ${isRTL ? 'rtl' : ''}`}>
-            {/* RTL: Logo → الرئيسية → جميع خدماتنا → المتجر → الموظفين → ملفي الشخصي → [langue + login/logout] */}
+            {/* RTL: Logo → الرئيسية → جميع خدماتنا → المتجر → الدعم → ملفي الشخصي → [langue + login/logout] */}
             {/* Normal order for RTL (links read naturally right to left) */}
             {isRTL ? (
               <>
@@ -306,7 +344,6 @@ export default function Navbar1() {
                 <li><Link to="/" onClick={closeMenu}>{t('nav.home')}</Link></li>
                 <li><Link to="/tous-les-services" onClick={closeMenu}>{t('nav.all_services')}</Link></li>
                 <li><Link to="/shop" onClick={closeMenu}>{t('nav.shop')}</Link></li>
-                <li><Link to="/employees/register" onClick={closeMenu}>{t('nav.employees')}</Link></li>
                 <li><Link to="/support" onClick={closeMenu}>الدعم</Link></li>
                 {isLoggedIn && (
                   <li><Link to="/profile" onClick={closeMenu}>{t('nav.profile')}</Link></li>
@@ -320,15 +357,23 @@ export default function Navbar1() {
                     title={t('nav.languages', 'Languages')}
                     aria-label={t('nav.languages', 'Languages')}
                     aria-expanded={isLangOpen}
-                    onClick={() => setIsLangOpen(v => !v)}
+                    onClick={handleLanguageClick}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-languages">
-                      <path d="m5 8 6 6" />
-                      <path d="m4 14 6-6 2-3" />
-                      <path d="M2 5h12" />
-                      <path d="M7 2h1" />
-                      <path d="m22 22-5-10-5 10" />
-                      <path d="M14 18h6" />
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className="desktop-lang-globe-icon"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                     </svg>
                   </button>
                   {isLangOpen && (
@@ -371,20 +416,47 @@ export default function Navbar1() {
                   )}
                 </li>
                 {!isLoggedIn && (
-                  <li style={{ marginLeft: 'auto', marginRight: '0' }}>
+                  <li style={{ marginLeft: 'auto', marginRight: '0', position: 'relative' }}>
                     <button
                       type="button"
-                      className="icon-btn login-btn"
+                      className="icon-btn login-btn login-btn-with-text"
                       title={t('nav.login')}
                       aria-label={t('nav.login')}
-                      onClick={() => { closeMenu(); navigate('/login-register'); }}
+                      aria-expanded={isLoginDropdownOpen}
+                      onClick={handleLoginClick}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-in">
-                        <path d="m10 17 5-5-5-5" />
-                        <path d="M15 12H3" />
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                      </svg>
+                      <span className="login-text">{t('nav.login', 'Login')}</span>
                     </button>
+                    {isLoginDropdownOpen && (
+                      <div className="login-dropdown" style={{ 
+                        position: 'absolute',
+                        top: '110%',
+                        right: 0,
+                        left: 'auto',
+                        zIndex: 100000,
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        padding: 8,
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                        minWidth: 200
+                      }}>
+                        <button
+                          type="button"
+                          onClick={handleLoginAsClient}
+                          className="login-dropdown-option"
+                        >
+                          <span>Login as Client</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleLoginForJob}
+                          className="login-dropdown-option"
+                        >
+                          <span>Login for Job</span>
+                        </button>
+                      </div>
+                    )}
                   </li>
                 )}
                 {isLoggedIn && (
@@ -411,7 +483,6 @@ export default function Navbar1() {
                 <li><Link to="/" onClick={closeMenu}>{t('nav.home')}</Link></li>
                 <li><Link to="/tous-les-services" onClick={closeMenu}>{t('nav.all_services')}</Link></li>
                 <li><Link to="/shop" onClick={closeMenu}>{t('nav.shop')}</Link></li>
-                <li><Link to="/employees/register" onClick={closeMenu}>{t('nav.employees')}</Link></li>
                 <li><Link to="/support" onClick={closeMenu}>Support</Link></li>
                 {isLoggedIn && (
                   <li><Link to="/profile" onClick={closeMenu}>{t('nav.profile')}</Link></li>
@@ -425,15 +496,23 @@ export default function Navbar1() {
                 title={t('nav.languages', 'Languages')}
                 aria-label={t('nav.languages', 'Languages')}
                 aria-expanded={isLangOpen}
-                onClick={() => setIsLangOpen(v => !v)}
+                onClick={handleLanguageClick}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-languages">
-                  <path d="m5 8 6 6" />
-                  <path d="m4 14 6-6 2-3" />
-                  <path d="M2 5h12" />
-                  <path d="M7 2h1" />
-                  <path d="m22 22-5-10-5 10" />
-                  <path d="M14 18h6" />
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="desktop-lang-globe-icon"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M2 12h20" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                 </svg>
               </button>
               {isLangOpen && (
@@ -477,20 +556,52 @@ export default function Navbar1() {
             </li>
             {/* Login/Logout buttons - always on the right side (left in RTL) */}
             {!isLoggedIn && (
-              <li style={{ marginLeft: isRTL ? '0' : 'auto', marginRight: isRTL ? '8px' : '0' }}>
+              <li style={{ marginLeft: isRTL ? '0' : 'auto', marginRight: isRTL ? '8px' : '0', position: 'relative' }}>
                 <button
                   type="button"
-                  className="icon-btn login-btn"
+                  className="icon-btn login-btn login-btn-with-text"
                   title={t('nav.login')}
                   aria-label={t('nav.login')}
-                  onClick={() => { closeMenu(); navigate('/login-register'); }}
+                  aria-expanded={isLoginDropdownOpen}
+                  onClick={handleLoginClick}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-in">
                     <path d="m10 17 5-5-5-5" />
                     <path d="M15 12H3" />
                     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
                   </svg>
+                  <span className="login-text">{t('nav.login', 'Login')}</span>
                 </button>
+                {isLoginDropdownOpen && (
+                  <div className="login-dropdown" style={{ 
+                    position: 'absolute',
+                    top: '110%',
+                    right: isRTL ? 'auto' : 0,
+                    left: isRTL ? 0 : 'auto',
+                    zIndex: 100000,
+                    background: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: 12,
+                    padding: 8,
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                    minWidth: 200
+                  }}>
+                    <button
+                      type="button"
+                      onClick={handleLoginAsClient}
+                      className="login-dropdown-option"
+                    >
+                      <span>Login as Client</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleLoginForJob}
+                      className="login-dropdown-option"
+                    >
+                      <span>Login for Job</span>
+                    </button>
+                  </div>
+                )}
               </li>
             )}
             {isLoggedIn && (
@@ -540,7 +651,6 @@ export default function Navbar1() {
             <li><Link to="/" onClick={closeMenu}>{t('nav.home')}</Link></li>
             <li><Link to="/tous-les-services" onClick={closeMenu}>{t('nav.all_services')}</Link></li>
             <li><Link to="/shop" onClick={closeMenu}>{t('nav.shop')}</Link></li>
-            <li><Link to="/employees/register" onClick={closeMenu}>{t('nav.employees')}</Link></li>
             <li><Link to="/contact" onClick={closeMenu}>{t('nav.contact')}</Link></li>
             <li><Link to="/support" onClick={closeMenu}>{isRTL ? 'الدعم' : 'Support'}</Link></li>
             <li><Link to="/gallery" onClick={closeMenu}>{t('nav.gallery')}</Link></li>
@@ -549,20 +659,53 @@ export default function Navbar1() {
               <li><Link to="/profile" onClick={closeMenu}>{t('nav.profile')}</Link></li>
             )}
             {!isLoggedIn && (
-              <li>
+              <li style={{ position: 'relative' }}>
                 <button
                   type="button"
-                  className="icon-btn login-btn"
+                  className="icon-btn login-btn login-btn-with-text"
                   title={t('nav.login')}
                   aria-label={t('nav.login')}
-                  onClick={() => { closeMenu(); navigate('/login-register'); }}
+                  aria-expanded={isLoginDropdownOpen}
+                  onClick={handleLoginClick}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-in">
                     <path d="m10 17 5-5-5-5" />
                     <path d="M15 12H3" />
                     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
                   </svg>
+                  <span className="login-text">{t('nav.login', 'Login')}</span>
                 </button>
+                {isLoginDropdownOpen && (
+                  <div className="login-dropdown" style={{ 
+                    position: 'absolute',
+                    top: '110%',
+                    right: isRTL ? 'auto' : 0,
+                    left: isRTL ? 0 : 'auto',
+                    zIndex: 100000,
+                    background: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: 12,
+                    padding: 8,
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                    minWidth: 200,
+                    width: '100%'
+                  }}>
+                    <button
+                      type="button"
+                      onClick={handleLoginAsClient}
+                      className="login-dropdown-option"
+                    >
+                      <span>Login as Client</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleLoginForJob}
+                      className="login-dropdown-option"
+                    >
+                      <span>Login for Job</span>
+                    </button>
+                  </div>
+                )}
               </li>
             )}
             {isLoggedIn && (

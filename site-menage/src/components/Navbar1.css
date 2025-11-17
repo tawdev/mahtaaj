@@ -354,8 +354,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: bold;
+  font-size: 17px;
   position: relative;
   z-index: 1;
 }
@@ -806,8 +806,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: bold;
+  font-size: 18px;
   margin: 4px 0;
 }
 
@@ -816,7 +816,7 @@
   color: #1e293b;
   transform: translateX(4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-weight: 700;
+  font-weight: bold;
 }
 
 .navbar1__drawer-links a:active {
@@ -957,7 +957,8 @@
   
   .navbar1__drawer-links a {
     padding: 14px 18px;
-    font-size: 15px;
+    font-size: 17px;
+    font-weight: bold;
   }
   
   .navbar1__drawer-links .icon {
@@ -1057,6 +1058,17 @@
     flex: 1 !important;
     order: 1;
   }
+  
+  /* Menu items font size for tablet */
+  .navbar1__links a {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .navbar1__drawer-links a {
+    font-size: 17px;
+    font-weight: bold;
+  }
 }
 
 
@@ -1108,18 +1120,71 @@
 
 /* Login button style */
 .login-btn {
-  border: 1px solid rgba(37, 99, 235, 0.35);
+  border: 1px solid rgba(37, 99, 235, 0.35) !important;
   color: #2563eb;
   background: rgba(239, 246, 255, 0.9);
   font-weight: 600;
+  border-radius: 8px;
 }
 
 .login-btn:hover {
   background: linear-gradient(135deg, #eff6ff, #dbeafe);
   color: #1d4ed8;
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+  border-color: rgba(37, 99, 235, 0.5) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   transform: translateY(-1px);
   font-weight: 700;
+}
+
+.login-btn:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.3);
+  outline-offset: 2px;
+  border-color: rgba(37, 99, 235, 0.5) !important;
+}
+
+/* Login button with text - Desktop - Content-fit border */
+.login-btn-with-text {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px !important;
+  white-space: nowrap;
+  border: 1px solid rgba(37, 99, 235, 0.35) !important;
+  border-radius: 8px;
+  min-width: auto !important;
+  min-height: auto !important;
+  width: fit-content !important;
+  height: auto !important;
+  box-sizing: border-box;
+}
+
+.login-btn-with-text .login-text {
+  font-size: 17px;
+  font-weight: bold;
+  color: inherit;
+  line-height: 1.2;
+  transition: color 0.3s ease;
+  margin: 0;
+  padding: 0;
+}
+
+/* RTL Support for login button with text */
+.navbar1.rtl .login-btn-with-text,
+[dir="rtl"] .login-btn-with-text {
+  flex-direction: row;
+}
+
+/* Mobile responsive for login button with text */
+@media (max-width: 768px) {
+  .login-btn-with-text {
+    padding: 5px 8px !important;
+    gap: 4px;
+  }
+  
+  .login-btn-with-text .login-text {
+    font-size: 15px;
+  }
 }
 
 /* تنسيقات خاصة لأزرار تسجيل الدخول والخروج في القائمة الجانبية */
@@ -1247,6 +1312,12 @@
     gap: 20px !important; /* Espacement plus large sur grand écran */
   }
   
+  /* Menu items font size for desktop */
+  .navbar1__links a {
+    font-size: 17px;
+    font-weight: bold;
+  }
+  
   /* Mode arabe sur grand écran */
   .navbar1.rtl .navbar1__links,
   .navbar1__links.rtl {
@@ -1372,12 +1443,72 @@ body > .App > .navbar1 {
   transform: translateY(-50%) scale(0.98);
 }
 
-/* Globe Icon */
+/* Globe Icon - Mobile */
 .mobile-lang-globe-icon {
   color: rgb(56, 9, 223);
   flex-shrink: 0;
   width: 16px;
   height: 16px;
+}
+
+/* Globe Icon - Desktop (unified with mobile) */
+.desktop-lang-globe-icon {
+  color: rgb(56, 9, 223);
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: block;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+/* Language button hover effect - Desktop */
+.lang-btn:hover .desktop-lang-globe-icon {
+  color: rgb(37, 5, 180);
+  transform: scale(1.1);
+}
+
+.lang-btn:active .desktop-lang-globe-icon {
+  transform: scale(0.95);
+}
+
+/* Language button style - Desktop */
+.navbar1__links .lang-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  min-width: 44px;
+  min-height: 44px;
+  background: rgba(239, 246, 255, 0.9);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  color: rgb(56, 9, 223);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.navbar1__links .lang-btn:hover {
+  background: rgba(239, 246, 255, 1);
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  transform: translateY(-1px);
+}
+
+.navbar1__links .lang-btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+}
+
+.navbar1__links .lang-btn:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.3);
+  outline-offset: 2px;
+}
+
+/* RTL Support for desktop language button */
+.navbar1.rtl .navbar1__links .lang-btn,
+[dir="rtl"] .navbar1__links .lang-btn {
+  /* Same styles, RTL is handled by flex direction */
 }
 
 /* Language Code */
@@ -1535,6 +1666,86 @@ body > .App > .navbar1 {
 @media (min-width: 769px) {
   .navbar1__mobile-lang-btn {
     display: none !important;
+  }
+}
+
+/* Login Dropdown Styles */
+.login-dropdown {
+  animation: fadeInDown 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.login-dropdown-option {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  color: #0f172a;
+  width: 100%;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 44px; /* Touch-friendly size for mobile */
+}
+
+.login-dropdown-option:hover {
+  background: #f8fafc;
+  color: #2563eb;
+  transform: translateX(2px);
+}
+
+.login-dropdown-option:active {
+  background: #eff6ff;
+  transform: translateX(1px) scale(0.98);
+}
+
+.login-dropdown-option span {
+  display: block;
+  width: 100%;
+}
+
+/* RTL Support for Login Dropdown */
+.navbar1.rtl .login-dropdown,
+[dir="rtl"] .login-dropdown {
+  right: auto;
+  left: 0;
+}
+
+.navbar1.rtl .login-dropdown-option,
+[dir="rtl"] .login-dropdown-option {
+  text-align: right;
+  justify-content: flex-end;
+}
+
+.navbar1.rtl .login-dropdown-option:hover,
+[dir="rtl"] .login-dropdown-option:hover {
+  transform: translateX(-2px);
+}
+
+.navbar1.rtl .login-dropdown-option:active,
+[dir="rtl"] .login-dropdown-option:active {
+  transform: translateX(-1px) scale(0.98);
+}
+
+/* Mobile responsive for login dropdown */
+@media (max-width: 768px) {
+  .login-dropdown {
+    min-width: 100%;
+    width: 100%;
+  }
+  
+  .login-dropdown-option {
+    padding: 14px 18px;
+    font-size: 15px;
+    min-height: 48px; /* Larger touch target on mobile */
   }
 }
 
