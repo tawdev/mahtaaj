@@ -475,6 +475,50 @@ CREATE TABLE IF NOT EXISTS hand_workers (
 );
 
 -- ============================================
+-- 24.1. جدول موظفي العمال اليدويين (Hand Worker Employees)
+-- ============================================
+CREATE TABLE IF NOT EXISTS hand_worker_employees (
+  id BIGSERIAL PRIMARY KEY,
+  first_name TEXT,
+  last_name TEXT,
+  email TEXT,
+  phone TEXT,
+  category_id BIGINT REFERENCES hand_worker_categories(id) ON DELETE SET NULL,
+  address TEXT,
+  city TEXT,
+  photo TEXT,
+  photo_url TEXT,
+  bio TEXT,
+  experience_years INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'inactive')),
+  is_available BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- 24.2. جدول موظفي العمال اليدويين المعتمدين (Hand Worker Employees Valid)
+-- ============================================
+CREATE TABLE IF NOT EXISTS hand_worker_employees_valid (
+  id BIGSERIAL PRIMARY KEY,
+  employee_id BIGINT REFERENCES hand_worker_employees(id) ON DELETE SET NULL,
+  first_name TEXT,
+  last_name TEXT,
+  email TEXT,
+  phone TEXT,
+  category_id BIGINT REFERENCES hand_worker_categories(id) ON DELETE SET NULL,
+  address TEXT,
+  city TEXT,
+  photo TEXT,
+  photo_url TEXT,
+  bio TEXT,
+  experience_years INTEGER DEFAULT 0,
+  is_available BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
 -- 25. جدول فئات البستنة (Jardinage Categories)
 -- ============================================
 CREATE TABLE IF NOT EXISTS jardinage_categories (
@@ -512,6 +556,56 @@ CREATE TABLE IF NOT EXISTS jardins (
 );
 
 -- ============================================
+-- 25.2. جدول موظفي البستنة (Jardinage Employees)
+-- ============================================
+CREATE TABLE IF NOT EXISTS jardinage_employees (
+  id BIGSERIAL PRIMARY KEY,
+  first_name TEXT,
+  last_name TEXT,
+  birth_date DATE,
+  age INTEGER,
+  email TEXT,
+  phone TEXT,
+  address TEXT,
+  location TEXT,
+  expertise TEXT,
+  auto_entrepreneur TEXT,
+  last_experience TEXT,
+  company_name TEXT,
+  photo TEXT,
+  photo_url TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'inactive')),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- 25.3. جدول موظفي البستنة المعتمدين (Jardinage Employees Valid)
+-- ============================================
+CREATE TABLE IF NOT EXISTS jardinage_employees_valid (
+  id BIGSERIAL PRIMARY KEY,
+  employee_id BIGINT REFERENCES jardinage_employees(id) ON DELETE SET NULL,
+  first_name TEXT,
+  last_name TEXT,
+  birth_date DATE,
+  age INTEGER,
+  email TEXT,
+  phone TEXT,
+  address TEXT,
+  location TEXT,
+  expertise TEXT,
+  auto_entrepreneur TEXT,
+  last_experience TEXT,
+  company_name TEXT,
+  photo TEXT,
+  photo_url TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
 -- 26. جدول العروض الترويجية (Promotions)
 -- ============================================
 CREATE TABLE IF NOT EXISTS promotions (
@@ -526,7 +620,7 @@ CREATE TABLE IF NOT EXISTS promotions (
 );
 
 -- ============================================
--- 27. جدول حراس الأمن (Securities)
+-- 27. جدول حراس الأمن (Securities) - Legacy table
 -- ============================================
 CREATE TABLE IF NOT EXISTS securities (
   id BIGSERIAL PRIMARY KEY,
@@ -539,6 +633,60 @@ CREATE TABLE IF NOT EXISTS securities (
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'inactive')),
   is_active BOOLEAN DEFAULT true,
   metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- 27.1. جدول موظفي الأمن (Security Employees)
+-- ============================================
+CREATE TABLE IF NOT EXISTS security_employees (
+  id BIGSERIAL PRIMARY KEY,
+  first_name TEXT,
+  last_name TEXT,
+  birth_date DATE,
+  age INTEGER,
+  email TEXT,
+  phone TEXT,
+  address TEXT,
+  location TEXT,
+  expertise TEXT,
+  auto_entrepreneur TEXT,
+  last_experience TEXT,
+  company_name TEXT,
+  preferred_work_time TEXT,
+  photo TEXT,
+  photo_url TEXT,
+  availability JSONB DEFAULT '{}'::jsonb,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'inactive')),
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================
+-- 27.2. جدول موظفي الأمن المعتمدين (Security Employees Valid)
+-- ============================================
+CREATE TABLE IF NOT EXISTS security_employees_valid (
+  id BIGSERIAL PRIMARY KEY,
+  employee_id BIGINT REFERENCES security_employees(id) ON DELETE SET NULL,
+  first_name TEXT,
+  last_name TEXT,
+  birth_date DATE,
+  age INTEGER,
+  email TEXT,
+  phone TEXT,
+  address TEXT,
+  location TEXT,
+  expertise TEXT,
+  auto_entrepreneur TEXT,
+  last_experience TEXT,
+  company_name TEXT,
+  preferred_work_time TEXT,
+  photo TEXT,
+  photo_url TEXT,
+  availability JSONB DEFAULT '{}'::jsonb,
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

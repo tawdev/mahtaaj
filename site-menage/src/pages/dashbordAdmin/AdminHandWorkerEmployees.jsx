@@ -14,11 +14,11 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 			setLoading(true);
 			setError('');
 			
-			console.log('[AdminHandWorkerEmployees] Loading registrations from Supabase');
+			console.log('[AdminHandWorkerEmployees] Loading registrations from hand_worker_employees table');
 			
-			// Load hand_workers with category join
+			// Load hand_worker_employees with category join
 			const { data, error } = await supabase
-				.from('hand_workers')
+				.from('hand_worker_employees')
 				.select(`
 					*,
 					hand_worker_categories:category_id (
@@ -40,6 +40,8 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 			// Transform data to match expected format
 			const transformedData = (data || []).map(item => ({
 				id: item.id,
+				first_name: item.first_name || '',
+				last_name: item.last_name || '',
 				full_name: `${item.first_name || ''} ${item.last_name || ''}`.trim() || '-',
 				email: item.email || '-',
 				phone: item.phone || '-',
@@ -50,8 +52,13 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 					       item.hand_worker_categories.name_en || '-'
 				} : null,
 				city: item.city || '-',
+				address: item.address || '-',
+				bio: item.bio || '',
+				photo: item.photo || item.photo_url || '',
 				experience_years: item.experience_years || 0,
-				status: item.status === 'available' ? 'approved' : (item.status || 'pending')
+				status: item.status === 'active' ? 'approved' : (item.status === 'inactive' ? 'rejected' : (item.status || 'pending')),
+				is_available: item.is_available || false,
+				...item
 			}));
 			
 			console.log('[AdminHandWorkerEmployees] Loaded registrations:', transformedData.length);
@@ -78,19 +85,62 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 		try {
 			console.log('[AdminHandWorkerEmployees] Approving registration:', id);
 			
-			const { error } = await supabase
-				.from('hand_workers')
-				.update({ status: 'approved' })
+			// First, get the employee data
+			const { data: employee, error: fetchError } = await supabase
+				.from('hand_worker_employees')
+				.select('*')
+				.eq('id', id)
+				.single();
+			
+			if (fetchError || !employee) {
+				console.error('[AdminHandWorkerEmployees] Error fetching employee:', fetchError);
+				alert('Erreur lors de la récupération des données: ' + (fetchError?.message || 'Employé non trouvé'));
+				return;
+			}
+			
+			// Insert into hand_worker_employees_valid table
+			const { error: insertError } = await supabase
+				.from('hand_worker_employees_valid')
+				.insert([{
+					employee_id: employee.id,
+					first_name: employee.first_name,
+					last_name: employee.last_name,
+					email: employee.email,
+					phone: employee.phone,
+					category_id: employee.category_id,
+					address: employee.address,
+					city: employee.city,
+					photo: employee.photo,
+					photo_url: employee.photo_url,
+					bio: employee.bio,
+					experience_years: employee.experience_years,
+					is_available: true
+				}]);
+			
+			if (insertError) {
+				console.error('[AdminHandWorkerEmployees] Error inserting into valid table:', insertError);
+				alert('Erreur lors de l\'insertion dans la table validée: ' + insertError.message);
+				return;
+			}
+			
+			// Update the original employee record
+			const { error: updateError } = await supabase
+				.from('hand_worker_employees')
+				.update({ 
+					status: 'active',
+					is_available: true,
+					updated_at: new Date().toISOString()
+				})
 				.eq('id', id);
 			
-			if (error) {
-				console.error('[AdminHandWorkerEmployees] Error approving registration:', error);
-				alert('Erreur lors de l\'approbation: ' + error.message);
+			if (updateError) {
+				console.error('[AdminHandWorkerEmployees] Error updating employee:', updateError);
+				alert('Erreur lors de la mise à jour: ' + updateError.message);
 				return;
 			}
 			
 			// Update local state
-			setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'approved' } : i));
+			setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'approved', is_available: true } : i));
 			alert('Inscription approuvée ✅');
 		} catch (e) {
 			console.error('[AdminHandWorkerEmployees] Exception approving registration:', e);
@@ -104,8 +154,12 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 			console.log('[AdminHandWorkerEmployees] Rejecting registration:', id);
 			
 			const { error } = await supabase
-				.from('hand_workers')
-				.update({ status: 'rejected' })
+				.from('hand_worker_employees')
+				.update({ 
+					status: 'inactive',
+					is_available: false,
+					updated_at: new Date().toISOString()
+				})
 				.eq('id', id);
 			
 			if (error) {
@@ -115,7 +169,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 			}
 			
 			// Update local state
-			setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'rejected' } : i));
+			setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'rejected', is_available: false } : i));
 			alert('Inscription rejetée');
 		} catch (e) {
 			console.error('[AdminHandWorkerEmployees] Exception rejecting registration:', e);
@@ -129,7 +183,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 			console.log('[AdminHandWorkerEmployees] Deleting registration:', id);
 			
 			const { error } = await supabase
-				.from('hand_workers')
+				.from('hand_worker_employees')
 				.delete()
 				.eq('id', id);
 			

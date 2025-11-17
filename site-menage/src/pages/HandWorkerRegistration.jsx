@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { translateHandWorkerCategories } from '../services/handWorkerTranslation';
+import { supabase } from '../lib/supabase';
 import './HandWorkerRegistration.css';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 export default function HandWorkerRegistration() {
   const { t, i18n } = useTranslation();
@@ -46,19 +45,35 @@ export default function HandWorkerRegistration() {
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/hand-worker-categories`);
-      const data = await response.json();
+      setError('');
       
-      if (data.success) {
+      console.log('[HandWorkerRegistration] Loading categories from Supabase');
+      
+      const { data, error } = await supabase
+        .from('hand_worker_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('order', { ascending: true });
+      
+      if (error) {
+        console.error('[HandWorkerRegistration] Error loading categories:', error);
+        setError(t('hand_worker_registration.loading_error') || 'Erreur lors du chargement des catégories. Veuillez réessayer.');
+        return;
+      }
+      
+      console.log('[HandWorkerRegistration] Loaded categories:', data?.length || 0);
+      
+      if (data && Array.isArray(data) && data.length > 0) {
         const currentLanguage = i18n.language || 'fr';
-        const translatedCategories = translateHandWorkerCategories(data.data, currentLanguage);
+        const translatedCategories = translateHandWorkerCategories(data, currentLanguage);
         setCategories(translatedCategories);
       } else {
-        setError(t('hand_worker_registration.loading_error'));
+        setCategories([]);
+        console.warn('[HandWorkerRegistration] No categories found');
       }
     } catch (e) {
-      console.error('Error loading categories:', e);
-      setError(t('hand_worker_registration.loading_error'));
+      console.error('[HandWorkerRegistration] Exception loading categories:', e);
+      setError(t('hand_worker_registration.loading_error') || 'Erreur lors du chargement des catégories. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
@@ -203,67 +218,133 @@ export default function HandWorkerRegistration() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+    const handleSubmit = async (e) => {
+      e.preventDefault();
 
-    setSubmitting(true);
-    setError('');
+      // Prevent double submission
+      if (submitting) {
+        console.warn('[HandWorkerRegistration] Submission already in progress, ignoring duplicate submit');
+        return;
+      }
+
+      if (!validateForm()) {
+        return;
+      }
+
+      setSubmitting(true);
+      setError('');
 
     try {
-      const formDataToSend = new FormData();
+      console.log('[HandWorkerRegistration] Submitting registration to Supabase');
       
-      // Add all form fields
-      Object.keys(formData).forEach(key => {
-        if (key === 'work_samples') {
-          formData.work_samples.forEach((file, index) => {
-            formDataToSend.append(`work_samples[${index}]`, file);
-          });
-        } else if (key === 'photo' && formData[key]) {
-          formDataToSend.append('photo', formData[key]);
-        } else if (key === 'experience_years') {
-          // Always include experience_years even if 0
-          formDataToSend.append(key, formData[key]);
-        } else if (formData[key] !== null && formData[key] !== '') {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
+      // Upload photo to Supabase Storage if provided
+      let photoUrl = null;
+      if (formData.photo) {
+        try {
+          const photoFile = formData.photo;
+          const fileName = `hand_worker_${Date.now()}_${Math.random().toString(36).substring(7)}.${photoFile.name.split('.').pop()}`;
+          
+          console.log('[HandWorkerRegistration] Uploading photo:', fileName);
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('employees')
+            .upload(fileName, photoFile, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
-      const response = await fetch(`${API_BASE_URL}/api/hand-worker-registrations`, {
-        method: 'POST',
-        body: formDataToSend,
-      });
+          if (uploadError) {
+            console.error('[HandWorkerRegistration] Photo upload error:', uploadError);
+            throw new Error('Erreur lors du téléchargement de la photo: ' + uploadError.message);
+          }
 
-      const data = await response.json();
-
-      if (data.success) {
-        setSuccess(true);
-        // Reset form
-        setFormData({
-          full_name: '',
-          email: '',
-          phone: '',
-          category_id: '',
-          address: '',
-          city: '',
-          photo: null,
-          work_samples: [],
-          bio: '',
-          experience_years: 0,
-        });
-      } else {
-        if (data.errors) {
-          setFormErrors(data.errors);
-        } else {
-          setError(data.message || t('hand_worker_registration.submission_error'));
+          const { data: { publicUrl } } = supabase.storage
+            .from('employees')
+            .getPublicUrl(fileName);
+          
+          photoUrl = publicUrl;
+          console.log('[HandWorkerRegistration] Photo uploaded successfully:', photoUrl);
+        } catch (uploadErr) {
+          console.error('[HandWorkerRegistration] Error uploading photo:', uploadErr);
+          setError('Erreur lors du téléchargement de la photo: ' + uploadErr.message);
+          setSubmitting(false);
+          return;
         }
       }
+
+      // Prepare data for Supabase hand_worker_employees table
+      const [firstName, ...lastNameParts] = (formData.full_name || '').split(' ');
+      const lastName = lastNameParts.join(' ') || '';
+      
+      // Build worker data object for hand_worker_employees table
+      const workerData = {
+        first_name: (firstName || formData.full_name || '').trim(),
+        last_name: (lastName || '').trim(),
+        email: (formData.email || '').trim() || null,
+        phone: (formData.phone || '').trim() || null,
+        category_id: formData.category_id ? parseInt(formData.category_id, 10) : null,
+        address: (formData.address || '').trim() || null,
+        city: (formData.city || '').trim() || null,
+        photo: photoUrl || null,
+        photo_url: photoUrl || null,
+        bio: (formData.bio || '').trim() || null,
+        experience_years: parseInt(formData.experience_years, 10) || 0,
+        status: 'pending', // New registrations start as pending
+        is_available: false // Not available until approved
+      };
+
+      // Remove null/empty string values for optional fields to avoid issues
+      Object.keys(workerData).forEach(key => {
+        if (workerData[key] === '' || workerData[key] === undefined) {
+          if (key !== 'experience_years' && key !== 'status' && key !== 'is_available') {
+            workerData[key] = null;
+          }
+        }
+      });
+
+      console.log('[HandWorkerRegistration] Inserting worker data to hand_worker_employees:', JSON.stringify(workerData, null, 2));
+
+      const { data, error } = await supabase
+        .from('hand_worker_employees')
+        .insert([workerData])
+        .select();
+
+      if (error) {
+        console.error('[HandWorkerRegistration] Error inserting worker:', error);
+        
+        // Handle specific error cases
+        if (error.code === '23505' || error.message?.includes('duplicate key')) {
+          throw new Error('Un enregistrement avec ces informations existe déjà. Veuillez vérifier vos données.');
+        } else if (error.code === '23503' || error.message?.includes('foreign key')) {
+          throw new Error('La catégorie sélectionnée n\'est pas valide.');
+        } else {
+          throw new Error(error.message || 'Erreur lors de l\'enregistrement. Veuillez réessayer.');
+        }
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error('Aucune donnée retournée après l\'enregistrement');
+      }
+
+      console.log('[HandWorkerRegistration] Worker registered successfully:', data);
+      setSuccess(true);
+      
+      // Reset form
+      setFormData({
+        full_name: '',
+        email: '',
+        phone: '',
+        category_id: '',
+        address: '',
+        city: '',
+        photo: null,
+        work_samples: [],
+        bio: '',
+        experience_years: 0,
+      });
     } catch (e) {
-      console.error('Error submitting registration:', e);
-      setError(t('hand_worker_registration.submission_error'));
+      console.error('[HandWorkerRegistration] Error submitting registration:', e);
+      setError(e.message || t('hand_worker_registration.submission_error') || 'Erreur lors de l\'enregistrement');
     } finally {
       setSubmitting(false);
     }

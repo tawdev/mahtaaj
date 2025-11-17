@@ -1,18 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiClock, FiCheck } from 'react-icons/fi';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import './jardinageRegister.css';
 
 export default function JardinageRegister() {
   const { t, i18n } = useTranslation();
-  
-  // Define day keys for internal use
-  const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  
-  // Get translated day names
-  const DAYS = DAY_KEYS.map(key => t(`employee_register.days.${key}`));
   
   const [form, setForm] = useState({
     first_name: '',
@@ -28,17 +20,13 @@ export default function JardinageRegister() {
     auto_entrepreneur: '',
     last_experience: '',
     company_name: '',
-    preferred_work_time: ''
   });
   
-  const [days, setDays] = useState({}); // { monday: { checked:true, start:'', end:'' }, ... }
-  const [lastSelectedHours, setLastSelectedHours] = useState(null); // { start:'09:00', end:'18:00' }
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
-  const [timeErrors, setTimeErrors] = useState({});
 
   // Calculate age from birth date
   const calculateAge = (birthDate) => {
@@ -71,42 +59,6 @@ export default function JardinageRegister() {
     t('employees.jardinage.expertise.maintenance','صيانة الحدائق'),
   ];
 
-  const selectedDaysPayload = useMemo(() => {
-    // Build object: { monday: {start, end}, wednesday: {start, end} }
-    const out = {};
-    for (const key of DAY_KEYS) {
-      const d = days[key];
-      if (d?.checked && d.start && d.end) {
-        out[key] = { start: d.start, end: d.end };
-      }
-    }
-    // Convert to translated day names for API
-    const translatedDays = {};
-    Object.keys(out).forEach(key => {
-      const translatedDay = DAYS[DAY_KEYS.indexOf(key)];
-      translatedDays[translatedDay] = out[key];
-    });
-    return translatedDays;
-  }, [days, DAYS]);
-
-  const handleDayToggle = (dayIndex) => {
-    const key = DAY_KEYS[dayIndex];
-    setDays(prev => {
-      const currentlyChecked = !!prev[key]?.checked;
-      if (currentlyChecked) {
-        // Uncheck -> remove values
-        const next = { ...prev };
-        next[key] = { checked: false };
-        return next;
-      }
-      // Check -> prefill with lastSelectedHours if exists
-      const prefill = lastSelectedHours ? { start: lastSelectedHours.start, end: lastSelectedHours.end } : { start: '', end: '' };
-      return {
-        ...prev,
-        [key]: { checked: true, ...prefill }
-      };
-    });
-  };
 
   const handleUseLocation = async () => {
     try {
@@ -134,47 +86,9 @@ export default function JardinageRegister() {
     }
   };
 
-  const validateTime = (day, startTime, endTime) => {
-    if (startTime && endTime) {
-      const start = new Date(`2000-01-01T${startTime}`);
-      const end = new Date(`2000-01-01T${endTime}`);
-      
-      if (end <= start) {
-        setTimeErrors(prev => ({ ...prev, [day]: t('employee_register.validation.end_time_after_start') }));
-        return false;
-      } else {
-        setTimeErrors(prev => {
-          const newErrors = { ...prev };
-          delete newErrors[day];
-          return newErrors;
-        });
-        return true;
-      }
-    }
-    return true;
-  };
-
-  const handleTimeChange = (dayIndex, field, value) => {
-    const key = DAY_KEYS[dayIndex];
-    setDays(prev => {
-      const next = {
-        ...prev,
-        [key]: { ...(prev[key] || { checked: true }), [field]: value }
-      };
-      const cur = next[key] || {};
-      if (cur.start && cur.end) {
-        setLastSelectedHours({ start: cur.start, end: cur.end });
-        // Validate time
-        validateTime(key, cur.start, cur.end);
-      }
-      return next;
-    });
-  };
 
   const validate = () => {
     if (!form.first_name || !form.last_name || !form.birth_date || !form.email || !form.address) return t('employee_register.validation.all_fields_required');
-    // Only require days if preferred_work_time is not selected
-    if (!form.preferred_work_time && Object.keys(selectedDaysPayload).length === 0) return t('employee_register.validation.select_at_least_one_day');
     return null;
   };
 
@@ -217,40 +131,32 @@ export default function JardinageRegister() {
         console.log('[JardinageRegister] Photo uploaded successfully:', photoUrl);
       }
       
-      // Prepare data for Supabase
-      // Note: employees table has full_name, not first_name/last_name
-      // Store all additional data in metadata JSONB field
+      // Prepare data for Supabase jardinage_employees table
       const employeeData = {
-        full_name: `${form.first_name} ${form.last_name}`.trim(),
-        email: form.email,
-        phone: form.phone || null,
-        address: form.address,
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
+        birth_date: form.birth_date || null,
+        age: form.age ? parseInt(form.age, 10) : null,
+        email: form.email.trim() || null,
+        phone: form.phone?.trim() || null,
+        address: form.address.trim() || null,
+        location: form.location?.trim() || null,
+        expertise: form.expertise || null,
+        auto_entrepreneur: form.auto_entrepreneur || null,
+        last_experience: form.last_experience || null,
+        company_name: form.company_name || null,
         photo: photoUrl || null,
         photo_url: photoUrl || null,
         status: 'pending',
-        // Store all jardinage-specific data in metadata JSONB field
-        metadata: {
-          type: 'jardinage',
-          first_name: form.first_name,
-          last_name: form.last_name,
-          birth_date: form.birth_date,
-          age: form.age ? Number(form.age) : null,
-          location: form.location || null,
-          expertise: form.expertise || null,
-          auto_entrepreneur: form.auto_entrepreneur || null,
-          last_experience: form.last_experience || null,
-          company_name: form.company_name || null,
-          preferred_work_time: form.preferred_work_time || null,
-          availability: Object.keys(selectedDaysPayload).length > 0 ? selectedDaysPayload : null
-        }
+        is_active: true
       };
       
-      console.log('[JardinageRegister] Submitting employee data:', employeeData);
+      console.log('[JardinageRegister] Submitting employee data to jardinage_employees:', employeeData);
       
-      // Insert into Supabase employees table
+      // Insert into Supabase jardinage_employees table
       const { data: result, error: insertError } = await supabase
-        .from('employees')
-        .insert(employeeData)
+        .from('jardinage_employees')
+        .insert([employeeData])
         .select();
       
       if (insertError) {
@@ -260,8 +166,7 @@ export default function JardinageRegister() {
       
       setMessage(t('employees.register.submit_success','تم إرسال النموذج بنجاح'));
       setShowSuccess(true);
-      setForm({ first_name:'', last_name:'', birth_date:'', age:'', email:'', phone:'', address:'', location:'', expertise:'', photo: null, auto_entrepreneur: '', last_experience: '', company_name: '', preferred_work_time: '' });
-      setDays({});
+      setForm({ first_name:'', last_name:'', birth_date:'', age:'', email:'', phone:'', address:'', location:'', expertise:'', photo: null, auto_entrepreneur: '', last_experience: '', company_name: '' });
       // Auto-hide after 4s
       setTimeout(() => setShowSuccess(false), 4000);
     } catch (e2) {
@@ -482,135 +387,6 @@ export default function JardinageRegister() {
               <input type="text" value={form.company_name} onChange={(e)=>setForm({...form, company_name:e.target.value})} placeholder={t('employees.register.company_name_ph','أدخل اسم الشركة')} />
             </div>
           </div>
-
-          <div className="form-group full">
-            <label>{t('employee_register.form.preferred_work_time') || 'وقت العمل المفضل'}</label>
-            <div className="preferred-work-time-buttons">
-              <button
-                type="button"
-                className={`preferred-time-btn ${form.preferred_work_time === 'morning' ? 'active' : ''}`}
-                onClick={() => setForm(prev => ({ ...prev, preferred_work_time: prev.preferred_work_time === 'morning' ? '' : 'morning' }))}
-              >
-                <span className="btn-icon" aria-hidden>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M12 7V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  </svg>
-                </span>
-                {t('employee_register.form.work_morning') || 'أعمل كل يوم في الصباح'}
-              </button>
-              <button
-                type="button"
-                className={`preferred-time-btn ${form.preferred_work_time === 'night' ? 'active' : ''}`}
-                onClick={() => setForm(prev => ({ ...prev, preferred_work_time: prev.preferred_work_time === 'night' ? '' : 'night' }))}
-              >
-                <span className="btn-icon" aria-hidden>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </span>
-                {t('employee_register.form.work_night') || 'أعمل كل يوم في الليل'}
-              </button>
-            </div>
-          </div>
-
-          <AnimatePresence>
-            {!form.preferred_work_time && (
-              <motion.div
-                className="form-group full"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <label>{t('employee_register.form.available_days')}</label>
-                <div className="days-grid-modern">
-                  {DAYS.map((day, index) => {
-                    const key = DAY_KEYS[index];
-                    const isActive = days[key]?.checked;
-                    const hasError = timeErrors[key];
-                    
-                    return (
-                      <motion.div
-                        key={key}
-                        className={`day-card ${isActive ? 'active' : ''} ${hasError ? 'error' : ''}`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="day-header">
-                          <label className="day-checkbox-modern">
-                            <input 
-                              type="checkbox" 
-                              checked={isActive} 
-                              onChange={() => handleDayToggle(index)} 
-                            />
-                            <span className="checkbox-custom">
-                              {isActive && <FiCheck className="check-icon" />}
-                            </span>
-                            <span className="day-name">{day}</span>
-                          </label>
-                        </div>
-                        
-                        <AnimatePresence>
-                          {isActive && (
-                            <motion.div
-                              className="time-fields-modern"
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            >
-                              <div className="time-inputs-row">
-                                <div className="time-field-modern">
-                                  <label className="time-label-modern">{t('employee_register.days.start_time')}</label>
-                                  <div className="time-input-wrapper">
-                                    <FiClock className="time-icon" />
-                                    <input 
-                                      type="time" 
-                                      value={days[key]?.start || ''} 
-                                      onChange={(e) => handleTimeChange(index, 'start', e.target.value)} 
-                                      placeholder={t('employee_register.days.start_placeholder')}
-                                      className="time-input"
-                                    />
-                                  </div>
-                                </div>
-                                
-                                <div className="time-field-modern">
-                                  <label className="time-label-modern">{t('employee_register.days.end_time')}</label>
-                                  <div className="time-input-wrapper">
-                                    <FiClock className="time-icon" />
-                                    <input 
-                                      type="time" 
-                                      value={days[key]?.end || ''} 
-                                      onChange={(e) => handleTimeChange(index, 'end', e.target.value)} 
-                                      placeholder={t('employee_register.days.end_placeholder')}
-                                      className="time-input"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {hasError && (
-                                <motion.div
-                                  className="time-error-message"
-                                  initial={{ opacity: 0, y: -10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: -10 }}
-                                >
-                                  {hasError}
-                                </motion.div>
-                              )}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <div className="actions">
             <button type="submit" className="submit-button" disabled={submitting}>

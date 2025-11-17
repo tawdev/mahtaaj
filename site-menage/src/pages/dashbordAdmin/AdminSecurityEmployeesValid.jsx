@@ -12,14 +12,13 @@ export default function AdminSecurityEmployeesValid({ token, onAuthError }) {
       setLoading(true);
       setError('');
       
-      console.log('[AdminSecurityEmployeesValid] Loading validated security employees from Supabase...');
+      console.log('[AdminSecurityEmployeesValid] Loading validated security employees from security_employees_valid table...');
       
-      // Load all employees first, then filter in JavaScript
-      // This is more reliable than using .eq() which might not work with NULL values
+      // Load validated employees from security_employees_valid table
       const { data, error } = await supabase
-        .from('employees')
+        .from('security_employees_valid')
         .select('*')
-        .order('updated_at', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (error) {
         console.error('[AdminSecurityEmployeesValid] Error loading employees:', error);
@@ -27,44 +26,31 @@ export default function AdminSecurityEmployeesValid({ token, onAuthError }) {
         return;
       }
       
-      console.log('[AdminSecurityEmployeesValid] Total employees loaded:', data?.length || 0);
-      
-      // Filter validated employees: status = 'active' AND is_active = true
-      const validatedData = Array.isArray(data) ? data.filter(emp => {
-        const isStatusActive = emp.status === 'active';
-        const isActive = emp.is_active === true;
-        const isValidated = isStatusActive && isActive;
-        
-        if (isValidated) {
-          console.log('[AdminSecurityEmployeesValid] Found validated employee:', {
-            id: emp.id,
-            name: emp.full_name,
-            status: emp.status,
-            is_active: emp.is_active
-          });
-        }
-        
-        return isValidated;
-      }) : [];
-      
-      console.log('[AdminSecurityEmployeesValid] Validated employees:', validatedData?.length || 0);
+      console.log('[AdminSecurityEmployeesValid] Loaded validated employees:', data?.length || 0);
       
       // Transform data to match expected format
-      const transformedData = Array.isArray(validatedData) ? validatedData.map(emp => {
-        const metadata = emp.metadata || {};
-        return {
-          id: emp.id,
-          first_name: metadata.first_name || emp.full_name?.split(' ')[0] || '',
-          last_name: metadata.last_name || emp.full_name?.split(' ').slice(1).join(' ') || '',
-          email: emp.email || '',
-          phone: emp.phone || '',
-          location: metadata.location || emp.address || '',
-          expertise: metadata.expertise || '-',
-          is_active: emp.is_active === true,
-          validated_at: emp.updated_at || emp.created_at, // Use updated_at as validation date
-          ...emp
-        };
-      }) : [];
+      const transformedData = Array.isArray(data) ? data.map(emp => ({
+        id: emp.id,
+        employee_id: emp.employee_id,
+        first_name: emp.first_name || '',
+        last_name: emp.last_name || '',
+        email: emp.email || '',
+        phone: emp.phone || '',
+        address: emp.address || '',
+        location: emp.location || '',
+        birth_date: emp.birth_date || '',
+        age: emp.age || null,
+        expertise: emp.expertise || '-',
+        auto_entrepreneur: emp.auto_entrepreneur || '',
+        last_experience: emp.last_experience || '',
+        company_name: emp.company_name || '',
+        preferred_work_time: emp.preferred_work_time || '',
+        photo: emp.photo || emp.photo_url || '',
+        availability: emp.availability || {},
+        is_active: emp.is_active === true,
+        validated_at: emp.created_at, // Use created_at as validation date
+        ...emp
+      })) : [];
       
       setItems(transformedData);
     } catch (e) {
@@ -81,28 +67,55 @@ export default function AdminSecurityEmployeesValid({ token, onAuthError }) {
     if (!window.confirm('Supprimer cette validation ? (L\'employé sera désactivé)')) return;
     
     try {
-      console.log('[AdminSecurityEmployeesValid] Deactivating employee:', id);
+      console.log('[AdminSecurityEmployeesValid] Removing validated employee:', id);
       
-      // Instead of deleting, we'll deactivate the employee
-      const { error } = await supabase
-        .from('employees')
-        .update({ 
-          status: 'inactive',
-          is_active: false
-        })
-        .eq('id', id);
+      // Get employee_id to update the original record
+      const { data: validEmployee, error: fetchError } = await supabase
+        .from('security_employees_valid')
+        .select('employee_id')
+        .eq('id', id)
+        .single();
       
-      if (error) {
-        console.error('[AdminSecurityEmployeesValid] Error deactivating employee:', error);
-        setError(`Erreur lors de la désactivation: ${error.message}`);
+      if (fetchError || !validEmployee) {
+        console.error('[AdminSecurityEmployeesValid] Error fetching employee:', fetchError);
+        setError(`Erreur lors de la récupération: ${fetchError?.message || 'Employé non trouvé'}`);
         return;
       }
       
-      console.log('[AdminSecurityEmployeesValid] Employee deactivated successfully');
-      // Remove from list (as it's no longer validated)
+      // Update the original employee record to inactive
+      if (validEmployee.employee_id) {
+        const { error: updateError } = await supabase
+          .from('security_employees')
+          .update({ 
+            status: 'inactive',
+            is_active: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', validEmployee.employee_id);
+        
+        if (updateError) {
+          console.error('[AdminSecurityEmployeesValid] Error updating employee:', updateError);
+          // Continue with deletion even if update fails
+        }
+      }
+      
+      // Delete from validated table
+      const { error: deleteError } = await supabase
+        .from('security_employees_valid')
+        .delete()
+        .eq('id', id);
+      
+      if (deleteError) {
+        console.error('[AdminSecurityEmployeesValid] Error deleting validated employee:', deleteError);
+        setError(`Erreur lors de la suppression: ${deleteError.message}`);
+        return;
+      }
+      
+      console.log('[AdminSecurityEmployeesValid] Validated employee removed successfully');
+      // Remove from list
       setItems(prev => prev.filter(i => i.id !== id));
     } catch (e) {
-      console.error('[AdminSecurityEmployeesValid] Exception during deactivation:', e);
+      console.error('[AdminSecurityEmployeesValid] Exception during removal:', e);
       setError(`Erreur: ${e.message}`);
     }
   };

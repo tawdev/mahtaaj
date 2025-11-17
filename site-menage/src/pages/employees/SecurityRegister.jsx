@@ -221,37 +221,35 @@ export default function SecurityRegister() {
         }
       }
       
-      // إعداد البيانات للحفظ في Supabase
+      // إعداد البيانات للحفظ في Supabase security_employees table
       const employeeData = {
-        full_name: `${form.first_name} ${form.last_name}`,
-        email: form.email,
-        phone: form.phone || null,
-        address: form.address,
-        photo: photoUrl,
-        photo_url: photoUrl,
+        first_name: form.first_name.trim(),
+        last_name: form.last_name.trim(),
+        birth_date: form.birth_date || null,
+        age: form.age ? parseInt(form.age, 10) : null,
+        email: form.email.trim() || null,
+        phone: form.phone?.trim() || null,
+        address: form.address.trim() || null,
+        location: form.location?.trim() || null,
+        expertise: form.expertise || null,
+        auto_entrepreneur: form.auto_entrepreneur || null,
+        last_experience: form.last_experience || null,
+        company_name: form.company_name || null,
+        preferred_work_time: form.preferred_work_time || null,
+        photo: photoUrl || null,
+        photo_url: photoUrl || null,
+        availability: selectedDaysPayload || {},
         status: 'pending',
-        // حفظ البيانات الإضافية في حقل JSON (يمكن إنشاء جدول منفصل لاحقاً)
-        metadata: {
-          first_name: form.first_name,
-          last_name: form.last_name,
-          birth_date: form.birth_date,
-          age: form.age ? Number(form.age) : null,
-          location: form.location || null,
-          expertise: form.expertise || null,
-          auto_entrepreneur: form.auto_entrepreneur || null,
-          last_experience: form.last_experience || null,
-          company_name: form.company_name || null,
-          preferred_work_time: form.preferred_work_time || null,
-          availability: selectedDaysPayload
-        }
+        is_active: true
       };
       
-      // حفظ البيانات في Supabase
+      console.log('[SecurityRegister] Submitting employee data to security_employees:', employeeData);
+      
+      // حفظ البيانات في Supabase security_employees table
       const { data, error } = await supabase
-        .from('employees')
+        .from('security_employees')
         .insert([employeeData])
-        .select()
-        .single();
+        .select();
       
       if (error) {
         console.error('Supabase error:', error);

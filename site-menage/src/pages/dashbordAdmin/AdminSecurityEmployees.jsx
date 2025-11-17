@@ -13,14 +13,11 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
       setLoading(true);
       setError('');
       
-      console.log('[AdminSecurityEmployees] Loading security employees from Supabase...');
+      console.log('[AdminSecurityEmployees] Loading security employees from security_employees table...');
       
-      // Load employees from Supabase
-      // Note: Security employees are stored in the employees table
-      // Load only non-validated employees (status != 'active' OR is_active != true)
-      // These are the employees waiting for validation
+      // Load employees from security_employees table
       const { data, error } = await supabase
-        .from('employees')
+        .from('security_employees')
         .select('*')
         .order('created_at', { ascending: false });
       
@@ -30,29 +27,30 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
         return;
       }
       
-      // Filter in JavaScript to get only non-validated employees
-      // (status != 'active' OR is_active != true)
-      const nonValidatedData = Array.isArray(data) ? data.filter(emp => {
-        return emp.status !== 'active' || emp.is_active !== true;
-      }) : [];
-      
-      console.log('[AdminSecurityEmployees] Loaded employees:', nonValidatedData?.length || 0, '(non-validated)');
+      console.log('[AdminSecurityEmployees] Loaded employees:', data?.length || 0);
       
       // Transform data to match expected format
-      const transformedData = Array.isArray(nonValidatedData) ? nonValidatedData.map(emp => {
-        const metadata = emp.metadata || {};
-        return {
-          id: emp.id,
-          first_name: metadata.first_name || emp.full_name?.split(' ')[0] || '',
-          last_name: metadata.last_name || emp.full_name?.split(' ').slice(1).join(' ') || '',
-          email: emp.email || '',
-          phone: emp.phone || '',
-          location: metadata.location || emp.address || '',
-          is_active: emp.status === 'active' || emp.is_active === true,
-          status: emp.status || 'pending',
-          ...emp
-        };
-      }) : [];
+      const transformedData = Array.isArray(data) ? data.map(emp => ({
+        id: emp.id,
+        first_name: emp.first_name || '',
+        last_name: emp.last_name || '',
+        email: emp.email || '',
+        phone: emp.phone || '',
+        address: emp.address || '',
+        location: emp.location || '',
+        birth_date: emp.birth_date || '',
+        age: emp.age || null,
+        expertise: emp.expertise || '',
+        auto_entrepreneur: emp.auto_entrepreneur || '',
+        last_experience: emp.last_experience || '',
+        company_name: emp.company_name || '',
+        preferred_work_time: emp.preferred_work_time || '',
+        photo: emp.photo || emp.photo_url || '',
+        availability: emp.availability || {},
+        is_active: emp.is_active || false,
+        status: emp.status || 'pending',
+        ...emp
+      })) : [];
       
       setItems(transformedData);
     } catch (e) {
@@ -77,10 +75,11 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
       console.log('[AdminSecurityEmployees] Toggling active status for employee:', id, 'to', next);
       
       const { error } = await supabase
-        .from('employees')
+        .from('security_employees')
         .update({ 
           is_active: !!next,
-          status: next ? 'active' : 'inactive'
+          status: next ? 'active' : 'inactive',
+          updated_at: new Date().toISOString()
         })
         .eq('id', id);
       
@@ -101,63 +100,72 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
     try {
       console.log('[AdminSecurityEmployees] Validating employee:', id);
       
-      // First, get the current employee data to verify
-      const { data: currentEmployee, error: fetchError } = await supabase
-        .from('employees')
+      // First, get the employee data
+      const { data: employee, error: fetchError } = await supabase
+        .from('security_employees')
         .select('*')
         .eq('id', id)
         .single();
       
-      if (fetchError) {
+      if (fetchError || !employee) {
         console.error('[AdminSecurityEmployees] Error fetching employee:', fetchError);
-        alert(`Erreur lors de la récupération: ${fetchError.message}`);
+        alert('Erreur lors de la récupération des données: ' + (fetchError?.message || 'Employé non trouvé'));
         return;
       }
       
-      console.log('[AdminSecurityEmployees] Current employee data:', {
-        id: currentEmployee.id,
-        status: currentEmployee.status,
-        is_active: currentEmployee.is_active
-      });
+      // Insert into security_employees_valid table
+      const { error: insertError } = await supabase
+        .from('security_employees_valid')
+        .insert([{
+          employee_id: employee.id,
+          first_name: employee.first_name,
+          last_name: employee.last_name,
+          birth_date: employee.birth_date,
+          age: employee.age,
+          email: employee.email,
+          phone: employee.phone,
+          address: employee.address,
+          location: employee.location,
+          expertise: employee.expertise,
+          auto_entrepreneur: employee.auto_entrepreneur,
+          last_experience: employee.last_experience,
+          company_name: employee.company_name,
+          preferred_work_time: employee.preferred_work_time,
+          photo: employee.photo,
+          photo_url: employee.photo_url,
+          availability: employee.availability || {},
+          is_active: true
+        }]);
       
-      // Update employee status to 'active' and is_active to true
-      // Also update updated_at to track validation date
-      const { data: updatedEmployees, error } = await supabase
-        .from('employees')
+      if (insertError) {
+        console.error('[AdminSecurityEmployees] Error inserting into valid table:', insertError);
+        alert('Erreur lors de l\'insertion dans la table validée: ' + insertError.message);
+        return;
+      }
+      
+      // Update the original employee record
+      const { error: updateError } = await supabase
+        .from('security_employees')
         .update({ 
           status: 'active',
           is_active: true,
-          updated_at: new Date().toISOString() // Explicitly update updated_at for validation date
+          updated_at: new Date().toISOString()
         })
-        .eq('id', id)
-        .select();
+        .eq('id', id);
       
-      if (error) {
-        console.error('[AdminSecurityEmployees] Error validating employee:', error);
-        alert(`Erreur lors de la validation: ${error.message}`);
+      if (updateError) {
+        console.error('[AdminSecurityEmployees] Error updating employee:', updateError);
+        alert('Erreur lors de la mise à jour: ' + updateError.message);
         return;
       }
       
-      if (!updatedEmployees || updatedEmployees.length === 0) {
-        console.error('[AdminSecurityEmployees] No employee was updated. Check RLS policies.');
-        alert('Erreur: Aucun employé n\'a été mis à jour. Vérifiez les permissions RLS.');
-        return;
-      }
-      
-      const updatedEmployee = updatedEmployees[0];
-      console.log('[AdminSecurityEmployees] Employee validated successfully:', {
-        id: updatedEmployee.id,
-        status: updatedEmployee.status,
-        is_active: updatedEmployee.is_active,
-        updated_at: updatedEmployee.updated_at
-      });
-      
-      // Remove from list (as it's now validated and will appear in employees-valid page)
+      console.log('[AdminSecurityEmployees] Validation successful');
+      // Remove from current list after successful validation
       setItems(prev => prev.filter(i => i.id !== id));
-      alert('Employé validé ✅\nIl apparaîtra maintenant dans la liste des employés validés.');
+      alert('Employé validé ✅');
     } catch (e) {
       console.error('[AdminSecurityEmployees] Exception validating employee:', e);
-      alert(`Erreur: ${e.message}`);
+      alert('Erreur lors de la validation: ' + e.message);
     }
   };
 
@@ -168,7 +176,7 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
       console.log('[AdminSecurityEmployees] Deleting employee:', id);
       
       const { error } = await supabase
-        .from('employees')
+        .from('security_employees')
         .delete()
         .eq('id', id);
       
