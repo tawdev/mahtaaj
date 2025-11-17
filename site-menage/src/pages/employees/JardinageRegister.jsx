@@ -16,6 +16,7 @@ export default function JardinageRegister() {
     address: '',
     location: '',
     expertise: '',
+    employee_type: '',
     photo: null,
     auto_entrepreneur: '',
     last_experience: '',
@@ -89,6 +90,7 @@ export default function JardinageRegister() {
 
   const validate = () => {
     if (!form.first_name || !form.last_name || !form.birth_date || !form.email || !form.address) return t('employee_register.validation.all_fields_required');
+    if (!form.employee_type) return t('employee_register.validation.employee_type_required', 'نوع العامل مطلوب');
     return null;
   };
 
@@ -142,6 +144,7 @@ export default function JardinageRegister() {
         address: form.address.trim() || null,
         location: form.location?.trim() || null,
         expertise: form.expertise || null,
+        employee_type: form.employee_type || null,
         auto_entrepreneur: form.auto_entrepreneur || null,
         last_experience: form.last_experience || null,
         company_name: form.company_name || null,
@@ -166,7 +169,7 @@ export default function JardinageRegister() {
       
       setMessage(t('employees.register.submit_success','تم إرسال النموذج بنجاح'));
       setShowSuccess(true);
-      setForm({ first_name:'', last_name:'', birth_date:'', age:'', email:'', phone:'', address:'', location:'', expertise:'', photo: null, auto_entrepreneur: '', last_experience: '', company_name: '' });
+      setForm({ first_name:'', last_name:'', birth_date:'', age:'', email:'', phone:'', address:'', location:'', expertise:'', employee_type:'', photo: null, auto_entrepreneur: '', last_experience: '', company_name: '' });
       // Auto-hide after 4s
       setTimeout(() => setShowSuccess(false), 4000);
     } catch (e2) {
@@ -330,6 +333,23 @@ export default function JardinageRegister() {
               <select value={form.expertise} onChange={(e)=>setForm({...form, expertise:e.target.value})}>
                 <option value="">{t('employees.register.expertise_select','اختر مجال الخبرة')}</option>
                 {expertiseOptions.map(opt => (<option key={opt} value={opt}>{opt}</option>))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group full">
+            <label>{t('employees.register.employee_type','نوع العامل')} *</label>
+            <div className="input-with-icon">
+              <span className="ifi-icon" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 21V19C16 16.7909 14.2091 15 12 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </span>
+              <select value={form.employee_type} onChange={(e)=>setForm({...form, employee_type:e.target.value})} required>
+                <option value="">{t('employees.register.select_employee_type','اختر نوع العامل')}</option>
+                <option value="عامل">عامل</option>
+                <option value="مساعد">مساعد</option>
               </select>
             </div>
           </div>

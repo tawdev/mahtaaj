@@ -56,6 +56,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 				bio: item.bio || '',
 				photo: item.photo || item.photo_url || '',
 				experience_years: item.experience_years || 0,
+				employee_type: item.employee_type || '-',
 				status: item.status === 'active' ? 'approved' : (item.status === 'inactive' ? 'rejected' : (item.status || 'pending')),
 				is_available: item.is_available || false,
 				...item
@@ -114,6 +115,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 					photo_url: employee.photo_url,
 					bio: employee.bio,
 					experience_years: employee.experience_years,
+					employee_type: employee.employee_type,
 					is_available: true
 				}]);
 			
@@ -241,6 +243,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 								<th>Catégorie</th>
 								<th>Ville</th>
 								<th>Expérience</th>
+								<th>نوع العامل</th>
 								<th>Statut</th>
 								<th>Actions</th>
 							</tr>
@@ -257,6 +260,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 									<td>{emp.category?.name || '-'}</td>
 									<td>{emp.city || '-'}</td>
 									<td>{emp.experience_years || 0} ans</td>
+									<td>{emp.employee_type || '-'}</td>
 									<td>
 										<span className={`handworker-employees-status ${emp.status || 'pending'}`}>
 											{emp.status === 'pending' ? '⏳ En attente' : 
@@ -279,7 +283,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 							))}
 							{filtered.length === 0 && (
 								<tr>
-									<td colSpan={9} className="handworker-employees-empty">Aucune inscription trouvée</td>
+									<td colSpan={10} className="handworker-employees-empty">Aucune inscription trouvée</td>
 								</tr>
 							)}
 						</tbody>

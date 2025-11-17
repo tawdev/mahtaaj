@@ -23,6 +23,7 @@ export default function HandWorkerRegistration() {
     work_samples: [],
     bio: '',
     experience_years: 0,
+    employee_type: '',
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -214,6 +215,10 @@ export default function HandWorkerRegistration() {
       errors.experience_years = t('hand_worker_registration.experience_invalid');
     }
 
+    if (!formData.employee_type) {
+      errors.employee_type = t('hand_worker_registration.employee_type_required') || 'نوع العامل مطلوب';
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -289,6 +294,7 @@ export default function HandWorkerRegistration() {
         photo_url: photoUrl || null,
         bio: (formData.bio || '').trim() || null,
         experience_years: parseInt(formData.experience_years, 10) || 0,
+        employee_type: formData.employee_type || null,
         status: 'pending', // New registrations start as pending
         is_available: false // Not available until approved
       };
@@ -296,7 +302,7 @@ export default function HandWorkerRegistration() {
       // Remove null/empty string values for optional fields to avoid issues
       Object.keys(workerData).forEach(key => {
         if (workerData[key] === '' || workerData[key] === undefined) {
-          if (key !== 'experience_years' && key !== 'status' && key !== 'is_available') {
+          if (key !== 'experience_years' && key !== 'status' && key !== 'is_available' && key !== 'employee_type') {
             workerData[key] = null;
           }
         }
@@ -341,6 +347,7 @@ export default function HandWorkerRegistration() {
         work_samples: [],
         bio: '',
         experience_years: 0,
+        employee_type: '',
       });
     } catch (e) {
       console.error('[HandWorkerRegistration] Error submitting registration:', e);
@@ -505,6 +512,29 @@ export default function HandWorkerRegistration() {
               </select>
             </div>
             {formErrors.category_id && <span className="error-message">{formErrors.category_id}</span>}
+          </div>
+          <div className="form-group full">
+            <label>{t('hand_worker_registration.employee_type', 'نوع العامل')} *</label>
+            <div className="input-with-icon">
+              <span className="ifi-icon" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M16 21V19C16 16.7909 14.2091 15 12 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </span>
+              <select
+                name="employee_type"
+                value={formData.employee_type}
+                onChange={handleInputChange}
+                className={formErrors.employee_type ? 'error' : ''}
+                required
+              >
+                <option value="">{t('hand_worker_registration.select_employee_type', 'اختر نوع العامل')}</option>
+                <option value="عامل">عامل</option>
+                <option value="مساعد">مساعد</option>
+              </select>
+            </div>
+            {formErrors.employee_type && <span className="error-message">{formErrors.employee_type}</span>}
           </div>
           <div className="form-group full">
             <label>{t('hand_worker_registration.bio')}</label>

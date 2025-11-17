@@ -35,6 +35,7 @@ export default function AdminJardinageEmployees({ token, onAuthError }) {
         email: emp.email || '',
         phone: emp.phone || '',
         expertise: emp.expertise || '',
+        employee_type: emp.employee_type || '-',
         location: emp.location || '',
         address: emp.address || '',
         birth_date: emp.birth_date || '',
@@ -144,6 +145,7 @@ export default function AdminJardinageEmployees({ token, onAuthError }) {
           address: employee.address,
           location: employee.location,
           expertise: employee.expertise,
+          employee_type: employee.employee_type,
           auto_entrepreneur: employee.auto_entrepreneur,
           last_experience: employee.last_experience,
           company_name: employee.company_name,
@@ -225,6 +227,7 @@ export default function AdminJardinageEmployees({ token, onAuthError }) {
                 <th>Email</th>
                 <th>Téléphone</th>
                 <th>Expertise</th>
+                <th>نوع العامل</th>
                 <th>Ville</th>
                 <th>Statut</th>
                 <th>Actions</th>
@@ -257,6 +260,7 @@ export default function AdminJardinageEmployees({ token, onAuthError }) {
                       '-'
                     )}
                   </td>
+                  <td>{emp.employee_type || '-'}</td>
                   <td>
                     <span className="jardinage-employees-location">
                       {emp.location || '-'}
@@ -295,7 +299,7 @@ export default function AdminJardinageEmployees({ token, onAuthError }) {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="jardinage-employees-empty">
+                  <td colSpan={9} className="jardinage-employees-empty">
                     Aucun employé trouvé
                   </td>
                 </tr>
