@@ -107,10 +107,28 @@ export default function ServiceCategories() {
               }
             }
             
+            // Check if category name is "Ménage + cuisine" or "Ménage et cuisine" to redirect to /services/menage/13
+            const categoryName = (category.name || '').toLowerCase();
+            const isMenageEtCuisine = (categoryName.includes('ménage') || categoryName.includes('menage')) && 
+                                     (categoryName.includes('cuisine') || categoryName.includes('+'));
+            
+            // Check if category name is "Ménage" only (without cuisine) to redirect to /services
+            const isMenageOnly = (categoryName.includes('ménage') || categoryName.includes('menage')) && 
+                                !categoryName.includes('cuisine') && !categoryName.includes('+');
+            
+            let categoryLink;
+            if (isMenageEtCuisine) {
+              categoryLink = '/services/menage/13';
+            } else if (isMenageOnly) {
+              categoryLink = '/services';
+            } else {
+              categoryLink = `/services/${serviceSlug}/${getCategorySlug(category)}`;
+            }
+            
             return (
               <Link
                 key={category.id}
-                to={`/services/${serviceSlug}/${getCategorySlug(category)}`}
+                to={categoryLink}
                 className="category-card"
                 style={{
                   backgroundImage: bgImage 

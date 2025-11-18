@@ -141,6 +141,12 @@ export default function Services() {
   };
 
   const handleSelectService = (service) => {
+    // Check if service is "Ménage" to redirect to /services/menage/1
+    const serviceName = (service.name || service.title || '').toLowerCase();
+    if (serviceName.includes('ménage') || serviceName.includes('menage')) {
+      navigate('/services/menage/1');
+      return;
+    }
     const slug = getServiceSlug(service);
     navigate(`/services/${slug}`);
   };
@@ -1518,7 +1524,7 @@ export default function Services() {
                     <button className="mode-button" onClick={handleBackToServices} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
                   <div className="grid-2-responsive">
-                    <div className="card-tile" onClick={() => setSelectedMainCategory('menage')}>
+                    <div className="card-tile" onClick={() => navigate('/services')}>
                       <h3 className="card-title">{t('services_page.categories.menage')}</h3>
                     </div>
                     <div className="card-tile" onClick={() => setSelectedMainCategory('cuisine')}>

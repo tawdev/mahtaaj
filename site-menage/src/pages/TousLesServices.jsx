@@ -12,7 +12,7 @@ export default function TousLesServices() {
       id: 1,
       icon: '🧹',
       translationKey: 'menage',
-      path: '/services',
+      path: '/services/menage',
       color: '#3b82f6',
       image: 'Ménage1.jpeg'
     },
