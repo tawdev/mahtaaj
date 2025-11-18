@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AdminBebeCategoriesCrud.css';
 import LanguageFields from '../../components/LanguageFields';
 import { supabase } from '../../lib/supabase';
+import { supabaseAdmin } from '../../lib/supabaseAdmin';
 
 const AdminBebeCategoriesCrud = () => {
   const [categories, setCategories] = useState([]);
@@ -158,6 +159,14 @@ const AdminBebeCategoriesCrud = () => {
     }));
   };
 
+  const getWriteClient = () => {
+    if (supabaseAdmin) {
+      return supabaseAdmin;
+    }
+    console.warn('[AdminBebeCategories] Using public client - RLS may block writes. Set REACT_APP_SUPABASE_SERVICE_ROLE_KEY in .env');
+    return supabase;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -243,10 +252,15 @@ const AdminBebeCategoriesCrud = () => {
 
       console.log('[AdminBebeCategories] Submitting category:', { editing: !!editingCategory, id: editingCategory?.id, payload });
 
+      const db = getWriteClient();
+      if (!supabaseAdmin) {
+        console.warn('[AdminBebeCategories] Service role key not configured, falling back to public client (writes may fail).');
+      }
+
       let data, error;
       if (editingCategory) {
         // Update existing category
-        const { data: updateData, error: updateError } = await supabase
+        const { data: updateData, error: updateError } = await db
           .from('bebe_categories')
           .update(payload)
           .eq('id', editingCategory.id)
@@ -255,7 +269,7 @@ const AdminBebeCategoriesCrud = () => {
         error = updateError;
       } else {
         // Insert new category
-        const { data: insertData, error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await db
           .from('bebe_categories')
           .insert(payload)
           .select();
@@ -312,23 +326,55 @@ const AdminBebeCategoriesCrud = () => {
       try {
         console.log('[AdminBebeCategories] Deleting category:', id);
         
-        const { error } = await supabase
+        const db = getWriteClient();
+        if (!supabaseAdmin) {
+          console.warn('[AdminBebeCategories] Service role key not configured, falling back to public client (writes may fail).');
+        }
+
+        // Delete with select to verify deletion
+        const { data, error } = await db
           .from('bebe_categories')
           .delete()
-          .eq('id', id);
+          .eq('id', id)
+          .select();
 
         if (error) {
           console.error('[AdminBebeCategories] Error deleting category:', error);
           setError('Erreur lors de la suppression: ' + error.message);
+          setToast({ type:'error', message: 'Erreur lors de la suppression: ' + error.message });
           return;
         }
 
-        console.log('[AdminBebeCategories] Category deleted successfully');
+        // Verify deletion was successful
+        if (!data || data.length === 0) {
+          let errorMsg = '';
+          if (supabaseAdmin) {
+            errorMsg = 'La catégorie n\'a pas pu être supprimée. Elle n\'existe peut-être pas.';
+          } else {
+            errorMsg = '❌ فشل الحذف: RLS يمنع العملية.\n\n' +
+              'الحل:\n' +
+              '1. افتح Supabase Dashboard\n' +
+              '2. اذهب إلى Settings > API\n' +
+              '3. انسخ service_role key\n' +
+              '4. أضف في ملف .env:\n' +
+              '   REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_key_here\n' +
+              '5. أعد تشغيل التطبيق';
+          }
+          console.warn('[AdminBebeCategories] No rows deleted - category may not exist or RLS blocked deletion');
+          console.error('[AdminBebeCategories] Deletion failed. If using public client, RLS is blocking. Add REACT_APP_SUPABASE_SERVICE_ROLE_KEY to .env file.');
+          setError(errorMsg);
+          setToast({ type:'error', message: 'فشل الحذف - راجع رسالة الخطأ' });
+          return;
+        }
+
+        console.log('[AdminBebeCategories] Category deleted successfully:', data);
         await loadCategories();
         setToast({ type:'success', message: 'تم حذف الفئة بنجاح' });
+        setError(''); // Clear any previous errors
       } catch (err) {
         console.error('[AdminBebeCategories] Exception deleting category:', err);
         setError('Erreur de connexion: ' + err.message);
+        setToast({ type:'error', message: 'Erreur de connexion: ' + err.message });
       }
     }
   };
@@ -373,8 +419,51 @@ const AdminBebeCategoriesCrud = () => {
         </button>
       </div>
 
+      {!supabaseAdmin && (
+        <div className="warning-message" style={{
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '8px',
+          padding: '15px',
+          marginBottom: '20px',
+          color: '#856404',
+          lineHeight: '1.6'
+        }}>
+          <strong>⚠️ تحذير: Service Role Key غير معرّف</strong>
+          <br />
+          <p style={{ margin: '10px 0' }}>
+            عمليات الحذف والتعديل قد تفشل بسبب RLS (Row Level Security).
+          </p>
+          <div style={{ marginTop: '10px', fontSize: '14px' }}>
+            <strong>الحل:</strong>
+            <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              <li>افتح Supabase Dashboard</li>
+              <li>اذهب إلى <code>Settings → API</code></li>
+              <li>انسخ <code>service_role</code> key</li>
+              <li>أنشئ ملف <code>.env</code> في مجلد <code>site-menage</code></li>
+              <li>أضف السطر التالي:
+                <pre style={{ 
+                  backgroundColor: '#f8f9fa', 
+                  padding: '8px', 
+                  borderRadius: '4px', 
+                  marginTop: '5px',
+                  fontSize: '12px',
+                  overflow: 'auto'
+                }}>
+REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+                </pre>
+              </li>
+              <li>أعد تشغيل التطبيق (<code>npm start</code>)</li>
+            </ol>
+          </div>
+        </div>
+      )}
+
       {error && (
-        <div className="error-message">
+        <div className="error-message" style={{
+          whiteSpace: 'pre-line',
+          lineHeight: '1.6'
+        }}>
           {error}
         </div>
       )}

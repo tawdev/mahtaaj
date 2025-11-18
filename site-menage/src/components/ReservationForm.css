@@ -9,6 +9,50 @@
   position: relative;
 }
 
+/* Booking Type Selector */
+.booking-type-selector {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.booking-type-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.booking-type-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.booking-type-btn.active {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.booking-type-btn.active:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
 .reservation-form-header {
   display: flex;
   justify-content: space-between;
@@ -94,6 +138,14 @@
   color: #ef4444;
   font-size: 12px;
   font-weight: 500;
+}
+
+.info-text {
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 4px;
+  display: block;
 }
 
 .general-error {
@@ -207,6 +259,15 @@
   .form-group textarea {
     padding: 10px 14px;
     font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .booking-type-selector {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .booking-type-btn {
+    width: 100%;
   }
   
   .form-actions {

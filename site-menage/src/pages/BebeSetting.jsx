@@ -150,8 +150,25 @@ export default function BebeSetting() {
     }
   };
 
-  const handleCategoryClick = (categoryId) => {
-    loadCategoryDetails(categoryId);
+  const handleCategoryClick = async (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    if (category) {
+      setSelectedCategory(category);
+      // Load services to get price and duration for reservation
+      await loadCategoryDetails(categoryId);
+      // Set the first service as selected for reservation if available
+      const { data } = await supabase
+        .from('bebe_settings')
+        .select('*')
+        .eq('category_id', categoryId)
+        .eq('is_active', true)
+        .order('order', { ascending: true })
+        .limit(1);
+      
+      if (data && data.length > 0) {
+        setSelectedService(data[0]);
+      }
+    }
   };
 
   const handleBackToCategories = () => {
@@ -286,27 +303,36 @@ export default function BebeSetting() {
                     {(() => {
                       const imagePath = category.image;
                       const imageUrl = imagePath ? getImageUrl(imagePath) : null;
+                      const defaultImage = '/serveces/a_مربية_أطفال_مغربية_ت.png';
                       return imageUrl ? (
                         <img
                           src={imageUrl}
                           alt={category.name}
                           onError={(e) => {
                             console.log('[BebeSetting] Image failed to load:', imageUrl, 'Original path:', imagePath);
-                            e.target.src = '/images/bebe/default.jpg';
+                            e.target.src = defaultImage;
                           }}
                           onLoad={() => {
                             console.log('[BebeSetting] Image loaded successfully:', imageUrl);
                           }}
                         />
                       ) : (
-                        <div className="category-image-placeholder">
-                          👶
-                        </div>
+                        <img
+                          src={defaultImage}
+                          alt={category.name}
+                          onError={(e) => {
+                            console.log('[BebeSetting] Default image failed to load');
+                            e.target.style.display = 'none';
+                          }}
+                        />
                       );
                     })()}
+                    {/* Category Name Overlay on Image */}
+                    <div className="category-name-overlay">
+                      <h3 className="category-name">{category.name || t('bebe_setting.category_not_available')}</h3>
+                    </div>
                   </div>
                   <div className="category-content">
-                    <h3 className="category-name">{category.name || t('bebe_setting.category_not_available')}</h3>
                     <p className="category-description">{category.description || t('bebe_setting.description_not_available')}</p>
                   </div>
                   <div className="category-overlay">
@@ -324,7 +350,6 @@ export default function BebeSetting() {
                 <span className="back-icon">←</span>
                 {t('bebe_setting.services.back_to_categories')}
               </button>
-              <h2 className="section-title">{selectedCategory.name}</h2>
             </div>
 
             {loadingDetails ? (
@@ -333,60 +358,87 @@ export default function BebeSetting() {
                 <p>{t('bebe_setting.loading.services')}</p>
               </div>
             ) : (
-              <div className="settings-grid">
-                {settings.length > 0 ? (
-                  settings.map((setting) => (
-                    <div key={setting.id} className="setting-card">
-                      <div className="setting-image">
-                        <img
-                          src={setting.photo || '/images/bebe/default.jpg'}
-                          alt={setting.nom}
-                          onError={(e) => {
-                            e.target.src = '/images/bebe/default.jpg';
-                          }}
-                        />
-                      </div>
-                      <div className="setting-content">
-                        <h3 className="setting-name">{setting.nom || setting.name || t('bebe_setting.category_not_available')}</h3>
-                        <p className="setting-description">{getLocalizedDescription(setting)}</p>
-                        <div className="setting-details">
-                          <div className="price-info">
-                            <span className="price-label">{t('bebe_setting.services.price')}</span>
-                            <span className="price-value">{setting.price} DH</span>
-                          </div>
-                          <div className="duration-info">
-                            <span className="duration-label">{t('bebe_setting.services.duration')}</span>
-                            <span className="duration-value">{setting.duration}</span>
-                          </div>
-                        </div>
-                        <div className="setting-actions">
-                          <button 
-                            className="details-button"
-                            onClick={() => handleServiceClick(setting)}
-                          >
-                            <span className="details-icon">👁️</span>
-                            {t('bebe_setting.services.view_details')}
-                          </button>
-                          <button 
-                            className="reserve-button"
-                            onClick={() => {
-                              setSelectedService(setting);
-                              setShowReservationForm(true);
-                            }}
-                          >
-                            <span className="reserve-icon">📅</span>
-                            {t('bebe_setting.services.reserve')}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="no-services">
-                    <div className="no-services-icon">📭</div>
-                    <p>{t('bebe_setting.services.no_services')}</p>
+              <div className="category-details-card">
+                {/* Category Image */}
+                <div className="category-details-image">
+                  {(() => {
+                    const imagePath = selectedCategory.image;
+                    const imageUrl = imagePath ? getImageUrl(imagePath) : null;
+                    const defaultImage = '/serveces/a_مربية_أطفال_مغربية_ت.png';
+                    return imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={selectedCategory.name}
+                        onError={(e) => {
+                          console.log('[BebeSetting] Category image failed to load:', imageUrl);
+                          e.target.src = defaultImage;
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={defaultImage}
+                        alt={selectedCategory.name}
+                        onError={(e) => {
+                          console.log('[BebeSetting] Default image failed to load');
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    );
+                  })()}
+                </div>
+
+                {/* Category Info */}
+                <div className="category-details-content">
+                  <h1 className="category-details-name">{selectedCategory.name || t('bebe_setting.category_not_available')}</h1>
+                  
+                  <div className="category-details-description">
+                    <p>{selectedCategory.description || t('bebe_setting.description_not_available')}</p>
                   </div>
-                )}
+
+                  {/* Price and Duration from first service */}
+                  <div className="category-details-info">
+                    <div className="price-info">
+                      <span className="price-label">{t('bebe_setting.services.price')}</span>
+                      <span className="price-value">{selectedService?.price || '100'} DH</span>
+                    </div>
+                    <div className="duration-info">
+                      <span className="duration-label">{t('bebe_setting.services.duration')}</span>
+                      <span className="duration-value">{selectedService?.duration || '2 heures'}</span>
+                    </div>
+                  </div>
+
+                  {/* Reserve Button */}
+                  <div className="category-details-actions">
+                    <button 
+                      className="reserve-button"
+                      onClick={() => {
+                        if (selectedService) {
+                          setShowReservationForm(true);
+                        } else {
+                          // If no service found, try to load the first one
+                          const loadFirstService = async () => {
+                            const { data } = await supabase
+                              .from('bebe_settings')
+                              .select('*')
+                              .eq('category_id', selectedCategory.id)
+                              .eq('is_active', true)
+                              .order('order', { ascending: true })
+                              .limit(1);
+                            
+                            if (data && data.length > 0) {
+                              setSelectedService(data[0]);
+                              setShowReservationForm(true);
+                            }
+                          };
+                          loadFirstService();
+                        }
+                      }}
+                    >
+                      <span className="reserve-icon">📅</span>
+                      {t('bebe_setting.services.reserve')}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -427,14 +479,18 @@ export default function BebeSetting() {
             <div className="service-details-image-container">
               <img
                 src={
-                  Array.isArray(selectedService.photo) 
-                    ? (selectedService.photo[0] || '/images/bebe/default.jpg')
-                    : (selectedService.photo || '/images/bebe/default.jpg')
+                  (() => {
+                    const imagePath = Array.isArray(selectedService.photo) 
+                      ? selectedService.photo[0] 
+                      : (selectedService.photo || selectedService.image);
+                    const imageUrl = imagePath ? getImageUrl(imagePath) : null;
+                    return imageUrl || '/serveces/a_مربية_أطفال_مغربية_ت.png';
+                  })()
                 }
                 alt={selectedService.nom || selectedService.name}
                 className="service-details-image"
                 onError={(e) => {
-                  e.target.src = '/images/bebe/default.jpg';
+                  e.target.src = '/serveces/a_مربية_أطفال_مغربية_ت.png';
                 }}
               />
               <div className="service-image-overlay">
@@ -473,6 +529,7 @@ export default function BebeSetting() {
           <div className="modal-content">
             <ReservationForm
               serviceId={selectedService.id}
+              categoryId={selectedService.category_id || selectedCategory?.id || null}
               serviceType="bebe"
               onSuccess={handleReservationSuccess}
               onCancel={handleReservationCancel}
