@@ -60,12 +60,12 @@
   background: white;
   border-radius: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 0;
   text-align: center;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  cursor: default;
+  cursor: pointer;
   opacity: 0;
   animation: fadeInUp 0.6s ease-out forwards;
 }
@@ -134,6 +134,28 @@
   flex-direction: column;
   gap: 15px;
   height: 100%;
+  padding: 20px;
+}
+
+/* Security Card Image Container */
+.security-card-image-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 0 -20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.security-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.security-card:hover .security-card-image {
+  transform: scale(1.1);
 }
 
 /* Role card specific text styles */
@@ -479,12 +501,17 @@
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
-  /* Allow dropdown menus and date pickers to escape */
-  overflow: visible;
+  /* Allow scrolling for long forms */
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: var(--shadow-lg);
   animation: modalSlideIn 0.3s ease-out;
   position: relative;
   z-index: 2001;
+  display: flex;
+  flex-direction: column;
+  /* Ensure modal content is scrollable */
+  -webkit-overflow-scrolling: touch;
 }
 
 @keyframes modalSlideIn {
@@ -502,9 +529,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 24px 0 24px;
+  padding: 24px 24px 16px 24px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  margin-bottom: 24px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+  background: var(--color-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .evaluation-modal-header h3 {
@@ -532,6 +564,12 @@
 
 .evaluation-form {
   padding: 0 24px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  /* Don't add overflow here, let the modal handle scrolling */
+  overflow: visible;
 }
 
 .evaluation-form-group {
@@ -625,6 +663,13 @@
   display: flex;
   gap: 12px;
   margin-top: 24px;
+  padding: 16px 0 0 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  position: sticky;
+  bottom: 0;
+  background: var(--color-bg);
+  z-index: 10;
+  flex-shrink: 0;
 }
 
 .evaluation-cancel-btn,
@@ -972,7 +1017,10 @@
     margin: auto !important;
     border-radius: 12px !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .evaluation-modal-header {
@@ -999,9 +1047,11 @@
 
   .evaluation-form {
     padding: 0 16px 16px 16px !important;
-    max-height: calc(95vh - 100px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
   }
 
   .evaluation-form-group {
@@ -1030,11 +1080,13 @@
     flex-direction: column !important;
     gap: 10px !important;
     margin-top: 20px !important;
-    position: sticky;
-    bottom: 0;
-    background: var(--color-bg);
-    padding-top: 12px;
-    z-index: 10;
+    position: sticky !important;
+    bottom: 0 !important;
+    background: var(--color-bg) !important;
+    padding: 16px 0 0 0 !important;
+    border-top: 1px solid rgba(148, 163, 184, 0.2) !important;
+    z-index: 10 !important;
+    flex-shrink: 0 !important;
   }
 
   .evaluation-cancel-btn,

@@ -92,10 +92,14 @@ export default function Security() {
   const [showReservationForm, setShowReservationForm] = useState(false);
   const [reservationLoading, setReservationLoading] = useState(false);
   const [reservationForm, setReservationForm] = useState({
-    type_reservation: 'jour',
+    type_reservation: 'heures', // 'heures' ou 'jours'
+    // Pour réservation par heures
     date_reservation: '',
     heure_debut: '',
-    heure_fin: '',
+    nombre_heures: 1,
+    // Pour réservation par jours
+    date_debut: '',
+    date_fin: '',
     phone: '',
     prix_total: 0,
     role_id: null,
@@ -249,59 +253,97 @@ export default function Security() {
         return;
       }
       
-      // Get first agent image for this role from securities table
-      // Note: securities table may not have role_id, so we'll get any active security agent
-      const { data: securitiesData, error: securitiesError } = await supabase
-        .from('securities')
-        .select('*')
-        .eq('is_active', true)
-        .eq('status', 'active')
-        .limit(1);
-      
-      if (securitiesError) {
-        console.error('[Security] Error loading securities:', securitiesError);
-      } else if (securitiesData && securitiesData.length > 0) {
-        const firstAgent = securitiesData[0];
-        if (firstAgent && (firstAgent.photo || firstAgent.photo_url)) {
-          // Helper function to get image URL from Supabase Storage
-          const getImageUrl = (imagePath) => {
-            if (!imagePath) return null;
-            
-            // If it's already a Supabase URL, return it
-            if (imagePath.includes('supabase.co/storage')) {
-              return imagePath;
-            }
-            
-            // If it's an old Laravel path, extract filename and try to get from Supabase
-            if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/')) {
-              const filename = imagePath.split('/').pop();
-              if (filename) {
-                const { data: { publicUrl } } = supabase.storage
-                  .from('employees')
-                  .getPublicUrl(filename);
-                return publicUrl;
-              }
-              return null;
-            }
-            
-            // If it's just a filename, try to get from Supabase Storage
-            if (!imagePath.includes('/') && !imagePath.includes('http')) {
+      // Use role image if available, otherwise try to get from securities table
+      if (role.image) {
+        // Helper function to get image URL from Supabase Storage
+        const getImageUrl = (imagePath) => {
+          if (!imagePath) return null;
+          
+          // If it's already a Supabase URL, return it
+          if (imagePath.includes('supabase.co/storage')) {
+            return imagePath;
+          }
+          
+          // If it's an old Laravel path, extract filename and try to get from Supabase
+          if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/')) {
+            const filename = imagePath.split('/').pop();
+            if (filename) {
               const { data: { publicUrl } } = supabase.storage
                 .from('employees')
-                .getPublicUrl(imagePath);
+                .getPublicUrl(filename);
               return publicUrl;
             }
-            
-            return imagePath;
-          };
+            return null;
+          }
           
-          const imageUrl = getImageUrl(firstAgent.photo_url || firstAgent.photo);
-          setRoleImage(imageUrl || '/nettoyage1.jpg');
+          // If it's just a filename, try to get from Supabase Storage
+          if (!imagePath.includes('/') && !imagePath.includes('http')) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('employees')
+              .getPublicUrl(imagePath);
+            return publicUrl;
+          }
+          
+          return imagePath;
+        };
+        
+        const imageUrl = getImageUrl(role.image);
+        setRoleImage(imageUrl || '/nettoyage1.jpg');
+      } else {
+        // Fallback: Get first agent image for this role from securities table
+        const { data: securitiesData, error: securitiesError } = await supabase
+          .from('securities')
+          .select('*')
+          .eq('is_active', true)
+          .eq('status', 'active')
+          .limit(1);
+        
+        if (securitiesError) {
+          console.error('[Security] Error loading securities:', securitiesError);
+          setRoleImage('/nettoyage1.jpg');
+        } else if (securitiesData && securitiesData.length > 0) {
+          const firstAgent = securitiesData[0];
+          if (firstAgent && (firstAgent.photo || firstAgent.photo_url)) {
+            // Helper function to get image URL from Supabase Storage
+            const getImageUrl = (imagePath) => {
+              if (!imagePath) return null;
+              
+              // If it's already a Supabase URL, return it
+              if (imagePath.includes('supabase.co/storage')) {
+                return imagePath;
+              }
+              
+              // If it's an old Laravel path, extract filename and try to get from Supabase
+              if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/')) {
+                const filename = imagePath.split('/').pop();
+                if (filename) {
+                  const { data: { publicUrl } } = supabase.storage
+                    .from('employees')
+                    .getPublicUrl(filename);
+                  return publicUrl;
+                }
+                return null;
+              }
+              
+              // If it's just a filename, try to get from Supabase Storage
+              if (!imagePath.includes('/') && !imagePath.includes('http')) {
+                const { data: { publicUrl } } = supabase.storage
+                  .from('employees')
+                  .getPublicUrl(imagePath);
+                return publicUrl;
+              }
+              
+              return imagePath;
+            };
+            
+            const imageUrl = getImageUrl(firstAgent.photo_url || firstAgent.photo);
+            setRoleImage(imageUrl || '/nettoyage1.jpg');
+          } else {
+            setRoleImage('/nettoyage1.jpg');
+          }
         } else {
           setRoleImage('/nettoyage1.jpg');
         }
-      } else {
-        setRoleImage('/nettoyage1.jpg');
       }
     } catch (e) { 
       console.error('[Security] Error loading role details:', e);
@@ -320,10 +362,12 @@ export default function Security() {
       return;
     }
     setReservationForm({
-      type_reservation: 'jour',
+      type_reservation: 'heures',
       date_reservation: '',
       heure_debut: '',
-      heure_fin: '',
+      nombre_heures: 1,
+      date_debut: '',
+      date_fin: '',
       phone: '',
       prix_total: 0,
       role_id: selectedRole,
@@ -332,18 +376,59 @@ export default function Security() {
   };
 
   const calculateReservationPrice = (form) => {
-    if (form.type_reservation === 'jour') {
-      return 800; // prix par jour
-    }
-    if (form.type_reservation === 'heure') {
-      const start = form.heure_debut ? Date.parse(`1970-01-01T${form.heure_debut}:00`) : 0;
-      const end = form.heure_fin ? Date.parse(`1970-01-01T${form.heure_fin}:00`) : 0;
-      if (end > start) {
-        const hours = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60)));
-        return hours * 120; // 120 / heure
+    const PRIX_BASE = 150; // Prix de base pour 4 heures
+    const PRIX_HEURE_SUPP = 40; // Prix par heure supplémentaire après 4 heures
+    const HEURES_PAR_JOUR = 8; // Nombre d'heures par jour
+    
+    if (form.type_reservation === 'heures') {
+      // Réservation par heures
+      const nombreHeures = parseInt(form.nombre_heures) || 1;
+      
+      if (nombreHeures <= 4) {
+        // Si ≤ 4 heures : prix de base
+        return PRIX_BASE;
+      } else {
+        // Si > 4 heures : prix de base + 40 DH par heure supplémentaire
+        const heuresSupplementaires = nombreHeures - 4;
+        return PRIX_BASE + (heuresSupplementaires * PRIX_HEURE_SUPP);
       }
-      return 120; // minimum 1h
+    } else if (form.type_reservation === 'jours') {
+      // Réservation par jours
+      if (form.date_debut && form.date_fin) {
+        const dateDebut = new Date(form.date_debut);
+        const dateFin = new Date(form.date_fin);
+        
+        // Vérifier que la date de fin est après la date de début
+        if (dateFin < dateDebut) {
+          return 0;
+        }
+        
+        // Calculer le nombre de jours (inclusif) - inclure le jour de début et le jour de fin
+        // Normaliser les dates pour éviter les problèmes de fuseau horaire
+        const dateDebutNormalized = new Date(dateDebut);
+        dateDebutNormalized.setHours(0, 0, 0, 0);
+        const dateFinNormalized = new Date(dateFin);
+        dateFinNormalized.setHours(0, 0, 0, 0);
+        
+        // Calculer la différence en millisecondes
+        const diffTime = dateFinNormalized.getTime() - dateDebutNormalized.getTime();
+        // Convertir en jours et ajouter 1 pour inclure le jour de début
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const nombreJours = Math.max(1, diffDays + 1); // Au moins 1 jour, +1 pour inclure le jour de début
+        
+        // Calculer le prix par jour
+        // Chaque jour = 8 heures
+        // Prix par jour = 150 (4h) + (8-4) * 40 = 150 + 160 = 310 DH
+        const prixParJour = PRIX_BASE + ((HEURES_PAR_JOUR - 4) * PRIX_HEURE_SUPP);
+        
+        // Prix total = prix par jour * nombre de jours
+        const prixTotal = prixParJour * nombreJours;
+        
+        return prixTotal;
+      }
+      return 0;
     }
+    
     return 0;
   };
 
@@ -367,14 +452,7 @@ export default function Security() {
     setReservationLoading(true);
     
     try {
-      // Validation côté client
-      if (!reservationForm.date_reservation) {
-        setToast({ show: true, text: t('security_page.please_select_date') });
-        setTimeout(() => setToast({ show: false, text: '' }), 3000);
-        setReservationLoading(false);
-        return;
-      }
-      
+      // Validation générale
       if (!reservationForm.phone.trim()) {
         setToast({ show: true, text: t('security_page.please_enter_phone') });
         setTimeout(() => setToast({ show: false, text: '' }), 3000);
@@ -389,16 +467,53 @@ export default function Security() {
         return;
       }
       
-      if (reservationForm.type_reservation === 'heure') {
-        if (!reservationForm.heure_debut || !reservationForm.heure_fin) {
-          setToast({ show: true, text: t('security_page.please_select_hours') });
+      // Validation selon le type de réservation
+      if (reservationForm.type_reservation === 'heures') {
+        if (!reservationForm.date_reservation) {
+          setToast({ show: true, text: t('security_page.please_select_date') });
           setTimeout(() => setToast({ show: false, text: '' }), 3000);
           setReservationLoading(false);
           return;
         }
         
-        if (reservationForm.heure_fin <= reservationForm.heure_debut) {
-          setToast({ show: true, text: t('security_page.end_time_after_start') });
+        if (!reservationForm.heure_debut) {
+          setToast({ show: true, text: 'Veuillez sélectionner l\'heure de début' });
+          setTimeout(() => setToast({ show: false, text: '' }), 3000);
+          setReservationLoading(false);
+          return;
+        }
+        
+        const nombreHeures = parseInt(reservationForm.nombre_heures) || 0;
+        if (nombreHeures < 1) {
+          setToast({ show: true, text: 'Le nombre d\'heures doit être au moins 1' });
+          setTimeout(() => setToast({ show: false, text: '' }), 3000);
+          setReservationLoading(false);
+          return;
+        }
+      } else if (reservationForm.type_reservation === 'jours') {
+        if (!reservationForm.date_debut) {
+          setToast({ show: true, text: 'Veuillez sélectionner la date de début' });
+          setTimeout(() => setToast({ show: false, text: '' }), 3000);
+          setReservationLoading(false);
+          return;
+        }
+        
+        if (!reservationForm.date_fin) {
+          setToast({ show: true, text: 'Veuillez sélectionner la date de fin' });
+          setTimeout(() => setToast({ show: false, text: '' }), 3000);
+          setReservationLoading(false);
+          return;
+        }
+        
+        const dateDebut = new Date(reservationForm.date_debut);
+        const dateFin = new Date(reservationForm.date_fin);
+        
+        // Normaliser les dates pour la comparaison
+        dateDebut.setHours(0, 0, 0, 0);
+        dateFin.setHours(0, 0, 0, 0);
+        
+        if (dateFin < dateDebut) {
+          setToast({ show: true, text: 'La date de fin doit être après ou égale à la date de début' });
           setTimeout(() => setToast({ show: false, text: '' }), 3000);
           setReservationLoading(false);
           return;
@@ -423,12 +538,52 @@ export default function Security() {
       // Prepare location - must not be empty (NOT NULL constraint)
       const location = userInfo.location || reservationForm.location || 'Non spécifié';
       
-      // Prepare date_reservation
-      const dateReservation = reservationForm.date_reservation ? new Date(reservationForm.date_reservation).toISOString().split('T')[0] : null;
+      // Prepare dates according to reservation type
+      let dateReservation = null;
+      let preferredDate = null;
+      let heureDebut = null;
+      let heureFin = null;
+      let dateDebut = null;
+      let dateFin = null;
       
-      // Prepare preferred_date (TIMESTAMPTZ)
-      const preferredDate = reservationForm.date_reservation ? new Date(reservationForm.date_reservation).toISOString() : null;
+      if (reservationForm.type_reservation === 'heures') {
+        dateReservation = reservationForm.date_reservation ? new Date(reservationForm.date_reservation).toISOString().split('T')[0] : null;
+        preferredDate = reservationForm.date_reservation && reservationForm.heure_debut 
+          ? new Date(`${reservationForm.date_reservation}T${reservationForm.heure_debut}:00`).toISOString() 
+          : null;
+        heureDebut = reservationForm.heure_debut || null;
+        // Calculer l'heure de fin basée sur l'heure de début + nombre d'heures
+        if (reservationForm.heure_debut && reservationForm.nombre_heures) {
+          const [hours, minutes] = reservationForm.heure_debut.split(':').map(Number);
+          const startDate = new Date();
+          startDate.setHours(hours, minutes, 0, 0);
+          const endDate = new Date(startDate.getTime() + (parseInt(reservationForm.nombre_heures) * 60 * 60 * 1000));
+          heureFin = `${String(endDate.getHours()).padStart(2, '0')}:${String(endDate.getMinutes()).padStart(2, '0')}`;
+        }
+      } else if (reservationForm.type_reservation === 'jours') {
+        // Pour réservation par jours, utiliser date_debut et date_fin
+        if (reservationForm.date_debut) {
+          const dateDebutObj = new Date(reservationForm.date_debut);
+          dateDebutObj.setHours(0, 0, 0, 0);
+          dateDebut = dateDebutObj.toISOString().split('T')[0];
+          dateReservation = dateDebut;
+          preferredDate = dateDebutObj.toISOString();
+        } else {
+          dateDebut = null;
+          dateReservation = null;
+          preferredDate = null;
+        }
+        
+        if (reservationForm.date_fin) {
+          const dateFinObj = new Date(reservationForm.date_fin);
+          dateFinObj.setHours(0, 0, 0, 0);
+          dateFin = dateFinObj.toISOString().split('T')[0];
+        } else {
+          dateFin = null;
+        }
+      }
       
+      // Build insert data with only required fields first
       const insertData = {
         user_id: userId || null,
         security_id: null, // Will be assigned later by admin
@@ -440,27 +595,128 @@ export default function Security() {
         total_price: totalPrice || 0,
         status: 'pending',
         preferred_date: preferredDate,
-        admin_notes: `Type: ${reservationForm.type_reservation}, Start: ${reservationForm.heure_debut || 'N/A'}, End: ${reservationForm.heure_fin || 'N/A'}`,
-        // Add new columns if they exist
-        type_reservation: reservationForm.type_reservation || 'jour',
-        date_reservation: dateReservation,
-        heure_debut: reservationForm.type_reservation === 'heure' && reservationForm.heure_debut ? reservationForm.heure_debut : null,
-        heure_fin: reservationForm.type_reservation === 'heure' && reservationForm.heure_fin ? reservationForm.heure_fin : null,
-        role_id: reservationForm.role_id || null
+        admin_notes: `Type: ${reservationForm.type_reservation}, ${reservationForm.type_reservation === 'heures' 
+          ? `Date: ${dateReservation}, Heure début: ${heureDebut || 'N/A'}, Nombre d'heures: ${reservationForm.nombre_heures || 'N/A'}`
+          : `Date début: ${dateDebut || 'N/A'}, Date fin: ${dateFin || 'N/A'}`}`
       };
       
+      // Try to add optional columns (only if they exist in the table)
+      // These columns might not exist yet, so we'll try to add them but won't fail if they don't exist
+      try {
+        // Ensure type_reservation is valid ('heures' or 'jours')
+        if (reservationForm.type_reservation && (reservationForm.type_reservation === 'heures' || reservationForm.type_reservation === 'jours')) {
+          insertData.type_reservation = reservationForm.type_reservation;
+        } else if (reservationForm.type_reservation) {
+          console.warn('[Security] Invalid type_reservation value:', reservationForm.type_reservation, 'using default: heures');
+          insertData.type_reservation = 'heures';
+        }
+        if (dateReservation) {
+          insertData.date_reservation = dateReservation;
+        }
+        if (heureDebut) {
+          insertData.heure_debut = heureDebut;
+        }
+        if (heureFin) {
+          insertData.heure_fin = heureFin;
+        }
+        if (dateDebut) {
+          insertData.date_debut = dateDebut;
+        }
+        if (dateFin) {
+          insertData.date_fin = dateFin;
+        }
+        if (reservationForm.type_reservation === 'heures' && reservationForm.nombre_heures) {
+          insertData.nombre_heures = parseInt(reservationForm.nombre_heures);
+        }
+        if (reservationForm.role_id) {
+          insertData.role_id = reservationForm.role_id;
+        }
+      } catch (e) {
+        console.warn('[Security] Could not add optional columns:', e);
+      }
+      
+      // Ensure type_reservation is always valid before inserting
+      console.log('[Security] type_reservation value before validation:', insertData.type_reservation, 'Type:', typeof insertData.type_reservation);
+      
+      if (insertData.type_reservation) {
+        // Normalize the value (trim whitespace, convert to string)
+        const normalizedValue = String(insertData.type_reservation).trim().toLowerCase();
+        if (normalizedValue === 'heures' || normalizedValue === 'jours') {
+          insertData.type_reservation = normalizedValue;
+        } else {
+          console.warn('[Security] Invalid type_reservation value, removing it:', insertData.type_reservation);
+          delete insertData.type_reservation;
+        }
+      }
+      
       console.log('[Security] Submitting reservation:', insertData);
+      console.log('[Security] type_reservation final value:', insertData.type_reservation);
 
-      const { data, error } = await supabase
+      // First, try to insert with all fields
+      let { data, error } = await supabase
         .from('reserve_security')
         .insert(insertData)
         .select();
 
+      // If error is about unknown columns, try again with only basic fields
+      if (error && (error.message?.includes('column') && error.message?.includes('does not exist'))) {
+        console.warn('[Security] Columns do not exist, trying with basic fields only');
+        
+        // Create basic insert data without optional columns
+        const basicInsertData = {
+          user_id: userId || null,
+          security_id: null,
+          firstname: userInfo.firstname || userInfo.name || 'User',
+          phone: reservationForm.phone.trim(),
+          location: location,
+          email: userInfo.email || null,
+          message: `Reservation for role_id: ${reservationForm.role_id}, Type: ${reservationForm.type_reservation}. ${reservationForm.type_reservation === 'heures' 
+            ? `Date: ${dateReservation}, Heure début: ${heureDebut || 'N/A'}, Nombre d'heures: ${reservationForm.nombre_heures || 'N/A'}`
+            : `Date début: ${dateDebut || 'N/A'}, Date fin: ${dateFin || 'N/A'}`}`,
+          total_price: totalPrice || 0,
+          status: 'pending',
+          preferred_date: preferredDate,
+          admin_notes: `Type: ${reservationForm.type_reservation}, ${reservationForm.type_reservation === 'heures' 
+            ? `Date: ${dateReservation}, Heure début: ${heureDebut || 'N/A'}, Nombre d'heures: ${reservationForm.nombre_heures || 'N/A'}`
+            : `Date début: ${dateDebut || 'N/A'}, Date fin: ${dateFin || 'N/A'}`}`
+        };
+        
+        console.log('[Security] Retrying with basic fields:', basicInsertData);
+        
+        const retryResult = await supabase
+          .from('reserve_security')
+          .insert(basicInsertData)
+          .select();
+        
+        data = retryResult.data;
+        error = retryResult.error;
+        
+        if (error) {
+          console.error('[Security] Error with basic fields:', error);
+        } else {
+          console.log('[Security] Reservation saved with basic fields. Please run add-columns-to-reserve-security.sql to enable full features.');
+          setToast({ 
+            show: true, 
+            text: 'Réservation enregistrée ! Note: Exécutez add-columns-to-reserve-security.sql pour activer toutes les fonctionnalités.' 
+          });
+          setTimeout(() => setToast({ show: false, text: '' }), 5000);
+        }
+      }
+
       if (error) {
         console.error('[Security] Error submitting reservation:', error);
-        const errorMsg = error.message || 'Erreur lors de la réservation';
+        console.error('[Security] Error details:', JSON.stringify(error, null, 2));
+        
+        // Check if error is about unknown columns
+        let errorMsg = error.message || 'Erreur lors de la réservation';
+        if (error.message?.includes('column') && error.message?.includes('does not exist')) {
+          errorMsg = 'Erreur: Certaines colonnes n\'existent pas dans la table. Veuillez exécuter le script SQL add-columns-to-reserve-security.sql dans Supabase SQL Editor.';
+        } else if (error.message?.includes('null value') || error.message?.includes('NOT NULL')) {
+          errorMsg = 'Erreur: Certains champs requis sont manquants. Veuillez remplir tous les champs obligatoires.';
+        }
+        
         setToast({ show: true, text: errorMsg });
-        setTimeout(() => setToast({ show: false, text: '' }), 3000);
+        setTimeout(() => setToast({ show: false, text: '' }), 5000);
         setReservationLoading(false);
         return;
       }
@@ -572,15 +828,66 @@ export default function Security() {
                 console.warn('[Security] Invalid role at index:', idx, role);
                 return null;
               }
+              // Helper function to get image URL from role
+              const getRoleImageUrl = (imagePath) => {
+                if (!imagePath) return null;
+                
+                // If it's already a full URL, return it
+                if (imagePath.includes('http') || imagePath.includes('supabase.co/storage')) {
+                  return imagePath;
+                }
+                
+                // If it's an old Laravel path, extract filename and try to get from Supabase
+                if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/')) {
+                  const filename = imagePath.split('/').pop();
+                  if (filename) {
+                    const { data: { publicUrl } } = supabase.storage
+                      .from('employees')
+                      .getPublicUrl(filename);
+                    return publicUrl;
+                  }
+                  return null;
+                }
+                
+                // If it's just a filename, try to get from Supabase Storage
+                if (!imagePath.includes('/') && !imagePath.includes('http')) {
+                  const { data: { publicUrl } } = supabase.storage
+                    .from('employees')
+                    .getPublicUrl(imagePath);
+                  return publicUrl;
+                }
+                
+                return imagePath;
+              };
+
+              const roleImageUrl = role.image ? getRoleImageUrl(role.image) : null;
+
               return (
                 <article 
                   key={role.id || `role-${idx}`}
                   className="security-card role-card" 
                   style={{
-                    animationDelay: `${0.1 + idx * 0.1}s`
+                    animationDelay: `${0.1 + idx * 0.1}s`,
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => {
+                    loadRoleDetails(role.id);
                   }}
                 >
                   <div className="security-card-content">
+                    {/* Image du rôle */}
+                    {roleImageUrl && (
+                      <div className="security-card-image-container">
+                        <img 
+                          src={roleImageUrl} 
+                          alt={role.name || 'Role image'}
+                          className="security-card-image"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
                     <h3 className="security-name">
                       {role.name || getTranslatedRole(role.name) || t('security_page.role_not_available')}
                     </h3>
@@ -694,7 +1001,7 @@ export default function Security() {
       {showReservationForm && (
         <div className="evaluation-modal-overlay" style={{ zIndex: 10000 }}>
           <div className="evaluation-modal">
-            <div className="evaluation-modal-header">
+            <div className="evaluation-modal-header" style={{ flexShrink: 0 }}>
               <h3>{t('security_page.reserve')} {selectedRoleData?.name || t('security_page.security_role')}</h3>
               <button 
                 className="evaluation-modal-close"
@@ -704,73 +1011,206 @@ export default function Security() {
               </button>
             </div>
             <form onSubmit={submitReservation} className="evaluation-form">
+              {/* Type de réservation */}
               <div className="evaluation-form-group">
-                <label>{t('security_page.reservation_type')}</label>
+                <label>📋 {t('security_page.reservation_type') || 'Type de réservation'}</label>
                 <select
                   value={reservationForm.type_reservation}
-                  onChange={(e) => updateReservationField('type_reservation', e.target.value)}
+                  onChange={(e) => {
+                    updateReservationField('type_reservation', e.target.value);
+                    // Reset related fields when changing type
+                    if (e.target.value === 'heures') {
+                      updateReservationField('date_debut', '');
+                      updateReservationField('date_fin', '');
+                    } else {
+                      updateReservationField('date_reservation', '');
+                      updateReservationField('heure_debut', '');
+                      updateReservationField('nombre_heures', 1);
+                    }
+                  }}
+                  style={{
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid #ddd',
+                    fontSize: '1rem',
+                    width: '100%'
+                  }}
                 >
-                  <option value="jour">{t('security_page.daily')}</option>
-                  <option value="heure">{t('security_page.hourly')}</option>
+                  <option value="heures">🕒 Par heures</option>
+                  <option value="jours">📅 Par jours</option>
                 </select>
               </div>
 
-              <div className="evaluation-form-group">
-                <label>{t('security_page.date')}</label>
-                <input
-                  type="date"
-                  value={reservationForm.date_reservation}
-                  onChange={(e) => updateReservationField('date_reservation', e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="evaluation-form-group">
-                <label>{t('security_page.phone_number')}</label>
-                <input
-                  type="tel"
-                  value={reservationForm.phone}
-                  onChange={(e) => updateReservationField('phone', e.target.value)}
-                  placeholder={t('security_page.phone_placeholder')}
-                  required
-                  pattern="[0-9\s\+\-\(\)]{10,}"
-                  title={t('security_page.phone_validation')}
-                />
-              </div>
-
-              {reservationForm.type_reservation === 'heure' && (
-                <div className="time-inputs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {/* Champs pour réservation par heures */}
+              {reservationForm.type_reservation === 'heures' && (
+                <>
                   <div className="evaluation-form-group">
-                    <label>{t('security_page.start_time')}</label>
+                    <label>📅 {t('security_page.date') || 'Date'}</label>
+                    <input
+                      type="date"
+                      value={reservationForm.date_reservation}
+                      onChange={(e) => updateReservationField('date_reservation', e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      required
+                      style={{
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '1px solid #ddd',
+                        fontSize: '1rem',
+                        width: '100%'
+                      }}
+                    />
+                  </div>
+
+                  <div className="evaluation-form-group">
+                    <label>⏰ Heure de début</label>
                     <input
                       type="time"
                       value={reservationForm.heure_debut}
                       onChange={(e) => updateReservationField('heure_debut', e.target.value)}
                       required
+                      style={{
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '1px solid #ddd',
+                        fontSize: '1rem',
+                        width: '100%'
+                      }}
                     />
                   </div>
+
                   <div className="evaluation-form-group">
-                    <label>{t('security_page.end_time')}</label>
+                    <label>⏱️ Nombre d'heures</label>
                     <input
-                      type="time"
-                      value={reservationForm.heure_fin}
-                      onChange={(e) => updateReservationField('heure_fin', e.target.value)}
+                      type="number"
+                      min="1"
+                      max="24"
+                      value={reservationForm.nombre_heures}
+                      onChange={(e) => updateReservationField('nombre_heures', parseInt(e.target.value) || 1)}
                       required
+                      style={{
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '1px solid #ddd',
+                        fontSize: '1rem',
+                        width: '100%'
+                      }}
                     />
+                    <small style={{ display: 'block', marginTop: '5px', color: '#666', fontSize: '0.875rem' }}>
+                      Prix de base (4h): 150 DH | Heure supplémentaire: 40 DH
+                    </small>
                   </div>
-                </div>
+                </>
               )}
 
+              {/* Champs pour réservation par jours */}
+              {reservationForm.type_reservation === 'jours' && (
+                <>
+                  <div className="evaluation-form-group">
+                    <label>📅 Date de début</label>
+                    <input
+                      type="date"
+                      value={reservationForm.date_debut}
+                      onChange={(e) => updateReservationField('date_debut', e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      required
+                      style={{
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '1px solid #ddd',
+                        fontSize: '1rem',
+                        width: '100%'
+                      }}
+                    />
+                  </div>
+
+                  <div className="evaluation-form-group">
+                    <label>📅 Date de fin</label>
+                    <input
+                      type="date"
+                      value={reservationForm.date_fin}
+                      onChange={(e) => updateReservationField('date_fin', e.target.value)}
+                      min={reservationForm.date_debut || new Date().toISOString().split('T')[0]}
+                      required
+                      style={{
+                        padding: '10px',
+                        borderRadius: '8px',
+                        border: '1px solid #ddd',
+                        fontSize: '1rem',
+                        width: '100%'
+                      }}
+                    />
+                    <small style={{ display: 'block', marginTop: '5px', color: '#666', fontSize: '0.875rem' }}>
+                      Chaque jour = 8 heures (150 DH pour 4h + 40 DH/heure supplémentaire)
+                    </small>
+                  </div>
+                </>
+              )}
+
+              {/* Numéro de téléphone */}
+              <div className="evaluation-form-group">
+                <label>📞 {t('security_page.phone_number') || 'Numéro de téléphone'}</label>
+                <input
+                  type="tel"
+                  value={reservationForm.phone}
+                  onChange={(e) => updateReservationField('phone', e.target.value)}
+                  placeholder={t('security_page.phone_placeholder') || 'Ex: 0612345678'}
+                  required
+                  pattern="[0-9\s\+\-\(\)]{10,}"
+                  title={t('security_page.phone_validation') || 'Numéro de téléphone valide'}
+                  style={{
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: '1px solid #ddd',
+                    fontSize: '1rem',
+                    width: '100%'
+                  }}
+                />
+              </div>
+
+              {/* Affichage du prix total */}
               <div style={{
-                background: '#f7f8fa',
-                borderRadius: 8,
-                padding: 12,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: 12,
+                padding: 20,
                 textAlign: 'center',
                 fontWeight: 700,
-                color: '#16a34a',
-                marginTop: 8
+                color: '#fff',
+                marginTop: 16,
+                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
               }}>
-                {t('security_page.total_price')} {calculateReservationPrice(reservationForm).toFixed(2)} DH
+                <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: 8 }}>
+                  {t('security_page.total_price') || 'Prix total'}
+                </div>
+                <div style={{ fontSize: '2rem', fontWeight: 800 }}>
+                  {calculateReservationPrice(reservationForm).toFixed(2)} DH
+                </div>
+                {reservationForm.type_reservation === 'heures' && (
+                  <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: 8 }}>
+                    {reservationForm.nombre_heures <= 4 
+                      ? `${reservationForm.nombre_heures} heure(s) - Prix de base`
+                      : `4h (base) + ${reservationForm.nombre_heures - 4} heure(s) supplémentaire(s)`
+                    }
+                  </div>
+                )}
+                {reservationForm.type_reservation === 'jours' && reservationForm.date_debut && reservationForm.date_fin && (
+                  <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: 8 }}>
+                    {(() => {
+                      const dateDebut = new Date(reservationForm.date_debut);
+                      const dateFin = new Date(reservationForm.date_fin);
+                      // Normaliser les dates
+                      dateDebut.setHours(0, 0, 0, 0);
+                      dateFin.setHours(0, 0, 0, 0);
+                      // Calculer la différence
+                      const diffTime = dateFin.getTime() - dateDebut.getTime();
+                      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                      const nombreJours = Math.max(1, diffDays + 1); // Au moins 1 jour, +1 pour inclure le jour de début
+                      const totalHeures = nombreJours * 8;
+                      const prixParJour = 150 + ((8 - 4) * 40); // 310 DH par jour
+                      return `${nombreJours} jour(s) × ${prixParJour} DH = ${prixParJour * nombreJours} DH (${totalHeures} heures au total)`;
+                    })()}
+                  </div>
+                )}
               </div>
 
               <div className="evaluation-form-actions">
