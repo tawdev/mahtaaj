@@ -42,6 +42,7 @@ import ServiceTypeDetails from './pages/ServiceTypeDetails';
 import EmployeeRegister from './pages/EmployeeRegister';
 import BebeSetting from './pages/BebeSetting';
 import Jardinage from './pages/Jardinage';
+import JardinageDetail from './pages/JardinageDetail';
 import HandWorkers from './pages/HandWorkers';
 import HandWorkerBooking from './pages/HandWorkerBooking';
 import HandWorkerRegistration from './pages/HandWorkerRegistration';
@@ -136,6 +137,7 @@ export default function App() {
           <Route path="/employees/register/clean" element={<EmployeeRegister />} />
           <Route path="/bebe-setting" element={<BebeSetting />} />
           <Route path="/jardinage" element={<Jardinage />} />
+          <Route path="/jardinage/details/:id" element={<JardinageDetail />} />
           <Route path="/hand-workers" element={<HandWorkers />} />
           <Route path="/hand-workers/booking" element={<HandWorkerBooking />} />
           <Route path="/hand-workers/register" element={<HandWorkerRegistration />} />

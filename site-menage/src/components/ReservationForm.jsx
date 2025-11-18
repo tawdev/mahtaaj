@@ -166,16 +166,21 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
         const reservationData = {
           user_id: userId,
           jardinage_service_id: serviceId || null,
+          jardinage_category_id: categoryId || null,
           client_name: formData.client_name.trim(),
           client_phone: formData.client_phone.trim(),
           client_email: null,
-          reservation_date: reservationDate,
-          hours: formData.booking_type === 'heures' ? parseInt(formData.hours) : null,
-          days: formData.booking_type === 'jours' ? duration : null,
+          location: formData.location.trim() || 'Non spécifié',
+          reservation_date: reservationDate ? new Date(reservationDate).toISOString().split('T')[0] : null,
           booking_type: formData.booking_type,
+          // For heures booking
+          start_date: formData.booking_type === 'heures' ? (formData.start_date ? new Date(formData.start_date).toISOString().split('T')[0] : null) : null,
           start_time: formData.booking_type === 'heures' ? formData.start_time : null,
-          start_date: formData.booking_type === 'jours' ? formData.start_date_jours : null,
-          end_date: formData.booking_type === 'jours' ? formData.end_date_jours : null,
+          hours: formData.booking_type === 'heures' ? parseInt(formData.hours) : null,
+          // For jours booking
+          start_date_jours: formData.booking_type === 'jours' ? (formData.start_date_jours ? new Date(formData.start_date_jours).toISOString().split('T')[0] : null) : null,
+          end_date_jours: formData.booking_type === 'jours' ? (formData.end_date_jours ? new Date(formData.end_date_jours).toISOString().split('T')[0] : null) : null,
+          days: formData.booking_type === 'jours' ? duration : null,
           total_price: totalPrice,
           status: 'pending',
           notes: formData.notes.trim() || null

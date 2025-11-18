@@ -98,7 +98,13 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .category-card:hover {
@@ -107,38 +113,78 @@
 }
 
 .category-image {
-  height: 200px;
+  height: 250px;
   overflow: hidden;
   position: relative;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
 }
 
 .category-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  object-position: center;
+  transition: transform 0.4s ease;
+  display: block;
 }
 
 .category-card:hover .category-image img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
-.category-content {
-  padding: 20px;
+.category-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #059669;
+}
+
+/* Category Name Overlay on Image */
+.category-name-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.5) 50%, transparent 100%);
+  padding: 20px 18px 18px;
+  z-index: 2;
 }
 
 .category-name {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 10px 0;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.category-content {
+  padding: 20px 24px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .category-description {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #64748b;
-  line-height: 1.5;
+  line-height: 1.6;
   margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .category-overlay {
@@ -413,7 +459,7 @@
 }
 
 /* Modal Styles */
-.service-details-modal, .reservation-modal {
+.service-details-modal, .reservation-modal, .category-details-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -589,6 +635,81 @@
   padding: 0 24px 24px 24px;
 }
 
+/* Category Details Modal Styles */
+.category-detail-image {
+  width: 100%;
+  height: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  position: relative;
+}
+
+.category-detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: all 0.3s ease;
+}
+
+.category-detail-image .category-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #059669;
+}
+
+.category-detail-info {
+  margin-bottom: 20px;
+}
+
+.category-detail-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+}
+
+.category-detail-description {
+  font-size: 1.1rem;
+  color: #374151;
+  line-height: 1.7;
+  margin: 0 0 24px 0;
+}
+
+.category-detail-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: #047857;
+  border: 1px solid #bbf7d0;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 160px;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+}
+
 /* Loading States */
 .loading-container, .loading-details {
   display: flex;
@@ -701,6 +822,18 @@
     gap: 16px;
   }
 
+  .category-image {
+    height: 220px;
+  }
+
+  .category-name {
+    font-size: 1.3rem;
+  }
+
+  .category-content {
+    padding: 16px 20px 20px;
+  }
+
   .jardins-grid {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -727,7 +860,41 @@
     padding: 16px;
   }
 
+  .category-image {
+    height: 200px;
+  }
+
+  .category-name {
+    font-size: 1.2rem;
+    padding: 16px 14px 14px;
+  }
+
+  .category-name-overlay {
+    padding: 16px 14px 14px;
+  }
+
   .jardin-details {
     padding: 12px;
+  }
+
+  .category-detail-image {
+    height: 250px;
+  }
+
+  .category-detail-name {
+    font-size: 1.5rem;
+  }
+
+  .category-detail-description {
+    font-size: 1rem;
+  }
+
+  .category-detail-actions {
+    flex-direction: column;
+  }
+
+  .btn-secondary, .btn-primary {
+    width: 100%;
+    min-width: auto;
   }
 }

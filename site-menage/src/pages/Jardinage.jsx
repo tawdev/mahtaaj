@@ -178,9 +178,6 @@ export default function Jardinage() {
     }
   };
 
-  const handleCategoryClick = (categoryId) => {
-    loadCategoryDetails(categoryId);
-  };
 
   const handleBackToCategories = () => {
     setSelectedCategory(null);
@@ -255,10 +252,10 @@ export default function Jardinage() {
             <h2 className="section-title">{t('jardinage.categories.title')}</h2>
             <div className="categories-grid">
               {categories.map((category) => (
-                <div
+                <Link
                   key={category.id}
+                  to={`/jardinage/details/${category.id}`}
                   className="category-card"
-                  onClick={() => handleCategoryClick(category.id)}
                 >
                   <div className="category-image">
                     {(() => {
@@ -281,24 +278,31 @@ export default function Jardinage() {
                           src={imageUrl}
                           alt={category.name}
                           onError={(e) => {
-                            console.log('[Jardinage] Image failed to load:', imageUrl);
-                            e.target.src = '/images/jardinage/default.jpg';
+                            e.target.style.display = 'none';
+                            const placeholder = e.target.nextElementSibling;
+                            if (placeholder) {
+                              placeholder.style.display = 'flex';
+                            }
                           }}
                         />
-                      ) : (
-                        <div className="category-image-placeholder">🌱</div>
-                      );
+                      ) : null;
                     })()}
+                    <div className="category-image-placeholder" style={{display: category.image ? 'none' : 'flex'}}>
+                      🌱
+                    </div>
+                    {/* Category Name Overlay */}
+                    <div className="category-name-overlay">
+                      <h3 className="category-name">{category.name || t('jardinage.category_not_available')}</h3>
+                    </div>
                   </div>
                   <div className="category-content">
-                    <h3 className="category-name">{category.name || t('jardinage.category_not_available')}</h3>
                     <p className="category-description">{category.description || t('jardinage.description_not_available')}</p>
                   </div>
                   <div className="category-overlay">
                     <span className="view-icon">🌱</span>
                     <span className="view-text">{t('jardinage.categories.view_services')}</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -454,12 +458,13 @@ export default function Jardinage() {
       )}
 
       {/* Reservation Form Modal */}
-      {showReservationForm && selectedService && (
+      {showReservationForm && (
         <div className="reservation-modal">
           <div className="modal-backdrop" onClick={handleReservationCancel}></div>
           <div className="modal-content">
             <ReservationForm
-              serviceId={selectedService.id}
+              serviceId={selectedService?.id || null}
+              categoryId={selectedCategory?.id || null}
               serviceType="jardinage"
               onSuccess={handleReservationSuccess}
               onCancel={handleReservationCancel}
