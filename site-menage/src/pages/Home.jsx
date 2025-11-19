@@ -3,7 +3,7 @@ import './Home.css';
 import ServiceCard from '../components/ServiceCard';
 import Contact from './Contact';
 import UserRating from '../components/UserRating';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import TousLesServices from './TousLesServices';
@@ -11,6 +11,7 @@ import TousLesServices from './TousLesServices';
 
 export default function Home() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   
   // Dynamic gallery data
   const [categories, setCategories] = useState([]);
@@ -42,6 +43,58 @@ export default function Home() {
       return 'Ménage + Cuisine';
     }
     return categoryName;
+  };
+
+  // Helper function to fix Arabic category name (replace "حماية" with "الأمن")
+  const fixArabicCategoryName = (categoryName, locale) => {
+    if (!categoryName || locale !== 'ar') return categoryName;
+    // Replace "حماية" with "الأمن" for Arabic language
+    if (categoryName.includes('حماية')) {
+      return categoryName.replace(/حماية/g, 'الأمن');
+    }
+    return categoryName;
+  };
+
+  // Helper function to get category path based on category name
+  const getCategoryPath = (categoryName) => {
+    if (!categoryName) return '/';
+    
+    const nameLower = categoryName.toLowerCase().trim();
+    const nameOriginal = categoryName.trim();
+    
+    // Map category names to their corresponding routes
+    // Ménage / Cleaning / التنظيف
+    if (nameLower.includes('ménage') || nameLower.includes('menage') || 
+        nameLower.includes('house') || nameOriginal.includes('تنظيف') || 
+        nameOriginal.includes('منزل')) {
+      return '/services/menage';
+    }
+    // Sécurité / Security / الأمن
+    if (nameLower.includes('sécurité') || nameLower.includes('security') || 
+        nameOriginal.includes('أمن') || nameOriginal.includes('الأمن')) {
+      return '/security';
+    }
+    // Bébé / Baby / رعاية الأطفال
+    if (nameLower.includes('bébé') || nameLower.includes('bebe') || 
+        nameLower.includes('child') || nameOriginal.includes('طفل') || 
+        nameOriginal.includes('رعاية') || nameOriginal.includes('أطفال')) {
+      return '/bebe-setting';
+    }
+    // Jardinage / Gardening / البستنة
+    if (nameLower.includes('jardinage') || nameLower.includes('gardening') || 
+        nameOriginal.includes('تنسيق') || nameOriginal.includes('الحدائق')) {
+      return '/jardinage';
+    }
+    // Travaux manuels / Hand workers / الأعمال اليدوية
+    if (nameLower.includes('travaux') || nameLower.includes('manuels') || 
+        nameLower.includes('main') || nameLower.includes('hand') || 
+        nameLower.includes('worker') || nameOriginal.includes('أعمال') || 
+        nameOriginal.includes('يدوية') || nameOriginal.includes('الأعمال اليدوية')) {
+      return '/hand-workers';
+    }
+    
+    // Default fallback
+    return '/';
   };
 
   // Helper function to get image URL from Supabase Storage
@@ -118,11 +171,16 @@ export default function Home() {
           console.error('Error loading categories:', categoriesError);
         } else if (categoriesData && categoriesData.length > 0) {
           // Map categories with localized names
-          const mappedCategories = categoriesData.map(cat => ({
-            ...cat,
-            name: cat[`name_${locale}`] || cat.name || cat.name_fr || '',
-            description: cat[`description_${locale}`] || cat.description || cat.description_fr || ''
-          }));
+          const mappedCategories = categoriesData.map(cat => {
+            let categoryName = cat[`name_${locale}`] || cat.name || cat.name_fr || '';
+            categoryName = fixArabicCategoryName(categoryName, locale);
+            
+            return {
+              ...cat,
+              name: categoryName,
+              description: cat[`description_${locale}`] || cat.description || cat.description_fr || ''
+            };
+          });
           
           setCategories(mappedCategories);
           
@@ -309,93 +367,31 @@ export default function Home() {
     setIsPlaying(!isPlaying);
   };
 
-  // Category selection handler
-  const handleCategorySelect = async (category) => {
-    if (category.id === selectedCategory?.id || isTransitioning) return;
+  // Category selection handler - navigates to the category page
+  const handleCategorySelect = (category) => {
+    if (isTransitioning) return;
     
-    setIsTransitioning(true);
-    
-    // Add fade out animation for clicked button
-    setHiddenButtons(prev => new Set([...prev, category.id]));
-    
-    try {
-      const { data: imagesData, error } = await supabase
-        .from('gallery')
-        .select('*')
-        .eq('category_gallery_id', category.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error loading category images:', error);
-        setIsTransitioning(false);
-        setHiddenButtons(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(category.id);
-          return newSet;
-        });
-        return;
-      }
-      
-      if (imagesData && imagesData.length > 0) {
-        // Map images with proper URLs
-        const mappedImages = imagesData.map(img => ({
-          ...img,
-          image_url: getImageUrl(img.image_path || img.image_url)
-        }));
-        
-        // Select random image from category
-        const randomImage = mappedImages[Math.floor(Math.random() * mappedImages.length)];
-        
-        setTimeout(() => {
-          setSelectedCategory(category);
-          setCurrentImage(randomImage);
-          setIsTransitioning(false);
-          
-          // Remove fade out animation after 1 second
-          setTimeout(() => {
-            setHiddenButtons(prev => {
-              const newSet = new Set(prev);
-              newSet.delete(category.id);
-              return newSet;
-            });
-          }, 1000);
-        }, 300);
-      } else {
-        setIsTransitioning(false);
-        setHiddenButtons(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(category.id);
-          return newSet;
-        });
-      }
-    } catch (error) {
-      console.error('Error loading category images:', error);
-      setIsTransitioning(false);
-      setHiddenButtons(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(category.id);
-        return newSet;
-      });
-    }
+    const categoryPath = getCategoryPath(category.name);
+    navigate(categoryPath);
   };
 
-  // Auto-rotate through categories
-  useEffect(() => {
-    if (!isPlaying || categories.length === 0 || isTransitioning) return;
-    
-    const interval = setInterval(() => {
-      const currentIndex = categories.findIndex(cat => cat.id === selectedCategory?.id);
-      const nextIndex = (currentIndex + 1) % categories.length;
-      const nextCategory = categories[nextIndex];
-      
-      if (nextCategory) {
-        handleCategorySelect(nextCategory);
-      }
-    }, 5000); // Change every 5 seconds
+  // Auto-rotate through categories - DISABLED: Now buttons navigate to pages instead of changing images
+  // useEffect(() => {
+  //   if (!isPlaying || categories.length === 0 || isTransitioning) return;
+  //   
+  //   const interval = setInterval(() => {
+  //     const currentIndex = categories.findIndex(cat => cat.id === selectedCategory?.id);
+  //     const nextIndex = (currentIndex + 1) % categories.length;
+  //     const nextCategory = categories[nextIndex];
+  //     
+  //     if (nextCategory) {
+  //       handleCategorySelect(nextCategory);
+  //     }
+  //   }, 5000); // Change every 5 seconds
 
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categories.length, selectedCategory?.id, isPlaying, isTransitioning]);
+  //   return () => clearInterval(interval);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [categories.length, selectedCategory?.id, isPlaying, isTransitioning]);
   
   // Don't render dynamic content until mounted to prevent hydration mismatch
   if (!mounted) {
@@ -469,17 +465,17 @@ export default function Home() {
           <div className="service-buttons-container category-buttons-container">
             {categories.map((category) => {
               const displayName = formatCategoryName(category.name);
+              const categoryPath = getCategoryPath(category.name);
               return (
-                <button
+                <Link
                   key={category.id}
+                  to={categoryPath}
                   className={`service-button category-button ${selectedCategory?.id === category.id ? 'active' : ''} ${hiddenButtons.has(category.id) ? 'fade-out' : 'fade-in'}`}
-                  onClick={() => handleCategorySelect(category)}
                   title={displayName}
                   aria-label={displayName}
-                  type="button"
                 >
                   <span className="service-label">{displayName}</span>
-                </button>
+                </Link>
               );
             })}
           </div>

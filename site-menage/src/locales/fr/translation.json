@@ -1301,7 +1301,9 @@
     "duration": "Durée",
     "total_price": "Prix Total",
     "submitting": "Soumission...",
-    "submit": "Soumettre la Réservation"
+    "submit": "Soumettre la Réservation",
+    "price_per_hour": "Prix par heure",
+    "minimum_hours": "Heures minimum"
   },
   "hand_worker_registration": {
     "title": "Inscription Travailleur Manuel",

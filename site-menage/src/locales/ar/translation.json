@@ -1328,7 +1328,9 @@
     "duration": "المدة",
     "total_price": "السعر الإجمالي",
     "submitting": "جاري الإرسال...",
-    "submit": "إرسال الحجز"
+    "submit": "إرسال الحجز",
+    "price_per_hour": "السعر في الساعة",
+    "minimum_hours": "الحد الأدنى للساعات"
   },
   "hand_worker_registration": {
     "title": "تسجيل عامل يدوي",

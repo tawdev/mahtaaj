@@ -1301,7 +1301,9 @@
     "duration": "Duration",
     "total_price": "Total Price",
     "submitting": "Submitting...",
-    "submit": "Submit Reservation"
+    "submit": "Submit Reservation",
+    "price_per_hour": "Price per hour",
+    "minimum_hours": "Minimum hours"
   },
   "hand_worker_registration": {
     "title": "Hand Worker Registration",
