@@ -1198,6 +1198,14 @@ ON CONFLICT (id) DO UPDATE SET
   "order" = EXCLUDED."order",
   updated_at = EXCLUDED.updated_at;
 
+-- Re-synchroniser la séquence services_id_seq après les insertions forcées d'ID
+SELECT
+  setval(
+    pg_get_serial_sequence('services', 'id'),
+    COALESCE((SELECT MAX(id) + 1 FROM services), 1),
+    false
+  );
+
 -- إدراج بيانات فئات المنازل (Categories House)
 INSERT INTO categories_house (id, service_id, name, name_ar, name_fr, name_en, image, is_active, "order", created_at, updated_at) VALUES
 (1, 1, 'Ménage', 'تنظيف', 'Ménage', 'Housekeeping', 'http://127.0.0.1:8000/storage/images/products/939caa82-3dd0-4d4d-bea4-79f41b3fd05d.jpeg', true, 0, '2025-11-01 07:35:30', '2025-11-01 13:15:04'),
