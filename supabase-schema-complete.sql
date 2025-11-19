@@ -967,10 +967,45 @@ CREATE POLICY "Anyone can view active services"
 ON services FOR SELECT
 USING (is_active = true);
 
--- السماح للمستخدمين المسجلين بإنشاء/تحديث/حذف (يمكن تخصيصها)
--- CREATE POLICY "Authenticated users can manage services"
--- ON services FOR ALL
--- USING (auth.role() = 'authenticated');
+-- Allow admin to create services
+CREATE POLICY "Allow all inserts on services"
+ON services FOR INSERT
+WITH CHECK (true);
+
+-- Allow admin to update services
+CREATE POLICY "Allow all updates on services"
+ON services FOR UPDATE
+USING (true)
+WITH CHECK (true);
+
+-- Allow admin to delete services
+CREATE POLICY "Allow all deletes on services"
+ON services FOR DELETE
+USING (true);
+
+-- ============================================
+-- Policies لـ categories_house
+-- ============================================
+-- Allow everyone to read categories_house
+CREATE POLICY "Allow all selects on categories_house"
+ON categories_house FOR SELECT
+USING (true);
+
+-- Allow admin to create categories_house
+CREATE POLICY "Allow all inserts on categories_house"
+ON categories_house FOR INSERT
+WITH CHECK (true);
+
+-- Allow admin to update categories_house
+CREATE POLICY "Allow all updates on categories_house"
+ON categories_house FOR UPDATE
+USING (true)
+WITH CHECK (true);
+
+-- Allow admin to delete categories_house
+CREATE POLICY "Allow all deletes on categories_house"
+ON categories_house FOR DELETE
+USING (true);
 
 -- ============================================
 -- Policies للحجوزات (Reservations)
@@ -1231,6 +1266,14 @@ ON CONFLICT (id) DO UPDATE SET
   is_active = EXCLUDED.is_active,
   "order" = EXCLUDED."order",
   updated_at = EXCLUDED.updated_at;
+
+-- Re-synchroniser la séquence categories_house_id_seq après l'insertion
+SELECT
+  setval(
+    pg_get_serial_sequence('categories_house', 'id'),
+    COALESCE((SELECT MAX(id) + 1 FROM categories_house), 1),
+    false
+  );
 
 -- إدراج بيانات أنواع فئات المعرض (Type Category Gallery) - يجب أن تكون قبل category_gallery
 INSERT INTO type_category_gallery (id, name, name_ar, name_fr, name_en, "order", created_at, updated_at) VALUES

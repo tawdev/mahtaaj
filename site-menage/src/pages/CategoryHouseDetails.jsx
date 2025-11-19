@@ -21,6 +21,13 @@ export default function CategoryHouseDetails() {
   const [error, setError] = useState('');
   const [surface, setSurface] = useState('');
   const [price, setPrice] = useState(0);
+  
+  // Special form state for carpets/sofas categories (service 7, categories 14, 15, 16)
+  const [carpetSofaForm, setCarpetSofaForm] = useState({
+    serviceType: '', // 'carpets', 'sofas', 'both'
+    count: '',
+    items: [] // Array of {length: '', width: ''}
+  });
 
   useEffect(() => {
     loadData();
@@ -34,6 +41,87 @@ export default function CategoryHouseDetails() {
       setPrice(0);
     }
   }, [surface]);
+
+  // Check if this is a carpet/sofa category (service 7, categories 14, 15, 16)
+  const isCarpetSofaCategory = () => {
+    const serviceId = parseInt(serviceSlug);
+    const categoryId = parseInt(categorySlug);
+    return serviceId === 7 && (categoryId === 14 || categoryId === 15 || categoryId === 16);
+  };
+
+  // Determine service type based on category ID
+  const getCarpetSofaServiceType = () => {
+    const categoryId = parseInt(categorySlug);
+    if (categoryId === 14) return 'carpets'; // tapis
+    if (categoryId === 15) return 'sofas'; // canapés
+    if (categoryId === 16) return 'both'; // tapis & canapés
+    return '';
+  };
+
+  // Handle count change - generate dynamic fields
+  const handleCountChange = (count) => {
+    const numCount = parseInt(count) || 0;
+    const validCount = Math.min(Math.max(numCount, 0), 10); // Limit to 10
+    
+    const newItems = Array(validCount).fill(null).map((_, index) => 
+      carpetSofaForm.items[index] || { length: '', width: '' }
+    );
+    
+    setCarpetSofaForm({
+      ...carpetSofaForm,
+      count: validCount > 0 ? validCount.toString() : '',
+      items: newItems
+    });
+  };
+
+  // Handle item dimension change
+  const handleItemChange = (index, field, value) => {
+    const numValue = parseFloat(value) || '';
+    const validValue = numValue === '' ? '' : Math.max(0.1, numValue);
+    
+    const newItems = [...carpetSofaForm.items];
+    newItems[index] = {
+      ...newItems[index],
+      [field]: validValue
+    };
+    
+    setCarpetSofaForm({
+      ...carpetSofaForm,
+      items: newItems
+    });
+  };
+
+  // Calculate total area for carpets/sofas
+  const calculateCarpetSofaArea = () => {
+    return carpetSofaForm.items.reduce((total, item) => {
+      const length = parseFloat(item.length) || 0;
+      const width = parseFloat(item.width) || 0;
+      return total + (length * width);
+    }, 0);
+  };
+
+  // Calculate price for carpets/sofas (using 2.5 DH per m² as default)
+  const calculateCarpetSofaPrice = () => {
+    const totalArea = calculateCarpetSofaArea();
+    return totalArea * 2.5;
+  };
+
+  // Initialize service type when category loads
+  useEffect(() => {
+    if (isCarpetSofaCategory() && category) {
+      const serviceType = getCarpetSofaServiceType();
+      setCarpetSofaForm(prev => {
+        if (prev.serviceType !== serviceType) {
+          return {
+            serviceType: serviceType,
+            count: '',
+            items: []
+          };
+        }
+        return prev;
+      });
+    }
+  }, [category, categorySlug, serviceSlug]);
 
   const loadData = async () => {
     try {
@@ -1040,37 +1128,178 @@ export default function CategoryHouseDetails() {
         <div className="category-details-content">
           <div className="description-section">
             <h3>🧹 {t('services_page.category_details.description_label')}</h3>
-            <p>{t('services_page.category_details.description_text')}</p>
+            <p>{category.description || t('services_page.category_details.description_text')}</p>
           </div>
 
-          <div className="form-section">
-            <label htmlFor="surface">
-              📏 {t('services_page.forms.estimated_surface')}
-            </label>
-            <input
-              type="number"
-              id="surface"
-              value={surface}
-              onChange={(e) => setSurface(e.target.value)}
-              placeholder={t('services_page.forms.surface_placeholder')}
-              min="0"
-              step="0.5"
-            />
-          </div>
+          {/* Special Dynamic Form for Carpets/Sofas Categories */}
+          {isCarpetSofaCategory() ? (
+            <div className="carpet-sofa-form-container" style={{ direction: 'rtl' }}>
+              {/* Special Offer Card for "Both" Option (category 16) */}
+              {carpetSofaForm.serviceType === 'both' && (
+                <div className="special-offer-card">
+                  <div className="offer-header">
+                    <span className="offer-icon">✨</span>
+                    <h3>العرض الشامل</h3>
+                  </div>
+                  <div className="offer-items">
+                    <div className="offer-item">
+                      <span className="item-icon">🛋️</span>
+                      <span className="item-text">6م أرائك</span>
+                    </div>
+                    <div className="offer-item">
+                      <span className="item-icon">🧶</span>
+                      <span className="item-text">3 × 2.5م سجاد</span>
+                    </div>
+                    <div className="offer-item">
+                      <span className="item-icon">🛏️</span>
+                      <span className="item-text">2 أسرّة مضادة للبكتيريا</span>
+                    </div>
+                  </div>
+                  <div className="offer-price">
+                    <span className="price-label">💰 السعر:</span>
+                    <span className="price-value">800 د.م</span>
+                  </div>
+                </div>
+              )}
 
-          <div className="price-section">
-            <h3>💰 {t('services_page.forms.estimated_price')}</h3>
-            <p className="price-value">{price.toFixed(2)} DH</p>
-          </div>
+              {/* Dynamic Form for Carpets or Sofas Only */}
+              {(carpetSofaForm.serviceType === 'carpets' || carpetSofaForm.serviceType === 'sofas') && (
+                <div className="dynamic-form-container">
+                  <div className="count-input-group">
+                    <label htmlFor="item-count">
+                      {carpetSofaForm.serviceType === 'carpets' ? '📏 عدد السجاد' : '📏 عدد الأرائك'}
+                    </label>
+                    <input
+                      id="item-count"
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={carpetSofaForm.count}
+                      onChange={(e) => handleCountChange(e.target.value)}
+                      placeholder="أدخل العدد"
+                      className="count-input"
+                    />
+                  </div>
 
-          <div className="actions-section">
-            <button onClick={handleReserve} className="reserve-button">
-              {t('services_page.forms.reserve')}
-            </button>
-            <Link to="/services" className="back-services-button">
-              {t('services_page.category_details.back_to_services')}
-            </Link>
-          </div>
+                  {/* Dynamic Items Fields */}
+                  {carpetSofaForm.items.length > 0 && (
+                    <div className="items-fields-container">
+                      {carpetSofaForm.items.map((item, index) => (
+                        <div key={index} className="item-field-group">
+                          <h4 className="item-title">
+                            {carpetSofaForm.serviceType === 'carpets' 
+                              ? `السجادة ${index + 1}:` 
+                              : `الأريكة ${index + 1}:`}
+                          </h4>
+                          <div className="dimensions-inputs">
+                            <div className="dimension-input">
+                              <label>الطول (م):</label>
+                              <input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                value={item.length}
+                                onChange={(e) => handleItemChange(index, 'length', e.target.value)}
+                                placeholder="0.0"
+                              />
+                            </div>
+                            <div className="dimension-input">
+                              <label>العرض (م):</label>
+                              <input
+                                type="number"
+                                min="0.1"
+                                step="0.1"
+                                value={item.width}
+                                onChange={(e) => handleItemChange(index, 'width', e.target.value)}
+                                placeholder="0.0"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Calculation Result */}
+                  {calculateCarpetSofaArea() > 0 && (
+                    <div className="calculation-result-card">
+                      <div className="result-item">
+                        <span className="result-icon">📐</span>
+                        <span className="result-label">المساحة الإجمالية:</span>
+                        <span className="result-value">{calculateCarpetSofaArea().toFixed(2)} م²</span>
+                      </div>
+                      <div className="result-item">
+                        <span className="result-icon">💰</span>
+                        <span className="result-label">السعر المقدر:</span>
+                        <span className="result-value price-value">{calculateCarpetSofaPrice().toFixed(2)} د.م</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Reserve Button */}
+              <div className="actions-section" style={{ marginTop: '2rem' }}>
+                <button 
+                  onClick={() => {
+                    const prefill = {
+                      serviceTitle: service?.name || service?.title,
+                      message: `Catégorie: ${category?.name}${carpetSofaForm.serviceType === 'both' ? ', العرض الشامل' : calculateCarpetSofaArea() > 0 ? `, المساحة: ${calculateCarpetSofaArea().toFixed(2)} م²` : ''}`,
+                      type: category?.name || '',
+                      size: carpetSofaForm.serviceType === 'both' ? 'عرض شامل' : calculateCarpetSofaArea().toFixed(2) || '',
+                      totalPrice: carpetSofaForm.serviceType === 'both' ? 800 : calculateCarpetSofaPrice() || 0,
+                    };
+                    try {
+                      localStorage.setItem('booking_prefill', JSON.stringify(prefill));
+                      navigate('/booking');
+                    } catch (err) {
+                      console.error('Error saving prefill:', err);
+                      navigate('/booking');
+                    }
+                  }}
+                  className="reserve-button"
+                  disabled={carpetSofaForm.serviceType !== 'both' && calculateCarpetSofaArea() === 0}
+                >
+                  {t('services_page.forms.reserve')}
+                </button>
+                <Link to="/services" className="back-services-button">
+                  {t('services_page.category_details.back_to_services')}
+                </Link>
+              </div>
+            </div>
+          ) : (
+            /* Standard Form for Other Categories */
+            <>
+              <div className="form-section">
+                <label htmlFor="surface">
+                  📏 {t('services_page.forms.estimated_surface')}
+                </label>
+                <input
+                  type="number"
+                  id="surface"
+                  value={surface}
+                  onChange={(e) => setSurface(e.target.value)}
+                  placeholder={t('services_page.forms.surface_placeholder')}
+                  min="0"
+                  step="0.5"
+                />
+              </div>
+
+              <div className="price-section">
+                <h3>💰 {t('services_page.forms.estimated_price')}</h3>
+                <p className="price-value">{price.toFixed(2)} DH</p>
+              </div>
+
+              <div className="actions-section">
+                <button onClick={handleReserve} className="reserve-button">
+                  {t('services_page.forms.reserve')}
+                </button>
+                <Link to="/services" className="back-services-button">
+                  {t('services_page.category_details.back_to_services')}
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       )}
     </main>

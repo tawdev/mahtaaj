@@ -16,6 +16,13 @@ export default function ServiceDetails() {
     hours: '',
     calculationType: 'area' // 'area' or 'time'
   });
+  
+  // Special form state for service 7 (carpets & sofas)
+  const [carpetSofaForm, setCarpetSofaForm] = useState({
+    serviceType: '', // 'carpets', 'sofas', 'both'
+    count: '',
+    items: [] // Array of {length: '', width: ''}
+  });
 
   useEffect(() => {
     loadService();
@@ -61,6 +68,67 @@ export default function ServiceDetails() {
     }
     return 0;
   };
+
+  // Handle service type change for carpets/sofas form
+  const handleServiceTypeChange = (type) => {
+    setCarpetSofaForm({
+      serviceType: type,
+      count: '',
+      items: []
+    });
+  };
+
+  // Handle count change - generate dynamic fields
+  const handleCountChange = (count) => {
+    const numCount = parseInt(count) || 0;
+    const validCount = Math.min(Math.max(numCount, 0), 10); // Limit to 10
+    
+    const newItems = Array(validCount).fill(null).map((_, index) => 
+      carpetSofaForm.items[index] || { length: '', width: '' }
+    );
+    
+    setCarpetSofaForm({
+      ...carpetSofaForm,
+      count: validCount > 0 ? validCount.toString() : '',
+      items: newItems
+    });
+  };
+
+  // Handle item dimension change
+  const handleItemChange = (index, field, value) => {
+    const numValue = parseFloat(value) || '';
+    const validValue = numValue === '' ? '' : Math.max(0.1, numValue);
+    
+    const newItems = [...carpetSofaForm.items];
+    newItems[index] = {
+      ...newItems[index],
+      [field]: validValue
+    };
+    
+    setCarpetSofaForm({
+      ...carpetSofaForm,
+      items: newItems
+    });
+  };
+
+  // Calculate total area for carpets/sofas
+  const calculateCarpetSofaArea = () => {
+    return carpetSofaForm.items.reduce((total, item) => {
+      const length = parseFloat(item.length) || 0;
+      const width = parseFloat(item.width) || 0;
+      return total + (length * width);
+    }, 0);
+  };
+
+  // Calculate price for carpets/sofas
+  const calculateCarpetSofaPrice = () => {
+    if (!service || !service.price_per_m2) return 0;
+    const totalArea = calculateCarpetSofaArea();
+    return totalArea * parseFloat(service.price_per_m2);
+  };
+
+  // Check if this is service 7 (carpets & sofas)
+  const isCarpetSofaService = service && (service.id === 7 || service.id === '7');
 
   if (loading) {
     return (
@@ -181,90 +249,239 @@ export default function ServiceDetails() {
             </div>
           </section>
 
-          {/* Calculator Section */}
-          <section className="service-calculator-section" data-aos="fade-up" data-aos-delay="1000">
-            <h2 className="section-title">Calculateur de coût</h2>
-            <div className="calculator-container">
-              <div className="calculator-inputs">
-                <div className="calculation-type">
-                  <label>
+          {/* Special Calculator Section for Service 7 (Carpets & Sofas) */}
+          {isCarpetSofaService ? (
+            <section className="service-calculator-section carpet-sofa-calculator" data-aos="fade-up" data-aos-delay="1000">
+              <h2 className="section-title">حاسبة التكلفة</h2>
+              <div className="carpet-sofa-form-container">
+                {/* Service Type Selection */}
+                <div className="service-type-selection">
+                  <label className={`service-type-option ${carpetSofaForm.serviceType === 'carpets' ? 'active' : ''}`}>
                     <input
                       type="radio"
-                      name="calculationType"
-                      value="area"
-                      checked={calculator.calculationType === 'area'}
-                      onChange={(e) => setCalculator({...calculator, calculationType: e.target.value, hours: ''})}
+                      name="carpetSofaType"
+                      value="carpets"
+                      checked={carpetSofaForm.serviceType === 'carpets'}
+                      onChange={(e) => handleServiceTypeChange(e.target.value)}
                     />
-                    Calcul par surface
+                    <span className="option-icon">🧶</span>
+                    <span className="option-text">سجاد فقط</span>
                   </label>
-                  <label>
+                  <label className={`service-type-option ${carpetSofaForm.serviceType === 'sofas' ? 'active' : ''}`}>
                     <input
                       type="radio"
-                      name="calculationType"
-                      value="time"
-                      checked={calculator.calculationType === 'time'}
-                      onChange={(e) => setCalculator({...calculator, calculationType: e.target.value, area: ''})}
+                      name="carpetSofaType"
+                      value="sofas"
+                      checked={carpetSofaForm.serviceType === 'sofas'}
+                      onChange={(e) => handleServiceTypeChange(e.target.value)}
                     />
-                    Calcul par temps
+                    <span className="option-icon">🛋️</span>
+                    <span className="option-text">أرائك فقط</span>
+                  </label>
+                  <label className={`service-type-option ${carpetSofaForm.serviceType === 'both' ? 'active' : ''}`}>
+                    <input
+                      type="radio"
+                      name="carpetSofaType"
+                      value="both"
+                      checked={carpetSofaForm.serviceType === 'both'}
+                      onChange={(e) => handleServiceTypeChange(e.target.value)}
+                    />
+                    <span className="option-icon">✨</span>
+                    <span className="option-text">سجاد وأرائك معاً</span>
                   </label>
                 </div>
 
-                {calculator.calculationType === 'area' && service.price_per_m2 && (
-                  <div className="input-group">
-                    <label htmlFor="area">Surface (m²)</label>
-                    <input
-                      id="area"
-                      type="number"
-                      min="1"
-                      step="0.1"
-                      value={calculator.area}
-                      onChange={(e) => setCalculator({...calculator, area: e.target.value})}
-                      placeholder="Entrez la surface"
-                    />
+                {/* Special Offer Card for "Both" Option */}
+                {carpetSofaForm.serviceType === 'both' && (
+                  <div className="special-offer-card">
+                    <div className="offer-header">
+                      <span className="offer-icon">✨</span>
+                      <h3>العرض الشامل</h3>
+                    </div>
+                    <div className="offer-items">
+                      <div className="offer-item">
+                        <span className="item-icon">🛋️</span>
+                        <span className="item-text">6م أرائك</span>
+                      </div>
+                      <div className="offer-item">
+                        <span className="item-icon">🧶</span>
+                        <span className="item-text">3 × 2.5م سجاد</span>
+                      </div>
+                      <div className="offer-item">
+                        <span className="item-icon">🛏️</span>
+                        <span className="item-text">2 أسرّة مضادة للبكتيريا</span>
+                      </div>
+                    </div>
+                    <div className="offer-price">
+                      <span className="price-label">💰 السعر:</span>
+                      <span className="price-value">800 د.م</span>
+                    </div>
                   </div>
                 )}
 
-                {calculator.calculationType === 'time' && (
-                  <div className="input-group">
-                    <label htmlFor="hours">Durée (heures)</label>
-                    <input
-                      id="hours"
-                      type="number"
-                      min="1"
-                      step="0.5"
-                      value={calculator.hours}
-                      onChange={(e) => setCalculator({...calculator, hours: e.target.value})}
-                      placeholder="Entrez la durée"
-                    />
+                {/* Dynamic Form for Carpets or Sofas Only */}
+                {(carpetSofaForm.serviceType === 'carpets' || carpetSofaForm.serviceType === 'sofas') && (
+                  <div className="dynamic-form-container">
+                    <div className="count-input-group">
+                      <label htmlFor="item-count">
+                        {carpetSofaForm.serviceType === 'carpets' ? '📏 عدد السجاد' : '📏 عدد الأرائك'}
+                      </label>
+                      <input
+                        id="item-count"
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={carpetSofaForm.count}
+                        onChange={(e) => handleCountChange(e.target.value)}
+                        placeholder="أدخل العدد"
+                        className="count-input"
+                      />
+                    </div>
+
+                    {/* Dynamic Items Fields */}
+                    {carpetSofaForm.items.length > 0 && (
+                      <div className="items-fields-container">
+                        {carpetSofaForm.items.map((item, index) => (
+                          <div key={index} className="item-field-group">
+                            <h4 className="item-title">
+                              {carpetSofaForm.serviceType === 'carpets' 
+                                ? `السجادة ${index + 1}:` 
+                                : `الأريكة ${index + 1}:`}
+                            </h4>
+                            <div className="dimensions-inputs">
+                              <div className="dimension-input">
+                                <label>الطول (م):</label>
+                                <input
+                                  type="number"
+                                  min="0.1"
+                                  step="0.1"
+                                  value={item.length}
+                                  onChange={(e) => handleItemChange(index, 'length', e.target.value)}
+                                  placeholder="0.0"
+                                />
+                              </div>
+                              <div className="dimension-input">
+                                <label>العرض (م):</label>
+                                <input
+                                  type="number"
+                                  min="0.1"
+                                  step="0.1"
+                                  value={item.width}
+                                  onChange={(e) => handleItemChange(index, 'width', e.target.value)}
+                                  placeholder="0.0"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Calculation Result */}
+                    {calculateCarpetSofaArea() > 0 && (
+                      <div className="calculation-result-card">
+                        <div className="result-item">
+                          <span className="result-icon">📐</span>
+                          <span className="result-label">المساحة الإجمالية:</span>
+                          <span className="result-value">{calculateCarpetSofaArea().toFixed(2)} م²</span>
+                        </div>
+                        <div className="result-item">
+                          <span className="result-icon">💰</span>
+                          <span className="result-label">السعر المقدر:</span>
+                          <span className="result-value price-value">{calculateCarpetSofaPrice().toFixed(2)} د.م</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
+            </section>
+          ) : (
+            /* Standard Calculator Section for Other Services */
+            <section className="service-calculator-section" data-aos="fade-up" data-aos-delay="1000">
+              <h2 className="section-title">Calculateur de coût</h2>
+              <div className="calculator-container">
+                <div className="calculator-inputs">
+                  <div className="calculation-type">
+                    <label>
+                      <input
+                        type="radio"
+                        name="calculationType"
+                        value="area"
+                        checked={calculator.calculationType === 'area'}
+                        onChange={(e) => setCalculator({...calculator, calculationType: e.target.value, hours: ''})}
+                      />
+                      Calcul par surface
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="calculationType"
+                        value="time"
+                        checked={calculator.calculationType === 'time'}
+                        onChange={(e) => setCalculator({...calculator, calculationType: e.target.value, area: ''})}
+                      />
+                      Calcul par temps
+                    </label>
+                  </div>
 
-              <div className="calculator-result">
-                <h3>Coût estimé</h3>
-                <div className="estimated-cost">
-                  {calculateCost() > 0 ? `${calculateCost().toFixed(2)} €` : '-- €'}
+                  {calculator.calculationType === 'area' && service.price_per_m2 && (
+                    <div className="input-group">
+                      <label htmlFor="area">Surface (m²)</label>
+                      <input
+                        id="area"
+                        type="number"
+                        min="1"
+                        step="0.1"
+                        value={calculator.area}
+                        onChange={(e) => setCalculator({...calculator, area: e.target.value})}
+                        placeholder="Entrez la surface"
+                      />
+                    </div>
+                  )}
+
+                  {calculator.calculationType === 'time' && (
+                    <div className="input-group">
+                      <label htmlFor="hours">Durée (heures)</label>
+                      <input
+                        id="hours"
+                        type="number"
+                        min="1"
+                        step="0.5"
+                        value={calculator.hours}
+                        onChange={(e) => setCalculator({...calculator, hours: e.target.value})}
+                        placeholder="Entrez la durée"
+                      />
+                    </div>
+                  )}
                 </div>
-                {calculateCost() > 0 && (
-                  <p className="cost-breakdown">
-                {calculator.calculationType === 'area' && service.price_per_m2 && (
-                  `${calculator.area} m² × ${parseFloat(service.price_per_m2).toFixed(2)} € = ${calculateCost().toFixed(2)} €`
-                )}
-                {calculator.calculationType === 'time' && calculator.hours && (
-                  (() => {
-                    const hours = parseFloat(calculator.hours);
-                    if (hours <= 4) {
-                      return `Forfait 4h : ${parseFloat(service.price_4h).toFixed(2)} €`;
-                    } else {
-                      return `4h (${parseFloat(service.price_4h).toFixed(2)} €) + ${hours - 4}h × ${parseFloat(service.extra_hour_price).toFixed(2)} € = ${calculateCost().toFixed(2)} €`;
-                    }
-                  })()
-                )}
-                  </p>
-                )}
+
+                <div className="calculator-result">
+                  <h3>Coût estimé</h3>
+                  <div className="estimated-cost">
+                    {calculateCost() > 0 ? `${calculateCost().toFixed(2)} €` : '-- €'}
+                  </div>
+                  {calculateCost() > 0 && (
+                    <p className="cost-breakdown">
+                  {calculator.calculationType === 'area' && service.price_per_m2 && (
+                    `${calculator.area} m² × ${parseFloat(service.price_per_m2).toFixed(2)} € = ${calculateCost().toFixed(2)} €`
+                  )}
+                  {calculator.calculationType === 'time' && calculator.hours && (
+                    (() => {
+                      const hours = parseFloat(calculator.hours);
+                      if (hours <= 4) {
+                        return `Forfait 4h : ${parseFloat(service.price_4h).toFixed(2)} €`;
+                      } else {
+                        return `4h (${parseFloat(service.price_4h).toFixed(2)} €) + ${hours - 4}h × ${parseFloat(service.extra_hour_price).toFixed(2)} € = ${calculateCost().toFixed(2)} €`;
+                      }
+                    })()
+                  )}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* CTA Section */}
           <section className="service-cta-section" data-aos="fade-up" data-aos-delay="1100">
