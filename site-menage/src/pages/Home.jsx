@@ -166,6 +166,37 @@ export default function Home() {
     };
   }, [i18n.language, getImageUrl]);
 
+  // Update selectedCategory when language changes to reflect localized names
+  useEffect(() => {
+    if (!selectedCategory || categories.length === 0) return;
+    
+    // Find the updated category with the same ID in the new categories array
+    const updatedCategory = categories.find(cat => cat.id === selectedCategory.id);
+    
+    if (updatedCategory) {
+      // Check if name or description changed (language change)
+      const nameChanged = updatedCategory.name !== selectedCategory.name;
+      const descriptionChanged = updatedCategory.description !== selectedCategory.description;
+      
+      if (nameChanged || descriptionChanged) {
+        // Update selectedCategory with new localized name/description while preserving other properties
+        // Use functional update to avoid unnecessary re-renders
+        setSelectedCategory(prevCategory => {
+          // Only update if there's an actual change to avoid infinite loops
+          if (prevCategory.name === updatedCategory.name && 
+              prevCategory.description === updatedCategory.description) {
+            return prevCategory;
+          }
+          return {
+            ...prevCategory,
+            name: updatedCategory.name,
+            description: updatedCategory.description
+          };
+        });
+      }
+    }
+  }, [i18n.language, categories, selectedCategory?.id]);
+
   // Load images for selected category
   useEffect(() => {
     const loadCategoryImages = async () => {
