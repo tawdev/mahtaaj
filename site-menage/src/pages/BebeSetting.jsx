@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ReservationForm from '../components/ReservationForm';
 import { supabase } from '../lib/supabase';
@@ -281,10 +280,13 @@ export default function BebeSetting() {
               </p>
             </div>
             <div className="back-to-home">
-              <Link to="/" className="back-button">
-                <span className="back-icon">←</span>
-                {t('bebe_setting.back_to_home')}
-              </Link>
+              <button
+                type="button"
+                className="back-button"
+                onClick={() => window.history.back()}
+              >
+                ← رجوع
+              </button>
             </div>
           </div>
 
