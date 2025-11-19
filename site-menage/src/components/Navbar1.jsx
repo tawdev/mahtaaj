@@ -463,16 +463,12 @@ export default function Navbar1() {
                   <li style={{ marginLeft: 'auto', marginRight: '0' }}>
                     <button
                       type="button"
-                      className="icon-btn logout-btn"
+                      className="icon-btn logout-btn logout-btn-with-text"
                       title={t('nav.logout')}
                       aria-label={t('nav.logout')}
                       onClick={handleLogout}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out">
-                        <path d="m16 17 5-5-5-5" />
-                        <path d="M21 12H9" />
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                      </svg>
+                      <span className="logout-text">{t('nav.logout', 'Logout')}</span>
                     </button>
                   </li>
                 )}
@@ -608,16 +604,12 @@ export default function Navbar1() {
               <li style={{ marginLeft: isRTL ? '0' : 'auto', marginRight: isRTL ? '8px' : '0' }}>
                 <button
                   type="button"
-                  className="icon-btn logout-btn"
+                  className="icon-btn logout-btn logout-btn-with-text"
                   title={t('nav.logout')}
                   aria-label={t('nav.logout')}
                   onClick={handleLogout}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out">
-                    <path d="m16 17 5-5-5-5" />
-                    <path d="M21 12H9" />
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  </svg>
+                  <span className="logout-text">{t('nav.logout', 'Logout')}</span>
                 </button>
               </li>
             )}
@@ -712,16 +704,12 @@ export default function Navbar1() {
               <li>
                 <button
                   type="button"
-                  className="icon-btn logout-btn"
+                  className="icon-btn logout-btn logout-btn-with-text"
                   title={t('nav.logout')}
                   aria-label={t('nav.logout')}
                   onClick={handleLogout}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out">
-                    <path d="m16 17 5-5-5-5" />
-                    <path d="M21 12H9" />
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  </svg>
+                  <span className="logout-text">{t('nav.logout', 'Logout')}</span>
                 </button>
               </li>
             )}
