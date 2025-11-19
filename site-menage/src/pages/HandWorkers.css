@@ -138,7 +138,7 @@
 .category-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 20px;
-  padding: 28px 24px;
+  padding: 0;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   border: 1px solid rgba(255,255,255,0.2);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -149,18 +149,63 @@
   min-height: 350px; /* Ensure minimum height for content */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+}
+
+/* Category Image Container */
+.category-image-container {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  flex-shrink: 0;
+  border-radius: 20px 20px 0 0;
+}
+
+.category-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.category-card:hover .category-image {
+  transform: scale(1.08);
+}
+
+/* Category Name Overlay on Image */
+.category-name-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.45) 30%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px 18px;
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
 }
 
 .category-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 20px 24px;
+  position: relative;
+  z-index: 1;
 }
 
 .category-footer {
   margin-top: auto;
+  padding: 0 24px 20px 24px;
 }
 
 .category-card::before {
@@ -189,19 +234,45 @@
 .category-icon {
   font-size: 3rem;
   color: #3b82f6;
-  margin-bottom: 16px;
+  margin-bottom: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80px;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 
+/* Category Title - Overlay on Image */
 .category-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 12px;
+  color: #ffffff;
+  margin: 0;
   letter-spacing: -0.025em;
+  line-height: 1.3;
+  text-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.8),
+    0 1px 4px rgba(0, 0, 0, 0.6),
+    0 0 2px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
+  max-width: 100%;
+  hyphens: auto;
 }
 
 .category-description {
@@ -718,15 +789,25 @@
     margin: 0 !important;
   }
 
+  .category-image-container {
+    height: 180px !important;
+  }
+
   .category-icon {
     font-size: 2.5rem;
     height: 60px;
+  }
+
+  .category-name-overlay {
+    padding: 12px 14px !important;
   }
 
   .category-title {
     font-size: 1.25rem !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+    line-height: 1.2 !important;
   }
 
   .category-description {
@@ -838,13 +919,23 @@
     opacity: 1 !important;
   }
 
+  .category-image-container {
+    height: 160px !important;
+  }
+
   .category-icon {
     font-size: 2rem;
     height: 50px;
   }
 
+  .category-name-overlay {
+    padding: 10px 12px !important;
+  }
+
   .category-title {
     font-size: 1.1rem !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+    line-height: 1.2 !important;
   }
 
   .category-description {
@@ -893,5 +984,17 @@
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+  }
+
+  .category-image-container {
+    height: 200px !important;
+  }
+
+  .category-name-overlay {
+    padding: 14px 16px !important;
+  }
+
+  .category-title {
+    font-size: 1.4rem !important;
   }
 }

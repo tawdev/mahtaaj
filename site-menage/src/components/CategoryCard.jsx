@@ -14,28 +14,37 @@ export default function CategoryCard({ category, onClick, index }) {
     >
       <div className="category-image-container">
         {category.imageUrl && !imageError ? (
-          <img
-            src={category.imageUrl}
-            alt={category.name}
-            className="category-image"
-            onError={(e) => {
-              setImageError(true);
-              e.target.style.display = 'none';
-            }}
-          />
+          <>
+            <img
+              src={category.imageUrl}
+              alt={category.name}
+              className="category-image"
+              onError={(e) => {
+                setImageError(true);
+                e.target.style.display = 'none';
+              }}
+            />
+            <div className="category-name-overlay">
+              <h3 className="category-title">{category.name}</h3>
+            </div>
+          </>
         ) : (
-          <div className="category-icon">
-            {category.icon ? (
-              <i className={category.icon}></i>
-            ) : (
-              <i className="fas fa-tools"></i>
-            )}
-          </div>
+          <>
+            <div className="category-icon">
+              {category.icon ? (
+                <i className={category.icon}></i>
+              ) : (
+                <i className="fas fa-tools"></i>
+              )}
+            </div>
+            <div className="category-name-overlay">
+              <h3 className="category-title">{category.name}</h3>
+            </div>
+          </>
         )}
       </div>
       
       <div className="category-content">
-        <h3 className="category-title">{category.name}</h3>
         <p className="category-description" title={category.description}>
           {category.description}
         </p>
