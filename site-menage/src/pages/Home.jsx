@@ -34,6 +34,16 @@ export default function Home() {
     setMounted(true);
   }, []);
   
+  // Helper function to format category name for Hero section
+  const formatCategoryName = (categoryName) => {
+    if (!categoryName) return categoryName;
+    // Change 'Ménage' to 'Ménage + Cuisine' in Hero section
+    if (categoryName === 'Ménage' || categoryName.trim() === 'Ménage') {
+      return 'Ménage + Cuisine';
+    }
+    return categoryName;
+  };
+
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = React.useCallback((imagePath) => {
     if (!imagePath) {
@@ -426,18 +436,21 @@ export default function Home() {
           </div>
         ) : categories.length > 0 ? (
           <div className="service-buttons-container category-buttons-container">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                className={`service-button category-button ${selectedCategory?.id === category.id ? 'active' : ''} ${hiddenButtons.has(category.id) ? 'fade-out' : 'fade-in'}`}
-                onClick={() => handleCategorySelect(category)}
-                title={category.name}
-                aria-label={category.name}
-                type="button"
-              >
-                <span className="service-label">{category.name}</span>
-              </button>
-            ))}
+            {categories.map((category) => {
+              const displayName = formatCategoryName(category.name);
+              return (
+                <button
+                  key={category.id}
+                  className={`service-button category-button ${selectedCategory?.id === category.id ? 'active' : ''} ${hiddenButtons.has(category.id) ? 'fade-out' : 'fade-in'}`}
+                  onClick={() => handleCategorySelect(category)}
+                  title={displayName}
+                  aria-label={displayName}
+                  type="button"
+                >
+                  <span className="service-label">{displayName}</span>
+                </button>
+              );
+            })}
           </div>
         ) : null}
 
@@ -453,13 +466,9 @@ export default function Home() {
         ) : selectedCategory && currentImage ? (
           <div className="home-hero-content">
             <h1 className={`hero-title ${isTransitioning ? 'fade-out' : 'fade-in'}`}>
-              {selectedCategory.name}
+              {formatCategoryName(selectedCategory.name)}
             </h1>
-            {selectedCategory.description && (
-              <p className={`hero-description ${isTransitioning ? 'fade-out' : 'fade-in'}`}>
-                {selectedCategory.description}
-              </p>
-            )}
+            
             <div className="button-container">
               <Link to="/tous-les-services" className="home-primary-button" aria-label={t('home_page.buttons.book_now')}>
                 <span className="icon" aria-hidden="true">
