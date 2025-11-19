@@ -29,17 +29,26 @@
 /* Services Grid */
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 2rem;
   padding: 0;
+  width: 100%;
+}
+
+@media (min-width: 1280px) {
+  .services-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* Service Card */
 .service-card {
   background: #ffffff;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  aspect-ratio: 4 / 3;
+  width: 100%;
   border-radius: 24px;
   padding: 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -52,9 +61,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-height: 300px;
   justify-content: center;
-  height: 100%;
 }
 
 /* Icon Container */
@@ -137,7 +144,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.7) 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.55) 100%);
   border-radius: 24px;
   z-index: 1;
   transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -236,7 +243,7 @@
 /* Responsive Design */
 @media (max-width: 1024px) {
   .services-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
   }
 
@@ -263,14 +270,13 @@
   }
 
   .service-card {
-    min-height: 250px;
+    aspect-ratio: 4 / 3;
     padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    height: 100%;
   }
 
   .service-card-content {
@@ -329,14 +335,13 @@
   }
 
   .service-card {
-    min-height: 220px;
+    aspect-ratio: 4 / 3;
     padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    height: 100%;
   }
 
   .service-card-content {
