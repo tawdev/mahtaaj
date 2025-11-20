@@ -9,6 +9,7 @@ const cards = (t) => ([
   { to: '/employees/register/bebe-setting', icon: '👶', title: t('nav.baby_setting','Bébé Setting') },
   { to: '/employees/register/jardinage', icon: '🌿', title: t('nav.gardening','Jardinage') },
   { to: '/employees/register/handworker', icon: '🛠️', title: t('nav.hand_workers','Hand Workers') },
+  { to: '/employees/register/driver', icon: '🚗', title: t('nav.driver','Driver') },
 ]);
 
 export default function RegisterEmployee1() {

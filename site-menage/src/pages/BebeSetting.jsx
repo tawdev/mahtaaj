@@ -133,6 +133,8 @@ export default function BebeSetting() {
         console.log('[BebeSetting] First setting sample:', {
           id: data[0].id,
           nom: data[0].nom,
+          price: data[0].price,
+          duration: data[0].duration,
           description: data[0].description,
           description_ar: data[0].description_ar,
           description_fr: data[0].description_fr,
@@ -141,6 +143,14 @@ export default function BebeSetting() {
       }
       setSettings(Array.isArray(data) ? data : []);
       setSelectedCategory(categories.find(cat => cat.id === categoryId));
+      
+      // Auto-select first service if available
+      if (data && data.length > 0) {
+        setSelectedService(data[0]);
+        console.log('[BebeSetting] Auto-selected first service:', data[0].id, 'Price:', data[0].price);
+      } else {
+        setSelectedService(null);
+      }
     } catch (err) {
       console.error('[BebeSetting] Exception loading category details:', err);
       setError(t('bebe_setting.errors.connection') + ': ' + err.message);
@@ -156,7 +166,7 @@ export default function BebeSetting() {
       // Load services to get price and duration for reservation
       await loadCategoryDetails(categoryId);
       // Set the first service as selected for reservation if available
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('bebe_settings')
         .select('*')
         .eq('category_id', categoryId)
@@ -164,8 +174,20 @@ export default function BebeSetting() {
         .order('order', { ascending: true })
         .limit(1);
       
+      if (error) {
+        console.error('[BebeSetting] Error loading first service:', error);
+      }
+      
       if (data && data.length > 0) {
+        console.log('[BebeSetting] Setting selectedService:', {
+          id: data[0].id,
+          price: data[0].price,
+          duration: data[0].duration
+        });
         setSelectedService(data[0]);
+      } else {
+        console.warn('[BebeSetting] No services found for category:', categoryId);
+        setSelectedService(null);
       }
     }
   };
@@ -401,11 +423,51 @@ export default function BebeSetting() {
                   <div className="category-details-info">
                     <div className="price-info">
                       <span className="price-label">{t('bebe_setting.services.price')}</span>
-                      <span className="price-value">{selectedService?.price || '100'} DH</span>
+                      <span className="price-value">
+                        {(() => {
+                          // Try selectedService first
+                          if (selectedService) {
+                            const priceValue = selectedService.price;
+                            console.log('[BebeSetting] Displaying price from selectedService:', {
+                              price: priceValue,
+                              type: typeof priceValue,
+                              isNull: priceValue == null,
+                              isEmpty: priceValue === ''
+                            });
+                            
+                            if (priceValue != null && priceValue !== '') {
+                              const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
+                              if (!isNaN(price) && price >= 0) {
+                                return `${price} DH`;
+                              }
+                            }
+                          }
+                          // Try first setting from settings array
+                          if (settings && settings.length > 0 && settings[0]) {
+                            const priceValue = settings[0].price;
+                            console.log('[BebeSetting] Displaying price from settings[0]:', {
+                              price: priceValue,
+                              type: typeof priceValue
+                            });
+                            
+                            if (priceValue != null && priceValue !== '') {
+                              const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
+                              if (!isNaN(price) && price >= 0) {
+                                return `${price} DH`;
+                              }
+                            }
+                          }
+                          // Default fallback
+                          console.warn('[BebeSetting] Using default price: 100 DH');
+                          return '100 DH';
+                        })()}
+                      </span>
                     </div>
                     <div className="duration-info">
                       <span className="duration-label">{t('bebe_setting.services.duration')}</span>
-                      <span className="duration-value">{selectedService?.duration || '2 heures'}</span>
+                      <span className="duration-value">
+                        {selectedService?.duration || (settings && settings.length > 0 && settings[0]?.duration) || '2 heures'}
+                      </span>
                     </div>
                   </div>
 

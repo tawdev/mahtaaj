@@ -53,6 +53,7 @@ import RegisterEmployee1 from './pages/employees/RegisterEmployee1';
 import SecurityRegister from './pages/employees/SecurityRegister';
 import BebeSettingRegister from './pages/employees/BebeSettingRegister';
 import JardinageRegister from './pages/employees/JardinageRegister';
+import DriverRegister from './pages/employees/DriverRegister';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -135,6 +136,7 @@ export default function App() {
           <Route path="/employees/register/bebe-setting" element={<BebeSettingRegister />} />
           <Route path="/employees/register/jardinage" element={<JardinageRegister />} />
           <Route path="/employees/register/handworker" element={<HandWorkerRegistration />} />
+          <Route path="/employees/register/driver" element={<DriverRegister />} />
           {/* Clean register page uses EmployeeRegister */}
           <Route path="/employees/register/clean" element={<EmployeeRegister />} />
           <Route path="/bebe-setting" element={<BebeSetting />} />
