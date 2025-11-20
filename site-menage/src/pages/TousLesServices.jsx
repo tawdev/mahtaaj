@@ -47,6 +47,14 @@ export default function TousLesServices() {
       path: '/hand-workers',
       color: '#8b5cf6',
       image: 'menuisier1.jpeg'
+    },
+    {
+      id: 6,
+      icon: '🚗',
+      translationKey: 'driver',
+      path: '/driver',
+      color: '#dc2626',
+      image: 'Gemini_Generated_Image_mw2wgwmw2wgwmw2w.png'
     }
   ];
 

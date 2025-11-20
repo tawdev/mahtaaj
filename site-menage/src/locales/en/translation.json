@@ -1375,6 +1375,10 @@
     "hand_workers": {
       "name": "Hand Workers",
       "name_fr": "Travaux Manuels"
+    },
+    "driver": {
+      "name": "Driver",
+      "name_fr": "Chauffeur"
     }
   },
   "support": {

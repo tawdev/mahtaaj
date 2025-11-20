@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './lib/supabase';
+import { supabaseAdmin } from './lib/supabaseAdmin';
 
 // Resolve current language from i18next/localStorage with fallback
 const getCurrentLocale = () => {
@@ -23,13 +24,25 @@ const getLocalizedField = (obj, field, locale) => {
 
 // Global error handler
 const handleApiError = (error) => {
+  // Log detailed error information
   console.error('API Error:', error);
-  if (error?.message?.includes('JWT')) {
+  console.error('Error code:', error?.code);
+  console.error('Error message:', error?.message);
+  console.error('Error details:', error?.details);
+  console.error('Error hint:', error?.hint);
+  
+  if (error?.message?.includes('JWT') || error?.code === 'PGRST301') {
     // Clear tokens and redirect to login
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminData');
     window.dispatchEvent(new CustomEvent('adminAuthError'));
   }
+  
+  // Provide more helpful error messages for common issues
+  if (error?.code === '42703' || error?.message?.includes('column') || error?.message?.includes('does not exist')) {
+    console.error('⚠️ Database schema mismatch detected. Please run update-driver-reservation-table.sql in Supabase SQL Editor.');
+  }
+  
   throw error;
 };
 
@@ -1313,6 +1326,298 @@ export async function deleteAdmin(token, id) {
 
     if (error) throw error;
     return { message: 'Admin deleted successfully' };
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+// ============================================
+// DRIVER EMPLOYEES
+// ============================================
+
+export async function getDriverEmployees() {
+  try {
+    const { data, error } = await supabase
+      .from('driver_employees')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function createDriverEmployee(employeeData) {
+  try {
+    const { data, error } = await supabase
+      .from('driver_employees')
+      .insert([employeeData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function updateDriverEmployee(id, employeeData) {
+  try {
+    const { data, error } = await supabase
+      .from('driver_employees')
+      .update(employeeData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function deleteDriverEmployee(id) {
+  try {
+    const { error } = await supabase
+      .from('driver_employees')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { message: 'Driver employee deleted successfully' };
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+// ============================================
+// DRIVER EMPLOYEES VALID
+// ============================================
+
+export async function getDriverEmployeesValid() {
+  try {
+    const { data, error } = await supabase
+      .from('driver_employees_valid')
+      .select('*, driver_employees(*)')
+      .order('validated_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function validateDriverEmployee(driverId) {
+  try {
+    // Get driver employee data
+    const { data: driver, error: driverError } = await supabase
+      .from('driver_employees')
+      .select('*')
+      .eq('id', driverId)
+      .single();
+
+    if (driverError || !driver) throw new Error('Driver employee not found');
+
+    // Create validated record
+    const { data, error } = await supabase
+      .from('driver_employees_valid')
+      .insert([{
+        driver_id: driverId,
+        validation_status: 'approved',
+        validated_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function deleteDriverEmployeeValid(id) {
+  try {
+    const { error } = await supabase
+      .from('driver_employees_valid')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { message: 'Validated driver employee deleted successfully' };
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+// ============================================
+// DRIVER RESERVATIONS
+// ============================================
+
+export async function getDriverReservations() {
+  try {
+    const { data, error } = await supabase
+      .from('driver_reservation')
+      .select('*, driver_employees(*)')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function createDriverReservation(reservationData) {
+  try {
+    const db = getWriteClient();
+    
+    // Log the data being sent for debugging
+    console.log('[createDriverReservation] Inserting data:', reservationData);
+    
+    const { data, error } = await db
+      .from('driver_reservation')
+      .insert([reservationData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[createDriverReservation] Supabase error:', error);
+      // Provide more helpful error messages
+      if (error.code === '42703' || error.message?.includes('column') || error.message?.includes('does not exist')) {
+        throw new Error('Les colonnes de la table driver_reservation ne sont pas à jour. Veuillez exécuter le script SQL update-driver-reservation-table.sql dans Supabase.');
+      }
+      throw error;
+    }
+    
+    console.log('[createDriverReservation] Success:', data);
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function updateDriverReservation(id, reservationData) {
+  try {
+    const db = getWriteClient();
+    const { data, error } = await db
+      .from('driver_reservation')
+      .update(reservationData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function deleteDriverReservation(id) {
+  try {
+    const { error } = await supabase
+      .from('driver_reservation')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { message: 'Driver reservation deleted successfully' };
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+// ============================================
+// DRIVER CATEGORIES
+// ============================================
+
+export async function getDriverCategories() {
+  try {
+    const { data, error } = await supabase
+      .from('driver_categorier')
+      .select('*, driver_employees(*)')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+// Get the appropriate Supabase client for writes (prefer admin client to bypass RLS)
+const getWriteClient = () => {
+  if (supabaseAdmin) {
+    return supabaseAdmin;
+  }
+  console.warn('[api-supabase] Using public client for writes - RLS may block. Set REACT_APP_SUPABASE_SERVICE_ROLE_KEY in .env');
+  return supabase;
+};
+
+export async function createDriverCategory(categoryData) {
+  try {
+    const db = getWriteClient();
+    const { data, error } = await db
+      .from('driver_categorier')
+      .insert([categoryData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function updateDriverCategory(id, categoryData) {
+  try {
+    const db = getWriteClient();
+    const { data, error } = await db
+      .from('driver_categorier')
+      .update(categoryData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+export async function deleteDriverCategory(id) {
+  try {
+    const db = getWriteClient();
+    const { error } = await db
+      .from('driver_categorier')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { message: 'Driver category deleted successfully' };
   } catch (error) {
     handleApiError(error);
     throw error;

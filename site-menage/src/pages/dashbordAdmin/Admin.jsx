@@ -38,6 +38,10 @@ import AdminHandWorkersCrud from './AdminHandWorkersCrud';
 import AdminHandWorkerReservationsCrud from './AdminHandWorkerReservationsCrud';
 import AdminHandWorkerRegistrationsCrud from './AdminHandWorkerRegistrationsCrud';
 import AdminValideHandWorkerReservationsCrud from './AdminValideHandWorkerReservationsCrud';
+import AdminDriverEmployees from './AdminDriverEmployees';
+import AdminDriverEmployeesValid from './AdminDriverEmployeesValid';
+import AdminDriverReservationsCrud from './AdminDriverReservationsCrud';
+import AdminDriverCategoriesCrud from './AdminDriverCategoriesCrud';
 import AdminTypeCategoryGalleryCrud from './AdminTypeCategoryGalleryCrud';
 import AdminCategoryGalleryCrud from './AdminCategoryGalleryCrud';
 import AdminGalleryCrud from './AdminGalleryCrud';
@@ -100,6 +104,12 @@ export default function Admin() {
         if (!allowedJ.includes(path)) {
           navigate('/admin/adminJardinaje', { replace: true });
         }
+      } else if (parsed?.role === 'adminDriver' || parsed?.role === 'driver') {
+        const path = window.location.pathname;
+        const allowedD = ['/admin/driver', '/admin/driver/employees', '/admin/driver/employees-valid', '/admin/driver/reservations', '/admin/driver/categories'];
+        if (!allowedD.includes(path)) {
+          navigate('/admin/driver', { replace: true });
+        }
       }
       }).catch(() => {
         // Token is invalid, clear it
@@ -157,6 +167,16 @@ export default function Admin() {
       setActiveTab('valide-hand-worker-reservations');
     } else if (path === '/admin/product-types') {
       setActiveTab('product-types');
+    } else if (path === '/admin/driver') {
+      setActiveTab('driver-employees');
+    } else if (path === '/admin/driver/employees') {
+      setActiveTab('driver-employees');
+    } else if (path === '/admin/driver/employees-valid') {
+      setActiveTab('driver-employees-valid');
+    } else if (path === '/admin/driver/reservations') {
+      setActiveTab('driver-reservations');
+    } else if (path === '/admin/driver/categories') {
+      setActiveTab('driver-categories');
     }
   }, [location.pathname]);
 
@@ -183,6 +203,13 @@ export default function Admin() {
       const allowed = ['/admin/handworker', '/admin/handworker/categories', '/admin/handworker/employees', '/admin/handworker/reservations', '/admin/handworker/validated'];
       if (path.startsWith('/admin') && !allowed.includes(path)) {
         navigate('/admin/handworker', { replace: true });
+      }
+    }
+    if (role === 'adminDriver' || role === 'driver') {
+      const path = location.pathname;
+      const allowed = ['/admin/driver', '/admin/driver/employees', '/admin/driver/employees-valid', '/admin/driver/reservations', '/admin/driver/categories'];
+      if (path.startsWith('/admin') && !allowed.includes(path)) {
+        navigate('/admin/driver', { replace: true });
       }
     }
     if (role === 'adminJardinaje') {
@@ -239,6 +266,8 @@ export default function Admin() {
       navigate('/admin/adminBebe', { replace: true });
     } else if (response.admin?.role === 'adminJardinaje') {
       navigate('/admin/adminJardinaje', { replace: true });
+    } else if (response.admin?.role === 'adminDriver' || response.admin?.role === 'driver') {
+      navigate('/admin/driver', { replace: true });
     } else {
       navigate('/admin/dashboard', { replace: true });
     }
@@ -385,6 +414,22 @@ export default function Admin() {
       case 'valide-hand-worker-reservations':
         setActiveTab('valide-hand-worker-reservations');
         navigate('/admin/handworker');
+        break;
+      case 'driver-employees':
+        setActiveTab('driver-employees');
+        navigate('/admin/driver/employees');
+        break;
+      case 'driver-employees-valid':
+        setActiveTab('driver-employees-valid');
+        navigate('/admin/driver/employees-valid');
+        break;
+      case 'driver-reservations':
+        setActiveTab('driver-reservations');
+        navigate('/admin/driver/reservations');
+        break;
+      case 'driver-categories':
+        setActiveTab('driver-categories');
+        navigate('/admin/driver/categories');
         break;
       case 'gallery-types':
         setActiveTab('gallery-types');
@@ -1362,6 +1407,107 @@ export default function Admin() {
             </button>
           </div>
           <AdminValideHandWorkerReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+        </>
+      )}
+
+      {/* Driver Sections */}
+      {hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => setActiveTab('dashboard')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <section className="admin-card">
+            <div className="admin-toolbar">
+              <h2>Chauffeurs</h2>
+            </div>
+            <div className="stats-grid">
+              <div className="stat-card employees-card clickable" onClick={() => navigate('/admin/driver/employees')}>
+                <div className="stat-icon employees-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Employés</h3>
+                </div>
+              </div>
+              <div className="stat-card confirmed-employees-card clickable" onClick={() => navigate('/admin/driver/employees-valid')}>
+                <div className="stat-icon confirmed-employees-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Employés Validés</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/driver/reservations')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Réservations</h3>
+                </div>
+              </div>
+              <div className="stat-card categories-card clickable" onClick={() => navigate('/admin/driver/categories')}>
+                <div className="stat-icon categories-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Catégories</h3>
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
+
+      {activeTab === 'driver-employees' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/employees' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/driver')}
+            >
+              ← Retour
+            </button>
+          </div>
+          <AdminDriverEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+        </>
+      )}
+
+      {activeTab === 'driver-employees-valid' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/employees-valid' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/driver')}
+            >
+              ← Retour
+            </button>
+          </div>
+          <AdminDriverEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+        </>
+      )}
+
+      {activeTab === 'driver-reservations' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/reservations' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/driver')}
+            >
+              ← Retour
+            </button>
+          </div>
+          <AdminDriverReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+        </>
+      )}
+
+      {activeTab === 'driver-categories' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/categories' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/driver')}
+            >
+              ← Retour
+            </button>
+          </div>
+          <AdminDriverCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
         </>
       )}
 

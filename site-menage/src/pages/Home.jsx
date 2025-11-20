@@ -38,10 +38,22 @@ export default function Home() {
   // Helper function to format category name for Hero section
   const formatCategoryName = (categoryName) => {
     if (!categoryName) return categoryName;
-    // Change 'Ménage' to 'Ménage + Cuisine' in Hero section
-    if (categoryName === 'Ménage' || categoryName.trim() === 'Ménage') {
+    const locale = i18n.language || 'fr';
+    const trimmedName = categoryName.trim();
+    
+    // Change 'Ménage' to 'Ménage + Cuisine' in Hero section (French)
+    if (locale === 'fr' && (categoryName === 'Ménage' || trimmedName === 'Ménage')) {
       return 'Ménage + Cuisine';
     }
+    
+    // Change Arabic cleaning category names to 'التنظيف + الطبخ' in Hero section
+    if (locale === 'ar') {
+      if (trimmedName.includes('التنظيف') || trimmedName.includes('خدمات التنظيف') || 
+          trimmedName.includes('منزل') || trimmedName === 'تنظيف') {
+        return 'التنظيف + الطبخ';
+      }
+    }
+    
     return categoryName;
   };
 

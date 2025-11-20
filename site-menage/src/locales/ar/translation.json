@@ -1402,6 +1402,10 @@
     "hand_workers": {
       "name": "الأشغال اليدوية",
       "name_fr": "Travaux Manuels"
+    },
+    "driver": {
+      "name": "سائق",
+      "name_fr": "Chauffeur"
     }
   },
   "support": {

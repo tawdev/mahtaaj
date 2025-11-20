@@ -46,6 +46,8 @@ import JardinageDetail from './pages/JardinageDetail';
 import HandWorkers from './pages/HandWorkers';
 import HandWorkerBooking from './pages/HandWorkerBooking';
 import HandWorkerRegistration from './pages/HandWorkerRegistration';
+import Driver from './pages/Driver';
+import DriverCategoryDetails from './pages/DriverCategoryDetails';
 import TousLesServices from './pages/TousLesServices';
 import RegisterEmployee1 from './pages/employees/RegisterEmployee1';
 import SecurityRegister from './pages/employees/SecurityRegister';
@@ -141,6 +143,8 @@ export default function App() {
           <Route path="/hand-workers" element={<HandWorkers />} />
           <Route path="/hand-workers/booking" element={<HandWorkerBooking />} />
           <Route path="/hand-workers/register" element={<HandWorkerRegistration />} />
+          <Route path="/driver" element={<Driver />} />
+          <Route path="/driver/:id" element={<DriverCategoryDetails />} />
           {/* Admin Panel Routes */}
           <Route path="/admin/login" element={<Admin />} />
           <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
@@ -148,7 +152,7 @@ export default function App() {
             path="/admin/dashboard"
             element={
               <PrivateRoute
-                allowedRoles={['admin','adminBebe','adminJardinaje','adminHouseKeeping','adminSecurity','adminHandWorker']}
+                allowedRoles={['admin','adminBebe','adminJardinaje','adminHouseKeeping','adminSecurity','adminHandWorker','adminDriver','driver']}
                 element={<Admin />}
               />
             }
@@ -300,6 +304,26 @@ export default function App() {
           <Route
             path="/admin/handworker/validated"
             element={<PrivateRoute allowedRoles={['admin','adminHandWorker']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/driver"
+            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/driver/employees"
+            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/driver/employees-valid"
+            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/driver/reservations"
+            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/driver/categories"
+            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
           />
           <Route path="/admin/403" element={<AdminForbidden />} />
 

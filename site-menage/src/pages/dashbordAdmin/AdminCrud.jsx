@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { getAdmins, createAdmin, updateAdmin, deleteAdmin } from '../../api-supabase';
 import './AdminCrud.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000';
-
 const ROLES = [
   { value: 'admin', label: 'Admin Principal' },
   { value: 'adminBebe', label: 'Admin Bébé' },
@@ -11,6 +9,7 @@ const ROLES = [
   { value: 'adminHouseKeeping', label: 'Admin House Keeping' },
   { value: 'adminSecurity', label: 'Admin Sécurité' },
   { value: 'adminHandWorker', label: 'Admin Travaux Manuels' },
+  { value: 'adminDriver', label: 'Admin Driver' },
 ];
 
 export default function AdminCrud({ token, onAuthError }) {
@@ -53,39 +52,20 @@ export default function AdminCrud({ token, onAuthError }) {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/admin/admins`, {
-        headers: {
-          'Authorization': `Bearer ${authToken}`,
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.status === 401) {
-        if (onAuthError) onAuthError();
-        setError('Session expirée. Veuillez vous reconnecter.');
-        return;
-      }
-
-      const data = await response.json();
+      const data = await getAdmins(authToken);
       
-      if (response.ok) {
         // Handle different response structures
         const adminsArray = Array.isArray(data.data) ? data.data : 
                            (Array.isArray(data) ? data : []);
         setAdmins(adminsArray);
-      } else {
-        // Show validation errors if available
-        let errorMsg = data.message || 'Erreur lors du chargement des administrateurs';
-        if (data.errors && typeof data.errors === 'object') {
-          const errorMessages = Object.values(data.errors).flat();
-          if (errorMessages.length > 0) {
-            errorMsg = errorMessages.join(', ');
-          }
-        }
-        setError(errorMsg);
-      }
     } catch (e) {
-      setError('Erreur de connexion');
+      console.error('Error loading admins:', e);
+      if (e.message?.includes('JWT') || e.message?.includes('expired') || e.message?.includes('invalid')) {
+        if (onAuthError) onAuthError();
+        setError('Session expirée. Veuillez vous reconnecter.');
+      } else {
+        setError(e.message || 'Erreur de connexion');
+      }
     } finally {
       setLoading(false);
     }

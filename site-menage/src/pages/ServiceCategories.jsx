@@ -58,6 +58,40 @@ export default function ServiceCategories() {
            (category.name || '').toLowerCase().replace(/\s+/g, '-');
   };
 
+  // Helper function to format service title for menage page
+  const formatServiceTitle = (serviceName) => {
+    if (!serviceName || serviceSlug !== 'menage') return serviceName;
+    
+    const locale = i18n.language || 'fr';
+    const trimmedName = serviceName.trim();
+    
+    // French: Change 'Ménage' to 'Ménage ET CUISINE'
+    if (locale === 'fr') {
+      if (trimmedName === 'Ménage' || trimmedName.toLowerCase() === 'ménage') {
+        return 'Ménage et Cuisine';
+      }
+    }
+    
+    // Arabic: Change cleaning titles to 'التنظيف و الطبخ'
+    if (locale === 'ar') {
+      if (trimmedName.includes('التنظيف') || trimmedName.includes('تنظيف') || 
+          trimmedName.includes('منزلي') || trimmedName === 'تنظيف') {
+        return 'التنظيف و الطبخ';
+      }
+    }
+    
+    // English: Change 'House Cleaning' to 'Cleaning and Cuisine'
+    if (locale === 'en') {
+      if (trimmedName.toLowerCase().includes('house cleaning') || 
+          trimmedName.toLowerCase() === 'cleaning' ||
+          trimmedName.toLowerCase().includes('house')) {
+        return 'Cleaning and Cuisine';
+      }
+    }
+    
+    return serviceName;
+  };
+
   if (loading) {
     return (
       <main className="services-page">
@@ -79,7 +113,7 @@ export default function ServiceCategories() {
     <main className="services-page">
       <div className="services-header">
         <Link to="/services" className="back-button">← {t('services_page.back')}</Link>
-        <h1>{service.name || service.title}</h1>
+        <h1>{formatServiceTitle(service.name || service.title)}</h1>
       </div>
 
       {categories.length === 0 ? (
