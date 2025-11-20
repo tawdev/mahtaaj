@@ -107,21 +107,33 @@
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group input[type="time"] {
   width: 100%;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #e5e7eb !important;
   border-radius: 8px;
   transition: all 0.3s ease;
   box-sizing: border-box;
   font-family: inherit;
+  background: #ffffff;
+  outline: none;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
+.form-group textarea:focus,
+.form-group input[type="text"]:focus,
+.form-group input[type="tel"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="time"]:focus {
+  outline: none !important;
+  border: 1px solid #3b82f6 !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
