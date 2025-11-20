@@ -675,6 +675,161 @@ export async function getTypeById(id, locale = getCurrentLocale()) {
   }
 }
 
+export async function deleteTypeAdmin(token, id) {
+  try {
+    if (!id) {
+      throw new Error('ID du type requis pour la suppression');
+    }
+
+    console.log('[deleteTypeAdmin] Attempting to delete type with ID:', id, 'Type:', typeof id);
+
+    // Ensure ID is a number
+    const typeId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (isNaN(typeId)) {
+      throw new Error('ID invalide');
+    }
+
+    // Check if we have a valid Supabase session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (!session && !token) {
+      console.warn('[deleteTypeAdmin] No Supabase session or token found');
+      throw new Error('Session expirée. Veuillez vous reconnecter.');
+    }
+
+    // First, delete all type_options associated with this type
+    console.log('[deleteTypeAdmin] Deleting associated type_options...');
+    const { data: deletedOptions, error: optionsDeleteError } = await supabase
+      .from('type_options')
+      .delete()
+      .eq('type_id', typeId)
+      .select();
+
+    if (optionsDeleteError) {
+      console.warn('[deleteTypeAdmin] Error deleting type_options (may not exist):', optionsDeleteError);
+    } else {
+      console.log('[deleteTypeAdmin] Deleted type_options, count:', deletedOptions?.length || 0);
+    }
+
+    // Try to delete the type directly
+    const { data: deletedData, error: deleteError } = await supabase
+      .from('types')
+      .delete()
+      .eq('id', typeId)
+      .select();
+
+    // If deletion succeeded (returned data)
+    if (deletedData && deletedData.length > 0) {
+      console.log('[deleteTypeAdmin] Type deleted successfully:', deletedData);
+      return { message: 'Type supprimé avec succès', deleted: true, data: deletedData };
+    }
+
+    // If there's an error, check if it's RLS-related
+    if (deleteError) {
+      console.error('[deleteTypeAdmin] Error deleting type:', deleteError);
+      
+      // Check if it's a permission/RLS error
+      if (deleteError.code === '42501' || 
+          deleteError.code === 'PGRST301' ||
+          deleteError.message?.includes('permission') || 
+          deleteError.message?.includes('policy') || 
+          deleteError.message?.includes('row-level security') ||
+          deleteError.message?.includes('RLS')) {
+        console.log('[deleteTypeAdmin] RLS permission error detected, attempting soft delete...');
+        
+        // Try soft delete: set is_active to false
+        const { data: softDeleteData, error: softDeleteError } = await supabase
+          .from('types')
+          .update({ is_active: false })
+          .eq('id', typeId)
+          .select()
+          .single();
+
+        if (softDeleteError) {
+          console.error('[deleteTypeAdmin] Soft delete also failed:', softDeleteError);
+          const errorMsg = softDeleteError.message || String(softDeleteError);
+          const errorCode = softDeleteError.code || softDeleteError.status || '';
+          
+          if (errorCode === 406 || errorMsg.includes('406') || errorMsg.includes('Not Acceptable')) {
+            throw new Error('❌ Les politiques RLS bloquent à la fois la suppression (DELETE) et la mise à jour (UPDATE). Veuillez configurer les permissions dans Supabase pour la table "types".');
+          }
+          
+          throw new Error('❌ Impossible de supprimer ou désactiver le type. Erreur: ' + errorMsg + ' (Code: ' + errorCode + '). Vérifiez les politiques RLS dans Supabase.');
+        }
+
+        if (softDeleteData) {
+          console.log('[deleteTypeAdmin] Type soft deleted (is_active = false)');
+          return { 
+            message: 'Type désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète', 
+            deleted: true, 
+            softDeleted: true,
+            data: softDeleteData 
+          };
+        }
+      }
+      
+      // For other errors, throw the original error
+      throw new Error(deleteError.message || 'Erreur lors de la suppression du type');
+    }
+
+    // If no error and no data returned, verify deletion
+    const { data: verifyData, error: verifyError } = await supabase
+      .from('types')
+      .select('id')
+      .eq('id', typeId)
+      .maybeSingle();
+
+    // If type doesn't exist (PGRST116 = not found), deletion was successful
+    if (verifyError && verifyError.code === 'PGRST116') {
+      console.log('[deleteTypeAdmin] Type verified as deleted (not found after delete)');
+      return { message: 'Type supprimé avec succès', deleted: true };
+    }
+
+    // If type still exists and no error, deletion failed silently
+    if (verifyData) {
+      console.warn('[deleteTypeAdmin] Type still exists after delete - no error but type persists');
+      // Try soft delete as fallback
+      const { data: softDeleteData, error: softDeleteError } = await supabase
+        .from('types')
+        .update({ is_active: false })
+        .eq('id', typeId)
+        .select()
+        .single();
+
+      if (!softDeleteError && softDeleteData) {
+        return { 
+          message: 'Type désactivé (soft delete) - La suppression complète nécessite des permissions RLS', 
+          deleted: true, 
+          softDeleted: true 
+        };
+      }
+      
+      // If soft delete also failed, provide detailed error
+      if (softDeleteError) {
+        console.error('[deleteTypeAdmin] Soft delete failed:', softDeleteError);
+        const errorMsg = softDeleteError.message || String(softDeleteError);
+        const errorCode = softDeleteError.code || softDeleteError.status || '';
+        
+        if (errorCode === 406 || errorMsg.includes('406') || errorMsg.includes('Not Acceptable')) {
+          throw new Error('❌ Les politiques RLS bloquent à la fois la suppression et la mise à jour. Veuillez configurer les permissions dans Supabase pour la table "types" (DELETE et UPDATE).');
+        }
+        
+        throw new Error('❌ Impossible de supprimer ou désactiver le type. Erreur: ' + errorMsg + ' (Code: ' + errorCode + '). Vérifiez les politiques RLS dans Supabase.');
+      }
+      
+      throw new Error('❌ La suppression a échoué. Le type existe toujours. Les politiques RLS bloquent probablement l\'opération. Vérifiez les permissions dans Supabase.');
+    }
+
+    // If no verifyData and no error, assume deletion succeeded
+    console.log('[deleteTypeAdmin] Type deleted successfully (no verification data)');
+    return { message: 'Type supprimé avec succès', deleted: true };
+  } catch (error) {
+    console.error('[deleteTypeAdmin] Exception in deleteTypeAdmin:', error);
+    handleApiError(error);
+    throw error;
+  }
+}
+
 // ============================================
 // TYPE OPTIONS
 // ============================================

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AdminJardinageCategoriesCrud.css';
 import LanguageFields from '../../components/LanguageFields';
 import { supabase } from '../../lib/supabase';
+import { deleteTypeAdmin } from '../../api-supabase';
 
 export default function AdminTypesCrud({ token, onAuthError }) {
   const [types, setTypes] = useState([]);
@@ -315,25 +316,71 @@ export default function AdminTypesCrud({ token, onAuthError }) {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce type ?')) {
-      try {
-        setError('');
-        
-        const { error } = await supabase
-          .from('types')
-          .delete()
-          .eq('id', id);
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce type ? Cette action supprimera également toutes les options associées.')) {
+      return;
+    }
 
-        if (error) {
-          console.error('Error deleting type:', error);
-          setError('Erreur lors de la suppression: ' + error.message);
-          return;
+    try {
+      setError('');
+      
+      // Use the API function which handles all the logic
+      const result = await deleteTypeAdmin(token, id);
+      
+      if (result.deleted) {
+        if (result.softDeleted) {
+          // Soft delete succeeded
+          alert('✅ ' + result.message);
+        } else {
+          // Hard delete succeeded
+          console.log('[AdminTypesCrud] Type deleted successfully');
         }
-
         await loadTypes();
-      } catch (err) {
-        console.error('Exception deleting type:', err);
-        setError('Erreur de connexion: ' + err.message);
+      } else {
+        setError('❌ ' + (result.message || 'La suppression a échoué'));
+      }
+    } catch (err) {
+      console.error('[AdminTypesCrud] Exception deleting type:', err);
+      const errorMessage = err.message || String(err);
+      
+      // Check if it's an auth error
+      if (errorMessage.includes('Session expirée') || errorMessage.includes('authentication')) {
+        setError('❌ ' + errorMessage);
+        if (onAuthError) {
+          onAuthError();
+        }
+      } else {
+        // Show detailed error message, especially for RLS issues
+        let fullErrorMessage;
+        if (errorMessage.includes('RLS') || errorMessage.includes('politiques') || errorMessage.includes('permissions')) {
+          fullErrorMessage = errorMessage + '\n\n' +
+            '💡 SOLUTION - Configurer les politiques RLS dans Supabase:\n\n' +
+            'OPTION 1 (Recommandé - Désactiver RLS pour les admins):\n' +
+            'Exécutez dans Supabase SQL Editor:\n\n' +
+            '-- Désactiver RLS pour permettre les opérations admin\n' +
+            'ALTER TABLE types DISABLE ROW LEVEL SECURITY;\n\n' +
+            'OU\n\n' +
+            'OPTION 2 (Créer des politiques permissives):\n' +
+            '1. Allez dans Supabase Dashboard → Authentication → Policies\n' +
+            '2. Sélectionnez la table "types"\n' +
+            '3. Créez une politique DELETE:\n\n' +
+            '   CREATE POLICY "Allow delete types"\n' +
+            '   ON types FOR DELETE\n' +
+            '   USING (true);\n\n' +
+            '4. Créez une politique UPDATE:\n\n' +
+            '   CREATE POLICY "Allow update types"\n' +
+            '   ON types FOR UPDATE\n' +
+            '   USING (true);\n\n' +
+            'Note: Ces politiques permettent toutes les opérations. Pour plus de sécurité,\n' +
+            'utilisez OPTION 1 et gérez les permissions au niveau de l\'application.';
+        } else {
+          fullErrorMessage = '❌ Erreur lors de la suppression: ' + errorMessage;
+        }
+        
+        setError(fullErrorMessage);
+        // Also show alert for RLS errors to make sure user sees it
+        if (errorMessage.includes('RLS') || errorMessage.includes('politiques') || errorMessage.includes('permissions')) {
+          alert('⚠️ ERREUR DE PERMISSIONS RLS\n\n' + fullErrorMessage);
+        }
       }
     }
   };

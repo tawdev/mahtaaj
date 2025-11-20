@@ -699,15 +699,35 @@
   text-decoration: none;
   color: var(--color-primary);
   font-weight: 600;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  padding: 12px 20px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
   transition: all 0.3s ease;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  white-space: nowrap;
+  z-index: 10;
 }
 
 .services-header .back-button:hover {
-  color: var(--color-primary-2);
+  color: white;
+  background: var(--color-primary);
   transform: translateX(-4px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+[dir="rtl"] .services-header .back-button {
+  left: auto;
+  right: 32px;
+}
+
+[dir="rtl"] .services-header .back-button:hover {
+  transform: translateX(4px);
 }
 
 .services-title-section {
@@ -937,7 +957,15 @@
   .services-header .back-button {
     position: static;
     margin-bottom: 16px;
-    display: inline-block;
+    display: inline-flex;
+    align-self: flex-start;
+    margin-left: 0;
+    margin-right: auto;
+  }
+  
+  [dir="rtl"] .services-header .back-button {
+    margin-right: 0;
+    margin-left: auto;
   }
   
   .services-mode-toggle {
@@ -1140,7 +1168,8 @@
 
   .services-header .back-button {
     font-size: 14px;
-    padding: 8px 16px;
+    padding: 10px 16px;
+    gap: 6px;
   }
   
   .mode-button {

@@ -18,6 +18,8 @@ export default function Home() {
   const [galleryImages, setGalleryImages] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
+  const [categoryImages, setCategoryImages] = useState([]); // All images for selected category
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Index for hero slider
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [hiddenButtons, setHiddenButtons] = useState(new Set());
   const [loading, setLoading] = useState(true);
@@ -202,10 +204,11 @@ export default function Home() {
           }
         }
         
-        // Load all gallery images from Supabase
+        // Load all active gallery images from Supabase for slider
         const { data: imagesData, error: imagesError } = await supabase
           .from('gallery')
           .select('*')
+          .eq('is_active', true)
           .order('created_at', { ascending: false });
         
         if (!isMounted) return;
@@ -217,8 +220,9 @@ export default function Home() {
           const mappedImages = imagesData.map(img => ({
             ...img,
             image_url: getImageUrl(img.image_path || img.image_url)
-          }));
+          })).filter(img => img.image_url); // Filter out images without valid URLs
           setGalleryImages(mappedImages);
+          console.log('[Home] Loaded', mappedImages.length, 'active gallery images for slider');
         }
       } catch (error) {
         console.error('Error loading gallery data:', error);
@@ -272,6 +276,9 @@ export default function Home() {
     const loadCategoryImages = async () => {
       if (!selectedCategory) {
         console.log('[Home] No selected category');
+        setCategoryImages([]);
+        setCurrentImage(null);
+        setCurrentImageIndex(0);
         return;
       }
       
@@ -287,7 +294,9 @@ export default function Home() {
         
         if (error) {
           console.error('[Home] Error loading category images:', error);
+          setCategoryImages([]);
           setCurrentImage(null);
+          setCurrentImageIndex(0);
           return;
         }
         
@@ -311,34 +320,143 @@ export default function Home() {
           console.log('[Home] Mapped images with valid URLs:', mappedImages.length);
           
           if (mappedImages.length > 0) {
-            // Select random image from category
-            const randomImage = mappedImages[Math.floor(Math.random() * mappedImages.length)];
-            console.log('[Home] Selected random image:', randomImage);
-            setCurrentImage(randomImage);
+            // Store all images for the category
+            setCategoryImages(mappedImages);
+            // The slider will handle setting images from all gallery images
+            // Only set current image if galleryImages is empty (initial load)
+            // Otherwise, let the slider manage the current image
           } else {
             console.warn('[Home] No images with valid URLs found');
+            setCategoryImages([]);
             setCurrentImage(null);
+            setCurrentImageIndex(0);
           }
         } else {
           console.warn('[Home] No images found for category');
+          setCategoryImages([]);
           setCurrentImage(null);
+          setCurrentImageIndex(0);
         }
       } catch (error) {
         console.error('[Home] Exception loading category images:', error);
+        setCategoryImages([]);
         setCurrentImage(null);
+        setCurrentImageIndex(0);
       }
     };
     
     loadCategoryImages();
   }, [selectedCategory, i18n.language, getImageUrl]);
 
-  // Auto-slide functionality (for gallery slider section - currently commented)
+  // Auto-slide through all active gallery images in Hero section (every 3 seconds)
+  // Use all gallery images instead of just category images to ensure slider works
+  useEffect(() => {
+    // Use galleryImages (all active images) instead of categoryImages
+    const imagesToSlide = galleryImages.filter(img => img.image_url);
+    
+    if (imagesToSlide.length === 0) {
+      console.log('[Home] Slider: No images available');
+      return;
+    }
+    
+    if (imagesToSlide.length === 1) {
+      console.log('[Home] Slider: Only one image, showing it without sliding');
+      // If only one image globally, show it but don't slide
+      if (!currentImage || currentImage.id !== imagesToSlide[0].id) {
+        setCurrentImage(imagesToSlide[0]);
+        setCurrentImageIndex(0);
+      }
+      return;
+    }
+    
+    console.log('[Home] Slider: Starting auto-slide with', imagesToSlide.length, 'images from all categories');
+    
+    // Initialize: If current image is not in the slider images, find its index or set first one
+    if (!currentImage || !imagesToSlide.find(img => img.id === currentImage.id)) {
+      const initialIndex = imagesToSlide.findIndex(img => 
+        categoryImages.length > 0 && categoryImages[0] && img.id === categoryImages[0].id
+      );
+      const startIndex = initialIndex >= 0 ? initialIndex : 0;
+      const initialImage = imagesToSlide[startIndex];
+      setCurrentImage(initialImage);
+      setCurrentImageIndex(startIndex);
+      
+      // Update selected category based on the initial image's category
+      if (initialImage && initialImage.category_gallery_id) {
+        const imageCategory = categories.find(cat => cat.id === initialImage.category_gallery_id);
+        if (imageCategory) {
+          setSelectedCategory(imageCategory);
+        }
+      }
+      
+      console.log('[Home] Slider: Initialized with image at index', startIndex);
+    } else {
+      // Update index to match current image
+      const currentIndex = imagesToSlide.findIndex(img => img.id === currentImage.id);
+      if (currentIndex >= 0 && currentIndex !== currentImageIndex) {
+        setCurrentImageIndex(currentIndex);
+        
+        // Update selected category based on current image's category
+        if (currentImage && currentImage.category_gallery_id) {
+          const imageCategory = categories.find(cat => cat.id === currentImage.category_gallery_id);
+          if (imageCategory) {
+            setSelectedCategory(imageCategory);
+          }
+        }
+      }
+    }
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % imagesToSlide.length;
+        console.log('[Home] Slider: Moving from index', prevIndex, 'to', nextIndex);
+        
+        // Change image directly - CSS will handle the transition
+        if (imagesToSlide[nextIndex] && imagesToSlide[nextIndex].image_url) {
+          console.log('[Home] Slider: Setting new image:', imagesToSlide[nextIndex].id);
+          const nextImage = imagesToSlide[nextIndex];
+          setCurrentImage(nextImage);
+          
+          // Update selected category based on the image's category
+          if (nextImage.category_gallery_id) {
+            const imageCategory = categories.find(cat => cat.id === nextImage.category_gallery_id);
+            if (imageCategory) {
+              console.log('[Home] Slider: Updating category to:', imageCategory.name);
+              setSelectedCategory(imageCategory);
+            }
+          }
+        } else {
+          console.warn('[Home] Slider: Next image is invalid at index', nextIndex);
+        }
+        
+        return nextIndex;
+      });
+    }, 3000); // Change every 3 seconds (3000ms)
+
+    return () => {
+      console.log('[Home] Slider: Cleaning up interval');
+      clearInterval(interval);
+    };
+  }, [galleryImages, categoryImages, categories]);
+
+  // Update selected category when current image changes
+  useEffect(() => {
+    if (currentImage && currentImage.category_gallery_id && categories.length > 0) {
+      const imageCategory = categories.find(cat => cat.id === currentImage.category_gallery_id);
+      if (imageCategory && (!selectedCategory || selectedCategory.id !== imageCategory.id)) {
+        console.log('[Home] Updating selected category to match current image:', imageCategory.name);
+        setSelectedCategory(imageCategory);
+      }
+    }
+  }, [currentImage, categories, selectedCategory]);
+
+  // Auto-slide functionality (for gallery slider section)
   useEffect(() => {
     if (!isPlaying || galleryImages.length === 0) return;
     
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % galleryImages.length);
-    }, 1000); // Change slide every 1 second
+    }, 3000); // Change slide every 3 seconds (3000ms)
 
     return () => clearInterval(interval);
   }, [isPlaying, galleryImages.length]);
@@ -452,7 +570,8 @@ export default function Home() {
         ) : currentImage && currentImage.image_url ? (
           <div className="hero-background">
             <div 
-              className="background-image"
+              key={`hero-img-${currentImage.id || currentImageIndex}-${currentImageIndex}`}
+              className="background-image fade-in"
               style={{
                 backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${currentImage.image_url})`
               }}
@@ -504,7 +623,7 @@ export default function Home() {
           </div>
         ) : selectedCategory && currentImage ? (
           <div className="home-hero-content">
-            <h1 className={`hero-title ${isTransitioning ? 'fade-out' : 'fade-in'}`}>
+            <h1 key={`title-${selectedCategory.id}`} className="hero-title fade-in">
               {formatCategoryName(selectedCategory.name)}
             </h1>
             

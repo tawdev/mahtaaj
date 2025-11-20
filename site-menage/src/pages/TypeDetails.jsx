@@ -204,6 +204,16 @@ export default function TypeDetails() {
   const btnBack = { ...btn, background: '#e0f2fe', color: '#075985' };
   const small = { fontSize: 12, color: '#64748b' };
 
+  // Determine back button URL based on current route
+  const getBackUrl = () => {
+    // If we're on /services/menage/1/1, go back to /services/menage/1
+    if (serviceSlug === 'menage' && categorySlug) {
+      return `/services/menage/${categorySlug}`;
+    }
+    // Otherwise, go to /services
+    return '/services';
+  };
+
   if (loading) {
     return (
       <main style={bgStyle}>
@@ -221,8 +231,8 @@ export default function TypeDetails() {
         <div style={{ maxWidth: 640, margin: '40px auto', textAlign: 'center' }}>
           <div style={{ color: '#ef4444', fontWeight: 700, marginBottom: 8 }}>{t('services_page.loading_error') || 'حدث خطأ أثناء التحميل'}</div>
           <div style={{ color: '#475569', marginBottom: 16 }}>{error}</div>
-          <Link to="/services" style={{ textDecoration: 'none' }}>
-            <button style={btnBack}>↩️ العودة للخدمات</button>
+          <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
+            <button style={btnBack}>↩️ العودة</button>
           </Link>
         </div>
       </main>
@@ -296,8 +306,8 @@ export default function TypeDetails() {
             <h1 style={titleStyle}>
               {selectedLang === 'ar' ? 'تفاصيل الفئة' : selectedLang === 'fr' ? 'Détails de la catégorie' : 'Category Details'} {currentName}
             </h1>
-            <Link to="/services" style={{ textDecoration: 'none' }}>
-              <button style={btnBack}>↩️ العودة للخدمات</button>
+            <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
+              <button style={btnBack}>↩️ العودة</button>
             </Link>
           </div>
         </div>
@@ -527,8 +537,8 @@ export default function TypeDetails() {
 
           <div style={actions}>
             <button onClick={handleReserve} style={btnReserve}>🔘 احجز</button>
-            <Link to="/services" style={{ textDecoration: 'none' }}>
-              <button style={btnBack}>↩️ العودة للخدمات</button>
+            <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
+              <button style={btnBack}>↩️ العودة</button>
             </Link>
           </div>
         </div>
