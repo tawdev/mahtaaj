@@ -73,6 +73,33 @@
   opacity: 1 !important;
 }
 
+.back-services-button {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 12px;
+  color: #1f2937;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.back-services-button:hover {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5f5 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  text-decoration: none;
+  color: #111827;
+}
+
 .register-button {
   display: inline-flex !important;
   align-items: center;

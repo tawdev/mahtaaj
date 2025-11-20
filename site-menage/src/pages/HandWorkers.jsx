@@ -337,6 +337,18 @@ export default function HandWorkers() {
             }}
           >
             <Link 
+              to="/tous-les-services"
+              className="back-services-button"
+              style={{
+                display: 'inline-flex',
+                visibility: 'visible',
+                opacity: 1
+              }}
+            >
+              <i className="fas fa-arrow-left"></i>
+              {t('hand_workers.return_to_services')}
+            </Link>
+            <Link 
               to="/hand-workers/register"
               className="register-button"
               style={{

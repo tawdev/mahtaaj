@@ -141,12 +141,22 @@ export default function Services() {
   };
 
   const handleSelectService = (service) => {
-    // Check if service is "Ménage" to redirect to /services/menage/1
-    const serviceName = (service.name || service.title || '').toLowerCase();
-    if (serviceName.includes('ménage') || serviceName.includes('menage')) {
+    // Strict matching for specific service names to redirect to /services/menage/1
+    const serviceName = (service.name || service.title || '').trim();
+    
+    // Exact match required (no includes, no case-insensitive partial matching)
+    const exactMatches = [
+      'التنظيف المنزلي',  // Arabic
+      'Ménage',            // French
+      'House Cleaning'     // English
+    ];
+    
+    if (exactMatches.includes(serviceName)) {
       navigate('/services/menage/1');
       return;
     }
+    
+    // For all other services, use normal navigation
     const slug = getServiceSlug(service);
     navigate(`/services/${slug}`);
   };
@@ -973,6 +983,18 @@ export default function Services() {
           padding: 0 20px;
         }
         
+        .services-actions {
+          margin-top: 16px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 12px;
+        }
+        
+        .services-actions .mode-button i {
+          font-size: 0.95rem;
+        }
+        
         .services-title {
           font-size: clamp(2rem, 4vw, 3rem);
           font-weight: 800;
@@ -1484,6 +1506,12 @@ export default function Services() {
               <span className="cart-estimate-minimum">{t('services_page.minimum_price')}</span>
               <span className="cart-estimate-additional">{t('services_page.additional_hour')}</span>
             </p>
+          </div>
+          <div className="services-actions" data-aos="fade-up" data-aos-delay="350">
+            <Link to="/services/menage" className="mode-button">
+              <i className="fas fa-arrow-left"></i>
+              {t('services_page.return_to_menage')}
+            </Link>
           </div>
         </div>
         

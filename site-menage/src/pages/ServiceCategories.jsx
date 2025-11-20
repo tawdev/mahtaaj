@@ -54,8 +54,60 @@ export default function ServiceCategories() {
   };
 
   const getCategorySlug = (category) => {
-    return category.id.toString() || 
+    return category.id?.toString() || 
            (category.name || '').toLowerCase().replace(/\s+/g, '-');
+  };
+
+  const includesKeyword = (value = '', keywords = []) => {
+    const normalized = value.toString().toLowerCase();
+    return keywords.some(keyword => normalized.includes(keyword));
+  };
+
+  const isMenageLabel = (category) => {
+    const menageKeywords = [
+      'ménage',
+      'menage',
+      'ménagé',
+      'housekeeping',
+      'house keeping',
+      'cleaning',
+      'clean house',
+      'تنظيف',
+      'التنظيف',
+      'النظافة',
+      'تنضيفة'
+    ];
+    const possibleValues = [
+      category?.name,
+      category?.title,
+      category?.slug,
+      category?.name_fr,
+      category?.name_en,
+      category?.name_ar
+    ].filter(Boolean);
+    return possibleValues.some(value => includesKeyword(value, menageKeywords));
+  };
+
+  const isCuisineLabel = (category) => {
+    const cuisineKeywords = [
+      'cuisine',
+      'kitchen',
+      'cuisin',
+      'cocina',
+      'cooking',
+      'طبخ',
+      'مطبخ',
+      'المطبخ'
+    ];
+    const possibleValues = [
+      category?.name,
+      category?.title,
+      category?.slug,
+      category?.name_fr,
+      category?.name_en,
+      category?.name_ar
+    ].filter(Boolean);
+    return possibleValues.some(value => includesKeyword(value, cuisineKeywords));
   };
 
   // Helper function to format service title for menage page
@@ -112,7 +164,7 @@ export default function ServiceCategories() {
   return (
     <main className="services-page">
       <div className="services-header">
-        <Link to="/services" className="back-button">← {t('services_page.back')}</Link>
+        <Link to="/tous-les-services" className="back-button">← {t('services_page.back')}</Link>
         <h1>{formatServiceTitle(service.name || service.title)}</h1>
       </div>
 
@@ -141,21 +193,32 @@ export default function ServiceCategories() {
               }
             }
             
-            // Check if category name is "Ménage + cuisine" or "Ménage et cuisine" to redirect to /services/menage/13
-            const categoryName = (category.name || '').toLowerCase();
-            const isMenageEtCuisine = (categoryName.includes('ménage') || categoryName.includes('menage')) && 
-                                     (categoryName.includes('cuisine') || categoryName.includes('+'));
+            // Strict matching for specific category names to redirect to /services/menage/1
+            // Only applies when on /services/menage page
+            const categoryName = (category.name || category.title || '').trim();
+            const exactMatches = [
+              'التنظيف المنزلي',  // Arabic
+              'Ménage',            // French
+              'Housekeeping'     // English
+            ];
             
-            // Check if category name is "Ménage" only (without cuisine) to redirect to /services
-            const isMenageOnly = (categoryName.includes('ménage') || categoryName.includes('menage')) && 
-                                !categoryName.includes('cuisine') && !categoryName.includes('+');
+            // Check if we're on /services/menage page and category name matches exactly
+            const isOnMenagePage = serviceSlug === 'menage' || serviceSlug === 'nettoyage';
+            const isExactMatch = exactMatches.includes(categoryName);
+            
+            // Check if category name is "Ménage + cuisine" or "Ménage et cuisine" to redirect to /services/menage/13
+            const menageLabel = isMenageLabel(category);
+            const cuisineLabel = isCuisineLabel(category);
+            const isMenageEtCuisine = menageLabel && cuisineLabel;
             
             let categoryLink;
-            if (isMenageEtCuisine) {
-              categoryLink = '/services/menage/13';
-            } else if (isMenageOnly) {
+            if (isOnMenagePage && isExactMatch) {
+              // Strict match: redirect to /services/menage/1
               categoryLink = '/services';
+            } else if (isMenageEtCuisine) {
+              categoryLink = '/services/menage/13';
             } else {
+              // For all other categories, show details page
               categoryLink = `/services/${serviceSlug}/${getCategorySlug(category)}`;
             }
             
