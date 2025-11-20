@@ -499,7 +499,12 @@
       "description_label": "Description:",
       "description_text": "Complete preparation before arrival: bedding, towels, impeccable cleanliness.",
       "available_types": "Available Types:",
-      "back_to_services": "Back to services"
+      "back_to_services": "Back to services",
+      "car_cleaning": {
+        "title": "Category Details",
+        "subtitle": "Car Cleaning at Center",
+        "description": "Professional car cleaning service at center. We offer complete interior and exterior cleaning using high-quality products and specialized equipment to ensure perfect shine and protect your vehicle's paint."
+      }
     },
     "type_details": {
       "title": "Type Details",

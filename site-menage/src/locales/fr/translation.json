@@ -499,7 +499,12 @@
       "description_label": "Description:",
       "description_text": "Préparation complète avant l'arrivée: literie, serviettes, propreté impeccable.",
       "available_types": "Types disponibles:",
-      "back_to_services": "Retour aux services"
+      "back_to_services": "Retour aux services",
+      "car_cleaning": {
+        "title": "Détails de la catégorie",
+        "subtitle": "Nettoyage des voitures en centre",
+        "description": "Service de nettoyage professionnel pour voitures en centre. Nous offrons un nettoyage complet intérieur et extérieur en utilisant des produits de haute qualité et des équipements spécialisés pour garantir un éclat parfait et protéger la peinture de votre véhicule."
+      }
     },
     "type_details": {
       "title": "Détails du type",

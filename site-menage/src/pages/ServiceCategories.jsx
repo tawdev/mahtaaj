@@ -193,11 +193,12 @@ export default function ServiceCategories() {
               }
             }
             
-            // Strict matching for specific category names to redirect to /services/menage/1
+            // Strict matching for specific category names to redirect to /services
             // Only applies when on /services/menage page
             const categoryName = (category.name || category.title || '').trim();
             const exactMatches = [
               'التنظيف المنزلي',  // Arabic
+              'تنظيف',            // Arabic - simple cleaning
               'Ménage',            // French
               'Housekeeping'     // English
             ];
@@ -213,7 +214,7 @@ export default function ServiceCategories() {
             
             let categoryLink;
             if (isOnMenagePage && isExactMatch) {
-              // Strict match: redirect to /services/menage/1
+              // Strict match: redirect to /services
               categoryLink = '/services';
             } else if (isMenageEtCuisine) {
               categoryLink = '/services/menage/13';

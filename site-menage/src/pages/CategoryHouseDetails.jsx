@@ -632,6 +632,21 @@ export default function CategoryHouseDetails() {
     );
   };
 
+  // Check if category is Car Cleaning
+  const isCarCleaningCategory = () => {
+    return category && (
+      category.name_fr === 'Nettoyage des voitures' ||
+      category.name_en === 'Car Cleaning' ||
+      category.name_ar === 'تنظيف السيارات' ||
+      category.name === 'Nettoyage des voitures' ||
+      category.name === 'Car Cleaning' ||
+      category.name === 'تنظيف السيارات' ||
+      (category.name_fr && category.name_fr.toLowerCase().includes('nettoyage des voitures')) ||
+      (category.name_en && category.name_en.toLowerCase().includes('car cleaning')) ||
+      (category.name_ar && category.name_ar.includes('تنظيف السيارات'))
+    );
+  };
+
   // Get types to display based on showAllTypes state
   const getDisplayTypes = () => {
     if (isMenageCuisineCategory()) {
@@ -734,8 +749,17 @@ export default function CategoryHouseDetails() {
         <Link to={`/services/${serviceSlug}`} className="back-button">
           ← {t('services_page.back')}
         </Link>
+        {isCarCleaningCategory() ? (
+          <>
+            <h1>🧾 {t('services_page.category_details.car_cleaning.title')}</h1>
+            <h2>{t('services_page.category_details.car_cleaning.subtitle')}</h2>
+          </>
+        ) : (
+          <>
         <h1>🧾 {t('services_page.category_details.title')}</h1>
         <h2>{category.name}</h2>
+          </>
+        )}
       </div>
 
       {/* Info banner for Ménage + cuisine selection rule */}
@@ -1123,9 +1147,102 @@ export default function CategoryHouseDetails() {
               </button>
             </div>
           )}
+
+          {/* Reserve button for Car Cleaning category when there are types */}
+          {isCarCleaningCategory() && getDisplayTypes().length > 0 && (
+            <div style={{
+              marginTop: '32px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '16px',
+              flexDirection: 'column'
+            }}>
+              <button
+                onClick={handleReserve}
+                style={{
+                  padding: '14px 32px',
+                  backgroundColor: '#10b981',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#059669';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#10b981';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.4)';
+                }}
+              >
+                <span>✓</span>
+                {t('services_page.forms.reserve')}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="category-details-content">
+          {/* Special Section for Car Cleaning Category */}
+          {isCarCleaningCategory() ? (
+            <>
+              <div className="description-section">
+                <h3>🧹 {t('services_page.category_details.description_label')}</h3>
+                <p>{category.description || t('services_page.category_details.car_cleaning.description')}</p>
+              </div>
+
+              <div className="actions-section" style={{ marginTop: '2rem' }}>
+                <button 
+                  onClick={handleReserve}
+                  className="reserve-button"
+                  style={{
+                    padding: '14px 32px',
+                    backgroundColor: '#10b981',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    margin: '0 auto'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = '#059669';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.5)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = '#10b981';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.4)';
+                  }}
+                >
+                  <span>✓</span>
+                  {t('services_page.forms.reserve')}
+                </button>
+                <Link to="/services" className="back-services-button" style={{ marginTop: '16px', display: 'block', textAlign: 'center' }}>
+                  {t('services_page.category_details.back_to_services')}
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
           <div className="description-section">
             <h3>🧹 {t('services_page.category_details.description_label')}</h3>
             <p>{category.description || t('services_page.category_details.description_text')}</p>
@@ -1298,6 +1415,8 @@ export default function CategoryHouseDetails() {
                   {t('services_page.category_details.back_to_services')}
                 </Link>
               </div>
+            </>
+          )}
             </>
           )}
         </div>
