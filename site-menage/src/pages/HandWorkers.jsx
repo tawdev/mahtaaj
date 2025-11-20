@@ -144,6 +144,41 @@ export default function HandWorkers() {
 
   const getCurrentLang = () => (localStorage.getItem('currentLang') || i18n.language || 'fr').split(/[-_]/)[0].toLowerCase();
 
+  const getNumberLocale = () => {
+    const lang = getCurrentLang();
+    if (lang === 'ar') return 'ar-MA';
+    if (lang === 'en') return 'en-US';
+    return 'fr-FR';
+  };
+
+  const formatNumericValue = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    const numeric = Number(value);
+    if (Number.isNaN(numeric)) return String(value);
+    return new Intl.NumberFormat(getNumberLocale(), {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    }).format(numeric);
+  };
+
+  const formatPriceValue = (value) => {
+    const formatted = formatNumericValue(value);
+    if (!formatted) {
+      return t('hand_workers.price_not_available', { defaultValue: '—' });
+    }
+    const currency = t('hand_workers.currency_unit', { defaultValue: 'DH' });
+    return `${formatted} ${currency}`;
+  };
+
+  const formatMinimumHoursValue = (value) => {
+    const formatted = formatNumericValue(value);
+    if (!formatted) {
+      return t('hand_workers.minimum_hours_not_available', { defaultValue: '—' });
+    }
+    const suffix = t('hand_workers.hours_suffix', { defaultValue: 'h' });
+    return `${formatted}${suffix}`;
+  };
+
   // Helper: localized value with per-lang fallback and language-specific default text
   const getLocalizedValue = (item, field) => {
     const lang = getCurrentLang();
@@ -484,11 +519,11 @@ export default function HandWorkers() {
                 <div className="category-info-pricing">
                   <div className="pricing-item">
                     <span className="pricing-label">{t('hand_workers.price_per_hour')}</span>
-                    <span className="pricing-value">{selectedCategory.price_per_hour} DH</span>
+                    <span className="pricing-value">{formatPriceValue(selectedCategory.price_per_hour)}</span>
                   </div>
                   <div className="pricing-item">
                     <span className="pricing-label">{t('hand_workers.minimum_hours')}</span>
-                    <span className="pricing-value">{selectedCategory.minimum_hours}h</span>
+                    <span className="pricing-value">{formatMinimumHoursValue(selectedCategory.minimum_hours)}</span>
                   </div>
                 </div>
               </div>

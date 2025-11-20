@@ -335,6 +335,39 @@
   color: #dc2626;
 }
 
+.hand-workers-page .category-price .price-label,
+.hand-workers-page .category-price .price-value,
+.hand-workers-page .category-minimum .minimum-label,
+.hand-workers-page .category-minimum .minimum-value {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0;
+  margin: 0;
+}
+
+.hand-workers-page .category-price .price-value,
+.hand-workers-page .pricing-item .pricing-value {
+  color: #059669;
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.hand-workers-page .category-minimum .minimum-value {
+  color: #dc2626;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.hand-workers-page .category-price .price-value::before,
+.hand-workers-page .pricing-item .pricing-value::before,
+.hand-workers-page .category-minimum .minimum-value::before {
+  content: '';
+}
+
 /* Category Details Section */
 .category-details-section {
   margin-top: 2rem;
