@@ -110,14 +110,24 @@ export default function Driver() {
   return (
     <main className="driver-page">
       <div className="driver-header">
-        <h1>🚗 {i18n.language === 'ar' ? 'خدمات السائقين' : 
-                 i18n.language === 'fr' ? 'Services de Chauffeur' : 
-                 'Driver Services'}</h1>
-        <p className="driver-subtitle">
-          {i18n.language === 'ar' ? 'اختر نوع الخدمة التي تحتاجها' : 
-           i18n.language === 'fr' ? 'Choisissez le type de service dont vous avez besoin' : 
-           'Choose the type of service you need'}
-        </p>
+        <div className="header-content">
+          <h1>🚗 {i18n.language === 'ar' ? 'خدمات السائقين' : 
+                   i18n.language === 'fr' ? 'Services de Chauffeur' : 
+                   'Driver Services'}</h1>
+          <p className="driver-subtitle">
+            {i18n.language === 'ar' ? 'اختر نوع الخدمة التي تحتاجها' : 
+             i18n.language === 'fr' ? 'Choisissez le type de service dont vous avez besoin' : 
+             'Choose the type of service you need'}
+          </p>
+        </div>
+        <div className="back-to-services">
+          <Link to="/tous-les-services" className="back-button">
+            <span className="back-icon">←</span>
+            {i18n.language === 'ar' ? 'العودة إلى الخدمات' : 
+             i18n.language === 'fr' ? 'Retour aux services' : 
+             'Back to services'}
+          </Link>
+        </div>
       </div>
 
       {categories.length === 0 ? (

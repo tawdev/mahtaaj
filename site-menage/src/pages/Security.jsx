@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './Security.css';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export default function Security() {
@@ -11,10 +12,10 @@ export default function Security() {
     
     // Direct translations for common roles
     const directTranslations = {
-      'Chef de sécurité': t('security_page.chef_de_securite', 'رئيس الأمان'),
-      'Agent de sûreté': t('security_page.agent_de_surete', 'وكيل الأمان المتخصص'),
-      'Agent de sécurité': t('security_page.agent_de_securite', 'وكيل الأمان العام'),
-      'Superviseur sécurité': t('security_page.superviseur_securite', 'مشرف فريق الأمان')
+      'Chef de sécurité': t('security_page.chef_de_securite', 'رئيس الأمن'),
+      'Agent de sûreté': t('security_page.agent_de_surete', 'وكيل الأمن المتخصص'),
+      'Agent de sécurité': t('security_page.agent_de_securite', 'وكيل الأمن العام'),
+      'Superviseur sécurité': t('security_page.superviseur_securite', 'مشرف فريق الأمن')
     };
     
     if (directTranslations[roleName]) {
@@ -767,10 +768,20 @@ export default function Security() {
       <div className="shop-container">
         <header className="shop-header" style={{marginBottom: 24}}>
           <div className="shop-header-content">
-            <h1 className="shop-title" data-aos="fade-up" data-aos-delay="100">{t('security_page.title')}</h1>
+            <h1 className="shop-title" data-aos="fade-up" data-aos-delay="100">
+              {i18n.language === 'ar' ? 'فريق الأمن' : t('security_page.title')}
+            </h1>
             <p className="shop-description" data-aos="fade-up" data-aos-delay="200">
               {t('security_page.subtitle')}
             </p>
+          </div>
+          <div className="back-to-services">
+            <Link to="/tous-les-services" className="back-button">
+              <span className="back-icon">←</span>
+              {i18n.language === 'ar' ? 'العودة' : 
+               i18n.language === 'fr' ? 'Retour' : 
+               'Back'}
+            </Link>
           </div>
         </header>
 

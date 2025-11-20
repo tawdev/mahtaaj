@@ -842,6 +842,67 @@
   transform: translateY(0);
 }
 
+/* Header styles for desktop */
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  padding: 20px 0;
+}
+
+.shop-header-content {
+  flex: 1;
+  text-align: center;
+}
+
+.back-to-services {
+  margin-left: 20px;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+  border: 1px solid rgba(31, 41, 55, 0.2);
+  border-radius: 12px;
+  color: #1f2937;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.back-button:hover {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e5e7eb 100%);
+  border-color: rgba(31, 41, 55, 0.4);
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+}
+
+.back-icon {
+  font-size: 16px;
+}
+
+/* RTL Support */
+[dir="rtl"] .shop-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .back-to-services {
+  margin-left: 0;
+  margin-right: 20px;
+}
+
+[dir="rtl"] .back-icon {
+  transform: scaleX(-1);
+}
+
 /* Responsive adjustments for mobile */
 @media (max-width: 768px) {
   /* Page container fixes */
@@ -862,18 +923,36 @@
 
   /* Header fixes */
   .shop-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
     margin-bottom: 1.5rem !important;
-    padding: 0 !important;
+    padding: 20px 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box;
   }
 
   .shop-header-content {
+    flex: 1;
+    text-align: center;
     width: 100% !important;
     max-width: 100% !important;
     padding: 0 !important;
     box-sizing: border-box;
+  }
+
+  .back-to-services {
+    margin-left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .back-button {
+    width: auto;
   }
 
   .shop-title {
@@ -888,6 +967,54 @@
     line-height: 1.5;
     word-wrap: break-word;
     overflow-wrap: break-word;
+  }
+
+  /* Back button styles */
+  .back-to-services {
+    margin-left: 20px;
+  }
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+    border: 1px solid rgba(31, 41, 55, 0.2);
+    border-radius: 12px;
+    color: #1f2937;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .back-button:hover {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e5e7eb 100%);
+    border-color: rgba(31, 41, 55, 0.4);
+    color: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+  }
+
+  .back-icon {
+    font-size: 16px;
+  }
+
+  /* RTL Support */
+  [dir="rtl"] .shop-header {
+    flex-direction: row-reverse;
+  }
+
+  [dir="rtl"] .back-to-services {
+    margin-left: 0;
+    margin-right: 20px;
+  }
+
+  [dir="rtl"] .back-icon {
+    transform: scaleX(-1);
   }
 
   /* Security grid fixes - already responsive */

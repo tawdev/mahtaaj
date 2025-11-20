@@ -239,9 +239,11 @@ export default function Jardinage() {
           </p>
         </div>
         <div className="back-to-home">
-          <Link to="/" className="back-button">
+          <Link to="/tous-les-services" className="back-button">
             <span className="back-icon">←</span>
-            {t('jardinage.back_to_home')}
+            {i18n.language === 'ar' ? 'العودة' : 
+             i18n.language === 'fr' ? 'Retour' : 
+             'Back'}
           </Link>
         </div>
       </div>
