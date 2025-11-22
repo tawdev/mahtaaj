@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getTypeById, getCategoryHouseById, getTypeOptions } from '../api-supabase';
+import { getTypeById, getCategoryHouseById, getTypeOptions, getTypes } from '../api-supabase';
 import './Services.css';
 
 export default function TypeDetails() {
@@ -18,14 +18,39 @@ export default function TypeDetails() {
   const [type, setType] = useState(null);
   const [category, setCategory] = useState(null);
   const [typeOptions, setTypeOptions] = useState([]);
+  const [categoryTypes, setCategoryTypes] = useState([]);
   const [selectedTypeOption, setSelectedTypeOption] = useState(null);
+  const [selectedKitchens, setSelectedKitchens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [surface, setSurface] = useState('');
   const [price, setPrice] = useState(0);
 
   useEffect(() => {
-    loadType();
+    // Only load if we have a typeSlug or typeId (this is TypeDetails page, not CategoryHouseDetails)
+    // Reset state when route changes
+    if (typeSlug || typeId) {
+      // Reset states to prevent data mixing between routes
+      setType(null);
+      setCategory(null);
+      setTypeOptions([]);
+      setCategoryTypes([]);
+      setSelectedTypeOption(null);
+      setSelectedKitchens([]);
+      setError('');
+      loadType();
+    } else {
+      // If no typeSlug, this component shouldn't be active
+      // Reset all states to prevent interference
+      setType(null);
+      setCategory(null);
+      setTypeOptions([]);
+      setCategoryTypes([]);
+      setSelectedTypeOption(null);
+      setSelectedKitchens([]);
+      setLoading(false);
+      setError('');
+    }
   }, [serviceSlug, categorySlug, typeSlug, categoryId, subCategoryId, typeId]);
 
   useEffect(() => {
@@ -37,6 +62,12 @@ export default function TypeDetails() {
   }, [surface]);
 
   const loadType = async () => {
+    // Early return if no typeSlug or typeId - this should not happen but safety check
+    if (!typeSlug && !typeId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
@@ -44,6 +75,7 @@ export default function TypeDetails() {
       const idCandidate = parseInt(typeId || typeSlug);
       if (isNaN(idCandidate)) {
         setError('Type ID invalide');
+        setLoading(false);
         return;
       }
 
@@ -76,6 +108,36 @@ export default function TypeDetails() {
           console.log('Category loaded:', categoryResult);
           if (categoryResult) {
             setCategory(categoryResult);
+            
+            // Check if this is a cuisine category and load all types for this category
+            // Only load categoryTypes if we're on a TypeDetails page (typeSlug exists)
+            // This prevents interference with CategoryHouseDetails page
+            if (typeSlug || typeId) {
+              const isCuisine = categoryResult && (
+                categoryResult.name_ar === 'مطبخ' ||
+                categoryResult.name_fr === 'Cuisine' ||
+                categoryResult.name_en === 'Kitchen' ||
+                categoryResult.name === 'Cuisine' ||
+                categoryResult.name === 'مطبخ' ||
+                categoryResult.name === 'Kitchen' ||
+                (categoryResult.name_ar && categoryResult.name_ar.includes('مطبخ')) ||
+                (categoryResult.name_fr && categoryResult.name_fr.toLowerCase().includes('cuisine')) ||
+                (categoryResult.name_en && categoryResult.name_en.toLowerCase().includes('kitchen'))
+              );
+              
+              if (isCuisine) {
+                // Load all types for this category
+                try {
+                  const typesData = await getTypes(i18n.language, null, categoryHouseId);
+                  const typesArray = Array.isArray(typesData) ? typesData : (typesData.data || []);
+                  console.log('Category Types loaded:', typesArray);
+                  setCategoryTypes(typesArray);
+                } catch (typesErr) {
+                  console.warn('Could not load category types:', typesErr);
+                  setCategoryTypes([]);
+                }
+              }
+            }
           }
         } catch (categoryErr) {
           console.warn('Could not load category:', categoryErr);
@@ -105,24 +167,38 @@ export default function TypeDetails() {
   };
 
   const handleReserve = () => {
+    // For cuisine categories, use multiple selections if available, otherwise fall back to single selection
+    const selectedOptions = (isCuisineCategory() || isAsianCuisineCategory()) && selectedKitchens.length > 0
+      ? selectedKitchens
+      : selectedTypeOption ? [selectedTypeOption] : [];
+
     const prefill = {
       typeId: type?.id,
       typeName: type?.name_ar || type?.name || type?.name_fr || type?.name_en || '',
       description: type?.description_ar || type?.description || type?.description_fr || type?.description_en || '',
       surface: surface || '',
       estimatedPrice: price || 0,
-      choixtype_id: selectedTypeOption?.id || undefined,
-      choixtype_name: selectedTypeOption ? (selectedTypeOption.name || selectedTypeOption.name_fr || selectedTypeOption.name_ar || selectedTypeOption.name_en) : undefined,
+      choixtype_id: selectedOptions.length === 1 ? selectedOptions[0]?.id : undefined,
+      choixtype_name: selectedOptions.length === 1 
+        ? (selectedOptions[0].name || selectedOptions[0].name_fr || selectedOptions[0].name_ar || selectedOptions[0].name_en)
+        : undefined,
+      choixtype_ids: selectedOptions.length > 0 ? selectedOptions.map(opt => opt.id) : undefined,
+      choixtype_names: selectedOptions.length > 0 
+        ? selectedOptions.map(opt => opt.name || opt.name_fr || opt.name_ar || opt.name_en)
+        : undefined,
+      selectedKitchens: selectedOptions,
     };
 
     try {
       localStorage.setItem('booking_prefill', JSON.stringify(prefill));
+      // Also save selected kitchens separately for easy access
+      localStorage.setItem('selected_kitchens', JSON.stringify(selectedKitchens));
     } catch (err) {
       console.error('Error saving prefill:', err);
     }
 
     const idCandidate = type?.id || parseInt(typeId || typeSlug) || '';
-    navigate(`/reservation/${idCandidate}`, { state: { type, prefill } });
+    navigate(`/reservation/${idCandidate}`, { state: { type, prefill, selectedKitchens } });
   };
 
   // Handle type option selection
@@ -134,6 +210,25 @@ export default function TypeDetails() {
       // Select the option
       setSelectedTypeOption(option);
     }
+  };
+
+  // Handle multiple kitchen selection
+  const handleKitchenSelect = (option) => {
+    setSelectedKitchens(prev => {
+      const isSelected = prev.some(kitchen => kitchen.id === option.id);
+      if (isSelected) {
+        // Remove from selection
+        return prev.filter(kitchen => kitchen.id !== option.id);
+      } else {
+        // Add to selection
+        return [...prev, option];
+      }
+    });
+  };
+
+  // Check if a kitchen is selected
+  const isKitchenSelected = (optionId) => {
+    return selectedKitchens.some(kitchen => kitchen.id === optionId);
   };
 
   // Check if category is Asian Cuisine
@@ -214,6 +309,11 @@ export default function TypeDetails() {
     return '/services';
   };
 
+  // Early return if no typeSlug - this component should not render for CategoryHouseDetails route
+  if (!typeSlug && !typeId) {
+    return null;
+  }
+
   if (loading) {
     return (
       <main style={bgStyle}>
@@ -289,14 +389,19 @@ export default function TypeDetails() {
   const currentDescription = getDescriptionByLang(selectedLang);
 
   // Check if the category is Cuisine/مطبخ/Kitchen
-  const isCuisineCategory = category && (
-    category.name_ar === 'مطبخ' ||
-    category.name_fr === 'Cuisine' ||
-    category.name_en === 'Kitchen' ||
-    category.name === 'Cuisine' ||
-    category.name === 'مطبخ' ||
-    category.name === 'Kitchen'
-  );
+  const isCuisineCategory = () => {
+    return category && (
+      category.name_ar === 'مطبخ' ||
+      category.name_fr === 'Cuisine' ||
+      category.name_en === 'Kitchen' ||
+      category.name === 'Cuisine' ||
+      category.name === 'مطبخ' ||
+      category.name === 'Kitchen' ||
+      (category.name_ar && category.name_ar.includes('مطبخ')) ||
+      (category.name_fr && category.name_fr.toLowerCase().includes('cuisine')) ||
+      (category.name_en && category.name_en.toLowerCase().includes('kitchen'))
+    );
+  };
 
   return (
     <main style={bgStyle}>
@@ -355,25 +460,35 @@ export default function TypeDetails() {
             </div>
           </div>
 
-          {/* Type Options Section for Asian Cuisine */}
-          {isAsianCuisineCategory() && (
+          {/* Type Options Section for Cuisine Categories (with multiple selection) */}
+          {(isCuisineCategory() || isAsianCuisineCategory()) && (
             <div>
               <div style={sectionTitle}>
-                {selectedLang === 'ar' ? '🧩 عرض الأنواع الفرعية (choixType)' : 
-                 selectedLang === 'fr' ? '🧩 Afficher les sous-types (choixType)' : 
-                 '🧩 Display Sub-types (choixType)'}
+                {selectedLang === 'ar' ? '🧩 الأنواع المتاحة' : 
+                 selectedLang === 'fr' ? '🧩 Types disponibles' : 
+                 '🧩 Available Types'}
+                {selectedKitchens.length > 0 && (
+                  <span style={{ 
+                    marginLeft: '12px', 
+                    fontSize: '14px', 
+                    fontWeight: 'normal', 
+                    color: '#3b82f6' 
+                  }}>
+                    ({selectedKitchens.length} {selectedLang === 'ar' ? 'محدد' : selectedLang === 'fr' ? 'sélectionné(s)' : 'selected'})
+                  </span>
+                )}
               </div>
-              {typeOptions.length > 0 ? (
+              {/* Use categoryTypes if available, otherwise use typeOptions */}
+              {(categoryTypes.length > 0 || typeOptions.length > 0) ? (
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
                   gap: '20px',
                   marginTop: '16px'
                 }}>
-                  {typeOptions.map((option) => {
-                    const isSelected = selectedTypeOption && selectedTypeOption.id === option.id;
-                    const optionImage = option.image_url || option.image;
-                    let imageUrl = optionImage;
+                  {(categoryTypes.length > 0 ? categoryTypes : typeOptions).map((option) => {
+                    const isSelected = isKitchenSelected(option.id);
+                    let imageUrl = pickImageUrl(option);
                     
                     if (imageUrl) {
                       if (imageUrl.startsWith('/serveces')) {
@@ -399,13 +514,11 @@ export default function TypeDetails() {
                     return (
                       <div
                         key={option.id}
-                        onClick={() => handleTypeOptionSelect(option)}
                         style={{
                           backgroundColor: isSelected ? '#dbeafe' : '#ffffff',
                           border: isSelected ? '2px solid #3b82f6' : '1px solid #e5e7eb',
                           borderRadius: '16px',
                           padding: '20px',
-                          cursor: 'pointer',
                           transition: 'all 0.3s ease',
                           boxShadow: isSelected 
                             ? '0 10px 25px rgba(59, 130, 246, 0.2)' 
@@ -426,24 +539,56 @@ export default function TypeDetails() {
                           }
                         }}
                       >
-                        {/* Selected indicator */}
-                        {isSelected && (
-                          <div style={{
+                        {/* Selection Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleKitchenSelect(option);
+                          }}
+                          style={{
                             position: 'absolute',
-                            top: '12px',
-                            right: '12px',
-                            width: '32px',
-                            height: '32px',
-                            backgroundColor: '#3b82f6',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            boxShadow: '0 2px 8px rgba(59, 130, 246, 0.4)'
-                          }}>
-                            <span style={{ color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>✓</span>
-                          </div>
-                        )}
+                            bottom: '16px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            padding: '10px 24px',
+                            backgroundColor: isSelected ? '#3b82f6' : '#ffffff',
+                            color: isSelected ? '#ffffff' : '#3b82f6',
+                            border: isSelected ? 'none' : '2px solid #3b82f6',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '14px',
+                            transition: 'all 0.2s ease',
+                            boxShadow: isSelected 
+                              ? '0 4px 12px rgba(59, 130, 246, 0.3)' 
+                              : '0 2px 4px rgba(0, 0, 0, 0.1)',
+                            zIndex: 10,
+                            minWidth: '120px'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isSelected) {
+                              e.currentTarget.style.backgroundColor = '#3b82f6';
+                              e.currentTarget.style.color = '#ffffff';
+                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                            } else {
+                              e.currentTarget.style.backgroundColor = '#2563eb';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isSelected) {
+                              e.currentTarget.style.backgroundColor = '#ffffff';
+                              e.currentTarget.style.color = '#3b82f6';
+                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                            } else {
+                              e.currentTarget.style.backgroundColor = '#3b82f6';
+                            }
+                          }}
+                        >
+                          {isSelected 
+                            ? (selectedLang === 'ar' ? '✓ تم الاختيار' : selectedLang === 'fr' ? '✓ Sélectionné' : '✓ Selected')
+                            : (selectedLang === 'ar' ? 'اختيار' : selectedLang === 'fr' ? 'Sélectionner' : 'Select')
+                          }
+                        </button>
                         
                         {/* Image */}
                         {imageUrl && (
@@ -476,7 +621,8 @@ export default function TypeDetails() {
                           fontWeight: '600',
                           color: '#1f2937',
                           marginBottom: '10px',
-                          marginTop: imageUrl ? '0' : '0'
+                          marginTop: imageUrl ? '0' : '0',
+                          paddingBottom: '50px'
                         }}>
                           {optionName}
                         </h4>
@@ -488,6 +634,7 @@ export default function TypeDetails() {
                             color: '#6b7280',
                             lineHeight: '1.6',
                             margin: 0,
+                            marginBottom: '12px',
                             display: '-webkit-box',
                             WebkitLineClamp: 3,
                             WebkitBoxOrient: 'vertical',
@@ -518,7 +665,7 @@ export default function TypeDetails() {
             </div>
           )}
 
-          {!isCuisineCategory && (
+          {!isCuisineCategory() && (
             <div>
               <div style={sectionTitle}>📏 تقدير المساحة والسعر</div>
               <div style={formRow}>

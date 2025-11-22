@@ -65,6 +65,57 @@ export default function Booking() {
   // Check if current type is a cuisine type (legacy check)
   const isCuisineType = ['Italienne', 'Marocaine', 'Française', 'Arabe du Golfe'].includes(typeValue);
 
+  // Check if selected service is one of the services that should hide size and type fields
+  // Services to hide fields for:
+  // 1. السجاد والأرائك / Carpets and Sofas / Tapis et Canapés
+  // 2. الغسيل والكي / Washing and Ironing / Lavage et Repassage
+  // 3. تنظيف السيارات / Car Cleaning / Nettoyage de voiture
+  const hideFields = (() => {
+    if (!selectedService) return false;
+    
+    const serviceLower = selectedService.toLowerCase().trim();
+    
+    const hideServices = [
+      // Arabic names
+      'السجاد والأرائك',
+      'السجاد والارائك',
+      'تنظيف السجاد',
+      'تنظيف الأرائك',
+      'الغسيل والكي',
+      'تنظيف السيارات',
+      'غسيل السيارات',
+      // French names
+      'tapis et canapés',
+      'tapis et canapes',
+      'nettoyage de tapis',
+      'nettoyage de canapés',
+      'nettoyage de canapes',
+      'lavage et repassage',
+      'nettoyage de voiture',
+      'lavage de voiture',
+      // English names
+      'carpets and sofas',
+      'carpet and sofa',
+      'carpet cleaning',
+      'sofa cleaning',
+      'washing and ironing',
+      'car cleaning',
+      'car wash',
+      // Common variations
+      'nettoyage canapé',
+      'nettoyage canape',
+      'repassage',
+      'ironing',
+      'washing',
+      'lavage'
+    ];
+    
+    return hideServices.some(hideService => 
+      serviceLower.includes(hideService.toLowerCase()) ||
+      hideService.toLowerCase().includes(serviceLower)
+    );
+  })();
+
   // Load category house when type is selected
   useEffect(() => {
     const loadCategoryFromType = async () => {
@@ -297,6 +348,61 @@ export default function Booking() {
     const t = requestAnimationFrame(() => setMounted(true));
     return () => cancelAnimationFrame(t);
   }, [i18n.language]);
+
+  // Auto-fill user data (firstname and email) from localStorage on page load
+  useEffect(() => {
+    // Use setTimeout to ensure React has rendered the form fields
+    const timeoutId = setTimeout(() => {
+      try {
+        // Get user data from localStorage
+        const userDataStr = localStorage.getItem('user_data') || localStorage.getItem('user');
+        const rememberedEmail = localStorage.getItem('remembered_email');
+        
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            
+            // Fill firstname field if available and not already filled
+            const firstnameInput = document.getElementById('firstname');
+            if (firstnameInput && userData.name) {
+              // Only fill if the field is empty
+              if (!firstnameInput.value || firstnameInput.value.trim() === '') {
+                // Extract first name from full name (take first word)
+                const firstName = userData.name.split(' ')[0] || userData.name;
+                firstnameInput.value = firstName;
+              }
+            }
+            
+            // Fill email field if available and not already filled
+            const emailInput = document.getElementById('email');
+            if (emailInput && userData.email) {
+              // Only fill if the field is empty
+              if (!emailInput.value || emailInput.value.trim() === '') {
+                emailInput.value = userData.email;
+              }
+            }
+          } catch (parseError) {
+            console.warn('Error parsing user data:', parseError);
+          }
+        }
+        
+        // If no user_data but remembered_email exists, fill email field
+        if (rememberedEmail) {
+          const emailInput = document.getElementById('email');
+          if (emailInput) {
+            // Only fill if the field is empty
+            if (!emailInput.value || emailInput.value.trim() === '') {
+              emailInput.value = rememberedEmail;
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Error loading user data for auto-fill:', error);
+      }
+    }, 100); // Small delay to ensure DOM is ready
+    
+    return () => clearTimeout(timeoutId);
+  }, []); // Run only once on mount
 
   // Choose best-quality background and optimize behavior per device
   useEffect(() => {
@@ -893,9 +999,24 @@ export default function Booking() {
                   ref={serviceSelectRef}
                   onChange={(e) => {
                     setSelectedService(e.target.value);
-                    // Show size field only if service is selected AND category is NOT Cuisine
-                    setShowSizeField(e.target.value !== '' && !isCuisineCategory);
-                    if (e.target.value === '') {
+                    // Check if this service should hide size and type fields
+                    const serviceLower = e.target.value.toLowerCase().trim();
+                    const shouldHide = [
+                      'السجاد والأرائك', 'السجاد والارائك', 'تنظيف السجاد', 'تنظيف الأرائك',
+                      'الغسيل والكي', 'تنظيف السيارات', 'غسيل السيارات',
+                      'tapis et canapés', 'tapis et canapes', 'nettoyage de tapis', 'nettoyage de canapés', 'nettoyage de canapes',
+                      'lavage et repassage', 'nettoyage de voiture', 'lavage de voiture',
+                      'carpets and sofas', 'carpet and sofa', 'carpet cleaning', 'sofa cleaning',
+                      'washing and ironing', 'car cleaning', 'car wash',
+                      'nettoyage canapé', 'nettoyage canape', 'repassage', 'ironing', 'washing', 'lavage'
+                    ].some(hideService => 
+                      serviceLower.includes(hideService.toLowerCase()) ||
+                      hideService.toLowerCase().includes(serviceLower)
+                    );
+                    
+                    // Show size field only if service is selected AND category is NOT Cuisine AND not in hide list
+                    setShowSizeField(e.target.value !== '' && !isCuisineCategory && !shouldHide);
+                    if (e.target.value === '' || shouldHide) {
                       setSizeValue('');
                       setCalculatedPrice(0);
                     }
@@ -918,7 +1039,7 @@ export default function Booking() {
                 </select>
               </div>
 
-              {showSizeField && !isCuisineType && !isCuisineCategory && (
+              {showSizeField && !isCuisineType && !isCuisineCategory && !hideFields && (
                 <div className="form-group">
                   <label htmlFor="size">{t('booking.size_label', 'Taille de la surface (m²)')}</label>
                   <div className="size-input-group">
@@ -982,8 +1103,8 @@ export default function Booking() {
                 </div>
               )}
 
-              {/* Type de prestation - Select dropdown (only show if not from Ménage + cuisine) */}
-              {selectedTypes.length === 0 && (
+              {/* Type de prestation - Select dropdown (only show if not from Ménage + cuisine and not in hideFields services) */}
+              {selectedTypes.length === 0 && !hideFields && (
                 <div className="form-group">
                   <label htmlFor="type">{t('booking.type_label', 'Type (optionnel)')}</label>
                   <select
