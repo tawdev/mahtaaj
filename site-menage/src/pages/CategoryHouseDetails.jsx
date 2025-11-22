@@ -779,7 +779,7 @@ export default function CategoryHouseDetails() {
     return (
       <main className="services-page">
         <div className="error-state">{error || t('services_page.loading_error')}</div>
-        <Link to="/services" className="back-button">{t('services_page.category_details.back_to_services')}</Link>
+        <Link to={serviceSlug ? `/services/${serviceSlug}` : '/services'} className="back-button">{t('services_page.category_details.back_to_services')}</Link>
       </main>
     );
   }
@@ -1277,7 +1277,7 @@ export default function CategoryHouseDetails() {
                   <span>✓</span>
                   {t('services_page.forms.reserve')}
                 </button>
-                <Link to="/services" className="back-services-button" style={{ marginTop: '16px', display: 'block', textAlign: 'center' }}>
+                <Link to={`/services/${serviceSlug}`} className="back-services-button" style={{ marginTop: '16px', display: 'block', textAlign: 'center' }}>
                   {t('services_page.category_details.back_to_services')}
                 </Link>
               </div>
@@ -1420,7 +1420,7 @@ export default function CategoryHouseDetails() {
                 >
                   {t('services_page.forms.reserve')}
                 </button>
-                <Link to="/services" className="back-services-button">
+                <Link to={`/services/${serviceSlug}`} className="back-services-button">
                   {t('services_page.category_details.back_to_services')}
                 </Link>
               </div>
@@ -1457,7 +1457,7 @@ export default function CategoryHouseDetails() {
                 <button onClick={handleReserve} className="reserve-button">
                   {t('services_page.forms.reserve')}
                 </button>
-                <Link to="/services" className="back-services-button">
+                <Link to={`/services/${serviceSlug}`} className="back-services-button">
                   {t('services_page.category_details.back_to_services')}
                 </Link>
               </div>

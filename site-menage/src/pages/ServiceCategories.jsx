@@ -164,7 +164,7 @@ export default function ServiceCategories() {
   return (
     <main className="services-page">
       <div className="services-header">
-        <Link to="/tous-les-services" className="back-button">← {t('services_page.back')}</Link>
+        <Link to="/services" className="back-button">← {t('services_page.back')}</Link>
         <h1>{formatServiceTitle(service.name || service.title)}</h1>
       </div>
 

@@ -20,6 +20,7 @@
     "baby_setting": "Bébé Setting",
     "gardening": "Jardinage",
     "hand_workers": "Travaux Manuels",
+    "driver": "Chauffeur",
     "brand_name": "SolutionPourMaintenant",
     "all_services": "Tous nos services"
   },
@@ -267,6 +268,8 @@
       "required_fields": "Veuillez remplir les champs requis",
       "submit_failed": "Échec de l'envoi du formulaire",
       "submit_success": "Formulaire envoyé avec succès",
+      "connection_error": "Impossible de se connecter au serveur. Veuillez vérifier que le serveur est démarré",
+      "invalid_response": "Réponse invalide du serveur",
       "first_name": "Prénom",
       "first_name_ph": "Entrez le prénom",
       "last_name": "Nom",

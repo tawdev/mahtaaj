@@ -318,6 +318,10 @@ export default function TypeDetails() {
     if (serviceSlug === 'menage' && categorySlug) {
       return `/services/menage/${categorySlug}`;
     }
+    // If we have a categorySlug, go back to the category page
+    if (categorySlug) {
+      return `/services/${serviceSlug}/${categorySlug}`;
+    }
     // Otherwise, go to /services
     return '/services';
   };
