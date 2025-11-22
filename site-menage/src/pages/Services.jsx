@@ -21,19 +21,15 @@ export default function Services() {
   const [detailPrice, setDetailPrice] = useState(0);
 
   useEffect(() => {
-    // Restore saved language on mount if present
-    try {
-      const saved = localStorage.getItem('currentLang');
-      if (saved && saved !== i18n.language) {
-        i18n.changeLanguage(saved);
-      }
-    } catch {}
+    // Don't change language automatically - respect user's current language selection
+    // Only load services with the current language
     loadServices();
   }, []);
 
-  // Reload services when language changes and persist selection
+  // Reload services when language changes (but don't change language automatically)
   useEffect(() => {
-    try { localStorage.setItem('currentLang', i18n.language); } catch {}
+    // Only persist language if it was changed by user action, not auto-detected
+    // The language should already be set by i18n's LanguageDetector or user selection
     loadServices();
   }, [i18n.language]);
 

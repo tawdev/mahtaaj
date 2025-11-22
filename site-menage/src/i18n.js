@@ -23,8 +23,14 @@ i18n
       escapeValue: false,
     },
     detection: {
-      order: ['localStorage', 'navigator'],
+      // Only detect from localStorage (user's previous choice), not from navigator
+      // This prevents auto-switching to Arabic when browser language is Arabic
+      order: ['localStorage'],
       caches: ['localStorage'],
+      // Don't lookup from navigator to avoid auto-switching
+      lookupLocalStorage: 'i18nextLng',
+      // Don't check navigator language
+      checkWhitelist: true,
     },
     // تعطيل Suspense لضمان عرض الترجمات مباشرة بدون انتظار
     react: {

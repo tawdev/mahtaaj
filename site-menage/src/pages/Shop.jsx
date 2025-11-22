@@ -312,25 +312,20 @@ export default function Shop() {
   const [reviewsForm, setReviewsForm] = useState({ open: false, rating: 5, comment: '' }); // Inline form inside reviews modal
 
   useEffect(() => {
-    // Restore saved language on first mount (if saved by any page)
-    try {
-      const saved = localStorage.getItem('currentLang');
-      if (saved && saved !== i18n.language) {
-        i18n.changeLanguage(saved);
-      }
-    } catch {}
+    // Don't change language automatically - respect user's current language selection
+    // Only load data with the current language
     loadProducts();
     loadCategories();
     loadUserRatings();
   }, []);
 
-  // Reload translated data when language changes
+  // Reload translated data when language changes (but don't change language automatically)
   useEffect(() => {
     // Reset labels depending on language
     setSelectedCategory(t('shop_page.all_categories'));
     setSelectedType(t('shop_page.all_categories'));
-    // Persist chosen language for future reloads
-    try { localStorage.setItem('currentLang', i18n.language); } catch {}
+    // The language should already be set by i18n's LanguageDetector or user selection
+    // Don't persist here to avoid conflicts
     loadProducts();
     loadCategories();
     if (selectedCategoryId) loadProductTypes(selectedCategoryId);
