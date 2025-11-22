@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './TousLesServices.css';
@@ -6,6 +6,7 @@ import './TousLesServices.css';
 export default function TousLesServices() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [imageErrors, setImageErrors] = useState({});
 
   const services = [
     {
@@ -62,29 +63,63 @@ export default function TousLesServices() {
     navigate(path);
   };
 
+  const handleImageError = (serviceId) => {
+    setImageErrors(prev => ({ ...prev, [serviceId]: true }));
+  };
+
+  const getImageUrl = (image) => {
+    const baseUrl = process.env.PUBLIC_URL || '';
+    return `${baseUrl}/image/serveces/${encodeURIComponent(image)}`;
+  };
+
   return (
     <div className="tous-les-services-page">
       <div className="tous-les-services-container">
         <h1 className="tous-les-services-title">🧺 {t('tous_les_services.title')}</h1>
         
         <div className="services-grid">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className="service-card"
-              onClick={() => handleCardClick(service.path)}
-              style={{ 
-                '--card-color': service.color,
-                backgroundImage: `url(${(process.env.PUBLIC_URL || '') + '/serveces/' + encodeURIComponent(service.image)})`
-              }}
-            >
-              <div className="card-background-overlay"></div>
-              <div className="service-card-content">
-                <h2 className="service-name">{t(`tous_les_services.${service.translationKey}.name`)}</h2>
+          {services.map((service) => {
+            const imageUrl = getImageUrl(service.image);
+            const hasImageError = imageErrors[service.id];
+            
+            return (
+              <div
+                key={service.id}
+                className="service-card"
+                onClick={() => handleCardClick(service.path)}
+                style={{ 
+                  '--card-color': service.color,
+                  backgroundColor: hasImageError ? service.color : undefined,
+                  backgroundImage: hasImageError ? 'none' : `url(${imageUrl})`
+                }}
+              >
+                {/* Preload image to detect errors */}
+                {!hasImageError && (
+                  <img
+                    src={imageUrl}
+                    alt=""
+                    style={{ display: 'none' }}
+                    onError={() => handleImageError(service.id)}
+                    onLoad={() => {
+                      // Image loaded successfully, ensure it's visible
+                      if (imageErrors[service.id]) {
+                        setImageErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors[service.id];
+                          return newErrors;
+                        });
+                      }
+                    }}
+                  />
+                )}
+                <div className="card-background-overlay"></div>
+                <div className="service-card-content">
+                  <h2 className="service-name">{t(`tous_les_services.${service.translationKey}.name`)}</h2>
+                </div>
+                <div className="card-overlay"></div>
               </div>
-              <div className="card-overlay"></div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

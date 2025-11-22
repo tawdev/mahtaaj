@@ -647,6 +647,47 @@ export default function CategoryHouseDetails() {
     );
   };
 
+  // Check if category is Washing (Lavage) or Ironing (Repassage)
+  const isWashingOrIroningCategory = () => {
+    if (!category) return false;
+    
+    const name = (category.name || '').toLowerCase();
+    const nameFr = (category.name_fr || '').toLowerCase();
+    const nameEn = (category.name_en || '').toLowerCase();
+    const nameAr = (category.name_ar || '').toLowerCase();
+    
+    // Check for Washing/Lavage/غسيل
+    const isWashing = 
+      name === 'lavage' ||
+      name === 'washing' ||
+      name === 'غسيل' ||
+      nameFr === 'lavage' ||
+      nameFr === 'lavage du linge' ||
+      nameEn === 'washing' ||
+      nameEn === 'laundry washing' ||
+      nameAr === 'غسيل' ||
+      nameAr === 'الغسيل' ||
+      nameFr.includes('lavage') ||
+      nameEn.includes('washing') ||
+      nameAr.includes('غسيل');
+    
+    // Check for Ironing/Repassage/كيّ
+    const isIroning = 
+      name === 'repassage' ||
+      name === 'ironing' ||
+      name === 'كيّ' ||
+      nameFr === 'repassage' ||
+      nameEn === 'ironing' ||
+      nameAr === 'كيّ' ||
+      nameAr === 'الكي' ||
+      nameFr.includes('repassage') ||
+      nameEn.includes('ironing') ||
+      nameAr.includes('كيّ') ||
+      nameAr.includes('كي');
+    
+    return isWashing || isIroning;
+  };
+
   // Get types to display based on showAllTypes state
   const getDisplayTypes = () => {
     if (isMenageCuisineCategory()) {
@@ -1387,25 +1428,30 @@ export default function CategoryHouseDetails() {
           ) : (
             /* Standard Form for Other Categories */
             <>
-              <div className="form-section">
-                <label htmlFor="surface">
-                  📏 {t('services_page.forms.estimated_surface')}
-                </label>
-                <input
-                  type="number"
-                  id="surface"
-                  value={surface}
-                  onChange={(e) => setSurface(e.target.value)}
-                  placeholder={t('services_page.forms.surface_placeholder')}
-                  min="0"
-                  step="0.5"
-                />
-              </div>
+              {/* Hide surface and price estimation for Washing/Lavage and Ironing/Repassage categories */}
+              {!isWashingOrIroningCategory() && (
+                <>
+                  <div className="form-section">
+                    <label htmlFor="surface">
+                      📏 {t('services_page.forms.estimated_surface')}
+                    </label>
+                    <input
+                      type="number"
+                      id="surface"
+                      value={surface}
+                      onChange={(e) => setSurface(e.target.value)}
+                      placeholder={t('services_page.forms.surface_placeholder')}
+                      min="0"
+                      step="0.5"
+                    />
+                  </div>
 
-              <div className="price-section">
-                <h3>💰 {t('services_page.forms.estimated_price')}</h3>
-                <p className="price-value">{price.toFixed(2)} DH</p>
-              </div>
+                  <div className="price-section">
+                    <h3>💰 {t('services_page.forms.estimated_price')}</h3>
+                    <p className="price-value">{price.toFixed(2)} DH</p>
+                  </div>
+                </>
+              )}
 
               <div className="actions-section">
                 <button onClick={handleReserve} className="reserve-button">

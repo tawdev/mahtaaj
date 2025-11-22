@@ -291,7 +291,20 @@ export default function TypeDetails() {
   const label = { color: '#64748b', fontSize: 12, marginBottom: 4 };
   const value = { color: '#0f172a', fontWeight: 600 };
   const formRow = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 };
-  const input = { width: '100%', padding: '10px 12px', border: '1px solid #e2e8f0', borderRadius: 8 };
+  const input = { 
+    width: '100%', 
+    padding: '10px 12px', 
+    border: '1px solid #e2e8f0', 
+    borderRadius: 8,
+    fontSize: '16px',
+    fontFamily: 'inherit',
+    backgroundColor: '#ffffff',
+    color: '#0f172a',
+    outline: 'none',
+    transition: 'border-color 0.2s ease',
+    WebkitAppearance: 'none',
+    MozAppearance: 'textfield'
+  };
   const priceBox = { background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#14532d', padding: 12, borderRadius: 8 };
   const actions = { display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8 };
   const btn = { padding: '12px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontWeight: 700 };
@@ -314,6 +327,15 @@ export default function TypeDetails() {
     return null;
   }
 
+  // Map language to supported languages (needed before error check)
+  const mapToSupportedLang = (lng) => {
+    if ((lng || '').toLowerCase().startsWith('ar')) return 'ar';
+    if ((lng || '').toLowerCase().startsWith('fr')) return 'fr';
+    return 'en';
+  };
+
+  const selectedLang = mapToSupportedLang(i18n?.language);
+
   if (loading) {
     return (
       <main style={bgStyle}>
@@ -332,7 +354,11 @@ export default function TypeDetails() {
           <div style={{ color: '#ef4444', fontWeight: 700, marginBottom: 8 }}>{t('services_page.loading_error') || 'حدث خطأ أثناء التحميل'}</div>
           <div style={{ color: '#475569', marginBottom: 16 }}>{error}</div>
           <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
-            <button style={btnBack}>↩️ العودة</button>
+            <button style={btnBack}>
+              {selectedLang === 'ar' ? '↩️ العودة' : 
+               selectedLang === 'fr' ? '↩️ Retour' : 
+               '↩️ Back'}
+            </button>
           </Link>
         </div>
       </main>
@@ -340,14 +366,6 @@ export default function TypeDetails() {
   }
 
   const featured = pickImageUrl(type);
-
-  const mapToSupportedLang = (lng) => {
-    if ((lng || '').toLowerCase().startsWith('ar')) return 'ar';
-    if ((lng || '').toLowerCase().startsWith('fr')) return 'fr';
-    return 'en';
-  };
-
-  const selectedLang = mapToSupportedLang(i18n?.language);
 
   const getNameByLang = (lang) => {
     switch (lang) {
@@ -412,7 +430,11 @@ export default function TypeDetails() {
               {selectedLang === 'ar' ? 'تفاصيل الفئة' : selectedLang === 'fr' ? 'Détails de la catégorie' : 'Category Details'} {currentName}
             </h1>
             <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
-              <button style={btnBack}>↩️ العودة</button>
+              <button style={btnBack}>
+                {selectedLang === 'ar' ? '↩️ العودة' : 
+                 selectedLang === 'fr' ? '↩️ Retour' : 
+                 '↩️ Back'}
+              </button>
             </Link>
           </div>
         </div>
@@ -667,15 +689,74 @@ export default function TypeDetails() {
 
           {!isCuisineCategory() && (
             <div>
-              <div style={sectionTitle}>📏 تقدير المساحة والسعر</div>
+              <div style={sectionTitle}>
+                {selectedLang === 'ar' ? '📏 تقدير المساحة والسعر' : 
+                 selectedLang === 'fr' ? '📏 Estimation de la surface et du prix' : 
+                 '📏 Surface and Price Estimation'}
+              </div>
               <div style={formRow}>
                 <div>
-                  <div style={{ ...label, marginBottom: 6 }}>المساحة التقريبية (m²)</div>
-                  <input type="number" min="0" step="0.5" value={surface} onChange={(e) => setSurface(e.target.value)} placeholder="أدخل المساحة" style={input} />
-                  <div style={small}>يتم حساب السعر تلقائيًا (2.5 درهم لكل m²)</div>
+                  <div style={{ ...label, marginBottom: 6 }}>
+                    {selectedLang === 'ar' ? 'المساحة التقريبية (m²)' : 
+                     selectedLang === 'fr' ? 'Surface approximative (m²)' : 
+                     'Approximate Area (m²)'}
+                  </div>
+                  <input 
+                    type="number" 
+                    min="0" 
+                    step="any"
+                    value={surface} 
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty string, numbers, and decimal points
+                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                        setSurface(value);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      // Allow: backspace, delete, tab, escape, enter, decimal point
+                      if ([46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||
+                        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                        (e.keyCode === 65 && e.ctrlKey === true) ||
+                        (e.keyCode === 67 && e.ctrlKey === true) ||
+                        (e.keyCode === 86 && e.ctrlKey === true) ||
+                        (e.keyCode === 88 && e.ctrlKey === true) ||
+                        // Allow: home, end, left, right
+                        (e.keyCode >= 35 && e.keyCode <= 39)) {
+                        return;
+                      }
+                      // Ensure that it is a number and stop the keypress
+                      if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#3b82f6';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#e2e8f0';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                    placeholder={selectedLang === 'ar' ? 'أدخل المساحة (m²)' : 
+                                 selectedLang === 'fr' ? 'Entrez la surface (m²)' : 
+                                 'Enter the area (m²)'} 
+                    style={input}
+                    inputMode="decimal"
+                    autoComplete="off"
+                  />
+                  <div style={small}>
+                    {selectedLang === 'ar' ? 'يتم حساب السعر تلقائيًا (2.5 درهم لكل m²)' : 
+                     selectedLang === 'fr' ? 'Le prix est calculé automatiquement (2.5 DH par m²)' : 
+                     'Price is calculated automatically (2.5 DH per m²)'}
+                  </div>
                 </div>
                 <div>
-                  <div style={{ ...label, marginBottom: 6 }}>السعر التقديري</div>
+                  <div style={{ ...label, marginBottom: 6 }}>
+                    {selectedLang === 'ar' ? 'السعر التقديري' : 
+                     selectedLang === 'fr' ? 'Prix estimé' : 
+                     'Estimated Price'}
+                  </div>
                   <div style={priceBox}>{price.toFixed(2)} DH</div>
                 </div>
               </div>
@@ -683,9 +764,17 @@ export default function TypeDetails() {
           )}
 
           <div style={actions}>
-            <button onClick={handleReserve} style={btnReserve}>🔘 احجز</button>
+            <button onClick={handleReserve} style={btnReserve}>
+              {selectedLang === 'ar' ? '🔘 احجز' : 
+               selectedLang === 'fr' ? '🔘 Réserver' : 
+               '🔘 Book'}
+            </button>
             <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
-              <button style={btnBack}>↩️ العودة</button>
+              <button style={btnBack}>
+                {selectedLang === 'ar' ? '↩️ العودة' : 
+                 selectedLang === 'fr' ? '↩️ Retour' : 
+                 '↩️ Back'}
+              </button>
             </Link>
           </div>
         </div>

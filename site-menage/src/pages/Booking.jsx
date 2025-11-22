@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { postContact, getServices, getTypes, getTypeById, getServiceById, createReservation, getCategoryHouseById, getTypeOptions } from '../api-supabase';
@@ -38,6 +38,7 @@ export default function Booking() {
   const [typeOptions, setTypeOptions] = useState([]); // TypeOptions for Asian Cuisine
   const [selectedTypeOption, setSelectedTypeOption] = useState(null); // Selected TypeOption
   const [loadingTypeOptions, setLoadingTypeOptions] = useState(false);
+  const [messageValue, setMessageValue] = useState(''); // Track message value to detect changes
   const locationRef = useRef(null);
   const serviceSelectRef = useRef(null);
   const messageRef = useRef(null);
@@ -48,6 +49,57 @@ export default function Booking() {
     selectedCategory.name_en === 'Kitchen' ||
     selectedCategory.name_ar === 'مطبخ'
   );
+
+  // Check if message contains "Catégorie: غسيل" or "Catégorie: كيّ"
+  const isWashingOrIroningFromMessage = (() => {
+    const message = messageValue || (messageRef.current?.value || '');
+    if (!message) return false;
+    
+    // Check for exact patterns: "Catégorie: غسيل" or "Catégorie: كيّ"
+    // Also check for variations with different spacing and case
+    const washingPatterns = [
+      /catégorie:\s*غسيل/i,
+      /catégorie:\s*الغسيل/i,
+      /catégorie:\s*غسيل/i,
+      /catégorie:\s*lavage/i,
+      /category:\s*غسيل/i,
+      /category:\s*الغسيل/i,
+      /category:\s*washing/i
+    ];
+    
+    const ironingPatterns = [
+      /catégorie:\s*كيّ/i,
+      /catégorie:\s*الكي/i,
+      /catégorie:\s*كي/i,
+      /catégorie:\s*repassage/i,
+      /category:\s*كيّ/i,
+      /category:\s*الكي/i,
+      /category:\s*ironing/i
+    ];
+    
+    // Check if message contains any washing pattern
+    const hasWashing = washingPatterns.some(pattern => pattern.test(message));
+    
+    // Check if message contains any ironing pattern
+    const hasIroning = ironingPatterns.some(pattern => pattern.test(message));
+    
+    // Also check for Arabic text with "Catégorie:" prefix
+    if (!hasWashing && !hasIroning) {
+      // More flexible check: if message contains "Catégorie:" followed by Arabic washing/ironing text
+      const categoryMatch = /catégorie:\s*([^\n,]+)/i.exec(message);
+      if (categoryMatch) {
+        const categoryValue = categoryMatch[1].trim();
+        if (categoryValue.includes('غسيل') || categoryValue.includes('الغسيل')) {
+          return true;
+        }
+        if (categoryValue.includes('كيّ') || categoryValue.includes('كي') || categoryValue.includes('الكي')) {
+          return true;
+        }
+      }
+    }
+    
+    return hasWashing || hasIroning;
+  })();
 
   // Check if selected category is Asian Cuisine
   const isAsianCuisineCategory = selectedCategory && (
@@ -276,8 +328,27 @@ export default function Booking() {
         return;
       }
 
-      // Don't auto-fill if service is already manually selected
-      if (selectedService) {
+      // Don't auto-fill if service is already manually selected OR if we have a pending service from prefill
+      // Check if there's a pending service that should take priority
+      const hasPendingService = localStorage.getItem('pending_service_selection') || 
+                                location.state?.prefill?.serviceTitle ||
+                                (() => {
+                                  try {
+                                    const prefill = JSON.parse(localStorage.getItem('booking_prefill') || '{}');
+                                    return prefill?.serviceTitle;
+                                  } catch {
+                                    return null;
+                                  }
+                                })();
+      
+      // If service is already selected and we don't have a pending service from prefill, don't override
+      if (selectedService && !hasPendingService) {
+        return;
+      }
+      
+      // If we have a pending service from prefill, don't override it with type-based service
+      // The pending service will be handled by the other useEffect
+      if (hasPendingService) {
         return;
       }
 
@@ -433,37 +504,240 @@ export default function Booking() {
   }, []);
 
   // Handle pending service selection after services are loaded
+  // This should run BEFORE loadServiceFromType to ensure prefill services take priority
   useEffect(() => {
     if (services.length > 0 && selectedService === '') {
-      const pendingService = localStorage.getItem('pending_service_selection');
-      const pendingMessage = localStorage.getItem('pending_message');
+      // Priority order: location.state > booking_prefill > pending_service_selection
+      let serviceToSelect = null;
+      let source = '';
       
-      if (pendingService) {
-        // Try to match the pending service title with loaded services
-        // Check both name (translated) and title for matching
-        const matchedService = services.find(s => {
+      // 1. Check location.state first (highest priority)
+      if (location.state?.prefill?.serviceTitle) {
+        serviceToSelect = location.state.prefill.serviceTitle;
+        source = 'location.state';
+        console.log('📌 Service from location.state:', serviceToSelect);
+      }
+      // 2. Check booking_prefill from localStorage (this is the main source from Services.jsx)
+      else {
+        try {
+          const prefillData = localStorage.getItem('booking_prefill');
+          if (prefillData) {
+            const prefill = JSON.parse(prefillData);
+            if (prefill?.serviceTitle) {
+              serviceToSelect = prefill.serviceTitle;
+              source = 'booking_prefill';
+              console.log('📌 Service from booking_prefill:', serviceToSelect);
+            }
+          }
+        } catch (e) {
+          console.warn('Error reading booking_prefill:', e);
+        }
+      }
+      
+      // 3. Fallback to pending_service_selection (backup from other sources)
+      if (!serviceToSelect) {
+        const pendingService = localStorage.getItem('pending_service_selection');
+        if (pendingService) {
+          serviceToSelect = pendingService;
+          source = 'pending_service_selection';
+          console.log('📌 Service from pending_service_selection:', serviceToSelect);
+        }
+      }
+      
+      if (serviceToSelect) {
+        // Try to match the service title with loaded services
+        // Use more precise matching to avoid false positives
+        const target = serviceToSelect.toLowerCase().trim();
+        const targetClean = target.replace(/^[🧹🧼🧽🧺🪟👕🛋️🏠🏢]\s*/, '').trim();
+        
+        // First, try exact matches (highest priority)
+        let matchedService = services.find(s => {
           const serviceName = (s.name || '').toLowerCase().trim();
           const serviceTitle = (s.title || '').toLowerCase().trim();
-          const pending = pendingService.toLowerCase().trim();
-          return serviceName === pending || 
-                 serviceTitle === pending ||
-                 serviceName.includes(pending) ||
-                 pending.includes(serviceName) ||
-                 serviceTitle.includes(pending) ||
-                 pending.includes(serviceTitle);
+          
+          // Exact match
+          if (serviceName === target || serviceTitle === target) {
+            return true;
+          }
+          
+          // Exact match without emoji
+          const serviceNameClean = serviceName.replace(/^[🧹🧼🧽🧺🪟👕🛋️🏠🏢]\s*/, '').trim();
+          const serviceTitleClean = serviceTitle.replace(/^[🧹🧼🧽🧺🪟👕🛋️🏠🏢]\s*/, '').trim();
+          
+          if (serviceNameClean === targetClean || serviceTitleClean === targetClean) {
+            return true;
+          }
+          
+          return false;
         });
+        
+        // If no exact match, try partial match but be VERY strict to avoid false positives
+        if (!matchedService) {
+          // Only try partial match if target is a complete phrase (contains spaces or is a known service name)
+          const isCompletePhrase = targetClean.includes(' ') || targetClean.length > 8;
+          
+          if (isCompletePhrase) {
+            matchedService = services.find(s => {
+              const serviceName = (s.name || '').toLowerCase().trim();
+              const serviceTitle = (s.title || '').toLowerCase().trim();
+              const serviceNameClean = serviceName.replace(/^[🧹🧼🧽🧺🪟👕🛋️🏠🏢]\s*/, '').trim();
+              const serviceTitleClean = serviceTitle.replace(/^[🧹🧼🧽🧺🪟👕🛋️🏠🏢]\s*/, '').trim();
+              
+              // For partial match, the target must be a significant part (at least 50% of the service name)
+              // AND the service name must contain the full target as a distinct phrase
+              const targetWords = targetClean.split(/\s+/).filter(w => w.length > 2);
+              
+              if (targetWords.length === 0) return false;
+              
+              // Check if ALL target words are present in the service name
+              const allWordsMatch = targetWords.every(word => 
+                serviceNameClean.includes(word) || serviceTitleClean.includes(word)
+              );
+              
+              if (!allWordsMatch) return false;
+              
+              // Additional check: the match should be significant (not just one common word)
+              // For example, "الغسيل والكي" contains "الغسيل" and "الكي" - both should be in service name
+              // But "التنظيف المنزلي" should NOT match "الغسيل والكي"
+              
+              // Check if service name starts with target or contains it as a complete phrase
+              const startsWithTarget = serviceNameClean.startsWith(targetClean) || serviceTitleClean.startsWith(targetClean);
+              const containsAsPhrase = serviceNameClean.includes(' ' + targetClean) || 
+                                      serviceTitleClean.includes(' ' + targetClean) ||
+                                      serviceNameClean.includes(targetClean + ' ') ||
+                                      serviceTitleClean.includes(targetClean + ' ');
+              
+              // Also check reverse: if service name is contained in target (for cases like "Lavage et Repassage" matching "Lavage")
+              const serviceInTarget = targetClean.includes(serviceNameClean) || targetClean.includes(serviceTitleClean);
+              
+              // Only match if it's a clear, unambiguous match
+              if (startsWithTarget || containsAsPhrase || (serviceInTarget && targetWords.length <= 2)) {
+                return true;
+              }
+              
+              return false;
+            });
+          }
+        }
+        
+        // If still no match, try keyword-based matching for known service patterns
+        if (!matchedService) {
+          // Define service keywords mapping
+          const serviceKeywords = {
+            // Arabic keywords
+            'الغسيل والكي': ['lavage', 'repassage', 'washing', 'ironing', 'laundry', 'linge'],
+            'غسيل': ['lavage', 'washing', 'laundry'],
+            'كي': ['repassage', 'ironing'],
+            'تنظيف السيارات': ['voiture', 'car', 'automobile', 'vehicle'],
+            'السجاد والأرائك': ['tapis', 'canapé', 'canape', 'carpet', 'sofa', 'sofas'],
+            'التنظيف المنزلي': ['ménage', 'menage', 'domicile', 'home', 'housekeeping'],
+            'تنظيف المكاتب': ['bureau', 'bureaux', 'office', 'offices'],
+            'تنظيف المصانع': ['usine', 'factory', 'industrial'],
+            'تنظيف المسابح': ['piscine', 'pool', 'swimming'],
+            'تنظيف airbnb': ['airbnb', 'check-in', 'check-out', 'checkin', 'checkout'],
+            // French keywords
+            'lavage et repassage': ['lavage', 'repassage', 'washing', 'ironing', 'laundry'],
+            'nettoyage de voiture': ['voiture', 'car', 'automobile'],
+            'tapis et canapés': ['tapis', 'canapé', 'carpet', 'sofa'],
+            'ménage à domicile': ['ménage', 'menage', 'domicile', 'home'],
+            // English keywords
+            'washing and ironing': ['lavage', 'repassage', 'washing', 'ironing', 'laundry'],
+            'car cleaning': ['voiture', 'car', 'automobile'],
+            'carpets and sofas': ['tapis', 'canapé', 'carpet', 'sofa'],
+            'housekeeping': ['ménage', 'menage', 'domicile', 'home']
+          };
+          
+          // Find matching keywords
+          const targetLower = targetClean.toLowerCase();
+          const matchingKeywords = Object.keys(serviceKeywords).find(key => {
+            const keyLower = key.toLowerCase();
+            return targetLower.includes(keyLower) || keyLower.includes(targetLower);
+          });
+          
+          if (matchingKeywords && serviceKeywords[matchingKeywords]) {
+            // Search for service that contains any of the keywords
+            matchedService = services.find(s => {
+              const serviceName = (s.name || '').toLowerCase();
+              const serviceTitle = (s.title || '').toLowerCase();
+              const serviceText = serviceName + ' ' + serviceTitle;
+              
+              return serviceKeywords[matchingKeywords].some(keyword => 
+                serviceText.includes(keyword.toLowerCase())
+              );
+            });
+            
+            if (matchedService) {
+              console.log('🔑 Service matched by keywords:', matchingKeywords, '→', matchedService.name || matchedService.title);
+            }
+          }
+        }
+        
+        // If still no match, log all available services for debugging
+        if (!matchedService) {
+          console.log('🔍 Service matching debug:', {
+            target: serviceToSelect,
+            targetClean: targetClean,
+            availableServices: services.map(s => ({
+              name: s.name,
+              title: s.title,
+              nameClean: (s.name || '').toLowerCase().trim().replace(/^[🧹🧼🧽🧺🪟👕🛋️🏠🏢]\s*/, ''),
+              titleClean: (s.title || '').toLowerCase().trim().replace(/^[🧹🧼🧽🧺🪟👕🛋️🏠🏢]\s*/, '')
+            }))
+          });
+        }
         
         if (matchedService) {
           // Use name first (translated), then fallback to title
           const serviceTitle = matchedService.name || matchedService.title;
           setSelectedService(serviceTitle);
           setShowSizeField(true);
+          console.log('✅ Service auto-selected:', serviceTitle, 'from:', source, 'original:', serviceToSelect);
+        } else {
+          console.warn('⚠️ Could not match service:', serviceToSelect, 'from:', source, 'Available services:', services.map(s => s.name || s.title));
         }
-        localStorage.removeItem('pending_service_selection');
+        
+        // Clean up after use
+        if (source === 'pending_service_selection') {
+          localStorage.removeItem('pending_service_selection');
+        }
+        
+        // Also clean up booking_prefill after service is successfully selected
+        // This prevents it from being used again on re-renders
+        if (source === 'booking_prefill' || source === 'location.state') {
+          try {
+            const prefillData = localStorage.getItem('booking_prefill');
+            if (prefillData) {
+              const prefill = JSON.parse(prefillData);
+              // Only remove if serviceTitle was successfully matched
+              if (prefill?.serviceTitle && matchedService) {
+                // Keep other prefill data but mark serviceTitle as used
+                // Or remove entirely if all data is used
+                localStorage.removeItem('booking_prefill');
+                console.log('🧹 Cleaned up booking_prefill after service selection');
+              }
+            }
+          } catch (e) {
+            console.warn('Error cleaning booking_prefill:', e);
+          }
+        }
       }
       
+      // Handle pending message
+      const pendingMessage = localStorage.getItem('pending_message');
       if (pendingMessage && messageRef.current) {
-        messageRef.current.value = pendingMessage;
+        // Validate message before filling
+        const isValid = isValidMessage(pendingMessage);
+        if (isValid) {
+          messageRef.current.value = pendingMessage;
+          setMessageValue(pendingMessage); // Update message value state
+          // Mark that message was filled from pending, not auto-filled
+          setMessageAutoFilled(false);
+        } else {
+          console.log('Invalid pending message, skipping:', pendingMessage);
+          // Clear invalid message
+          messageRef.current.value = '';
+          setMessageValue('');
+        }
         localStorage.removeItem('pending_message');
       }
     }
@@ -537,6 +811,35 @@ export default function Booking() {
   // Prefill from Services subcategory selection
   useEffect(() => {
     try {
+      // Clean up any invalid data from localStorage first
+      const cleanInvalidData = () => {
+        try {
+          const draft = localStorage.getItem('booking_draft');
+          if (draft) {
+            const d = JSON.parse(draft);
+            if (d.message && !isValidMessage(d.message)) {
+              console.log('Cleaning invalid draft message');
+              d.message = '';
+              localStorage.setItem('booking_draft', JSON.stringify(d));
+            }
+          }
+        } catch (e) {
+          console.warn('Error cleaning draft data:', e);
+        }
+        
+        try {
+          const pendingMsg = localStorage.getItem('pending_message');
+          if (pendingMsg && !isValidMessage(pendingMsg)) {
+            console.log('Cleaning invalid pending message');
+            localStorage.removeItem('pending_message');
+          }
+        } catch (e) {
+          console.warn('Error cleaning pending message:', e);
+        }
+      };
+      
+      cleanInvalidData();
+      
       const raw = localStorage.getItem('booking_prefill');
       if (!raw) return;
       const prefill = JSON.parse(raw);
@@ -550,9 +853,17 @@ export default function Booking() {
         const typeDisplay = prefill.selectedTypes.map(t => t.name).join(' + ');
         setTypeValue(typeDisplay);
         
-        // Set message if provided
+        // Set message if provided and valid
         if (prefill.message && messageRef.current) {
-          messageRef.current.value = prefill.message;
+          const isValid = isValidMessage(prefill.message);
+          if (isValid) {
+            messageRef.current.value = prefill.message;
+            // Mark that message was filled from prefill, not auto-filled
+            setMessageAutoFilled(false);
+          } else {
+            console.log('Invalid prefill message, skipping:', prefill.message);
+            messageRef.current.value = '';
+          }
         }
         
         // Show size field if surface is provided
@@ -564,8 +875,11 @@ export default function Booking() {
       }
       
       // Store prefill service title for matching after services load
+      // This will be picked up by the useEffect that handles pending_service_selection
+      // IMPORTANT: Store it BEFORE services are loaded so it can be matched when services array is ready
       if (prefill?.serviceTitle) {
         localStorage.setItem('pending_service_selection', prefill.serviceTitle);
+        console.log('📝 Stored service title from prefill:', prefill.serviceTitle);
       }
       
       // Prefill other fields immediately
@@ -597,7 +911,17 @@ export default function Booking() {
       
       if (prefill?.message && messageRef.current && !prefill?.selectedTypes) {
         // Only set message if not from selectedTypes (already handled above)
-        messageRef.current.value = prefill.message;
+        const isValid = isValidMessage(prefill.message);
+        if (isValid) {
+          messageRef.current.value = prefill.message;
+          setMessageValue(prefill.message); // Update message value state
+          // Mark that message was filled from prefill, not auto-filled
+          setMessageAutoFilled(false);
+        } else {
+          console.log('Invalid prefill message, skipping:', prefill.message);
+          messageRef.current.value = '';
+          setMessageValue('');
+        }
       }
       
       // Handle choixtype_id prefill for Asian cuisine
@@ -623,13 +947,25 @@ export default function Booking() {
           if (typeof d.type === 'string') setTypeValue(d.type);
           if (typeof d.sizeValue === 'string') setSizeValue(d.sizeValue);
           if (typeof d.selectedService === 'string') { setSelectedService(d.selectedService); setShowSizeField(!!d.selectedService); }
-          if (d.message && messageRef.current) messageRef.current.value = d.message;
+          if (d.message && messageRef.current) {
+            const isValid = isValidMessage(d.message);
+            if (isValid) {
+              messageRef.current.value = d.message;
+              setMessageValue(d.message); // Update message value state
+              // Mark that message was filled from draft, not auto-filled
+              setMessageAutoFilled(false);
+            } else {
+              console.log('Invalid draft message, skipping:', d.message);
+              messageRef.current.value = '';
+              setMessageValue('');
+            }
+          }
           if (d.promo) setPromo(d.promo);
         } catch {}
       }
       
-      // Clear the prefill data after using it to prevent interference
-      localStorage.removeItem('booking_prefill');
+        // Don't remove booking_prefill here - it's needed for service selection
+        // It will be cleaned up after service is selected by the service selection useEffect
     } catch {}
   }, []);
 
@@ -685,6 +1021,187 @@ export default function Booking() {
     return base;
   };
 
+  // Track if message was auto-filled to allow updates when type/size changes
+  const [messageAutoFilled, setMessageAutoFilled] = useState(false);
+
+  // Helper function to validate if message looks like valid data (not random characters)
+  // This should be defined before it's used in other functions
+  const isValidMessage = useCallback((message) => {
+    if (!message || message.trim().length === 0) return false;
+    
+    // Check if message contains valid patterns (type, size, etc.)
+    const validPatterns = [
+      /type|نوع|taille|حجم|surface|سطح|m²|m2/i,
+      /[0-9]+\s*m²?/i,
+      /[a-z]{2,}/i, // At least 2 consecutive letters (not random chars)
+      /[\u0600-\u06FF]{2,}/ // At least 2 consecutive Arabic letters
+    ];
+    
+    // If message is too short or looks like random characters, it's invalid
+    if (message.length < 5) return false;
+    
+    // Check if it contains valid patterns
+    const hasValidPattern = validPatterns.some(pattern => pattern.test(message));
+    
+    // Check if it's not just random characters (too many consonants in a row)
+    const randomCharPattern = /[bcdfghjklmnpqrstvwxyz]{5,}/i;
+    if (randomCharPattern.test(message) && !hasValidPattern) return false;
+    
+    return true;
+  }, []);
+
+  // Helper function to check if selected service is "Ménage à domicile" (supports all languages)
+  const isMenageService = useCallback((serviceName) => {
+    if (!serviceName) return false;
+    
+    const serviceLower = serviceName.toLowerCase().trim();
+    
+    // Check in all possible languages
+    const menageKeywords = [
+      // Arabic
+      'التنظيف المنزلي',
+      'تنظيف منزلي',
+      'منزلي',
+      // French
+      'ménage à domicile',
+      'menage a domicile',
+      'ménage',
+      'domicile',
+      // English
+      'home cleaning',
+      'house cleaning',
+      'domestic cleaning',
+      'housekeeping',
+      'home service'
+    ];
+    
+    return menageKeywords.some(keyword => 
+      serviceLower.includes(keyword.toLowerCase()) ||
+      keyword.toLowerCase().includes(serviceLower)
+    );
+  }, []);
+
+  // Helper function to fill message for Ménage service
+  const fillMenageMessage = useCallback(() => {
+    if (!messageRef.current || !selectedService) return;
+    
+    // Check if this is "Ménage à domicile" or similar services (supports all languages)
+    if (!isMenageService(selectedService)) {
+      // Reset auto-filled flag for other services
+      if (messageAutoFilled) {
+        setMessageAutoFilled(false);
+      }
+      return;
+    }
+    
+    const currentMessage = messageRef.current.value.trim();
+    
+    // Clean invalid messages (random characters, test data, etc.)
+    if (currentMessage.length > 0 && !isValidMessage(currentMessage)) {
+      console.log('Cleaning invalid message:', currentMessage);
+      messageRef.current.value = '';
+      setMessageValue(''); // Update message value state
+      setMessageAutoFilled(false);
+    }
+    
+    // Build message based on available information
+    let messageParts = [];
+    
+    // Add type if available and valid
+    // Only add if typeValue is valid and not random characters
+    if (typeValue && typeValue.trim() && typeValue.trim().length > 0) {
+      // Validate type value (should not be random characters)
+      // Check if it's a valid type name (not too long, contains valid characters)
+      const typeTrimmed = typeValue.trim();
+      const isValidType = typeTrimmed.length > 0 && 
+                         typeTrimmed.length < 50 && 
+                         (isValidMessage(typeTrimmed) || 
+                          /^[a-zA-Z\u0600-\u06FF\s]+$/.test(typeTrimmed)); // Only letters and spaces
+      
+      if (isValidType) {
+        messageParts.push(`${t('booking.type_label', 'Type')}: ${typeTrimmed}`);
+      }
+    }
+    
+    // Add size if available and valid
+    if (sizeValue && sizeValue.trim() && parseFloat(sizeValue) > 0) {
+      const sizeNum = parseFloat(sizeValue);
+      if (!isNaN(sizeNum) && sizeNum > 0 && sizeNum < 10000) {
+        messageParts.push(`${t('booking.size_label', 'Taille de la surface (m²)')}: ${sizeValue} m²`);
+      }
+    }
+    
+    // Only auto-fill if:
+    // 1. Message is empty or invalid, OR
+    // 2. Message was previously auto-filled (to allow updates when type/size changes)
+    const shouldFill = currentMessage.length === 0 || 
+                      !isValidMessage(currentMessage) || 
+                      messageAutoFilled;
+    
+    if (shouldFill) {
+      // If we have any valid information, build the message
+      if (messageParts.length > 0) {
+        const autoMessage = messageParts.join(', ');
+        messageRef.current.value = autoMessage;
+        setMessageValue(autoMessage); // Update message value state
+        setMessageAutoFilled(true);
+      } else if (currentMessage.length === 0 || !isValidMessage(currentMessage)) {
+        // Default message for Ménage à domicile (only if message is empty or invalid)
+        const defaultMessage = t('booking.default_menage_message', 'Service de ménage à domicile demandé');
+        messageRef.current.value = defaultMessage;
+        setMessageValue(defaultMessage); // Update message value state
+        setMessageAutoFilled(true);
+      }
+    }
+  }, [selectedService, typeValue, sizeValue, t, messageAutoFilled, isMenageService]);
+
+  // Auto-fill message field when service, type, or size changes (especially for Ménage à domicile)
+  useEffect(() => {
+    if (!selectedService) return;
+    
+    let timeoutId;
+    let retryTimeout;
+    
+    // Use requestAnimationFrame to ensure DOM is ready, then setTimeout for state updates
+    const rafId = requestAnimationFrame(() => {
+      timeoutId = setTimeout(() => {
+        // Double-check that ref is ready and clean any invalid data first
+        if (messageRef.current) {
+          const currentValue = messageRef.current.value.trim();
+          // Clean invalid messages before filling
+          if (currentValue.length > 0 && !isValidMessage(currentValue)) {
+            console.log('Cleaning invalid message before auto-fill:', currentValue);
+            messageRef.current.value = '';
+            setMessageValue(''); // Update message value state
+            setMessageAutoFilled(false);
+          }
+          fillMenageMessage();
+        } else {
+          // Retry after a short delay if ref is not ready
+          retryTimeout = setTimeout(() => {
+            if (messageRef.current && selectedService) {
+              const currentValue = messageRef.current.value.trim();
+              // Clean invalid messages before filling
+              if (currentValue.length > 0 && !isValidMessage(currentValue)) {
+                console.log('Cleaning invalid message before auto-fill (retry):', currentValue);
+                messageRef.current.value = '';
+                setMessageValue(''); // Update message value state
+                setMessageAutoFilled(false);
+              }
+              fillMenageMessage();
+            }
+          }, 150);
+        }
+      }, 100); // Increased delay to ensure state is fully updated
+    });
+    
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (timeoutId) clearTimeout(timeoutId);
+      if (retryTimeout) clearTimeout(retryTimeout);
+    };
+  }, [selectedService, typeValue, sizeValue, fillMenageMessage, isValidMessage, i18n.language]);
+
   // Effet pour recalculer le prix quand la taille, le service ou le type change
   useEffect(() => {
     if (selectedService && sizeValue) {
@@ -736,6 +1253,26 @@ export default function Booking() {
       const servicesArray = Array.isArray(data) ? data : data.data || [];
       console.log('Loaded services:', servicesArray.map(s => s.title || s.name));
       setServices(servicesArray);
+      
+      // If we have a selectedService, try to find it in the new language and update it
+      if (selectedService && servicesArray.length > 0) {
+        // Find the service by matching the current selectedService with the new language services
+        // We need to find by ID if possible, or by matching the service name
+        const currentService = servicesArray.find(s => {
+          const sName = (s.name || '').toLowerCase().trim();
+          const sTitle = (s.title || '').toLowerCase().trim();
+          const selected = selectedService.toLowerCase().trim();
+          return sName === selected || sTitle === selected;
+        });
+        
+        // If we found the service, update selectedService with the translated name
+        if (currentService) {
+          const translatedName = currentService.name || currentService.title;
+          if (translatedName && translatedName !== selectedService) {
+            setSelectedService(translatedName);
+          }
+        }
+      }
     } catch (e) {
       console.error('Error loading services:', e);
       // En cas d'erreur, utiliser les services par défaut
@@ -759,6 +1296,19 @@ export default function Booking() {
       const typesArray = Array.isArray(data) ? data : data.data || [];
       console.log('Loaded types:', typesArray.map(t => t.name));
       setTypes(typesArray);
+      
+      // If we have a selectedTypeId, reload the type name in the current language
+      if (selectedTypeId) {
+        try {
+          const typeData = await getTypeById(selectedTypeId, i18n.language);
+          const type = typeData.data || typeData;
+          if (type && type.name) {
+            setTypeValue(type.name);
+          }
+        } catch (err) {
+          console.warn('Error reloading type name for language:', err);
+        }
+      }
       
       // Try to match pending type name
       const pendingTypeName = localStorage.getItem('pending_type_name');
@@ -998,9 +1548,11 @@ export default function Booking() {
                   className="form-select"
                   ref={serviceSelectRef}
                   onChange={(e) => {
-                    setSelectedService(e.target.value);
+                    const newService = e.target.value;
+                    setSelectedService(newService);
+                    
                     // Check if this service should hide size and type fields
-                    const serviceLower = e.target.value.toLowerCase().trim();
+                    const serviceLower = newService.toLowerCase().trim();
                     const shouldHide = [
                       'السجاد والأرائك', 'السجاد والارائك', 'تنظيف السجاد', 'تنظيف الأرائك',
                       'الغسيل والكي', 'تنظيف السيارات', 'غسيل السيارات',
@@ -1015,11 +1567,21 @@ export default function Booking() {
                     );
                     
                     // Show size field only if service is selected AND category is NOT Cuisine AND not in hide list
-                    setShowSizeField(e.target.value !== '' && !isCuisineCategory && !shouldHide);
-                    if (e.target.value === '' || shouldHide) {
+                    setShowSizeField(newService !== '' && !isCuisineCategory && !shouldHide);
+                    if (newService === '' || shouldHide) {
                       setSizeValue('');
                       setCalculatedPrice(0);
                     }
+                    
+                    // Trigger message auto-fill after state update
+                    // Use setTimeout to ensure state is updated and DOM is ready
+                    // The useEffect will handle this, but we trigger it immediately for better UX
+                    // Also ensure we wait for language-specific data to load
+                    setTimeout(() => {
+                      if (isMenageService(newService)) {
+                        fillMenageMessage();
+                      }
+                    }, 150);
                   }}
                 >
                   <option value="" disabled>
@@ -1039,7 +1601,7 @@ export default function Booking() {
                 </select>
               </div>
 
-              {showSizeField && !isCuisineType && !isCuisineCategory && !hideFields && (
+              {showSizeField && !isCuisineType && !isCuisineCategory && !hideFields && !isWashingOrIroningFromMessage && (
                 <div className="form-group">
                   <label htmlFor="size">{t('booking.size_label', 'Taille de la surface (m²)')}</label>
                   <div className="size-input-group">
@@ -1103,8 +1665,8 @@ export default function Booking() {
                 </div>
               )}
 
-              {/* Type de prestation - Select dropdown (only show if not from Ménage + cuisine and not in hideFields services) */}
-              {selectedTypes.length === 0 && !hideFields && (
+              {/* Type de prestation - Select dropdown (only show if not from Ménage + cuisine and not in hideFields services and not washing/ironing from message) */}
+              {selectedTypes.length === 0 && !hideFields && !isWashingOrIroningFromMessage && (
                 <div className="form-group">
                   <label htmlFor="type">{t('booking.type_label', 'Type (optionnel)')}</label>
                   <select
@@ -1406,6 +1968,16 @@ export default function Booking() {
                   placeholder={t('booking.message_placeholder', 'Décrivez la prestation souhaitée : lieu précis, surfaces à nettoyer, poils d\'animaux, fumeur, sièges très tachés, sable, etc.')}
                   className="form-textarea"
                   ref={messageRef}
+                  onInput={(e) => {
+                    // Update message value state to detect washing/ironing categories
+                    setMessageValue(e.target.value || '');
+                    
+                    // If user manually edits the message, reset auto-filled flag
+                    // This prevents overwriting user input when type/size changes
+                    if (messageAutoFilled) {
+                      setMessageAutoFilled(false);
+                    }
+                  }}
                 />
                 <small className="form-help">{t('booking.message_help', 'Plus vous êtes précis, mieux nous pourrons vous servir')}</small>
               </div>
