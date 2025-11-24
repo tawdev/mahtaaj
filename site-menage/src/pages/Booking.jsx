@@ -250,6 +250,14 @@ export default function Booking() {
   // Load TypeOptions for Asian Cuisine
   useEffect(() => {
     const loadTypeOptions = async () => {
+      // Reset type options first to ensure clean state
+      if (!selectedTypeId || !selectedCategory) {
+        setTypeOptions([]);
+        setSelectedTypeOption(null);
+        setChoixtypeId(null);
+        return;
+      }
+      
       // Check if it's Asian Cuisine category
       const isAsian = selectedCategory && (
         selectedCategory.name_fr === 'Cuisine Asiatique' ||
@@ -267,10 +275,10 @@ export default function Booking() {
       console.log('Loading TypeOptions - isAsian:', isAsian);
       console.log('Loading TypeOptions - selectedTypeId:', selectedTypeId);
 
-      if (!selectedTypeId || !isAsian) {
+      if (!isAsian) {
         setTypeOptions([]);
         setSelectedTypeOption(null);
-        // Don't reset choixtypeId here as it might be from prefill
+        setChoixtypeId(null);
         return;
       }
 
@@ -312,7 +320,7 @@ export default function Booking() {
     };
 
     loadTypeOptions();
-  }, [selectedTypeId, selectedCategory, i18n.language]);
+  }, [selectedTypeId, selectedCategory, i18n.language, choixtypeId]);
 
   // Handle TypeOption selection
   const handleTypeOptionSelect = (option) => {
@@ -411,6 +419,80 @@ export default function Booking() {
       loadServiceFromType();
     }
   }, [selectedTypeId, services, i18n.language, selectedService]);
+
+  // Reset form function - clears all booking-related fields
+  const resetFormFields = useCallback(() => {
+    console.log('🔄 Resetting form fields...');
+    
+    // Reset all state fields
+    setSelectedService('');
+    setShowSizeField(false);
+    setSizeValue('');
+    setCalculatedPrice(0);
+    setTypeValue('');
+    setSelectedTypeId(null);
+    setSelectedCategory(null);
+    setSelectedTypes([]);
+    setChoixtypeId(null);
+    setSelectedTypeOption(null);
+    setTypeOptions([]);
+    setServiceAutoFillError('');
+    setMessageAutoFilled(false);
+    setExtraServices([]);
+    
+    // Reset form input fields
+    if (messageRef.current) {
+      messageRef.current.value = '';
+      setMessageValue('');
+    }
+    
+    // Reset other form fields if they exist
+    const firstnameInput = document.getElementById('firstname');
+    if (firstnameInput) firstnameInput.value = '';
+    
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) phoneInput.value = '';
+    
+    const locationInput = document.getElementById('location');
+    if (locationInput) locationInput.value = '';
+    
+    const emailInput = document.getElementById('email');
+    if (emailInput) emailInput.value = '';
+    
+    // Clear localStorage booking data (but keep user data)
+    localStorage.removeItem('booking_prefill');
+    localStorage.removeItem('pending_service_selection');
+    localStorage.removeItem('pending_surface_value');
+    localStorage.removeItem('pending_type_name');
+    localStorage.removeItem('pending_message');
+    localStorage.removeItem('booking_draft');
+    localStorage.removeItem('booking_extra_services');
+    
+    console.log('✅ Form fields reset complete');
+  }, []);
+
+  // Reset form when navigating to booking page (new booking)
+  useEffect(() => {
+    // Always reset form fields first when component mounts or pathname changes
+    // This ensures clean state for new bookings
+    const hasPrefill = localStorage.getItem('booking_prefill');
+    const hasUrlParams = id || location.state?.prefill;
+    const hasLocationState = location.state?.type || location.state?.prefill;
+    
+    // Only keep prefill data if there's actual new prefill data from navigation
+    // Otherwise, reset everything for a clean new booking
+    if (!hasPrefill && !hasUrlParams && !hasLocationState) {
+      // New booking - reset all fields
+      resetFormFields();
+      console.log('🔄 New booking detected - form reset');
+    } else if (hasPrefill || hasUrlParams || hasLocationState) {
+      // Has prefill data - clean old data but keep new prefill
+      // Remove old draft data that might interfere
+      localStorage.removeItem('booking_draft');
+      localStorage.removeItem('pending_message');
+      console.log('📋 Prefill data detected - keeping new data, cleaning old drafts');
+    }
+  }, [location.pathname, resetFormFields, id, location.state]);
 
   useEffect(() => {
     loadServices();
@@ -810,8 +892,20 @@ export default function Booking() {
 
   // Prefill from Services subcategory selection
   useEffect(() => {
+    // Skip prefill if form was just reset (no prefill data)
+    const hasPrefill = localStorage.getItem('booking_prefill');
+    const hasUrlParams = id || location.state?.prefill;
+    const hasLocationState = location.state?.type || location.state?.prefill;
+    
+    // Only proceed with prefill if there's actual prefill data from navigation
+    if (!hasPrefill && !hasUrlParams && !hasLocationState) {
+      // No prefill data - ensure all fields are clean
+      resetFormFields();
+      return;
+    }
+    
     try {
-      // Clean up any invalid data from localStorage first
+      // Clean up any invalid/old data from localStorage first
       const cleanInvalidData = () => {
         try {
           const draft = localStorage.getItem('booking_draft');
@@ -931,43 +1025,24 @@ export default function Booking() {
         // Note: selectedTypeOption will be set when typeOptions are loaded
       }
       
-      // Load draft (from multi-services page) - but only if no prefill data
-      const es = localStorage.getItem('booking_extra_services');
-      if (es) {
-        try { setExtraServices(JSON.parse(es) || []); } catch {}
-      }
-      const draft = localStorage.getItem('booking_draft');
-      if (draft && !prefill?.serviceTitle && !prefill?.selectedTypes) {
-        try {
-          const d = JSON.parse(draft);
-          console.log('Loading draft data:', d);
-          if (d.firstname && document.getElementById('firstname')) document.getElementById('firstname').value = d.firstname;
-          if (d.phone && document.getElementById('phone')) document.getElementById('phone').value = d.phone;
-          if (d.location && document.getElementById('location')) document.getElementById('location').value = d.location;
-          if (typeof d.type === 'string') setTypeValue(d.type);
-          if (typeof d.sizeValue === 'string') setSizeValue(d.sizeValue);
-          if (typeof d.selectedService === 'string') { setSelectedService(d.selectedService); setShowSizeField(!!d.selectedService); }
-          if (d.message && messageRef.current) {
-            const isValid = isValidMessage(d.message);
-            if (isValid) {
-              messageRef.current.value = d.message;
-              setMessageValue(d.message); // Update message value state
-              // Mark that message was filled from draft, not auto-filled
-              setMessageAutoFilled(false);
-            } else {
-              console.log('Invalid draft message, skipping:', d.message);
-              messageRef.current.value = '';
-              setMessageValue('');
-            }
-          }
-          if (d.promo) setPromo(d.promo);
-        } catch {}
+      // Don't load draft data - it causes old data to persist
+      // Draft data should only be used when explicitly requested (e.g., from multi-services page)
+      // For new bookings, we want clean fields
+      
+      // Clean up extra services if not from prefill
+      if (!prefill?.selectedTypes) {
+        localStorage.removeItem('booking_extra_services');
+        setExtraServices([]);
       }
       
-        // Don't remove booking_prefill here - it's needed for service selection
-        // It will be cleaned up after service is selected by the service selection useEffect
-    } catch {}
-  }, []);
+      // Don't remove booking_prefill here - it's needed for service selection
+      // It will be cleaned up after service is selected by the service selection useEffect
+    } catch (err) {
+      console.error('Error processing prefill data:', err);
+      // On error, reset form to ensure clean state
+      resetFormFields();
+    }
+  }, [id, location.state, resetFormFields]);
 
   // Fonction pour calculer le prix basé sur la taille
   const calculatePrice = (serviceTitle, size) => {
@@ -1155,9 +1230,17 @@ export default function Booking() {
     }
   }, [selectedService, typeValue, sizeValue, t, messageAutoFilled, isMenageService]);
 
-  // Auto-fill message field when service, type, or size changes (especially for Ménage à domicile)
+  // Auto-fill message field when service, category, type, or size changes (especially for Ménage à domicile)
   useEffect(() => {
-    if (!selectedService) return;
+    if (!selectedService) {
+      // If no service selected, clear message if it was auto-filled
+      if (messageAutoFilled && messageRef.current) {
+        messageRef.current.value = '';
+        setMessageValue('');
+        setMessageAutoFilled(false);
+      }
+      return;
+    }
     
     let timeoutId;
     let retryTimeout;
@@ -1168,6 +1251,27 @@ export default function Booking() {
         // Double-check that ref is ready and clean any invalid data first
         if (messageRef.current) {
           const currentValue = messageRef.current.value.trim();
+          
+          // For Ménage service, clean old messages that don't match current selection
+          if (isMenageService(selectedService)) {
+            // Check if message contains old category/surface that doesn't match current selection
+            const hasOldCategory = currentValue.includes('Catégorie:') || currentValue.includes('Category:') || currentValue.includes('الفئة:');
+            const hasOldSurface = currentValue.match(/Surface:\s*\d+/i) || currentValue.match(/المساحة:\s*\d+/i);
+            
+            // If message has old data but current selection is different, clean it
+            if (hasOldCategory && !selectedCategory) {
+              console.log('🧹 Cleaning message with old category data');
+              messageRef.current.value = '';
+              setMessageValue('');
+              setMessageAutoFilled(false);
+            } else if (hasOldSurface && !sizeValue) {
+              console.log('🧹 Cleaning message with old surface data');
+              messageRef.current.value = '';
+              setMessageValue('');
+              setMessageAutoFilled(false);
+            }
+          }
+          
           // Clean invalid messages before filling
           if (currentValue.length > 0 && !isValidMessage(currentValue)) {
             console.log('Cleaning invalid message before auto-fill:', currentValue);
@@ -1175,6 +1279,7 @@ export default function Booking() {
             setMessageValue(''); // Update message value state
             setMessageAutoFilled(false);
           }
+          
           fillMenageMessage();
         } else {
           // Retry after a short delay if ref is not ready
@@ -1200,7 +1305,7 @@ export default function Booking() {
       if (timeoutId) clearTimeout(timeoutId);
       if (retryTimeout) clearTimeout(retryTimeout);
     };
-  }, [selectedService, typeValue, sizeValue, fillMenageMessage, isValidMessage, i18n.language]);
+  }, [selectedService, selectedCategory, typeValue, sizeValue, fillMenageMessage, isValidMessage, i18n.language, messageAutoFilled, isMenageService]);
 
   // Effet pour recalculer le prix quand la taille, le service ou le type change
   useEffect(() => {
@@ -1376,6 +1481,18 @@ export default function Booking() {
       // Sauvegarder en tant que réservation
       await createReservation(payload);
       setSubmitted(true);
+      
+      // Clean up all form data after successful submission
+      resetFormFields();
+      
+      // Clear localStorage booking data
+      localStorage.removeItem('booking_prefill');
+      localStorage.removeItem('pending_service_selection');
+      localStorage.removeItem('pending_surface_value');
+      localStorage.removeItem('pending_type_name');
+      localStorage.removeItem('pending_message');
+      localStorage.removeItem('booking_draft');
+      localStorage.removeItem('booking_extra_services');
     } catch (err) {
       console.error('Erreur lors de la création de la réservation:', err);
       const errorMessage = err?.message || err?.error || 'Erreur lors de l\'envoi. Vérifiez les champs.';
@@ -1538,68 +1655,14 @@ export default function Booking() {
                 {locError && <small className="form-error">{locError}</small>}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="service">{t('booking.service_label', 'Service souhaité')} *</label>
-                <select 
-                  id="service" 
-                  name="service" 
-                  required 
-                  value={selectedService}
-                  className="form-select"
-                  ref={serviceSelectRef}
-                  onChange={(e) => {
-                    const newService = e.target.value;
-                    setSelectedService(newService);
-                    
-                    // Check if this service should hide size and type fields
-                    const serviceLower = newService.toLowerCase().trim();
-                    const shouldHide = [
-                      'السجاد والأرائك', 'السجاد والارائك', 'تنظيف السجاد', 'تنظيف الأرائك',
-                      'الغسيل والكي', 'تنظيف السيارات', 'غسيل السيارات',
-                      'tapis et canapés', 'tapis et canapes', 'nettoyage de tapis', 'nettoyage de canapés', 'nettoyage de canapes',
-                      'lavage et repassage', 'nettoyage de voiture', 'lavage de voiture',
-                      'carpets and sofas', 'carpet and sofa', 'carpet cleaning', 'sofa cleaning',
-                      'washing and ironing', 'car cleaning', 'car wash',
-                      'nettoyage canapé', 'nettoyage canape', 'repassage', 'ironing', 'washing', 'lavage'
-                    ].some(hideService => 
-                      serviceLower.includes(hideService.toLowerCase()) ||
-                      hideService.toLowerCase().includes(serviceLower)
-                    );
-                    
-                    // Show size field only if service is selected AND category is NOT Cuisine AND not in hide list
-                    setShowSizeField(newService !== '' && !isCuisineCategory && !shouldHide);
-                    if (newService === '' || shouldHide) {
-                      setSizeValue('');
-                      setCalculatedPrice(0);
-                    }
-                    
-                    // Trigger message auto-fill after state update
-                    // Use setTimeout to ensure state is updated and DOM is ready
-                    // The useEffect will handle this, but we trigger it immediately for better UX
-                    // Also ensure we wait for language-specific data to load
-                    setTimeout(() => {
-                      if (isMenageService(newService)) {
-                        fillMenageMessage();
-                      }
-                    }, 150);
-                  }}
-                >
-                  <option value="" disabled>
-                    {servicesLoading ? t('booking.loading_services', 'Chargement des services...') : t('booking.select_service', 'Choisir un service')}
-                  </option>
-                  {services.map((service) => {
-                    // API returns 'name' field already translated based on locale
-                    // Use name first (translated), then fallback to title
-                    const displayName = service.name || service.title || '';
-                    const serviceValue = service.name || service.title || '';
-                    return (
-                      <option key={service.id} value={serviceValue}>
-                        {getServiceIcon(service)} {displayName}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+              {/* Hidden input to send service value in form submission */}
+              <input 
+                type="hidden" 
+                id="service" 
+                name="service" 
+                value={selectedService}
+                required
+              />
 
               {showSizeField && !isCuisineType && !isCuisineCategory && !hideFields && !isWashingOrIroningFromMessage && (
                 <div className="form-group">
@@ -1665,60 +1728,6 @@ export default function Booking() {
                 </div>
               )}
 
-              {/* Type de prestation - Select dropdown (only show if not from Ménage + cuisine and not in hideFields services and not washing/ironing from message) */}
-              {selectedTypes.length === 0 && !hideFields && !isWashingOrIroningFromMessage && (
-                <div className="form-group">
-                  <label htmlFor="type">{t('booking.type_label', 'Type (optionnel)')}</label>
-                  <select
-                    id="type"
-                    name="type"
-                    className="form-select"
-                    value={selectedTypeId || ''}
-                    onChange={(e) => {
-                      const typeId = e.target.value ? parseInt(e.target.value) : null;
-                      setSelectedTypeId(typeId);
-                      
-                      if (typeId) {
-                        const selectedType = types.find(t => t.id === typeId);
-                        if (selectedType) {
-                          setTypeValue(selectedType.name || '');
-                        }
-                      } else {
-                        setTypeValue('');
-                        setSelectedCategory(null);
-                        setSelectedService('');
-                        setShowSizeField(false);
-                        setServiceAutoFillError('');
-                        setSizeValue('');
-                        setCalculatedPrice(0);
-                      }
-                    }}
-                    disabled={typesLoading}
-                  >
-                    <option value="">
-                      {typesLoading 
-                        ? t('booking.loading_types', 'Chargement des types...') 
-                        : t('booking.select_type', 'Choisir un type (optionnel)')}
-                    </option>
-                    {types.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.name}
-                      </option>
-                    ))}
-                  </select>
-                  {serviceAutoFillError && (
-                    <small className="form-error">{serviceAutoFillError}</small>
-                  )}
-                  {!serviceAutoFillError && selectedTypeId && (
-                    <small className="form-help">
-                      {t('booking.type_help_auto', 'Le service associé sera sélectionné automatiquement')}
-                    </small>
-                  )}
-                  {!selectedTypeId && (
-                    <small className="form-help">{t('booking.type_help', 'Renseignez le type si pertinent (ex: Villa, Italienne…)')}</small>
-                  )}
-                </div>
-              )}
 
               {/* Type Options Selection for Asian Cuisine */}
               {isAsianCuisineCategory && selectedTypeId && (
@@ -1965,9 +1974,15 @@ export default function Booking() {
                   rows="5" 
                   required 
                   minLength={10} 
+                  readOnly={true}
                   placeholder={t('booking.message_placeholder', 'Décrivez la prestation souhaitée : lieu précis, surfaces à nettoyer, poils d\'animaux, fumeur, sièges très tachés, sable, etc.')}
                   className="form-textarea"
                   ref={messageRef}
+                  style={{
+                    cursor: 'not-allowed',
+                    opacity: 0.7,
+                    backgroundColor: '#f3f4f6'
+                  }}
                   onInput={(e) => {
                     // Update message value state to detect washing/ironing categories
                     setMessageValue(e.target.value || '');

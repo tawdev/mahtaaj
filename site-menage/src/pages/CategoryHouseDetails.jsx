@@ -226,72 +226,8 @@ export default function CategoryHouseDetails() {
       } else if (isKitchenCategory) {
         // Store all types for kitchen category
         setAllTypes(typesArray);
-        
-        // Helper function to filter and sort default kitchen types (local to loadData)
-        const filterDefaultKitchenTypesLocal = (typesArray) => {
-          const defaultKitchenTypes = [
-            {
-              keywords: ['المغربية', 'مغربية', 'Marocaine', 'Moroccan'],
-              order: 1
-            },
-            {
-              keywords: ['الإيطالية', 'إيطالية', 'Italienne', 'Italian'],
-              order: 2
-            },
-            {
-              keywords: ['العربية الخليجية', 'خليجية', 'Arabe du Golfe', 'Gulf Arab'],
-              order: 3
-            },
-            {
-              keywords: ['الدولية', 'دولية', 'Internationale', 'International'],
-              order: 4
-            }
-          ];
-          
-          return typesArray
-            .filter(type => {
-              const typeName = (type.name || '').toLowerCase();
-              const typeNameAr = (type.name_ar || '').toLowerCase();
-              const typeNameFr = (type.name_fr || '').toLowerCase();
-              const typeNameEn = (type.name_en || '').toLowerCase();
-              
-              return defaultKitchenTypes.some(allowed => {
-                return allowed.keywords.some(keyword => {
-                  const keywordLower = keyword.toLowerCase();
-                  return typeName.includes(keywordLower) ||
-                         typeNameAr.includes(keywordLower) ||
-                         typeNameFr.includes(keywordLower) ||
-                         typeNameEn.includes(keywordLower);
-                });
-              });
-            })
-            .map(type => {
-              const typeName = (type.name || '').toLowerCase();
-              const typeNameAr = (type.name_ar || '').toLowerCase();
-              const typeNameFr = (type.name_fr || '').toLowerCase();
-              const typeNameEn = (type.name_en || '').toLowerCase();
-              
-              for (const allowed of defaultKitchenTypes) {
-                const matches = allowed.keywords.some(keyword => {
-                  const keywordLower = keyword.toLowerCase();
-                  return typeName.includes(keywordLower) ||
-                         typeNameAr.includes(keywordLower) ||
-                         typeNameFr.includes(keywordLower) ||
-                         typeNameEn.includes(keywordLower);
-                });
-                
-                if (matches) {
-                  return { ...type, _sortOrder: allowed.order };
-                }
-              }
-              return { ...type, _sortOrder: 999 };
-            })
-            .sort((a, b) => (a._sortOrder || 999) - (b._sortOrder || 999))
-            .map(({ _sortOrder, ...type }) => type);
-        };
-        
-        // Filter to show only 4 default types initially
-        typesArray = filterDefaultKitchenTypesLocal(typesArray);
+        // For Cuisine category, show all types directly (no filtering)
+        // typesArray already contains all types for this category
       } else {
         setAllTypes([]);
       }
@@ -688,10 +624,26 @@ export default function CategoryHouseDetails() {
     return isWashing || isIroning;
   };
 
+  // Check if category is Cuisine/Kitchen
+  const isKitchenCategoryCheck = () => {
+    return category && (
+      category.name_fr === 'Cuisine' ||
+      category.name_en === 'Kitchen' ||
+      category.name_ar === 'المطبخ' ||
+      category.name === 'Cuisine' ||
+      category.name === 'Kitchen' ||
+      category.name === 'المطبخ'
+    );
+  };
+
   // Get types to display based on showAllTypes state
   const getDisplayTypes = () => {
     if (isMenageCuisineCategory()) {
       // For Ménage + cuisine, always show all types
+      return allTypes.length > 0 ? allTypes : types;
+    }
+    if (isKitchenCategoryCheck()) {
+      // For Cuisine category, always show all types
       return allTypes.length > 0 ? allTypes : types;
     }
     if (showAllTypes) {
@@ -851,7 +803,7 @@ export default function CategoryHouseDetails() {
         <div className="types-grid">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <h3>{t('services_page.category_details.available_types')}</h3>
-            {showAllTypes && allTypes.length > 0 && !isMenageCuisineCategory() && (
+            {showAllTypes && allTypes.length > 0 && !isMenageCuisineCategory() && !isKitchenCategoryCheck() && (
               <button
                 onClick={() => {
                   setShowAllTypes(false);
@@ -1030,7 +982,7 @@ export default function CategoryHouseDetails() {
               
               // Check if this is the International type and we're not showing all types yet
               const isInternational = isInternationalType(type);
-              const shouldHandleClick = isInternational && !showAllTypes && allTypes.length > 0;
+              const shouldHandleClick = isInternational && !showAllTypes && allTypes.length > 0 && !isKitchenCategoryCheck();
               
               const cardContent = (
                 <div
