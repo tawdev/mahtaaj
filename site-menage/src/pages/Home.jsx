@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './Home.css';
 import ServiceCard from '../components/ServiceCard';
 import Contact from './Contact';
@@ -69,6 +69,90 @@ export default function Home() {
     return categoryName;
   };
 
+  // Helper function to sort categories in the specified order
+  // Uses slug or database name fields to ensure consistent ordering regardless of language
+  // This ensures the order remains the same when language changes
+  const sortCategoriesByOrder = (categories) => {
+    // Order map based on slug (language-independent) and fallback to name patterns
+    // This ensures the order remains consistent when language changes
+    const getCategoryOrder = (category) => {
+      // Use slug first (most reliable, language-independent)
+      const slug = (category.slug || '').toLowerCase().trim();
+      
+      // Check slug first (most reliable, language-independent)
+      if (slug.includes('menage') || slug.includes('menage-cuisine') || slug.includes('house') || slug.includes('cleaning')) {
+        return 1; // Ménage et cuisine
+      }
+      if (slug.includes('securite') || slug.includes('security') || slug.includes('sécurité')) {
+        return 2; // Sécurité
+      }
+      if (slug.includes('bebe') || slug.includes('bébé') || slug.includes('baby')) {
+        return 3; // Bébé Setting
+      }
+      if (slug.includes('jardinage') || slug.includes('gardening')) {
+        return 4; // Jardinage
+      }
+      if (slug.includes('travaux') || slug.includes('manuels') || slug.includes('hand') || slug.includes('worker')) {
+        return 5; // Travaux Manuels
+      }
+      if (slug.includes('chauffeur') || slug.includes('driver')) {
+        return 6; // Chauffeur
+      }
+      
+      // Fallback to database name fields (not localized name)
+      // Use original database fields to avoid language-dependent sorting
+      const nameFr = ((category.name_fr || '') + '').toLowerCase().trim();
+      const nameEn = ((category.name_en || '') + '').toLowerCase().trim();
+      const nameAr = ((category.name_ar || '') + '').toLowerCase().trim();
+      const allNames = [nameFr, nameEn, nameAr].join(' ');
+      
+      if (allNames.includes('menage') || allNames.includes('house') || allNames.includes('cleaning') ||
+          allNames.includes('تنظيف') || allNames.includes('منزل')) {
+        return 1; // Ménage et cuisine
+      }
+      if (allNames.includes('sécurité') || allNames.includes('security') || 
+          allNames.includes('أمن') || allNames.includes('الأمن')) {
+        return 2; // Sécurité
+      }
+      if (allNames.includes('bébé') || allNames.includes('bebe') || allNames.includes('baby') ||
+          allNames.includes('طفل') || allNames.includes('رعاية') || allNames.includes('أطفال')) {
+        return 3; // Bébé Setting
+      }
+      if (allNames.includes('jardinage') || allNames.includes('gardening') ||
+          allNames.includes('تنسيق') || allNames.includes('الحدائق')) {
+        return 4; // Jardinage
+      }
+      if (allNames.includes('travaux') || allNames.includes('manuels') || 
+          allNames.includes('hand') || allNames.includes('worker') ||
+          allNames.includes('أعمال') || allNames.includes('يدوية')) {
+        return 5; // Travaux Manuels
+      }
+      if (allNames.includes('chauffeur') || allNames.includes('driver') ||
+          allNames.includes('سائق') || allNames.includes('السائق')) {
+        return 6; // Chauffeur
+      }
+      
+      // Use order field from database if available, otherwise default to end
+      return category.order !== undefined && category.order !== null ? category.order + 100 : 999;
+    };
+
+    return [...categories].sort((a, b) => {
+      const orderA = getCategoryOrder(a);
+      const orderB = getCategoryOrder(b);
+      
+      // If same order, use database order field or maintain original order
+      if (orderA === orderB) {
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        // If no order field, maintain original order by ID
+        return (a.id || 0) - (b.id || 0);
+      }
+      
+      return orderA - orderB;
+    });
+  };
+
   // Helper function to get category path based on category name
   const getCategoryPath = (categoryName) => {
     if (!categoryName) return '/';
@@ -105,6 +189,11 @@ export default function Home() {
         nameLower.includes('worker') || nameOriginal.includes('أعمال') || 
         nameOriginal.includes('يدوية') || nameOriginal.includes('الأعمال اليدوية')) {
       return '/hand-workers';
+    }
+    // Chauffeur / Driver / سائق
+    if (nameLower.includes('chauffeur') || nameLower.includes('driver') || 
+        nameOriginal.includes('سائق') || nameOriginal.includes('السائق')) {
+      return '/driver';
     }
     
     // Default fallback
@@ -184,8 +273,12 @@ export default function Home() {
         if (categoriesError) {
           console.error('Error loading categories:', categoriesError);
         } else if (categoriesData && categoriesData.length > 0) {
-          // Map categories with localized names
-          const mappedCategories = categoriesData.map(cat => {
+          // First, sort categories by their stable identifiers (slug/order) BEFORE mapping names
+          // This ensures the order remains consistent regardless of language
+          const preSortedCategories = sortCategoriesByOrder(categoriesData);
+          
+          // Then map categories with localized names (order is already fixed)
+          const mappedCategories = preSortedCategories.map(cat => {
             let categoryName = cat[`name_${locale}`] || cat.name || cat.name_fr || '';
             categoryName = fixArabicCategoryName(categoryName, locale);
             
@@ -196,6 +289,7 @@ export default function Home() {
             };
           });
           
+          // Categories are already sorted, just set them
           setCategories(mappedCategories);
           
           // Select first category by default
@@ -349,7 +443,7 @@ export default function Home() {
   }, [selectedCategory, i18n.language, getImageUrl]);
 
   // Auto-slide through all active gallery images in Hero section (every 3 seconds)
-  // Use all gallery images instead of just category images to ensure slider works
+  // Use all gallery images organized by category order
   useEffect(() => {
     // Use galleryImages (all active images) instead of categoryImages
     const imagesToSlide = galleryImages.filter(img => img.image_url);
@@ -369,15 +463,35 @@ export default function Home() {
       return;
     }
     
-    console.log('[Home] Slider: Starting auto-slide with', imagesToSlide.length, 'images from all categories');
+    // Organize images by category order to match the sorted categories
+    const sortedCategories = sortCategoriesByOrder(categories);
+    const organizedImages = [];
+    
+    // For each category in order, add its images
+    sortedCategories.forEach(category => {
+      const categoryImgs = imagesToSlide.filter(img => 
+        img.category_gallery_id === category.id
+      );
+      organizedImages.push(...categoryImgs);
+    });
+    
+    // Add any remaining images that don't match categories
+    const remainingImages = imagesToSlide.filter(img => 
+      !organizedImages.find(orgImg => orgImg.id === img.id)
+    );
+    organizedImages.push(...remainingImages);
+    
+    const finalImagesToSlide = organizedImages.length > 0 ? organizedImages : imagesToSlide;
+    
+    console.log('[Home] Slider: Starting auto-slide with', finalImagesToSlide.length, 'images organized by category order');
     
     // Initialize: If current image is not in the slider images, find its index or set first one
-    if (!currentImage || !imagesToSlide.find(img => img.id === currentImage.id)) {
-      const initialIndex = imagesToSlide.findIndex(img => 
+    if (!currentImage || !finalImagesToSlide.find(img => img.id === currentImage.id)) {
+      const initialIndex = finalImagesToSlide.findIndex(img => 
         categoryImages.length > 0 && categoryImages[0] && img.id === categoryImages[0].id
       );
       const startIndex = initialIndex >= 0 ? initialIndex : 0;
-      const initialImage = imagesToSlide[startIndex];
+      const initialImage = finalImagesToSlide[startIndex];
       setCurrentImage(initialImage);
       setCurrentImageIndex(startIndex);
       
@@ -392,7 +506,7 @@ export default function Home() {
       console.log('[Home] Slider: Initialized with image at index', startIndex);
     } else {
       // Update index to match current image
-      const currentIndex = imagesToSlide.findIndex(img => img.id === currentImage.id);
+      const currentIndex = finalImagesToSlide.findIndex(img => img.id === currentImage.id);
       if (currentIndex >= 0 && currentIndex !== currentImageIndex) {
         setCurrentImageIndex(currentIndex);
         
@@ -406,15 +520,25 @@ export default function Home() {
       }
     }
     
+    // Use a ref to track if we're transitioning to avoid rapid changes
+    let isTransitioningRef = false;
+    
     const interval = setInterval(() => {
+      if (isTransitioningRef) {
+        console.log('[Home] Slider: Skipping transition, already in progress');
+        return;
+      }
+      
       setCurrentImageIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % imagesToSlide.length;
+        const nextIndex = (prevIndex + 1) % finalImagesToSlide.length;
         console.log('[Home] Slider: Moving from index', prevIndex, 'to', nextIndex);
         
         // Change image directly - CSS will handle the transition
-        if (imagesToSlide[nextIndex] && imagesToSlide[nextIndex].image_url) {
-          console.log('[Home] Slider: Setting new image:', imagesToSlide[nextIndex].id);
-          const nextImage = imagesToSlide[nextIndex];
+        if (finalImagesToSlide[nextIndex] && finalImagesToSlide[nextIndex].image_url) {
+          console.log('[Home] Slider: Setting new image:', finalImagesToSlide[nextIndex].id);
+          const nextImage = finalImagesToSlide[nextIndex];
+          
+          isTransitioningRef = true;
           setCurrentImage(nextImage);
           
           // Update selected category based on the image's category
@@ -425,6 +549,11 @@ export default function Home() {
               setSelectedCategory(imageCategory);
             }
           }
+          
+          // Reset transition flag after a short delay
+          setTimeout(() => {
+            isTransitioningRef = false;
+          }, 500);
         } else {
           console.warn('[Home] Slider: Next image is invalid at index', nextIndex);
         }
@@ -597,6 +726,26 @@ export default function Home() {
             {categories.map((category) => {
               const displayName = formatCategoryName(category.name);
               const categoryPath = getCategoryPath(category.name);
+              const isChauffeur = category.name?.toLowerCase().includes('chauffeur') || 
+                                 category.name?.toLowerCase().includes('driver') ||
+                                 category.name?.includes('سائق');
+              
+              // For Chauffeur button, use onClick to navigate to /driver
+              if (isChauffeur) {
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => navigate('/driver')}
+                    className={`service-button category-button ${selectedCategory?.id === category.id ? 'active' : ''} ${hiddenButtons.has(category.id) ? 'fade-out' : 'fade-in'}`}
+                    title={displayName}
+                    aria-label={displayName}
+                  >
+                    <span className="service-label">{displayName}</span>
+                  </button>
+                );
+              }
+              
+              // For other categories, use Link
               return (
                 <Link
                   key={category.id}

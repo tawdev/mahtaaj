@@ -62,10 +62,72 @@ export default function AdminCategoriesCrud({ token, onAuthError }) {
     }));
   };
 
+  // Helper function to generate slug from name
+  const generateSlug = (name) => {
+    if (!name) return null;
+    return name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+  };
+
+  // Helper function to check if slug exists
+  const checkSlugExists = async (slug, excludeId = null) => {
+    if (!slug) return false;
+    let query = supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', slug);
+    
+    if (excludeId) {
+      query = query.neq('id', excludeId);
+    }
+    
+    const { data, error } = await query;
+    return data && data.length > 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setError('');
+      
+      // Prepare category data with proper formatting
+      const categoryData = {
+        name: formData.name?.trim() || null,
+        name_ar: formData.name_ar?.trim() || null,
+        name_fr: formData.name_fr?.trim() || null,
+        name_en: formData.name_en?.trim() || null,
+        description: formData.description?.trim() || null,
+        description_ar: formData.description_ar?.trim() || null,
+        description_fr: formData.description_fr?.trim() || null,
+        description_en: formData.description_en?.trim() || null,
+        slug: formData.slug?.trim() || null,
+        is_active: formData.is_active,
+        order: parseInt(formData.order) || 0
+      };
+      
+      // Generate slug if empty
+      if (!categoryData.slug) {
+        const nameToUse = categoryData.name_fr || categoryData.name_en || categoryData.name_ar || categoryData.name || '';
+        categoryData.slug = generateSlug(nameToUse);
+      }
+      
+      // Ensure slug is unique
+      if (categoryData.slug) {
+        const slugExists = await checkSlugExists(categoryData.slug, editingCategory?.id);
+        if (slugExists) {
+          let uniqueSlug = categoryData.slug;
+          let counter = 1;
+          while (await checkSlugExists(uniqueSlug, editingCategory?.id)) {
+            uniqueSlug = `${categoryData.slug}-${counter}`;
+            counter++;
+          }
+          categoryData.slug = uniqueSlug;
+        }
+      }
       
       let data, error;
       
@@ -73,24 +135,47 @@ export default function AdminCategoriesCrud({ token, onAuthError }) {
         // Update existing category
         const { data: updateData, error: updateError } = await supabase
           .from('categories')
-          .update(formData)
+          .update(categoryData)
           .eq('id', editingCategory.id)
-          .select();
+          .select('id, name, name_ar, name_fr, name_en, description, description_ar, description_fr, description_en, slug, is_active, order, created_at, updated_at');
         data = updateData && updateData.length > 0 ? updateData[0] : null;
         error = updateError;
       } else {
         // Create new category
         const { data: insertData, error: insertError } = await supabase
           .from('categories')
-          .insert([formData])
-          .select();
+          .insert([categoryData])
+          .select('id, name, name_ar, name_fr, name_en, description, description_ar, description_fr, description_en, slug, is_active, order, created_at, updated_at');
         data = insertData && insertData.length > 0 ? insertData[0] : null;
         error = insertError;
       }
 
       if (error) {
         console.error('Error saving category:', error);
-        setError('Erreur lors de la sauvegarde: ' + error.message);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          statusCode: error.statusCode
+        });
+        
+        let errorMessage = 'Erreur lors de la sauvegarde: ';
+        
+        // Provide more specific error messages
+        if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique') || error.statusCode === 409) {
+          errorMessage += 'Un slug ou une valeur unique existe déjà. Veuillez utiliser une valeur différente.';
+        } else if (error.code === '23503' || error.message?.includes('foreign key')) {
+          errorMessage += 'Erreur de référence. Vérifiez les relations.';
+        } else if (error.code === '23514' || error.message?.includes('check constraint')) {
+          errorMessage += 'Les données ne respectent pas les contraintes de validation.';
+        } else if (error.code === 'PGRST116' || error.message?.includes('permission') || error.message?.includes('policy')) {
+          errorMessage += 'Erreur de permissions. Vérifiez les politiques RLS.';
+        } else {
+          errorMessage += error.message || error.details || 'Erreur inconnue';
+        }
+        
+        setError(errorMessage);
         return;
       }
 
