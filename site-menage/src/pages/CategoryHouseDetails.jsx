@@ -17,6 +17,10 @@ export default function CategoryHouseDetails() {
   const [categoriesHouseMap, setCategoriesHouseMap] = useState({}); // Map category_house_id to category info
   const [warningMessage, setWarningMessage] = useState(''); // Warning message for selection limits
   const [typeOptionsMap, setTypeOptionsMap] = useState({}); // Map type_id to options array
+  const [menageTypes, setMenageTypes] = useState([]); // Types for Menage category
+  const [cuisineTypes, setCuisineTypes] = useState([]); // Types for Cuisine category
+  const [menageCategory, setMenageCategory] = useState(null); // Menage category info
+  const [cuisineCategory, setCuisineCategory] = useState(null); // Cuisine category info
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [surface, setSurface] = useState('');
@@ -201,18 +205,68 @@ export default function CategoryHouseDetails() {
         foundCategory.name === 'المطبخ'
       );
       
-      // For Ménage + cuisine category, load all types for service 1
+      // For Ménage + cuisine category, load types for Menage and Cuisine separately
       if (isMenageCuisineCategory) {
-        const allServiceTypes = await getTypes(i18n.language, foundService.id, null);
-        const allTypesArray = Array.isArray(allServiceTypes) 
-          ? allServiceTypes 
-          : (allServiceTypes.data || []);
-        
-        // Load all categories house to map types to their categories
+        // Load all categories house to find Menage and Cuisine categories
         const categoriesData = await getCategoriesHouse(i18n.language, foundService.id);
         const categoriesArray = Array.isArray(categoriesData) 
           ? categoriesData 
           : (categoriesData.data || []);
+        
+        // Find Menage category
+        const menageCat = categoriesArray.find(cat => 
+          cat.name_fr === 'Ménage' ||
+          cat.name_en === 'Housekeeping' ||
+          cat.name_ar === 'التنظيف' ||
+          cat.name_ar === 'التدبير المنزلي' ||
+          cat.name === 'Ménage' ||
+          cat.name === 'Housekeeping' ||
+          cat.name === 'التنظيف' ||
+          (cat.name_fr && cat.name_fr.toLowerCase().includes('ménage')) ||
+          (cat.name_en && cat.name_en.toLowerCase().includes('housekeeping')) ||
+          (cat.name_ar && (cat.name_ar.includes('تنظيف') || cat.name_ar.includes('تدبير')))
+        );
+        
+        // Find Cuisine category
+        const cuisineCat = categoriesArray.find(cat => 
+          cat.name_fr === 'Cuisine' ||
+          cat.name_en === 'Kitchen' ||
+          cat.name_ar === 'المطبخ' ||
+          cat.name === 'Cuisine' ||
+          cat.name === 'Kitchen' ||
+          cat.name === 'المطبخ' ||
+          (cat.name_fr && cat.name_fr.toLowerCase().includes('cuisine')) ||
+          (cat.name_en && cat.name_en.toLowerCase().includes('kitchen')) ||
+          (cat.name_ar && cat.name_ar.includes('مطبخ'))
+        );
+        
+        // Store category info
+        setMenageCategory(menageCat || null);
+        setCuisineCategory(cuisineCat || null);
+        
+        // Fetch types for Menage category
+        let menageTypesArray = [];
+        if (menageCat) {
+          const menageTypesData = await getTypes(i18n.language, null, menageCat.id);
+          menageTypesArray = Array.isArray(menageTypesData) 
+            ? menageTypesData 
+            : (menageTypesData.data || []);
+          setMenageTypes(menageTypesArray);
+        } else {
+          setMenageTypes([]);
+        }
+        
+        // Fetch types for Cuisine category
+        let cuisineTypesArray = [];
+        if (cuisineCat) {
+          const cuisineTypesData = await getTypes(i18n.language, null, cuisineCat.id);
+          cuisineTypesArray = Array.isArray(cuisineTypesData) 
+            ? cuisineTypesData 
+            : (cuisineTypesData.data || []);
+          setCuisineTypes(cuisineTypesArray);
+        } else {
+          setCuisineTypes([]);
+        }
         
         // Create a map of category_house_id to category info
         const categoriesMap = {};
@@ -221,8 +275,18 @@ export default function CategoryHouseDetails() {
         });
         setCategoriesHouseMap(categoriesMap);
         
-        setAllTypes(allTypesArray);
-        typesArray = allTypesArray;
+        // For backward compatibility, also set allTypes
+        const allMenageAndCuisineTypes = [...menageTypesArray, ...cuisineTypesArray];
+        setAllTypes(allMenageAndCuisineTypes);
+        typesArray = allMenageAndCuisineTypes;
+        
+        // Load options for Menage and Cuisine types separately
+        if (menageTypesArray.length > 0) {
+          await loadTypeOptions(menageTypesArray);
+        }
+        if (cuisineTypesArray.length > 0) {
+          await loadTypeOptions(cuisineTypesArray);
+        }
       } else if (isKitchenCategory) {
         // Store all types for kitchen category
         setAllTypes(typesArray);
@@ -237,6 +301,14 @@ export default function CategoryHouseDetails() {
       setSelectedTypes([]); // Reset selected types when loading new data
       setCategoriesHouseMap({}); // Reset categories map
       setWarningMessage(''); // Reset warning message
+      
+      // Reset Menage and Cuisine types if not in Ménage + cuisine category
+      if (!isMenageCuisineCategory) {
+        setMenageTypes([]);
+        setCuisineTypes([]);
+        setMenageCategory(null);
+        setCuisineCategory(null);
+      }
       
       // Load options for all types
       await loadTypeOptions(typesArray);
@@ -799,7 +871,229 @@ export default function CategoryHouseDetails() {
         </div>
       )}
 
-      {getDisplayTypes().length > 0 ? (
+      {/* Special display for Ménage + cuisine category - Two columns */}
+      {isMenageCuisineCategory() && (menageTypes.length > 0 || cuisineTypes.length > 0) ? (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '24px',
+          marginTop: '24px'
+        }}>
+          {/* Left Column - Menage Types */}
+          <div>
+            <h3 style={{
+              marginBottom: '20px',
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#1f2937',
+              textAlign: 'center'
+            }}>
+              {i18n.language === 'ar' ? 'التنظيف' : 
+               i18n.language === 'fr' ? 'Ménage' : 
+               'Cleaning'}
+            </h3>
+            <div className="types-grid-container" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '16px'
+            }}>
+              {menageTypes.map((type) => {
+                const selected = isTypeSelected(type);
+                let bgImage = type.image_url || type.image || null;
+                
+                if (bgImage) {
+                  if (bgImage.startsWith('/serveces')) {
+                    bgImage = (process.env.PUBLIC_URL || '') + bgImage;
+                  }
+                  if (bgImage.startsWith('/') && !bgImage.startsWith('/serveces')) {
+                    const apiBase = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000';
+                    bgImage = apiBase + bgImage;
+                  }
+                }
+                
+                return (
+                  <div
+                    key={type.id}
+                    className="type-card"
+                    style={{
+                      backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+                      backgroundSize: bgImage ? 'cover' : undefined,
+                      backgroundPosition: bgImage ? 'center' : undefined,
+                      backgroundRepeat: bgImage ? 'no-repeat' : undefined,
+                      cursor: 'default',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Selection button */}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTypeSelect(type);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        width: '32px',
+                        height: '32px',
+                        backgroundColor: selected ? '#10b981' : 'rgba(255, 255, 255, 0.95)',
+                        border: selected ? '2px solid #10b981' : '2px solid #3b82f6',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10,
+                        transition: 'all 0.3s ease',
+                        boxShadow: selected 
+                          ? '0 2px 8px rgba(16, 185, 129, 0.4)' 
+                          : '0 2px 6px rgba(0, 0, 0, 0.2)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!selected) {
+                          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+                          e.currentTarget.style.borderColor = '#2563eb';
+                          e.currentTarget.style.transform = 'scale(1.1)';
+                        } else {
+                          e.currentTarget.style.backgroundColor = '#059669';
+                          e.currentTarget.style.transform = 'scale(1.1)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!selected) {
+                          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                          e.currentTarget.style.borderColor = '#3b82f6';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        } else {
+                          e.currentTarget.style.backgroundColor = '#10b981';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }
+                      }}
+                    >
+                      {selected && (
+                        <span style={{
+                          color: '#fff',
+                          fontSize: '20px',
+                          fontWeight: 'bold',
+                          lineHeight: '1'
+                        }}>✓</span>
+                      )}
+                    </div>
+                    <h4>{type.name}</h4>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right Column - Cuisine Types */}
+          <div>
+            <h3 style={{
+              marginBottom: '20px',
+              fontSize: '20px',
+              fontWeight: '600',
+              color: '#1f2937',
+              textAlign: 'center'
+            }}>
+              {i18n.language === 'ar' ? 'مطبخ' : 
+               i18n.language === 'fr' ? 'Cuisine' : 
+               'Cooking'}
+            </h3>
+            <div className="types-grid-container" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '16px'
+            }}>
+              {cuisineTypes.map((type) => {
+                const selected = isTypeSelected(type);
+                let bgImage = type.image_url || type.image || null;
+                
+                if (bgImage) {
+                  if (bgImage.startsWith('/serveces')) {
+                    bgImage = (process.env.PUBLIC_URL || '') + bgImage;
+                  }
+                  if (bgImage.startsWith('/') && !bgImage.startsWith('/serveces')) {
+                    const apiBase = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000';
+                    bgImage = apiBase + bgImage;
+                  }
+                }
+                
+                return (
+                  <div
+                    key={type.id}
+                    className="type-card"
+                    style={{
+                      backgroundImage: bgImage ? `url(${bgImage})` : undefined,
+                      backgroundSize: bgImage ? 'cover' : undefined,
+                      backgroundPosition: bgImage ? 'center' : undefined,
+                      backgroundRepeat: bgImage ? 'no-repeat' : undefined,
+                      cursor: 'default',
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Selection button */}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTypeSelect(type);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        width: '32px',
+                        height: '32px',
+                        backgroundColor: selected ? '#10b981' : 'rgba(255, 255, 255, 0.95)',
+                        border: selected ? '2px solid #10b981' : '2px solid #3b82f6',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10,
+                        transition: 'all 0.3s ease',
+                        boxShadow: selected 
+                          ? '0 2px 8px rgba(16, 185, 129, 0.4)' 
+                          : '0 2px 6px rgba(0, 0, 0, 0.2)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!selected) {
+                          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+                          e.currentTarget.style.borderColor = '#2563eb';
+                          e.currentTarget.style.transform = 'scale(1.1)';
+                        } else {
+                          e.currentTarget.style.backgroundColor = '#059669';
+                          e.currentTarget.style.transform = 'scale(1.1)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!selected) {
+                          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                          e.currentTarget.style.borderColor = '#3b82f6';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        } else {
+                          e.currentTarget.style.backgroundColor = '#10b981';
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }
+                      }}
+                    >
+                      {selected && (
+                        <span style={{
+                          color: '#fff',
+                          fontSize: '20px',
+                          fontWeight: 'bold',
+                          lineHeight: '1'
+                        }}>✓</span>
+                      )}
+                    </div>
+                    <h4>{type.name}</h4>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : getDisplayTypes().length > 0 ? (
         <div className="types-grid">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <h3>{t('services_page.category_details.available_types')}</h3>
