@@ -16,6 +16,7 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
     address: '',
     reservation_date: '',
     reservation_time: '',
+    number_of_seats: 1,
     message: ''
   });
 
@@ -93,6 +94,7 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
         email: formData.email?.trim() || null,
         phone: formData.phone.trim(),
         address: formData.address?.trim() || null,
+        number_of_seats: formData.number_of_seats ? parseInt(formData.number_of_seats) : 1,
         message: formData.message?.trim() || null
       };
 
@@ -283,6 +285,30 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
                 onChange={handleInputChange}
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="number_of_seats">
+              {i18n.language === 'ar' ? 'عدد المقاعد' : 
+               i18n.language === 'fr' ? 'Nombre de places' : 
+               'Number of Seats'} *
+            </label>
+            <input
+              type="number"
+              id="number_of_seats"
+              name="number_of_seats"
+              value={formData.number_of_seats}
+              onChange={handleInputChange}
+              required
+              min="1"
+              max="50"
+              step="1"
+              placeholder={
+                i18n.language === 'ar' ? 'أدخل عدد المقاعد' : 
+                i18n.language === 'fr' ? 'Entrez le nombre de places' : 
+                'Enter number of seats'
+              }
+            />
           </div>
 
           <div className="form-group">

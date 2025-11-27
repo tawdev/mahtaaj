@@ -28,6 +28,7 @@ export default function AdminDriverReservationsCrud({ token, onAuthError }) {
     email: '',
     phone: '',
     address: '',
+    number_of_seats: 1,
     message: ''
   });
 
@@ -105,6 +106,7 @@ export default function AdminDriverReservationsCrud({ token, onAuthError }) {
         email: '',
         phone: '',
         address: '',
+        number_of_seats: 1,
         message: ''
       });
       loadReservations();
@@ -137,6 +139,7 @@ export default function AdminDriverReservationsCrud({ token, onAuthError }) {
       email: reservation.email || '',
       phone: reservation.phone || '',
       address: reservation.address || '',
+      number_of_seats: reservation.number_of_seats || 1,
       message: reservation.message || ''
     });
     setShowForm(true);
@@ -385,6 +388,7 @@ export default function AdminDriverReservationsCrud({ token, onAuthError }) {
               <th>Email</th>
               <th>Date</th>
               <th>Heure</th>
+              <th>Places</th>
               <th>Statut</th>
               <th>Créé le</th>
               <th>Actions</th>
@@ -393,7 +397,7 @@ export default function AdminDriverReservationsCrud({ token, onAuthError }) {
           <tbody>
             {filteredReservations.length === 0 ? (
               <tr>
-                <td colSpan="9" className="no-data">Aucune réservation trouvée</td>
+                <td colSpan="10" className="no-data">Aucune réservation trouvée</td>
               </tr>
             ) : (
               filteredReservations.map((reservation) => {
@@ -406,6 +410,7 @@ export default function AdminDriverReservationsCrud({ token, onAuthError }) {
                     <td>{reservation.email || '-'}</td>
                     <td>{reservation.reservation_date ? new Date(reservation.reservation_date).toLocaleDateString() : '-'}</td>
                     <td>{reservation.reservation_time ? reservation.reservation_time.substring(0, 5) : '-'}</td>
+                    <td>{reservation.number_of_seats || '-'}</td>
                     <td>
                       <span className={`status-badge ${reservation.status === 'confirmed' ? 'active' : reservation.status === 'completed' ? 'active' : 'inactive'}`}>
                         {reservation.status === 'pending' ? 'En attente' : 
