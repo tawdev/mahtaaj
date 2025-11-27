@@ -10,7 +10,6 @@ const AdminBebeReservationsCrud = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [useBebeTable, setUseBebeTable] = useState(null); // null = not checked yet, true/false = cached result
 
   useEffect(() => {
     loadReservations();
@@ -21,109 +20,50 @@ const AdminBebeReservationsCrud = () => {
       setLoading(true);
       setError('');
       
-      console.log('[AdminBebeReservations] Loading reservations from Supabase');
+      console.log('[AdminBebeReservations] Loading reservations from bebe_reservations table');
       
-      let data = [];
-      let tableName = '';
+      // Load directly from bebe_reservations table
+      const { data: bebeData, error: bebeError } = await supabase
+        .from('bebe_reservations')
+        .select('*')
+        .order('created_at', { ascending: false });
       
-      // Check if we should use bebe_reservations table (only check once)
-      if (useBebeTable === null) {
-        // Try bebe_reservations table first with limit 1 to check existence
-        const { error: bebeError } = await supabase
-          .from('bebe_reservations')
-          .select('id')
-          .limit(1);
-        
-        if (bebeError && (bebeError.code === 'PGRST116' || bebeError.message?.includes('does not exist'))) {
-          // Table doesn't exist (404)
-          console.log('[AdminBebeReservations] bebe_reservations table not found, using reservations table');
-          setUseBebeTable(false);
-        } else if (!bebeError) {
-          // Table exists
-          setUseBebeTable(true);
-        }
+      if (bebeError) {
+        console.error('[AdminBebeReservations] Error loading from bebe_reservations:', bebeError);
+        setError('Erreur lors du chargement des réservations: ' + bebeError.message);
+        setReservations([]);
+        return;
       }
       
-      // Load data based on which table to use
-      if (useBebeTable === true) {
-        // Load from bebe_reservations table
-        const { data: bebeData, error: bebeError } = await supabase
-          .from('bebe_reservations')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (bebeError) {
-          console.error('[AdminBebeReservations] Error loading from bebe_reservations:', bebeError);
-          // Fallback to reservations
-          setUseBebeTable(false);
-        } else {
-          data = bebeData || [];
-          tableName = 'bebe_reservations';
-        }
-      }
+      // Transform bebe_reservations data to match expected format
+      const data = (bebeData || []).map(res => ({
+        id: res.id,
+        client_name: res.client_name || 'N/A',
+        client_phone: res.client_phone || 'N/A',
+        location: res.location || 'Non spécifié',
+        reservation_date: res.reservation_date || res.start_date || res.start_date_jours || res.created_at,
+        hours: res.hours || null,
+        days: res.days || null,
+        booking_type: res.booking_type || 'heures',
+        start_time: res.start_time || null,
+        start_date: res.start_date || res.start_date_jours || null,
+        end_date: res.end_date || res.end_date_jours || null,
+        start_date_jours: res.start_date_jours || null,
+        end_date_jours: res.end_date_jours || null,
+        total_price: res.total_price || 0,
+        status: res.status || 'pending',
+        notes: res.notes || null,
+        bebe_setting_id: res.bebe_setting_id || null,
+        bebe_category_id: res.bebe_category_id || null,
+        created_at: res.created_at
+      }));
       
-      // If bebe_reservations doesn't exist or failed, use reservations table
-      if (useBebeTable === false || (useBebeTable !== true && data.length === 0)) {
-        const { data: reservationsData, error: reservationsError } = await supabase
-          .from('reservations')
-          .select('*')
-          .eq('service', 'bebe')
-          .order('created_at', { ascending: false });
-        
-        if (reservationsError) {
-          console.error('[AdminBebeReservations] Error loading reservations:', reservationsError);
-          setError('Erreur lors du chargement des réservations: ' + reservationsError.message);
-          return;
-        }
-        
-        // Transform reservations data to match expected format
-        data = (reservationsData || []).map(res => ({
-          id: res.id,
-          client_name: res.firstname || res.client_name || 'N/A',
-          client_phone: res.phone || res.client_phone || 'N/A',
-          location: res.location || 'Non spécifié',
-          reservation_date: res.preferred_date || res.reservation_date || res.created_at,
-          hours: res.hours || null,
-          days: res.days || null,
-          booking_type: res.booking_type || 'heures',
-          start_time: res.start_time || null,
-          start_date: res.start_date || null,
-          end_date: res.end_date || null,
-          total_price: res.total_price || 0,
-          status: res.status || 'pending',
-          notes: res.message || res.notes || null,
-          created_at: res.created_at
-        }));
-        tableName = 'reservations';
-        if (useBebeTable === null) {
-          setUseBebeTable(false);
-        }
-      } else if (tableName === 'bebe_reservations') {
-        // Transform bebe_reservations data
-        data = (data || []).map(res => ({
-          id: res.id,
-          client_name: res.client_name || 'N/A',
-          client_phone: res.client_phone || 'N/A',
-          location: res.location || 'Non spécifié',
-          reservation_date: res.reservation_date || res.start_date || res.created_at,
-          hours: res.hours || null,
-          days: res.days || null,
-          booking_type: res.booking_type || 'heures',
-          start_time: res.start_time || null,
-          start_date: res.start_date || null,
-          end_date: res.end_date || null,
-          total_price: res.total_price || 0,
-          status: res.status || 'pending',
-          notes: res.notes || null,
-          created_at: res.created_at
-        }));
-      }
-      
-      console.log(`[AdminBebeReservations] Loaded ${data?.length || 0} reservations from ${tableName || 'reservations'} table`);
+      console.log(`[AdminBebeReservations] ✅ Loaded ${data?.length || 0} reservations from bebe_reservations table`);
       setReservations(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('[AdminBebeReservations] Exception loading reservations:', err);
+      console.error('[AdminBebeReservations] ❌ Exception loading reservations:', err);
       setError('Erreur de connexion: ' + err.message);
+      setReservations([]);
     } finally {
       setLoading(false);
     }
@@ -134,21 +74,21 @@ const AdminBebeReservationsCrud = () => {
       setError('');
       console.log('[AdminBebeReservations] Updating status:', reservationId, newStatus);
       
-      const tableName = useBebeTable ? 'bebe_reservations' : 'reservations';
       const { error: updateError } = await supabase
-        .from(tableName)
+        .from('bebe_reservations')
         .update({ status: newStatus })
         .eq('id', reservationId);
       
       if (updateError) {
-        console.error('[AdminBebeReservations] Error updating status:', updateError);
+        console.error('[AdminBebeReservations] ❌ Error updating status:', updateError);
         setError('Erreur lors de la mise à jour du statut: ' + updateError.message);
         return;
       }
       
+      console.log('[AdminBebeReservations] ✅ Status updated successfully');
       await loadReservations();
     } catch (err) {
-      console.error('[AdminBebeReservations] Exception updating status:', err);
+      console.error('[AdminBebeReservations] ❌ Exception updating status:', err);
       setError('Erreur de connexion: ' + err.message);
     }
   };
@@ -159,21 +99,21 @@ const AdminBebeReservationsCrud = () => {
         setError('');
         console.log('[AdminBebeReservations] Deleting reservation:', id);
         
-        const tableName = useBebeTable ? 'bebe_reservations' : 'reservations';
         const { error: deleteError } = await supabase
-          .from(tableName)
+          .from('bebe_reservations')
           .delete()
           .eq('id', id);
         
         if (deleteError) {
-          console.error('[AdminBebeReservations] Error deleting reservation:', deleteError);
+          console.error('[AdminBebeReservations] ❌ Error deleting reservation:', deleteError);
           setError('Erreur lors de la suppression: ' + deleteError.message);
           return;
         }
         
+        console.log('[AdminBebeReservations] ✅ Reservation deleted successfully');
         await loadReservations();
       } catch (err) {
-        console.error('[AdminBebeReservations] Exception deleting reservation:', err);
+        console.error('[AdminBebeReservations] ❌ Exception deleting reservation:', err);
         setError('Erreur de connexion: ' + err.message);
       }
     }
