@@ -826,7 +826,7 @@ export default function Profile() {
                           <span className="item-name">{item.name}</span>
                           <span className="item-quantity">{t('profile.orders.details.quantity')} {item.quantity}</span>
                         </div>
-                        <div className="item-price">{item.price} DH</div>
+                        <div className="item-price">{item.price} </div>
                       </div>
                     ))}
                   </div>

@@ -486,7 +486,7 @@ export default function TypeDetails() {
             </div>
           </div>
 
-          {!isCuisineCategory() && (
+          {!isCuisineCategory() && serviceSlug !== 'lavage' && (
             <div>
               <div style={sectionTitle}>
                 {selectedLang === 'ar' ? '📏 تقدير المساحة والسعر' : 

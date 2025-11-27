@@ -33,14 +33,7 @@ export default function Support() {
 
         <div className="support-info">
           <div className="info-item">
-            <div className="info-icon phone-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"
-                  fill="currentColor"
-                />
-              </svg>
-            </div>
+            
             <div className="info-content">
               <h3>{t('support.phone_label')}</h3>
               <p className="info-value">
@@ -50,21 +43,7 @@ export default function Support() {
           </div>
 
           <div className="info-item">
-            <div className="info-icon email-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-                  fill="currentColor"
-                />
-                <path
-                  d="m22 6-10 5L2 6"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+            
             <div className="info-content">
               <h3>{t('support.email_label')}</h3>
               <p className="info-value">
@@ -73,23 +52,7 @@ export default function Support() {
             </div>
           </div>
 
-          <div className="info-item">
-            <div className="info-icon time-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" fill="currentColor" />
-                <path
-                  d="M12 6v6l4 2"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </div>
-            <div className="info-content">
-              <h3>{t('support.hours_label')}</h3>
-              <p className="info-value">{t('support.hours_value')}</p>
-            </div>
-          </div>
+          
         </div>
 
         <div className="support-actions">

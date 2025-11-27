@@ -1462,12 +1462,18 @@ body > .App > .navbar1 {
 }
 
 /* Mobile Language Switcher Button - Custom Design */
-.navbar1__mobile-lang-btn {
+/* Container for mobile language button and dropdown */
+.navbar1__mobile-lang-container {
   display: none; /* Hidden by default, shown only on mobile */
   position: absolute;
   right: 12px; /* Default: right side for LTR (FR/EN) */
   top: 50%;
   transform: translateY(-50%);
+  z-index: 10;
+}
+
+.navbar1__mobile-lang-btn {
+  display: flex;
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -1480,16 +1486,12 @@ body > .App > .navbar1 {
   justify-content: center;
   gap: 4px;
   padding: 0;
-  z-index: 10;
   flex-direction: row;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
 }
 
-/* Move button to left side when Arabic (RTL) is selected */
-.navbar1.rtl .navbar1__mobile-lang-btn,
-[dir="rtl"] .navbar1__mobile-lang-btn {
+/* Move container to left side when Arabic (RTL) is selected */
+.navbar1.rtl .navbar1__mobile-lang-container,
+[dir="rtl"] .navbar1__mobile-lang-container {
   right: auto;
   left: 12px; /* Left side for RTL (AR) */
 }
@@ -1684,17 +1686,17 @@ body > .App > .navbar1 {
 
 /* Show mobile language button only on mobile */
 @media (max-width: 768px) {
-  .navbar1__mobile-lang-btn {
-    display: flex !important;
-    position: absolute !important;
-    right: 12px !important; /* Default: right for LTR (FR/EN) */
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+  .navbar1__mobile-lang-container {
+    display: block !important;
   }
   
-  /* Move button to left when Arabic (RTL) is selected */
-  .navbar1.rtl .navbar1__mobile-lang-btn,
-  [dir="rtl"] .navbar1__mobile-lang-btn {
+  .navbar1__mobile-lang-btn {
+    display: flex !important;
+  }
+  
+  /* Move container to left when Arabic (RTL) is selected */
+  .navbar1.rtl .navbar1__mobile-lang-container,
+  [dir="rtl"] .navbar1__mobile-lang-container {
     right: auto !important;
     left: 12px !important; /* Left side for RTL (AR) */
   }

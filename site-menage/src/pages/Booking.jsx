@@ -12,8 +12,6 @@ export default function Booking() {
   const location = useLocation();
   const { t, i18n } = useTranslation();
   const [submitted, setSubmitted] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [bgUrl, setBgUrl] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   const [locLoading, setLocLoading] = useState(false);
   const [locError, setLocError] = useState('');
@@ -39,6 +37,7 @@ export default function Booking() {
   const [selectedTypeOption, setSelectedTypeOption] = useState(null); // Selected TypeOption
   const [loadingTypeOptions, setLoadingTypeOptions] = useState(false);
   const [messageValue, setMessageValue] = useState(''); // Track message value to detect changes
+  const [messageAutoFilled, setMessageAutoFilled] = useState(false); // Track if message was auto-filled
   const locationRef = useRef(null);
   const serviceSelectRef = useRef(null);
   const messageRef = useRef(null);
@@ -180,6 +179,14 @@ export default function Booking() {
         const typeData = await getTypeById(selectedTypeId, i18n.language);
         const type = typeData.data || typeData;
         
+        // Update typeValue if we have type data
+        if (type) {
+          const typeName = type.name_fr || type.name_en || type.name_ar || type.name || '';
+          if (typeName && (!typeValue || typeValue !== typeName)) {
+            setTypeValue(typeName);
+          }
+        }
+        
         if (type && type.category_house_id) {
           // Load category house information
           const categoryData = await getCategoryHouseById(type.category_house_id, i18n.language);
@@ -197,6 +204,39 @@ export default function Booking() {
               category.name_fr === 'Cuisine' ||
               category.name_en === 'Kitchen' ||
               category.name_ar === 'مطبخ'
+            );
+            
+            // Check if this is Repassage category or type
+            const currentTypeName = typeValue || type?.name_fr || type?.name_en || type?.name_ar || type?.name || '';
+            const isRepassage = (
+              category.name_fr?.toLowerCase().includes('repassage') ||
+              category.name_en?.toLowerCase().includes('ironing') ||
+              category.name_ar?.includes('كيّ') ||
+              category.name_ar?.includes('كي') ||
+              category.name?.toLowerCase().includes('repassage') ||
+              category.name?.toLowerCase().includes('ironing') ||
+              currentTypeName?.toLowerCase().includes('repassage') ||
+              currentTypeName?.toLowerCase().includes('ironing') ||
+              type?.name_fr?.toLowerCase().includes('repassage') ||
+              type?.name_en?.toLowerCase().includes('ironing') ||
+              type?.name_ar?.includes('كيّ') ||
+              type?.name_ar?.includes('كي')
+            );
+            
+            // Check if this is Lavage/Washing category or type
+            const isLavage = (
+              category.name_fr?.toLowerCase().includes('lavage') ||
+              category.name_en?.toLowerCase().includes('washing') ||
+              category.name_ar?.includes('غسيل') ||
+              category.name_ar?.includes('الغسيل') ||
+              category.name?.toLowerCase().includes('lavage') ||
+              category.name?.toLowerCase().includes('washing') ||
+              currentTypeName?.toLowerCase().includes('lavage') ||
+              currentTypeName?.toLowerCase().includes('washing') ||
+              type?.name_fr?.toLowerCase().includes('lavage') ||
+              type?.name_en?.toLowerCase().includes('washing') ||
+              type?.name_ar?.includes('غسيل') ||
+              type?.name_ar?.includes('الغسيل')
             );
             
             if (!isCuisine) {
@@ -222,6 +262,72 @@ export default function Booking() {
               } catch (err) {
                 console.warn('Error reading prefill for surface:', err);
               }
+              
+              // Auto-fill message for Repassage or Lavage type
+              if ((isRepassage || isLavage) && messageRef.current) {
+                // Use setTimeout to ensure messageRef is ready and state is updated
+                setTimeout(() => {
+                  if (!messageRef.current) return;
+                  
+                  const currentMessage = messageRef.current.value.trim();
+                  // Get type name from multiple sources to ensure we have it
+                  const typeName = typeValue || type?.name_fr || type?.name_en || type?.name_ar || type?.name || '';
+                  const categoryName = category.name_fr || category.name_en || category.name_ar || category.name || '';
+                  
+                  console.log('[Booking] Auto-filling message for', isRepassage ? 'Repassage' : 'Lavage');
+                  console.log('[Booking] Type name:', typeName);
+                  console.log('[Booking] Category name:', categoryName);
+                  
+                  // Only fill if message is empty or was auto-filled
+                  if (currentMessage.length === 0 || messageAutoFilled) {
+                    let messageParts = [];
+                    
+                    // Add category name if available
+                    if (categoryName && categoryName.trim()) {
+                      messageParts.push(`${t('booking.category_label', 'Catégorie')}: ${categoryName}`);
+                    }
+                    
+                    // Add type name if available (always add for Lavage/Repassage, even if same as category)
+                    if (typeName && typeName.trim()) {
+                      // For Lavage and Repassage, always include type even if same as category name
+                      if (isLavage || isRepassage) {
+                        messageParts.push(`${t('booking.type_label', 'Type')}: ${typeName}`);
+                      } else if (typeName.toLowerCase() !== categoryName.toLowerCase()) {
+                        // For other categories, only add if different from category
+                        messageParts.push(`${t('booking.type_label', 'Type')}: ${typeName}`);
+                      }
+                    }
+                    
+                    // Add surface if available
+                    const surfaceValue = location.state?.prefill?.surface || localStorage.getItem('pending_surface_value') || sizeValue;
+                    if (surfaceValue && parseFloat(surfaceValue) > 0) {
+                      messageParts.push(`${t('booking.size_label', 'Taille de la surface (m²)')}: ${surfaceValue} m²`);
+                    }
+                    
+                    // Build and set message
+                    if (messageParts.length > 0) {
+                      const autoMessage = messageParts.join(', ');
+                      console.log('[Booking] Setting auto-filled message:', autoMessage);
+                      messageRef.current.value = autoMessage;
+                      setMessageValue(autoMessage);
+                      setMessageAutoFilled(true);
+                    } else if (currentMessage.length === 0) {
+                      // Default message based on category type
+                      let defaultMessage = '';
+                      if (isRepassage) {
+                        defaultMessage = t('booking.default_repassage_message', 'Service de repassage demandé');
+                      } else if (isLavage) {
+                        defaultMessage = t('booking.default_lavage_message', 'Service de lavage demandé');
+                      }
+                      if (defaultMessage) {
+                        messageRef.current.value = defaultMessage;
+                        setMessageValue(defaultMessage);
+                        setMessageAutoFilled(true);
+                      }
+                    }
+                  }
+                }, 200); // Increased delay to ensure type is loaded
+              }
             } else {
               // Hide surface field for Cuisine
               setShowSizeField(false);
@@ -245,7 +351,99 @@ export default function Booking() {
     } else {
       setSelectedCategory(null);
     }
-  }, [selectedTypeId, i18n.language, location]);
+  }, [selectedTypeId, i18n.language, location, t]);
+  
+  // Separate effect to auto-fill message when type and category are loaded for Repassage/Lavage
+  useEffect(() => {
+    if (!selectedCategory || !selectedTypeId || !messageRef.current) return;
+    
+    const fillMessageForRepassageOrLavage = async () => {
+      try {
+        // Get type data
+        const typeData = await getTypeById(selectedTypeId, i18n.language);
+        const type = typeData.data || typeData;
+        
+        if (!type) return;
+        
+        // Check if this is Repassage or Lavage
+        const currentTypeName = typeValue || type?.name_fr || type?.name_en || type?.name_ar || type?.name || '';
+        const categoryName = selectedCategory.name_fr || selectedCategory.name_en || selectedCategory.name_ar || selectedCategory.name || '';
+        
+        const isRepassage = (
+          selectedCategory.name_fr?.toLowerCase().includes('repassage') ||
+          selectedCategory.name_en?.toLowerCase().includes('ironing') ||
+          selectedCategory.name_ar?.includes('كيّ') ||
+          selectedCategory.name_ar?.includes('كي') ||
+          selectedCategory.name?.toLowerCase().includes('repassage') ||
+          selectedCategory.name?.toLowerCase().includes('ironing') ||
+          currentTypeName?.toLowerCase().includes('repassage') ||
+          currentTypeName?.toLowerCase().includes('ironing') ||
+          type?.name_fr?.toLowerCase().includes('repassage') ||
+          type?.name_en?.toLowerCase().includes('ironing') ||
+          type?.name_ar?.includes('كيّ') ||
+          type?.name_ar?.includes('كي')
+        );
+        
+        const isLavage = (
+          selectedCategory.name_fr?.toLowerCase().includes('lavage') ||
+          selectedCategory.name_en?.toLowerCase().includes('washing') ||
+          selectedCategory.name_ar?.includes('غسيل') ||
+          selectedCategory.name_ar?.includes('الغسيل') ||
+          selectedCategory.name?.toLowerCase().includes('lavage') ||
+          selectedCategory.name?.toLowerCase().includes('washing') ||
+          currentTypeName?.toLowerCase().includes('lavage') ||
+          currentTypeName?.toLowerCase().includes('washing') ||
+          type?.name_fr?.toLowerCase().includes('lavage') ||
+          type?.name_en?.toLowerCase().includes('washing') ||
+          type?.name_ar?.includes('غسيل') ||
+          type?.name_ar?.includes('الغسيل')
+        );
+        
+        if ((isRepassage || isLavage) && messageRef.current) {
+          const currentMessage = messageRef.current.value.trim();
+          const finalTypeName = typeValue || type?.name_fr || type?.name_en || type?.name_ar || type?.name || '';
+          
+          // Only fill if message is empty or was auto-filled
+          if (currentMessage.length === 0 || messageAutoFilled) {
+            let messageParts = [];
+            
+            // Add category name if available
+            if (categoryName && categoryName.trim()) {
+              messageParts.push(`${t('booking.category_label', 'Catégorie')}: ${categoryName}`);
+            }
+            
+            // Add type name if available (always add for Lavage/Repassage)
+            if (finalTypeName && finalTypeName.trim()) {
+              messageParts.push(`${t('booking.type_label', 'Type')}: ${finalTypeName}`);
+            }
+            
+            // Add surface if available
+            if (sizeValue && parseFloat(sizeValue) > 0) {
+              messageParts.push(`${t('booking.size_label', 'Taille de la surface (m²)')}: ${sizeValue} m²`);
+            }
+            
+            // Build and set message
+            if (messageParts.length > 0) {
+              const autoMessage = messageParts.join(', ');
+              console.log('[Booking] Auto-filling message for', isRepassage ? 'Repassage' : 'Lavage', ':', autoMessage);
+              messageRef.current.value = autoMessage;
+              setMessageValue(autoMessage);
+              setMessageAutoFilled(true);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error filling message for Repassage/Lavage:', error);
+      }
+    };
+    
+    // Small delay to ensure all state is updated
+    const timeoutId = setTimeout(() => {
+      fillMessageForRepassageOrLavage();
+    }, 300);
+    
+    return () => clearTimeout(timeoutId);
+  }, [selectedCategory, selectedTypeId, typeValue, sizeValue, messageAutoFilled, i18n.language, t]);
 
   // Load TypeOptions for Asian Cuisine
   useEffect(() => {
@@ -497,9 +695,6 @@ export default function Booking() {
   useEffect(() => {
     loadServices();
     loadTypes();
-    // Enable fade-in on mount
-    const t = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(t);
   }, [i18n.language]);
 
   // Auto-fill user data (firstname and email) from localStorage on page load
@@ -557,32 +752,11 @@ export default function Booking() {
     return () => clearTimeout(timeoutId);
   }, []); // Run only once on mount
 
-  // Choose best-quality background and optimize behavior per device
+  // Detect mobile device
   useEffect(() => {
     try {
       setIsMobile(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
     } catch {}
-
-    const base = process.env.PUBLIC_URL || '';
-    const webp = `${base}/galerie/reservation.webp`;
-    const jpg = `${base}/galerie/reservation.jpg`;
-
-    const probe = new Image();
-    probe.onload = () => {
-      setBgUrl(webp);
-      const pre = new Image();
-      pre.src = webp;
-    };
-    probe.onerror = () => {
-      setBgUrl(jpg);
-      const pre = new Image();
-      pre.src = jpg;
-    };
-    probe.src = webp;
-
-    return () => {
-      // no-op cleanup
-    };
   }, []);
 
   // Handle pending service selection after services are loaded
@@ -867,7 +1041,12 @@ export default function Booking() {
             const type = fetchedType.data || fetchedType;
             if (type) {
               setSelectedTypeId(type.id);
-              setTypeValue(type.name || '');
+              // Set typeValue with localized name
+              const typeName = type.name_fr || type.name_en || type.name_ar || type.name || '';
+              if (typeName) {
+                setTypeValue(typeName);
+                console.log('[Booking] Set typeValue from URL:', typeName);
+              }
               if (type.service_id) {
                 // Load the associated service
                 const serviceData = await getServiceById(type.service_id, i18n.language);
@@ -1096,8 +1275,7 @@ export default function Booking() {
     return base;
   };
 
-  // Track if message was auto-filled to allow updates when type/size changes
-  const [messageAutoFilled, setMessageAutoFilled] = useState(false);
+  // messageAutoFilled is now declared above with other state variables
 
   // Helper function to validate if message looks like valid data (not random characters)
   // This should be defined before it's used in other functions
@@ -1502,37 +1680,16 @@ export default function Booking() {
     }
   }
 
-  // Background style using public image path to avoid bundler resolution issues
+  // Simple background style
   const bgStyle = {
-    backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.45) 0%, rgba(2, 6, 23, 0.35) 100%), url(${bgUrl})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
-    backgroundAttachment: isMobile ? 'scroll' : 'fixed',
     minHeight: '100vh'
   };
 
-  // Glassmorphism style for the form container
-  const cardStyle = {
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.25)',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
-    borderRadius: '18px',
-    transition: 'opacity 600ms ease, transform 600ms ease',
-    opacity: mounted ? 1 : 0,
-    transform: mounted ? 'translateY(0)' : 'translateY(6px)'
-  };
+  // Simple container style
+  const cardStyle = {};
 
-  // Additional transparency specifically around the form area
-  const formSectionStyle = {
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderRadius: '16px',
-    backdropFilter: 'blur(8px)',
-    WebkitBackdropFilter: 'blur(8px)'
-  };
+  // Simple form section style
+  const formSectionStyle = {};
 
   return (
     <main className="booking-page" style={bgStyle}>
@@ -1664,28 +1821,13 @@ export default function Booking() {
                 required
               />
 
-              {showSizeField && !isCuisineType && !isCuisineCategory && !hideFields && !isWashingOrIroningFromMessage && (
-                <div className="form-group">
-                  <label htmlFor="size">{t('booking.size_label', 'Taille de la surface (m²)')}</label>
-                  <div className="size-input-group">
-                    <input 
-                      id="size" 
-                      name="size" 
-                      type="number"
-                      min="1"
-                      step="0.5"
-                      placeholder={t('booking.size_placeholder', 'Ex: 50')}
-                      className="form-input"
-                      value={sizeValue}
-                      onChange={(e) => setSizeValue(e.target.value)}
-                    />
-                    <span className="size-unit">m²</span>
-                  </div>
-                  <small className="form-help">
-                    {t('booking.size_help', 'Indiquez la surface à nettoyer pour un devis plus précis')}
-                  </small>
-                </div>
-              )}
+              {/* Size field hidden - removed per user request */}
+              <input 
+                type="hidden" 
+                id="size" 
+                name="size" 
+                value={sizeValue || ''}
+              />
 
               {/* Display selected types from Ménage + cuisine */}
               {selectedTypes.length > 0 && (
@@ -1949,9 +2091,7 @@ export default function Booking() {
                 </div>
               )}
 
-              <div className="form-group">
-                <PromoCode onApplied={setPromo} />
-              </div>
+              {/* PromoCode field hidden - removed per user request */}
 
             {extraServices.length > 0 && (
               <div className="form-group">
@@ -1966,36 +2106,14 @@ export default function Booking() {
               </div>
             )}
 
-              <div className="form-group">
-                <label htmlFor="message">{t('booking.message_label', 'Détails de la prestation')} *</label>
-                <textarea 
-                  id="message" 
-                  name="message" 
-                  rows="5" 
-                  required 
-                  minLength={10} 
-                  readOnly={true}
-                  placeholder={t('booking.message_placeholder', 'Décrivez la prestation souhaitée : lieu précis, surfaces à nettoyer, poils d\'animaux, fumeur, sièges très tachés, sable, etc.')}
-                  className="form-textarea"
-                  ref={messageRef}
-                  style={{
-                    cursor: 'not-allowed',
-                    opacity: 0.7,
-                    backgroundColor: '#f3f4f6'
-                  }}
-                  onInput={(e) => {
-                    // Update message value state to detect washing/ironing categories
-                    setMessageValue(e.target.value || '');
-                    
-                    // If user manually edits the message, reset auto-filled flag
-                    // This prevents overwriting user input when type/size changes
-                    if (messageAutoFilled) {
-                      setMessageAutoFilled(false);
-                    }
-                  }}
-                />
-                <small className="form-help">{t('booking.message_help', 'Plus vous êtes précis, mieux nous pourrons vous servir')}</small>
-              </div>
+              {/* Message field hidden - removed per user request */}
+              <input 
+                type="hidden" 
+                id="message" 
+                name="message" 
+                ref={messageRef}
+                value={messageValue || ''}
+              />
 
               <div className="form-group">
                 <label htmlFor="email">{t('booking.email_label', 'Email (optionnel)')}</label>
@@ -2030,29 +2148,7 @@ export default function Booking() {
           )}
         </div>
 
-        <div className="booking-info">
-          <div className="info-card">
-            <div className="info-icon">📞</div>
-            <div className="info-content">
-              <h4>Contact direct</h4>
-              <p>Appelez-nous au <a href="tel:+33666262106">06 66 26 21 06</a></p>
-            </div>
-          </div>
-          <div className="info-card">
-            <div className="info-icon">⏰</div>
-            <div className="info-content">
-              <h4>Horaires</h4>
-              <p>24h/7j</p>
-            </div>
-          </div>
-          <div className="info-card">
-            <div className="info-icon">✅</div>
-            <div className="info-content">
-              <h4>Confirmation</h4>
-              <p>Nous vous confirmons sous 24h</p>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </main>
   );

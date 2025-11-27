@@ -201,6 +201,7 @@
     "type_label": "Type (optionnel)",
     "type_placeholder": "Ex: Villa, Appartement, Marocaine, etc.",
     "type_help": "Renseignez le type si pertinent (ex: Villa, Italienne…)",
+    "category_label": "Catégorie",
     "select_type": "Choisir un type (optionnel)",
     "loading_types": "Chargement des types...",
     "type_help_auto": "Le service associé sera sélectionné automatiquement",

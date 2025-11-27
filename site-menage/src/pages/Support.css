@@ -110,6 +110,7 @@
 .info-content {
   flex: 1;
   text-align: right;
+  text-align: center;
 }
 
 .info-content h3 {
@@ -117,6 +118,7 @@
   font-size: 18px;
   font-weight: 700;
   color: #1e293b;
+  text-align: center;
 }
 
 .info-value {

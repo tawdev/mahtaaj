@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './Security.css';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export default function Security() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
 
   const getTranslatedRole = (roleName) => {
     if (!roleName) return t('security_page.role_not_available');
@@ -92,6 +93,7 @@ export default function Security() {
   const [toast, setToast] = useState({ show: false, text: '' });
   const [showReservationForm, setShowReservationForm] = useState(false);
   const [reservationLoading, setReservationLoading] = useState(false);
+  const [reservationSuccess, setReservationSuccess] = useState(false);
   const [reservationForm, setReservationForm] = useState({
     type_reservation: 'heures', // 'heures' ou 'jours'
     // Pour réservation par heures
@@ -723,10 +725,9 @@ export default function Security() {
       }
 
       console.log('[Security] Reservation submitted successfully:', data);
-      setToast({ show: true, text: t('security_page.reservation_confirmed') });
-      setTimeout(() => setToast({ show: false, text: '' }), 2500);
       setShowReservationForm(false);
       setReservationLoading(false);
+      setReservationSuccess(true);
     } catch (err) {
       console.error('[Security] Exception during reservation:', err);
       setToast({ show: true, text: t('security_page.reservation_error') + ': ' + err.message });
@@ -746,6 +747,41 @@ export default function Security() {
 
   return (
     <div className="shop-page">
+      {/* Success Card */}
+      {reservationSuccess && (
+        <div className="reservation-success-card">
+          <div className="reservation-success-content">
+            <div className="reservation-success-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22,4 12,14.01 9,11.01"/>
+              </svg>
+            </div>
+            <h2 className="reservation-success-title">
+              {i18n.language === 'ar' ? 'تم تأكيد الحجز !' : 
+               i18n.language === 'fr' ? 'Réservation confirmée !' : 
+               'Reservation Confirmed!'}
+            </h2>
+            <p className="reservation-success-message">
+              {i18n.language === 'ar' ? 'سنتصل بكم في أقرب وقت.' : 
+               i18n.language === 'fr' ? 'Nous vous contacterons dans les plus brefs délais.' : 
+               'We will contact you as soon as possible.'}
+            </p>
+            <button 
+              className="reservation-success-button"
+              onClick={() => {
+                setReservationSuccess(false);
+                navigate('/');
+              }}
+            >
+              {i18n.language === 'ar' ? 'العودة إلى الصفحة الرئيسية' : 
+               i18n.language === 'fr' ? 'Retour à l\'accueil' : 
+               'Back to Home'}
+            </button>
+          </div>
+        </div>
+      )}
+
       {toast.show && (
         <div style={{
           position: 'fixed',

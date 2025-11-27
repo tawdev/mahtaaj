@@ -1314,3 +1314,191 @@
   }
 }
 
+/* Reservation Success Card */
+.reservation-success-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeInOverlay 0.3s ease-out;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.reservation-success-content {
+  background: white;
+  border-radius: 20px;
+  padding: 48px 40px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: fadeInUpCard 0.5s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes fadeInUpCard {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.reservation-success-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.reservation-success-icon {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 24px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+  animation: iconBounce 0.6s ease-out 0.3s both;
+}
+
+@keyframes iconBounce {
+  0% {
+    transform: scale(0) rotate(180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(0deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.reservation-success-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+  animation: fadeInText 0.6s ease-out 0.5s both;
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reservation-success-message {
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  animation: fadeInText 0.6s ease-out 0.7s both;
+}
+
+.reservation-success-button {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  animation: fadeInText 0.6s ease-out 0.9s both;
+  min-width: 200px;
+}
+
+.reservation-success-button:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.reservation-success-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive for success card */
+@media (max-width: 768px) {
+  .reservation-success-content {
+    padding: 36px 24px;
+    max-width: 90%;
+  }
+
+  .reservation-success-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+  }
+
+  .reservation-success-title {
+    font-size: 24px;
+  }
+
+  .reservation-success-message {
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .reservation-success-button {
+    padding: 12px 24px;
+    font-size: 15px;
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .reservation-success-content {
+    padding: 32px 20px;
+  }
+
+  .reservation-success-icon {
+    width: 70px;
+    height: 70px;
+  }
+
+  .reservation-success-title {
+    font-size: 22px;
+  }
+
+  .reservation-success-message {
+    font-size: 14px;
+  }
+}
+

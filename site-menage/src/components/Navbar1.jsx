@@ -267,46 +267,48 @@ export default function Navbar1() {
         </Link>
 
         {/* Mobile Language Switcher Button - appears only on mobile */}
-        <button
-          type="button"
-          className="navbar1__mobile-lang-btn"
-          title={t('nav.languages', 'Languages')}
-          aria-label={t('nav.languages', 'Languages')}
-          aria-expanded={isLangOpen}
-          onClick={handleLanguageClick}
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="18" 
-            height="18" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-            className="mobile-lang-globe-icon"
+        <div className="navbar1__mobile-lang-container" style={{ position: 'relative' }}>
+          <button
+            type="button"
+            className="navbar1__mobile-lang-btn"
+            title={t('nav.languages', 'Languages')}
+            aria-label={t('nav.languages', 'Languages')}
+            aria-expanded={isLangOpen}
+            onClick={handleLanguageClick}
           >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M2 12h20" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
-          <span className="mobile-lang-code">{getCurrentLangCode()}</span>
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="14" 
-            height="14" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2.5" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-            className={`mobile-lang-chevron ${isLangOpen ? 'open' : ''}`}
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-          {/* Language Dropdown Menu */}
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className="mobile-lang-globe-icon"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20" />
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg>
+            <span className="mobile-lang-code">{getCurrentLangCode()}</span>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className={`mobile-lang-chevron ${isLangOpen ? 'open' : ''}`}
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+          {/* Language Dropdown Menu - outside the button to avoid nesting */}
           {isLangOpen && (
             <div className="navbar1__mobile-lang-dropdown">
               {[
@@ -331,7 +333,7 @@ export default function Navbar1() {
               ))}
             </div>
           )}
-        </button>
+        </div>
 
         {/* Navigation menu - links in normal order */}
         <nav className={`navbar1__nav ${isRTL ? 'rtl-nav' : ''}`} aria-label="Navigation principale">
