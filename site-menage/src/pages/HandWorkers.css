@@ -362,6 +362,23 @@
   color: #dc2626;
 }
 
+.category-message {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  text-align: center;
+}
+
+.message-text {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #92400e;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
 .hand-workers-page .category-price .price-label,
 .hand-workers-page .category-price .price-value,
 .hand-workers-page .category-minimum .minimum-label,
@@ -525,6 +542,23 @@
   font-size: 1.25rem;
   font-weight: 700;
   color: #059669;
+}
+
+.category-info-message {
+  margin-top: 16px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  text-align: center;
+}
+
+.category-info-message .message-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #92400e;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
 /* Hand Workers Section */

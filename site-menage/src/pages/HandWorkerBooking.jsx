@@ -18,6 +18,7 @@ export default function HandWorkerBooking() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const [formData, setFormData] = useState({
     client_first_name: '',
@@ -29,7 +30,7 @@ export default function HandWorkerBooking() {
     service_description: '',
     preferred_date: '',
     preferred_time: '',
-    duration_hours: 1,
+    duration_days: 1,
     location: '',
     address: '',
     city: '',
@@ -136,7 +137,7 @@ export default function HandWorkerBooking() {
       ...prev, 
       category_id: categoryId,
       hand_worker_id: '',
-      duration_hours: category?.minimum_hours || 1
+      duration_days: category?.minimum_jours || 1 // Default to minimum days or 1
     }));
     loadHandWorkers(categoryId);
   };
@@ -146,18 +147,149 @@ export default function HandWorkerBooking() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const calculateTotalPrice = () => {
-    if (selectedCategory && formData.duration_hours) {
-      return selectedCategory.price_per_hour * parseFloat(formData.duration_hours);
+  const handleGetLocation = async () => {
+    if (!navigator.geolocation) {
+      setError(t('hand_worker_booking.geolocation_not_supported') || 'La géolocalisation n\'est pas supportée par votre navigateur');
+      return;
     }
-    return 0;
+
+    setIsGettingLocation(true);
+    setError('');
+
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      
+      // Use reverse geocoding to get address
+      // Using Nominatim (OpenStreetMap) as a free geocoding service
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+          {
+            headers: {
+              'User-Agent': 'HandWorkerBookingApp/1.0'
+            }
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.address) {
+            // Build address string from components
+            const addressParts = [];
+            
+            // Try to get street/house number
+            const street = data.address.road || data.address.street;
+            const houseNumber = data.address.house_number;
+            if (street) {
+              addressParts.push(houseNumber ? `${houseNumber} ${street}` : street);
+            }
+            
+            // Try to get city/town/village
+            const city = data.address.city || data.address.town || data.address.village || data.address.municipality;
+            if (city) {
+              setFormData(prev => ({ ...prev, city: city }));
+            }
+            
+            // Try to get region/state
+            const region = data.address.region || data.address.state;
+            if (region && !addressParts.includes(region)) {
+              addressParts.push(region);
+            }
+            
+            // Build full address
+            const fullAddress = addressParts.length > 0 
+              ? addressParts.join(', ')
+              : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            
+            setFormData(prev => ({
+              ...prev,
+              address: fullAddress,
+              location: city || region || fullAddress
+            }));
+          } else {
+            // Fallback to coordinates if no address found
+            setFormData(prev => ({
+              ...prev,
+              address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+            }));
+          }
+        } else {
+          // Fallback to coordinates if geocoding fails
+          setFormData(prev => ({
+            ...prev,
+            address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+          }));
+        }
+      } catch (geocodingError) {
+        console.error('[HandWorkerBooking] Geocoding error:', geocodingError);
+        // Fallback to coordinates if geocoding fails
+        setFormData(prev => ({
+          ...prev,
+          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        }));
+      }
+    } catch (error) {
+      console.error('[HandWorkerBooking] Geolocation error:', error);
+      let errorMessage = t('hand_worker_booking.geolocation_error') || 'Erreur lors de la récupération de la localisation';
+      
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = t('hand_worker_booking.geolocation_permission_denied') || 'Permission de géolocalisation refusée. Veuillez autoriser l\'accès à votre position.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = t('hand_worker_booking.geolocation_unavailable') || 'Position indisponible. Veuillez entrer votre adresse manuellement.';
+          break;
+        case error.TIMEOUT:
+          errorMessage = t('hand_worker_booking.geolocation_timeout') || 'Délai d\'attente dépassé. Veuillez réessayer.';
+          break;
+        default:
+          errorMessage = t('hand_worker_booking.geolocation_error') || 'Impossible de récupérer votre localisation. Veuillez entrer votre adresse manuellement.';
+          break;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsGettingLocation(false);
+    }
+  };
+
+  const calculateTotalPrice = () => {
+    if (selectedCategory && formData.duration_days) {
+      const days = parseFloat(formData.duration_days);
+      // Calculate price if more than 30 days (170 DH per day)
+      if (days > 30) {
+        const pricePerDay = 170; // Fixed price per day
+        return pricePerDay * days;
+      }
+      // For 30 days or less, return null (no automatic price calculation)
+      return null;
+    }
+    return null;
+  };
+
+  const isDurationMoreThanMonth = () => {
+    if (formData.duration_days) {
+      const days = parseFloat(formData.duration_days);
+      return days > 30;
+    }
+    return false;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!selectedCategory) {
-      setError(t('hand_worker_booking.select_category_error'));
+      const errorMsg = t('hand_worker_booking.select_category_error');
+      console.error('[HandWorkerBooking] Error: No category selected');
+      setError(errorMsg);
       return;
     }
 
@@ -165,14 +297,23 @@ export default function HandWorkerBooking() {
     setError('');
 
     try {
-      console.log('[HandWorkerBooking] Submitting reservation:', formData);
+      console.log('[HandWorkerBooking] Starting submission...');
+      console.log('[HandWorkerBooking] Form data:', formData);
+      console.log('[HandWorkerBooking] Selected category:', selectedCategory);
       
       // Get user ID from Supabase session if available
-      const { data: { session } } = await supabase.auth.getSession();
-      const userId = session?.user?.id || null;
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      // Calculate total price
+      if (sessionError) {
+        console.error('[HandWorkerBooking] Session error:', sessionError);
+      }
+      
+      const userId = session?.user?.id || null;
+      console.log('[HandWorkerBooking] User ID:', userId);
+      
+      // Calculate total price (will be null if <= 30 days, but we still allow submission)
       const totalPrice = calculateTotalPrice();
+      console.log('[HandWorkerBooking] Calculated total price:', totalPrice);
       
       // Prepare reservation data
       const reservationData = {
@@ -186,7 +327,7 @@ export default function HandWorkerBooking() {
         service_description: formData.service_description,
         preferred_date: formData.preferred_date || null,
         preferred_time: formData.preferred_time || null,
-        duration_hours: formData.duration_hours ? parseFloat(formData.duration_hours) : null,
+        duration_days: formData.duration_days ? parseFloat(formData.duration_days) : null,
         location: formData.location,
         address: formData.address,
         city: formData.city,
@@ -195,6 +336,8 @@ export default function HandWorkerBooking() {
         client_notes: formData.client_notes || null
       };
       
+      console.log('[HandWorkerBooking] Reservation data to insert:', reservationData);
+      
       const { data, error } = await supabase
         .from('hand_worker_reservations')
         .insert(reservationData)
@@ -202,12 +345,19 @@ export default function HandWorkerBooking() {
         .single();
       
       if (error) {
-        console.error('[HandWorkerBooking] Error submitting reservation:', error);
-        setError(error.message || t('hand_worker_booking.submission_error'));
+        console.error('[HandWorkerBooking] ❌ Error submitting reservation:', error);
+        console.error('[HandWorkerBooking] Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        const errorMessage = error.message || error.details || t('hand_worker_booking.submission_error');
+        setError(errorMessage);
         return;
       }
       
-      console.log('[HandWorkerBooking] Reservation submitted successfully:', data);
+      console.log('[HandWorkerBooking] ✅ Reservation submitted successfully:', data);
       
       setSuccess(true);
       // Reset form
@@ -221,7 +371,7 @@ export default function HandWorkerBooking() {
         service_description: '',
         preferred_date: '',
         preferred_time: '',
-        duration_hours: 1,
+        duration_days: 1,
         location: '',
         address: '',
         city: '',
@@ -230,10 +380,17 @@ export default function HandWorkerBooking() {
       setSelectedCategory(null);
       setHandWorkers([]);
     } catch (e) {
-      console.error('[HandWorkerBooking] Exception submitting reservation:', e);
-      setError(e.message || t('hand_worker_booking.submission_error'));
+      console.error('[HandWorkerBooking] ❌ Exception submitting reservation:', e);
+      console.error('[HandWorkerBooking] Exception details:', {
+        message: e.message,
+        stack: e.stack,
+        name: e.name
+      });
+      const errorMessage = e.message || t('hand_worker_booking.submission_error');
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
+      console.log('[HandWorkerBooking] Submission process completed');
     }
   };
 
@@ -331,13 +488,14 @@ export default function HandWorkerBooking() {
                 name="category_id"
                 value={formData.category_id}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                className="form-select"
+                className={`form-select ${selectedCategory ? 'category-disabled' : ''}`}
+                disabled={!!selectedCategory}
                 required
               >
                 <option value="">{t('hand_worker_booking.select_category')}</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.id}>
-                    {category.name} - {category.price_per_hour} DH/h
+                    {category.name} - {category.price_per_day || category.price_per_hour * 8 || 0} DH/jour
                   </option>
                 ))}
               </select>
@@ -349,8 +507,8 @@ export default function HandWorkerBooking() {
                   <h4>{selectedCategory.name}</h4>
                   <p>{selectedCategory.description}</p>
                   <div className="category-pricing">
-                    <span>{t('hand_worker_booking.price_per_hour')}: {selectedCategory.price_per_hour} DH</span>
-                    <span>{t('hand_worker_booking.minimum_hours')}: {selectedCategory.minimum_hours}h</span>
+                    <span>{t('hand_worker_booking.price_per_day') || 'Prix par jour'}: {selectedCategory.price_per_day || selectedCategory.price_per_hour * 8 || 0} DH</span>
+                    <span>{t('hand_worker_booking.minimum_jours') || 'Jours minimum'}: {selectedCategory.minimum_jours || 1} jour{selectedCategory.minimum_jours > 1 ? 's' : ''}</span>
                   </div>
                 </div>
               </div>
@@ -376,15 +534,15 @@ export default function HandWorkerBooking() {
 
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">{t('hand_worker_booking.duration_hours')} *</label>
+                <label className="form-label">{t('hand_worker_booking.duration_days') || 'المدة (jours)'} *</label>
                 <input
                   type="number"
-                  name="duration_hours"
-                  value={formData.duration_hours}
+                  name="duration_days"
+                  value={formData.duration_days}
                   onChange={handleInputChange}
                   className="form-input"
-                  min={selectedCategory?.minimum_hours || 1}
-                  step="0.5"
+                  min="1"
+                  step="1"
                   required
                 />
               </div>
@@ -432,15 +590,26 @@ export default function HandWorkerBooking() {
 
             <div className="form-group">
               <label className="form-label">{t('hand_worker_booking.address')} *</label>
-              <textarea
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                className="form-textarea"
-                rows="3"
-                placeholder={t('hand_worker_booking.address_placeholder')}
-                required
-              />
+              <div className="address-input-wrapper">
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className="form-textarea"
+                  rows="3"
+                  placeholder={t('hand_worker_booking.address_placeholder')}
+                  required
+                />
+                <button
+                  type="button"
+                  className="location-btn"
+                  onClick={handleGetLocation}
+                  disabled={isGettingLocation}
+                  title={t('hand_worker_booking.get_location') || 'Obtenir mon adresse automatiquement'}
+                >
+                  {isGettingLocation ? '⏳' : '📍'}
+                </button>
+              </div>
             </div>
 
             <div className="form-group">
@@ -473,23 +642,31 @@ export default function HandWorkerBooking() {
           </div>
 
           {/* Price Summary */}
-          {selectedCategory && (
+          {selectedCategory && formData.duration_days && (
             <div className="price-summary">
               <h3>{t('hand_worker_booking.price_summary')}</h3>
-              <div className="price-breakdown">
-                <div className="price-item">
-                  <span>{t('hand_worker_booking.hourly_rate')}</span>
-                  <span>{selectedCategory.price_per_hour} DH</span>
+              {isDurationMoreThanMonth() ? (
+                <div className="price-breakdown">
+                  <div className="price-item">
+                    <span>{t('hand_worker_booking.monthly_rate') || 'السعر الشهري (170 DH لكل يوم)'}</span>
+                    <span>170 DH</span>
+                  </div>
+                  <div className="price-item">
+                    <span>{t('hand_worker_booking.duration') || 'المدة'}</span>
+                    <span>{formData.duration_days} {formData.duration_days > 1 ? t('hand_worker_booking.days') || 'jours' : t('hand_worker_booking.day') || 'jour'}</span>
+                  </div>
+                  <div className="price-item total">
+                    <span>{t('hand_worker_booking.total_price')}</span>
+                    <span>{calculateTotalPrice()?.toFixed(2)} DH</span>
+                  </div>
                 </div>
-                <div className="price-item">
-                  <span>{t('hand_worker_booking.duration')}</span>
-                  <span>{formData.duration_hours}h</span>
+              ) : (
+                <div className="price-message">
+                  <p className="negotiation-message">
+                    {t('hand_worker_booking.contact_for_negotiation') || 'أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة'}
+                  </p>
                 </div>
-                <div className="price-item total">
-                  <span>{t('hand_worker_booking.total_price')}</span>
-                  <span>{calculateTotalPrice().toFixed(2)} DH</span>
-                </div>
-              </div>
+              )}
             </div>
           )}
 

@@ -41,12 +41,12 @@ export default function CategoryCard({ category, onClick, index }) {
     return `${formatted} ${t('hand_workers.currency_unit', { defaultValue: 'DH' })}`;
   };
 
-  const formatMinimumHours = (value) => {
+  const formatMinimumJours = (value) => {
     const formatted = formatNumber(value);
     if (!formatted) {
-      return t('hand_workers.minimum_hours_not_available', { defaultValue: '—' });
+      return t('hand_workers.minimum_jours_not_available', { defaultValue: '—' });
     }
-    return `${formatted}${t('hand_workers.hours_suffix', { defaultValue: 'h' })}`;
+    return `${formatted}${t('hand_workers.jours_suffix', { defaultValue: ' jour(s)' })}`;
   };
 
   return (
@@ -96,12 +96,15 @@ export default function CategoryCard({ category, onClick, index }) {
       
       <div className="category-footer">
         <div className="category-price">
-          <span className="price-label">{t('hand_workers.price_per_hour')}</span>
-          <span className="price-value">{formatPrice(category.price_per_hour)}</span>
+          <span className="price-label">{t('hand_workers.price_per_day') || 'Prix par jour'}</span>
+          <span className="price-value">{formatPrice(category.price_per_day || category.price_per_hour)}</span>
         </div>
         <div className="category-minimum">
-          <span className="minimum-label">{t('hand_workers.minimum_hours')}</span>
-          <span className="minimum-value">{formatMinimumHours(category.minimum_hours)}</span>
+          <span className="minimum-label">{t('hand_workers.minimum_jours') || 'Jours minimum'}</span>
+          <span className="minimum-value">{formatMinimumJours(category.minimum_jours)}</span>
+        </div>
+        <div className="category-message">
+          <p className="message-text">أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة</p>
         </div>
       </div>
     </div>

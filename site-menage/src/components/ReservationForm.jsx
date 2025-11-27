@@ -20,6 +20,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   // Calculate price based on booking type and duration
   const calculatePrice = (bookingType, duration, startDateJours = null, endDateJours = null) => {
@@ -54,6 +55,125 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
         ...prev,
         [name]: ''
       }));
+    }
+  };
+
+  const handleGetLocation = async () => {
+    if (!navigator.geolocation) {
+      setErrors(prev => ({
+        ...prev,
+        location: 'La géolocalisation n\'est pas supportée par votre navigateur'
+      }));
+      return;
+    }
+
+    setIsGettingLocation(true);
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.location;
+      return newErrors;
+    });
+
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      
+      // Use reverse geocoding to get address
+      // Using Nominatim (OpenStreetMap) as a free geocoding service
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+          {
+            headers: {
+              'User-Agent': 'ReservationApp/1.0'
+            }
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.address) {
+            // Build address string from components
+            const addressParts = [];
+            
+            // Try to get city/town/village
+            const city = data.address.city || data.address.town || data.address.village || data.address.municipality;
+            if (city) addressParts.push(city);
+            
+            // Try to get region/state
+            const region = data.address.region || data.address.state;
+            if (region && !addressParts.includes(region)) {
+              addressParts.push(region);
+            }
+            
+            // Try to get country
+            const country = data.address.country;
+            if (country && !addressParts.includes(country)) {
+              addressParts.push(country);
+            }
+            
+            const locationString = addressParts.length > 0 
+              ? addressParts.join(', ')
+              : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            
+            setFormData(prev => ({
+              ...prev,
+              location: locationString
+            }));
+          } else {
+            // Fallback to coordinates if no address found
+            setFormData(prev => ({
+              ...prev,
+              location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+            }));
+          }
+        } else {
+          // Fallback to coordinates if geocoding fails
+          setFormData(prev => ({
+            ...prev,
+            location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+          }));
+        }
+      } catch (geocodingError) {
+        console.error('[ReservationForm] Geocoding error:', geocodingError);
+        // Fallback to coordinates if geocoding fails
+        setFormData(prev => ({
+          ...prev,
+          location: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        }));
+      }
+    } catch (error) {
+      console.error('[ReservationForm] Geolocation error:', error);
+      let errorMessage = 'Erreur lors de la récupération de la localisation';
+      
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = 'Permission de géolocalisation refusée. Veuillez autoriser l\'accès à votre position.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = 'Position indisponible. Veuillez entrer votre localisation manuellement.';
+          break;
+        case error.TIMEOUT:
+          errorMessage = 'Délai d\'attente dépassé. Veuillez réessayer.';
+          break;
+        default:
+          errorMessage = 'Impossible de récupérer votre localisation. Veuillez entrer votre localisation manuellement.';
+          break;
+      }
+      
+      setErrors(prev => ({
+        ...prev,
+        location: errorMessage
+      }));
+    } finally {
+      setIsGettingLocation(false);
     }
   };
 
@@ -176,7 +296,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
           // For heures booking
           start_date: formData.booking_type === 'heures' ? (formData.start_date ? new Date(formData.start_date).toISOString().split('T')[0] : null) : null,
           start_time: formData.booking_type === 'heures' ? formData.start_time : null,
-          hours: formData.booking_type === 'heures' ? parseInt(formData.hours) : null,
+          hours: formData.booking_type === 'heures' ? parseInt(formData.hours) : 0,
           // For jours booking
           start_date_jours: formData.booking_type === 'jours' ? (formData.start_date_jours ? new Date(formData.start_date_jours).toISOString().split('T')[0] : null) : null,
           end_date_jours: formData.booking_type === 'jours' ? (formData.end_date_jours ? new Date(formData.end_date_jours).toISOString().split('T')[0] : null) : null,
@@ -232,7 +352,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
           // For heures booking
           start_date: formData.booking_type === 'heures' ? (formData.start_date ? new Date(formData.start_date).toISOString().split('T')[0] : null) : null,
           start_time: formData.booking_type === 'heures' ? formData.start_time : null,
-          hours: formData.booking_type === 'heures' ? parseInt(formData.hours) : null,
+          hours: formData.booking_type === 'heures' ? parseInt(formData.hours) : 0,
           // For jours booking
           start_date_jours: formData.booking_type === 'jours' ? (formData.start_date_jours ? new Date(formData.start_date_jours).toISOString().split('T')[0] : null) : null,
           end_date_jours: formData.booking_type === 'jours' ? (formData.end_date_jours ? new Date(formData.end_date_jours).toISOString().split('T')[0] : null) : null,
@@ -382,16 +502,27 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
 
         <div className="form-group">
           <label htmlFor="location">📍 Lieu de la prestation *</label>
-          <input
-            type="text"
-            id="location"
-            name="location"
-            value={formData.location}
-            onChange={handleInputChange}
-            className={errors.location ? 'error' : ''}
-            placeholder="Ex: Casablanca, Rabat, Marrakech..."
-            required
-          />
+          <div className="location-input-wrapper">
+            <input
+              type="text"
+              id="location"
+              name="location"
+              value={formData.location}
+              onChange={handleInputChange}
+              className={errors.location ? 'error' : ''}
+              placeholder="Ex: Casablanca, Rabat, Marrakech..."
+              required
+            />
+            <button
+              type="button"
+              className="location-btn"
+              onClick={handleGetLocation}
+              disabled={isGettingLocation}
+              title="Obtenir ma localisation automatiquement"
+            >
+              {isGettingLocation ? '⏳' : '📍'}
+            </button>
+          </div>
           {errors.location && (
             <span className="error-text">{errors.location}</span>
           )}

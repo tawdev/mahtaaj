@@ -5,6 +5,20 @@
   margin: 0 auto;
 }
 
+/* Ensure buttons are always visible */
+.admin-hand-worker-categories-crud .category-actions {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.admin-hand-worker-categories-crud .edit-button,
+.admin-hand-worker-categories-crud .delete-button {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 .admin-header {
   display: flex;
   justify-content: space-between;
@@ -188,6 +202,7 @@
   border: 1px solid #e2e8f0;
   transition: all 0.3s ease;
   position: relative;
+  overflow: visible;
 }
 
 .category-card:hover {
@@ -217,29 +232,87 @@
 }
 
 .category-actions {
-  display: flex;
-  gap: 8px;
+  display: flex !important;
+  gap: 10px;
+  align-items: center;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 10;
 }
 
 .edit-button,
 .delete-button {
-  background: none;
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
   border: none;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 10;
+}
+
+.edit-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
 }
 
 .edit-button:hover {
-  background: #f0f9ff;
-  color: #3b82f6;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.edit-button:active {
+  transform: translateY(0);
+}
+
+.delete-button {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
 }
 
 .delete-button:hover {
-  background: #fef2f2;
-  color: #dc2626;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.delete-button:active {
+  transform: translateY(0);
+}
+
+.button-icon {
+  font-size: 1.1rem;
+  display: inline-block;
+  line-height: 1;
+}
+
+.button-text {
+  font-size: 0.9rem;
+  white-space: nowrap;
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Force visibility */
+.category-header .category-actions {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.category-header .category-actions button {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .category-content h3 {
@@ -377,5 +450,17 @@
 
   .category-actions {
     justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .edit-button,
+  .delete-button {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  .button-text {
+    display: inline;
   }
 }

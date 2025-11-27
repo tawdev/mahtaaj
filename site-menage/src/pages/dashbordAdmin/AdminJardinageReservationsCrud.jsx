@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 const AdminJardinageReservationsCrud = () => {
   const [reservations, setReservations] = useState([]);
   const [services, setServices] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -16,6 +17,7 @@ const AdminJardinageReservationsCrud = () => {
   useEffect(() => {
     loadReservations();
     loadServices();
+    loadCategories();
   }, []);
 
   const loadReservations = async () => {
@@ -27,18 +29,7 @@ const AdminJardinageReservationsCrud = () => {
       
       const { data: reservationsData, error: reservationsError } = await supabase
         .from('jardinage_reservations')
-        .select(`
-          *,
-          service:jardins (
-            id,
-            name,
-            name_fr,
-            name_ar,
-            name_en,
-            price,
-            duration
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
       
       if (reservationsError) {
@@ -74,6 +65,27 @@ const AdminJardinageReservationsCrud = () => {
       }
     } catch (err) {
       console.error('[AdminJardinageReservations] Exception loading services:', err);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      console.log('[AdminJardinageReservations] Loading categories from Supabase...');
+      
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('jardinage_categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('order', { ascending: true });
+      
+      if (categoriesError) {
+        console.error('[AdminJardinageReservations] Error loading categories:', categoriesError);
+      } else {
+        console.log('[AdminJardinageReservations] Loaded categories:', categoriesData?.length || 0);
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      }
+    } catch (err) {
+      console.error('[AdminJardinageReservations] Exception loading categories:', err);
     }
   };
 
@@ -136,14 +148,38 @@ const AdminJardinageReservationsCrud = () => {
     setSelectedReservation(null);
   };
 
-  const getServiceName = (serviceId, serviceData) => {
+  const getServiceName = (reservation) => {
     // Try to get name from joined service data first
-    if (serviceData) {
-      return serviceData.name || serviceData.name_fr || serviceData.name_ar || serviceData.name_en || 'Service inconnu';
+    if (reservation.service) {
+      const serviceName = reservation.service.name || reservation.service.name_fr || reservation.service.name_ar || reservation.service.name_en;
+      if (serviceName) return serviceName;
     }
-    // Fallback to services list
-    const service = services.find(s => s.id === serviceId);
-    return service ? (service.name || service.name_fr || service.name_ar || service.name_en || 'Service inconnu') : 'Service inconnu';
+    
+    // If service ID exists, try to find it in the services list
+    if (reservation.jardinage_service_id) {
+      const service = services.find(s => s.id === reservation.jardinage_service_id);
+      if (service) {
+        const serviceName = service.name || service.name_fr || service.name_ar || service.name_en;
+        if (serviceName) return serviceName;
+      }
+    }
+    
+    // If no service, try to get category name
+    if (reservation.category) {
+      const categoryName = reservation.category.name || reservation.category.name_fr || reservation.category.name_ar || reservation.category.name_en;
+      if (categoryName) return categoryName;
+    }
+    
+    // If category ID exists, try to find it in the categories list
+    if (reservation.jardinage_category_id) {
+      const category = categories.find(c => c.id === reservation.jardinage_category_id);
+      if (category) {
+        const categoryName = category.name || category.name_fr || category.name_ar || category.name_en;
+        if (categoryName) return categoryName;
+      }
+    }
+    
+    return 'Service inconnu';
   };
 
   const getStatusColor = (status) => {
@@ -169,7 +205,7 @@ const AdminJardinageReservationsCrud = () => {
   const filteredReservations = reservations.filter(reservation => {
     const clientName = reservation.client_name || '';
     const clientPhone = reservation.client_phone || '';
-    const serviceName = getServiceName(reservation.jardinage_service_id, reservation.service) || '';
+    const serviceName = getServiceName(reservation) || '';
     
     const matchesSearch = 
       clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -276,7 +312,7 @@ const AdminJardinageReservationsCrud = () => {
                   <td>{reservation.id}</td>
                   <td className="client-name">{reservation.client_name}</td>
                   <td className="client-phone">{reservation.client_phone}</td>
-                  <td className="service-name">{getServiceName(reservation.jardinage_service_id, reservation.service)}</td>
+                  <td className="service-name">{getServiceName(reservation)}</td>
                   <td className="reservation-date">
                     {reservation.reservation_date ? new Date(reservation.reservation_date).toLocaleDateString('fr-FR') : '-'}
                   </td>
@@ -375,7 +411,16 @@ const AdminJardinageReservationsCrud = () => {
                 
                 <div className="detail-item">
                   <label>Service:</label>
-                  <span>{getServiceName(selectedReservation.jardinage_service_id, selectedReservation.service)}</span>
+                  <span>{getServiceName(selectedReservation)}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Type de réservation:</label>
+                  <span>
+                    {selectedReservation.booking_type === 'heures' ? '⏰ Par heures' : 
+                     selectedReservation.booking_type === 'jours' ? '📅 Par jours' : 
+                     selectedReservation.booking_type || '-'}
+                  </span>
                 </div>
                 
                 <div className="detail-item">
@@ -383,10 +428,60 @@ const AdminJardinageReservationsCrud = () => {
                   <span>{selectedReservation.reservation_date ? new Date(selectedReservation.reservation_date).toLocaleDateString('fr-FR') : '-'}</span>
                 </div>
                 
-                <div className="detail-item">
-                  <label>Durée:</label>
-                  <span>{selectedReservation.hours} heures</span>
-                </div>
+                {selectedReservation.booking_type === 'heures' ? (
+                  <>
+                    {selectedReservation.start_date && (
+                      <div className="detail-item">
+                        <label>Date de début:</label>
+                        <span>{new Date(selectedReservation.start_date).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                    )}
+                    {selectedReservation.start_time && (
+                      <div className="detail-item">
+                        <label>Heure de début:</label>
+                        <span>{selectedReservation.start_time}</span>
+                      </div>
+                    )}
+                    <div className="detail-item">
+                      <label>Durée:</label>
+                      <span>{selectedReservation.hours} heure{selectedReservation.hours > 1 ? 's' : ''}</span>
+                    </div>
+                  </>
+                ) : selectedReservation.booking_type === 'jours' ? (
+                  <>
+                    {selectedReservation.start_date_jours && (
+                      <div className="detail-item">
+                        <label>Date de début:</label>
+                        <span>{new Date(selectedReservation.start_date_jours).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                    )}
+                    {selectedReservation.end_date_jours && (
+                      <div className="detail-item">
+                        <label>Date de fin:</label>
+                        <span>{new Date(selectedReservation.end_date_jours).toLocaleDateString('fr-FR')}</span>
+                      </div>
+                    )}
+                    <div className="detail-item">
+                      <label>Durée:</label>
+                      <span>
+                        {selectedReservation.days ? `${selectedReservation.days} jour${selectedReservation.days > 1 ? 's' : ''}` : 
+                         selectedReservation.start_date_jours && selectedReservation.end_date_jours ? 
+                         (() => {
+                           const start = new Date(selectedReservation.start_date_jours);
+                           const end = new Date(selectedReservation.end_date_jours);
+                           const diffTime = Math.abs(end - start);
+                           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                           return `${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+                         })() : '-'}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="detail-item">
+                    <label>Durée:</label>
+                    <span>{selectedReservation.hours ? `${selectedReservation.hours} heure${selectedReservation.hours > 1 ? 's' : ''}` : '-'}</span>
+                  </div>
+                )}
                 
                 <div className="detail-item">
                   <label>Prix total:</label>

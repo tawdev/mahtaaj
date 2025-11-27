@@ -20,7 +20,7 @@ export default function AdminHandWorkerReservationsCrud({ token, onAuthError }) 
     service_description: '',
     preferred_date: '',
     preferred_time: '',
-    duration_hours: '',
+    duration_days: '',
     location: '',
     address: '',
     city: '',
@@ -129,7 +129,7 @@ export default function AdminHandWorkerReservationsCrud({ token, onAuthError }) 
         service_description: formData.service_description,
         preferred_date: formData.preferred_date || null,
         preferred_time: formData.preferred_time || null,
-        duration_hours: formData.duration_hours ? parseFloat(formData.duration_hours) : null,
+        duration_days: formData.duration_days ? parseFloat(formData.duration_days) : null,
         location: formData.location,
         address: formData.address,
         city: formData.city,
@@ -187,7 +187,7 @@ export default function AdminHandWorkerReservationsCrud({ token, onAuthError }) 
       service_description: reservation.service_description,
       preferred_date: reservation.preferred_date ? reservation.preferred_date.split('T')[0] : '',
       preferred_time: reservation.preferred_time || '',
-      duration_hours: reservation.duration_hours,
+      duration_days: reservation.duration_days || reservation.duration_hours, // Fallback for old data
       location: reservation.location,
       address: reservation.address,
       city: reservation.city,
@@ -261,7 +261,7 @@ export default function AdminHandWorkerReservationsCrud({ token, onAuthError }) 
       service_description: '',
       preferred_date: '',
       preferred_time: '',
-      duration_hours: '',
+      duration_days: '',
       location: '',
       address: '',
       city: '',
@@ -449,13 +449,13 @@ export default function AdminHandWorkerReservationsCrud({ token, onAuthError }) 
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Durée (heures) *</label>
+                    <label>Durée (jours) *</label>
                     <input
                       type="number"
-                      step="0.5"
-                      min="0.5"
-                      value={formData.duration_hours}
-                      onChange={(e) => setFormData({...formData, duration_hours: e.target.value})}
+                      step="1"
+                      min="1"
+                      value={formData.duration_days}
+                      onChange={(e) => setFormData({...formData, duration_days: e.target.value})}
                       required
                     />
                   </div>
@@ -623,7 +623,12 @@ export default function AdminHandWorkerReservationsCrud({ token, onAuthError }) 
                     </div>
                     <div className="detail-item">
                       <span className="label">Durée:</span>
-                      <span className="value">{reservation.duration_hours}h</span>
+                      <span className="value">
+                        {(() => {
+                          const days = reservation.duration_days || (reservation.duration_hours ? Math.ceil(reservation.duration_hours / 8) : 0) || 0;
+                          return `${days} ${days > 1 ? 'jours' : 'jour'}`;
+                        })()}
+                      </span>
                     </div>
                     <div className="detail-item">
                       <span className="label">Prix:</span>

@@ -117,9 +117,80 @@ textarea.form-textarea:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Disabled select styling - keep it clear and visible */
+.form-select.category-disabled,
+.form-select:disabled {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  cursor: not-allowed;
+  opacity: 1 !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.05);
+}
+
+.form-select.category-disabled:hover,
+.form-select:disabled:hover {
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.05);
+}
+
+.form-select.category-disabled option,
+.form-select:disabled option {
+  color: #1e293b !important;
+  background: #ffffff !important;
+}
+
 .form-textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+/* Address input wrapper with location button */
+.address-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.address-input-wrapper .form-textarea {
+  flex: 1;
+  margin: 0;
+}
+
+.location-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  padding: 0;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.location-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.location-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.location-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Category Info */
@@ -205,6 +276,23 @@ textarea.form-textarea:focus {
   font-weight: 700;
   font-size: 1.1rem;
   color: #059669;
+}
+
+.price-message {
+  padding: 16px;
+  text-align: center;
+}
+
+.negotiation-message {
+  margin: 0;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #92400e;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .price-item span:first-child {
@@ -421,6 +509,16 @@ textarea.form-textarea:focus {
   .form-textarea {
     padding: 10px 12px;
     font-size: 0.95rem;
+  }
+
+  .address-input-wrapper {
+    flex-direction: column;
+  }
+
+  .address-input-wrapper .location-btn {
+    width: 100%;
+    height: 44px;
+    align-self: stretch;
   }
 
   .price-summary {

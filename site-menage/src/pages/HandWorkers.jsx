@@ -170,12 +170,12 @@ export default function HandWorkers() {
     return `${formatted} ${currency}`;
   };
 
-  const formatMinimumHoursValue = (value) => {
+  const formatMinimumJoursValue = (value) => {
     const formatted = formatNumericValue(value);
     if (!formatted) {
-      return t('hand_workers.minimum_hours_not_available', { defaultValue: '—' });
+      return t('hand_workers.minimum_jours_not_available', { defaultValue: '—' });
     }
-    const suffix = t('hand_workers.hours_suffix', { defaultValue: 'h' });
+    const suffix = t('hand_workers.jours_suffix', { defaultValue: ' jour(s)' });
     return `${formatted}${suffix}`;
   };
 
@@ -530,13 +530,16 @@ export default function HandWorkers() {
                 </div>
                 <div className="category-info-pricing">
                   <div className="pricing-item">
-                    <span className="pricing-label">{t('hand_workers.price_per_hour')}</span>
-                    <span className="pricing-value">{formatPriceValue(selectedCategory.price_per_hour)}</span>
+                    <span className="pricing-label">{t('hand_workers.price_per_day') || 'Prix par jour'}</span>
+                    <span className="pricing-value">{formatPriceValue(selectedCategory.price_per_day || selectedCategory.price_per_hour)}</span>
                   </div>
                   <div className="pricing-item">
-                    <span className="pricing-label">{t('hand_workers.minimum_hours')}</span>
-                    <span className="pricing-value">{formatMinimumHoursValue(selectedCategory.minimum_hours)}</span>
+                    <span className="pricing-label">{t('hand_workers.minimum_jours') || 'Jours minimum'}</span>
+                    <span className="pricing-value">{formatMinimumJoursValue(selectedCategory.minimum_jours)}</span>
                   </div>
+                </div>
+                <div className="category-info-message">
+                  <p className="message-text">أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة</p>
                 </div>
               </div>
             </div>

@@ -30,8 +30,8 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
     description_en: '',
     icon: '',
     image: '',
-    price_per_hour: '',
-    minimum_hours: '',
+    price_per_day: '',
+    minimum_jours: '',
     is_active: true,
     order: 0
   });
@@ -178,6 +178,11 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         delete payload.id;
         console.warn('[AdminHandWorkerCategories] Removed id from payload:', formId);
       }
+      
+      // Remove any auto-generated fields
+      delete payload.created_at;
+      delete payload.updated_at;
+      
       const activeLang = (localStorage.getItem('currentLang') || localStorage.getItem('i18nextLng') || 'fr').split(/[-_]/)[0].toLowerCase();
       if (!payload.name) {
         if (activeLang === 'ar' && payload.name_ar) payload.name = payload.name_ar;
@@ -190,9 +195,40 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         if (activeLang === 'en' && payload.description_en) payload.description = payload.description_en;
       }
       
-      // Convert price_per_hour and minimum_hours to numbers
-      if (payload.price_per_hour) payload.price_per_hour = parseFloat(payload.price_per_hour);
-      if (payload.minimum_hours) payload.minimum_hours = parseInt(payload.minimum_hours);
+      // Convert price_per_day to number (handle empty strings)
+      if (payload.price_per_day !== '' && payload.price_per_day !== null && payload.price_per_day !== undefined) {
+        payload.price_per_day = parseFloat(payload.price_per_day);
+        if (isNaN(payload.price_per_day) || payload.price_per_day < 0) {
+          setError('Le prix par jour doit être un nombre valide');
+          alert('❌ Le prix par jour doit être un nombre valide');
+          return;
+        }
+      } else {
+        setError('Le prix par jour est requis');
+        alert('❌ Le prix par jour est requis');
+        return;
+      }
+      
+      // Convert minimum_jours to number (handle empty strings)
+      if (payload.minimum_jours !== '' && payload.minimum_jours !== null && payload.minimum_jours !== undefined) {
+        payload.minimum_jours = parseInt(payload.minimum_jours);
+        if (isNaN(payload.minimum_jours) || payload.minimum_jours < 1) {
+          setError('Le nombre minimum de jours doit être un nombre valide (minimum 1)');
+          alert('❌ Le nombre minimum de jours doit être un nombre valide (minimum 1)');
+          return;
+        }
+      } else {
+        setError('Le nombre minimum de jours est requis');
+        alert('❌ Le nombre minimum de jours est requis');
+        return;
+      }
+      
+      // Ensure order is a number
+      if (payload.order !== undefined && payload.order !== null && payload.order !== '') {
+        payload.order = parseInt(payload.order) || 0;
+      } else {
+        payload.order = 0;
+      }
       
       // Handle image upload to Supabase Storage if imageFile exists
       let imageUrl = formData.image || '';
@@ -257,13 +293,20 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         }
       }
       
-      // Update payload with image URL
-      payload.image = imageUrl;
+      // Update payload with image URL (can be empty string)
+      payload.image = imageUrl || null;
       
-      // Final check: ensure payload doesn't have id, created_at, updated_at, or any other auto-generated fields
-      delete payload.id;
-      delete payload.created_at;
-      delete payload.updated_at;
+      // Clean empty strings to null for optional fields
+      if (payload.icon === '') payload.icon = null;
+      if (payload.name_ar === '') payload.name_ar = null;
+      if (payload.name_fr === '') payload.name_fr = null;
+      if (payload.name_en === '') payload.name_en = null;
+      if (payload.description_ar === '') payload.description_ar = null;
+      if (payload.description_fr === '') payload.description_fr = null;
+      if (payload.description_en === '') payload.description_en = null;
+      
+      // Ensure is_active is boolean
+      payload.is_active = payload.is_active !== undefined ? Boolean(payload.is_active) : true;
       
       console.log('[AdminHandWorkerCategories] Submitting category:', { 
         editing: !!editingCategory, 
@@ -275,8 +318,9 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       });
       
       let data, error;
-      if (editingCategory) {
+      if (editingCategory && editingCategory.id) {
         // Update existing category (use editingCategory.id, not formData.id)
+        console.log('[AdminHandWorkerCategories] Updating category with ID:', editingCategory.id);
         const { data: updateData, error: updateError } = await supabase
           .from('hand_worker_categories')
           .update(payload)
@@ -288,18 +332,18 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         // Insert new category (payload already doesn't have id)
         // Create a clean payload without any auto-generated fields
         const cleanPayload = {
-          name: payload.name,
-          name_ar: payload.name_ar,
-          name_fr: payload.name_fr,
-          name_en: payload.name_en,
-          description: payload.description,
-          description_ar: payload.description_ar,
-          description_fr: payload.description_fr,
-          description_en: payload.description_en,
-          icon: payload.icon,
-          image: payload.image,
-          price_per_hour: payload.price_per_hour,
-          minimum_hours: payload.minimum_hours,
+          name: payload.name || null,
+          name_ar: payload.name_ar || null,
+          name_fr: payload.name_fr || null,
+          name_en: payload.name_en || null,
+          description: payload.description || null,
+          description_ar: payload.description_ar || null,
+          description_fr: payload.description_fr || null,
+          description_en: payload.description_en || null,
+          icon: payload.icon || null,
+          image: payload.image || null,
+          price_per_day: payload.price_per_day,
+          minimum_jours: payload.minimum_jours,
           is_active: payload.is_active !== undefined ? payload.is_active : true,
           order: payload.order || 0
         };
@@ -316,8 +360,16 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       
       if (error) {
         console.error('[AdminHandWorkerCategories] Error saving category:', error);
-        setError('Erreur lors de la sauvegarde: ' + error.message);
-        alert(`❌ Échec de la sauvegarde: ${error.message}`);
+        const errorMessage = error.message || 'Erreur inconnue';
+        setError('Erreur lors de la sauvegarde: ' + errorMessage);
+        alert(`❌ Échec de la sauvegarde: ${errorMessage}`);
+        return;
+      }
+      
+      if (!data || (Array.isArray(data) && data.length === 0)) {
+        console.error('[AdminHandWorkerCategories] No data returned after save');
+        setError('Aucune donnée retournée après la sauvegarde');
+        alert('❌ Aucune donnée retournée après la sauvegarde');
         return;
       }
       
@@ -336,11 +388,21 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
   };
 
   const handleEdit = (category) => {
+    if (!category || !category.id) {
+      console.error('[AdminHandWorkerCategories] Cannot edit: invalid category', category);
+      alert('❌ Erreur: Catégorie invalide');
+      return;
+    }
+    
+    console.log('[AdminHandWorkerCategories] Editing category:', category);
     setEditingCategory(category);
+    setError('');
+    
     const imagePath = category.image || '';
     const imageUrl = imagePath ? getImageUrl(imagePath) : '';
+    
     setFormData({
-      name: category.name,
+      name: category.name || '',
       name_ar: category.name_ar || '',
       name_fr: category.name_fr || '',
       name_en: category.name_en || '',
@@ -350,24 +412,47 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       description_en: category.description_en || '',
       icon: category.icon || '',
       image: imageUrl || imagePath || '',
-      price_per_hour: category.price_per_hour,
-      minimum_hours: category.minimum_hours,
-      is_active: category.is_active,
+      price_per_day: category.price_per_day || category.price_per_hour || '',
+      minimum_jours: category.minimum_jours || '',
+      is_active: category.is_active !== undefined ? category.is_active : true,
       order: category.order || 0
     });
+    
     setImagePreview(imageUrl || imagePath || null);
     setImageFile(null);
     setShowForm(true);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
+    if (!id) {
+      console.error('[AdminHandWorkerCategories] Cannot delete: no ID provided');
+      alert('❌ Erreur: ID de catégorie manquant');
+      return;
+    }
+
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action est irréversible.')) {
       return;
     }
 
     try {
+      setError('');
       console.log('[AdminHandWorkerCategories] Deleting category:', id);
       
+      // First check if category exists
+      const { data: categoryData, error: checkError } = await supabase
+        .from('hand_worker_categories')
+        .select('id, name')
+        .eq('id', id)
+        .single();
+      
+      if (checkError || !categoryData) {
+        console.error('[AdminHandWorkerCategories] Category not found:', checkError);
+        setError('Catégorie non trouvée');
+        alert('❌ Catégorie non trouvée');
+        return;
+      }
+      
+      // Delete the category
       const { error } = await supabase
         .from('hand_worker_categories')
         .delete()
@@ -375,8 +460,9 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       
       if (error) {
         console.error('[AdminHandWorkerCategories] Error deleting category:', error);
-        setError('Erreur lors de la suppression: ' + error.message);
-        alert('❌ Erreur lors de la suppression: ' + error.message);
+        const errorMessage = error.message || 'Erreur inconnue';
+        setError('Erreur lors de la suppression: ' + errorMessage);
+        alert('❌ Erreur lors de la suppression: ' + errorMessage);
         return;
       }
       
@@ -385,8 +471,9 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       alert('✔️ Catégorie supprimée avec succès');
     } catch (e) {
       console.error('[AdminHandWorkerCategories] Exception deleting category:', e);
-      setError('Erreur lors de la suppression: ' + e.message);
-      alert('❌ Erreur: ' + e.message);
+      const errorMessage = e.message || 'Erreur inconnue';
+      setError('Erreur lors de la suppression: ' + errorMessage);
+      alert('❌ Erreur: ' + errorMessage);
     }
   };
 
@@ -402,8 +489,8 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       description_en: '',
       icon: '',
       image: '',
-      price_per_hour: '',
-      minimum_hours: '',
+      price_per_day: '',
+      minimum_jours: '',
       is_active: true,
       order: 0
     });
@@ -524,24 +611,24 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Prix par heure (DH) *</label>
+                  <label>Prix par jour (DH) *</label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
-                    value={formData.price_per_hour}
-                    onChange={(e) => setFormData({...formData, price_per_hour: e.target.value})}
+                    value={formData.price_per_day}
+                    onChange={(e) => setFormData({...formData, price_per_day: e.target.value})}
                     required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Heures minimum *</label>
+                  <label>Jours minimum *</label>
                   <input
                     type="number"
                     min="1"
-                    value={formData.minimum_hours}
-                    onChange={(e) => setFormData({...formData, minimum_hours: e.target.value})}
+                    value={formData.minimum_jours}
+                    onChange={(e) => setFormData({...formData, minimum_jours: e.target.value})}
                     required
                   />
                 </div>
@@ -586,18 +673,48 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
                       <i className="fas fa-tools"></i>
                     )}
                   </div>
-                  <div className="category-actions">
+                  <div className="category-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <button 
                       className="edit-button"
                       onClick={() => handleEdit(category)}
+                      title="Modifier cette catégorie"
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '6px',
+                        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 16px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        fontSize: '0.9rem'
+                      }}
                     >
-                      ✏️
+                      <span className="button-icon">✏️</span>
+                      <span className="button-text">Modifier</span>
                     </button>
                     <button 
                       className="delete-button"
                       onClick={() => handleDelete(category.id)}
+                      title="Supprimer cette catégorie"
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '6px',
+                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 16px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        fontSize: '0.9rem'
+                      }}
                     >
-                      🗑️
+                      <span className="button-icon">🗑️</span>
+                      <span className="button-text">Supprimer</span>
                     </button>
                   </div>
                 </div>
@@ -608,12 +725,12 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
                   
                   <div className="category-details">
                     <div className="detail-item">
-                      <span className="label">Prix/heure:</span>
-                      <span className="value">{category.price_per_hour} DH</span>
+                      <span className="label">Prix/jour:</span>
+                      <span className="value">{category.price_per_day || category.price_per_hour || 0} DH</span>
                     </div>
                     <div className="detail-item">
                       <span className="label">Minimum:</span>
-                      <span className="value">{category.minimum_hours}h</span>
+                      <span className="value">{category.minimum_jours || '-'} jour{category.minimum_jours > 1 ? 's' : ''}</span>
                     </div>
                     <div className="detail-item">
                       <span className="label">Statut:</span>
