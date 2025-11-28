@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { translateHandWorkerCategories } from '../services/handWorkerTranslation';
 import i18n from '../i18n';
 import { supabase } from '../lib/supabase';
@@ -419,6 +419,17 @@ export default function HandWorkerBooking() {
 
   return (
     <main className="hand-worker-booking-page">
+      {/* Back Button - Top Left */}
+      <div className="back-button-top-container">
+        <Link 
+          to="/hand-workers" 
+          className="back-button-top"
+        >
+          <span className="back-icon">←</span>
+          {t('hand_worker_booking.back_to_hand_workers', 'Retour aux services')}
+        </Link>
+      </div>
+
       <div className="booking-header">
         <h1 className="booking-title">{t('hand_worker_booking.title')}</h1>
         <p className="booking-subtitle">{t('hand_worker_booking.subtitle')}</p>

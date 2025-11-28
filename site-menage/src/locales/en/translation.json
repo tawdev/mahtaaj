@@ -1243,7 +1243,9 @@
     "book_service": "Book Service",
     "book_service_description": "Ready to book this service? Fill out the form to get started.",
     "book_now": "Book Now",
+    "book_appointment": "Book an appointment",
     "register_as_worker": "Register as Worker",
+    "less_than_month_booking_message": "Less than a month — Please click this button to book an appointment",
     "categories": {
       "maçon": {
         "title": "Mason",
@@ -1329,6 +1331,27 @@
     "price_per_day": "Price per day",
     "minimum_hours": "Minimum hours",
     "minimum_jours": "Minimum days"
+  },
+  "hand_worker_appointment": {
+    "title": "Book an appointment",
+    "subtitle": "Fill out the form below to book an appointment",
+    "back_to_hand_workers": "Back to Hand Workers",
+    "personal_info": "Personal information",
+    "appointment_details": "Appointment details",
+    "name": "Full name",
+    "name_placeholder": "Your full name",
+    "phone": "Phone",
+    "phone_placeholder": "Your phone number",
+    "email": "Email",
+    "email_placeholder": "Your email address",
+    "date": "Date",
+    "duration": "Duration (days)",
+    "duration_placeholder": "Number of days",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "submission_error": "Error submitting. Please try again.",
+    "success_title": "Appointment requested successfully!",
+    "success_message": "Your appointment request has been submitted. We will contact you soon to confirm the details."
   },
   "hand_worker_registration": {
     "title": "Hand Worker Registration",

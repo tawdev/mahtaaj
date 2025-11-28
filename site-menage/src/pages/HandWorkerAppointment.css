@@ -1,0 +1,373 @@
+/* Hand Worker Appointment Page Styles */
+.hand-worker-appointment-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  padding: 2rem 0;
+  position: relative;
+}
+
+/* Back Button - Top Left */
+.back-button-top-container {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  z-index: 1000;
+}
+
+.back-button-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  color: #1e293b;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.back-button-top:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+  color: #1e293b;
+}
+
+.back-button-top .back-icon {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* RTL Support for back button */
+[dir="rtl"] .back-button-top-container {
+  left: auto;
+  right: 20px;
+}
+
+.appointment-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 0 20px;
+}
+
+.appointment-title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 16px;
+  letter-spacing: -0.025em;
+  background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.appointment-subtitle {
+  font-size: 1.2rem;
+  color: #64748b;
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+.appointment-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+
+.error-message i {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.appointment-form {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.appointment-form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.form-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-input:hover {
+  border-color: #cbd5e1;
+}
+
+.form-actions {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.submit-button {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+  min-width: 180px;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #047857, #065f46);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success State */
+.success-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 20px;
+}
+
+.success-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  padding: 48px 40px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  max-width: 500px;
+  width: 100%;
+}
+
+.success-icon {
+  font-size: 4rem;
+  color: #10b981;
+  margin-bottom: 24px;
+}
+
+.success-card h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.success-card p {
+  font-size: 1rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+}
+
+.back-to-home-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  cursor: pointer;
+}
+
+.back-to-home-button:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+  text-decoration: none;
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .back-button-top-container {
+    top: 70px;
+    left: 12px;
+  }
+
+  [dir="rtl"] .back-button-top-container {
+    left: auto;
+    right: 12px;
+  }
+
+  .back-button-top {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .hand-worker-appointment-page {
+    padding: 1rem 0;
+  }
+
+  .appointment-content {
+    padding: 0 16px;
+  }
+
+  .appointment-form {
+    padding: 24px 20px;
+  }
+
+  .success-card {
+    padding: 32px 24px;
+  }
+
+  .success-icon {
+    font-size: 3rem;
+  }
+
+  .success-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .submit-button {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    min-width: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-button-top-container {
+    top: 60px;
+    left: 8px;
+  }
+
+  [dir="rtl"] .back-button-top-container {
+    left: auto;
+    right: 8px;
+  }
+
+  .back-button-top {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .appointment-form {
+    padding: 20px 16px;
+  }
+
+  .form-input {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  .success-card {
+    padding: 24px 20px;
+  }
+
+  .success-icon {
+    font-size: 2.5rem;
+  }
+
+  .success-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .success-card p {
+    font-size: 0.95rem;
+  }
+
+  .submit-button {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+    min-width: 140px;
+  }
+}
+

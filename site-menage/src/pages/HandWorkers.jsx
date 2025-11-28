@@ -539,7 +539,13 @@ export default function HandWorkers() {
                   </div>
                 </div>
                 <div className="category-info-message">
-                  <p className="message-text">أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة</p>
+                  <p className="message-text">{t('hand_workers.less_than_month_booking_message', 'أقل من شهر — المرجو الضغط على هذا الزر لحجز موعد')}</p>
+                  <Link 
+                    to={`/hand-workers/appointment?category=${selectedCategory.id}`}
+                    className="booking-button-inline"
+                  >
+                    {t('hand_workers.book_appointment', 'Réserver un rendez-vous')}
+                  </Link>
                 </div>
               </div>
             </div>

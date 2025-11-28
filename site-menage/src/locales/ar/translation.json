@@ -1268,7 +1268,9 @@
     "book_service": "احجز الخدمة",
     "book_service_description": "مستعد لحجز هذه الخدمة؟ املأ النموذج للبدء.",
     "book_now": "احجز الآن",
+    "book_appointment": "احجز موعد",
     "register_as_worker": "التسجيل كعامل",
+    "less_than_month_booking_message": "أقل من شهر — المرجو الضغط على هذا الزر لحجز موعد",
     "categories": {
       "maçon": {
         "title": "بنّاء",
@@ -1303,6 +1305,27 @@
         "description": "أعمال القفل والأمان"
       }
     }
+  },
+  "hand_worker_appointment": {
+    "title": "احجز موعد",
+    "subtitle": "املأ النموذج أدناه لحجز موعد",
+    "back_to_hand_workers": "العودة إلى الأعمال اليدوية",
+    "personal_info": "المعلومات الشخصية",
+    "appointment_details": "تفاصيل الموعد",
+    "name": "الاسم الكامل",
+    "name_placeholder": "اسمك الكامل",
+    "phone": "الهاتف",
+    "phone_placeholder": "رقم هاتفك",
+    "email": "البريد الإلكتروني",
+    "email_placeholder": "عنوان بريدك الإلكتروني",
+    "date": "التاريخ",
+    "duration": "المدة (أيام)",
+    "duration_placeholder": "عدد الأيام",
+    "submit": "إرسال",
+    "submitting": "جاري الإرسال...",
+    "submission_error": "خطأ في الإرسال. يرجى المحاولة مرة أخرى.",
+    "success_title": "تم طلب الموعد بنجاح!",
+    "success_message": "تم إرسال طلب الموعد الخاص بك. سنتواصل معك قريباً لتأكيد التفاصيل."
   },
   "hand_worker_booking": {
     "title": "احجز خدمة الأعمال اليدوية",

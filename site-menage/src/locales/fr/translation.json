@@ -1246,7 +1246,9 @@
     "book_service": "Réserver le Service",
     "book_service_description": "Prêt à réserver ce service ? Remplissez le formulaire pour commencer.",
     "book_now": "Réserver Maintenant",
+    "book_appointment": "Réserver un rendez-vous",
     "register_as_worker": "S'inscrire comme Ouvrier",
+    "less_than_month_booking_message": "Moins d'un mois — Veuillez cliquer sur ce bouton pour réserver un rendez-vous",
     "categories": {
       "maçon": {
         "title": "Maçon",
@@ -1332,6 +1334,27 @@
     "price_per_day": "Prix par jour",
     "minimum_hours": "Heures minimum",
     "minimum_jours": "Jours minimum"
+  },
+  "hand_worker_appointment": {
+    "title": "Réserver un rendez-vous",
+    "subtitle": "Remplissez le formulaire ci-dessous pour réserver un rendez-vous",
+    "back_to_hand_workers": "Retour aux Travaux Manuels",
+    "personal_info": "Informations personnelles",
+    "appointment_details": "Détails du rendez-vous",
+    "name": "Nom complet",
+    "name_placeholder": "Votre nom complet",
+    "phone": "Téléphone",
+    "phone_placeholder": "Votre numéro de téléphone",
+    "email": "Email",
+    "email_placeholder": "Votre adresse email",
+    "date": "Date",
+    "duration": "Durée (jours)",
+    "duration_placeholder": "Nombre de jours",
+    "submit": "Soumettre",
+    "submitting": "Envoi...",
+    "submission_error": "Erreur lors de la soumission. Veuillez réessayer.",
+    "success_title": "Rendez-vous demandé avec succès!",
+    "success_message": "Votre demande de rendez-vous a été soumise. Nous vous contacterons bientôt pour confirmer les détails."
   },
   "hand_worker_registration": {
     "title": "Inscription Travailleur Manuel",
