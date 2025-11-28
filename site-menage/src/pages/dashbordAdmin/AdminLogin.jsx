@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { adminLogin } from '../../api-supabase';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './AdminLogin.css';
 
 export default function AdminLogin({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -56,14 +58,24 @@ export default function AdminLogin({ onLogin }) {
           
           <div className="admin-field">
             <label htmlFor="password">Mot de passe</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
+            <div className="admin-password-input-wrapper">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                className="admin-password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
           
           {error && <div className="admin-error">{error}</div>}

@@ -98,6 +98,46 @@
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   font-weight: 500;
+  width: 100%;
+}
+
+.admin-password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-password-input-wrapper input {
+  padding-left: 50px;
+}
+
+.admin-password-toggle {
+  position: absolute;
+  left: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  transition: color 0.3s ease;
+  z-index: 1;
+}
+
+.admin-password-toggle:hover {
+  color: #3b82f6;
+}
+
+.admin-password-toggle:focus {
+  outline: none;
+  color: #3b82f6;
+}
+
+.admin-password-toggle svg {
+  width: 18px;
+  height: 18px;
 }
 
 .admin-field input:focus {
@@ -214,6 +254,14 @@
   
   .admin-field input {
     padding: 14px 18px;
+  }
+  
+  .admin-password-input-wrapper input {
+    padding-left: 48px;
+  }
+  
+  .admin-password-toggle {
+    left: 14px;
   }
   
   .admin-login-button {
