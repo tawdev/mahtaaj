@@ -142,7 +142,7 @@ export default function Services() {
     
     // Exact match required (no includes, no case-insensitive partial matching)
     const exactMatches = [
-      'التنظيف المنزلي',  // Arabic
+      'التنظيف',  // Arabic
       'Ménage',            // French
       'House Cleaning'     // English
     ];

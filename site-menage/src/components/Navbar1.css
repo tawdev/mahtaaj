@@ -386,15 +386,36 @@
     display: none !important;
   }
   
-  /* Show hamburger on mobile - improved visibility and positioning */
+  /* Adjust navbar inner layout for mobile - use Flexbox for proper organization */
+  .navbar1__inner {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+  
+  /* RTL Support - Adjust inner layout for RTL mode */
+  .navbar1.rtl .navbar1__inner,
+  .navbar1__inner.rtl-inner,
+  [dir="rtl"] .navbar1__inner {
+    flex-direction: row !important;
+  }
+  
+  /* Show hamburger on mobile - use Flexbox positioning instead of absolute */
   .navbar1__hamburger {
     display: inline-flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    position: absolute !important;
-    left: 12px !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
     z-index: 10 !important;
     width: 48px !important;
     height: 40px !important;
@@ -405,23 +426,25 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     border-radius: 8px !important;
     padding: 8px 10px !important;
+    flex-shrink: 0 !important;
+    order: 1 !important; /* First in LTR */
+    margin: 0 !important;
   }
   
   /* RTL Support - Position hamburger on the right in RTL mode */
   .navbar1.rtl .navbar1__hamburger,
   [dir="rtl"] .navbar1__hamburger {
-    left: auto !important;
-    right: 12px !important;
+    order: 3 !important; /* Last in RTL */
   }
   
-  /* Center logo on mobile - perfect centering both horizontally and vertically */
+  /* Center logo on mobile - use Flexbox for centering */
   .navbar1__brand {
-    position: absolute !important;
-    left: 50% !important;
+    position: relative !important;
+    left: auto !important;
     right: auto !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    flex: 0 0 auto !important;
+    top: auto !important;
+    transform: none !important;
+    flex: 1 1 auto !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
@@ -431,17 +454,20 @@
     margin-right: 0 !important;
     z-index: 5 !important;
     text-align: center !important;
+    order: 2 !important; /* Middle */
+    padding: 0 8px !important;
   }
   
   /* RTL Support - Center logo in RTL mode on mobile - always centered (same as LTR) */
   .navbar1.rtl .navbar1__brand,
   .navbar1__brand.rtl-brand,
   [dir="rtl"] .navbar1__brand {
-    position: absolute !important;
-    left: 50% !important;
+    position: relative !important;
+    left: auto !important;
     right: auto !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    top: auto !important;
+    transform: none !important;
+    flex: 1 1 auto !important;
     justify-content: center !important;
     align-items: center !important;
     text-align: center !important;
@@ -450,20 +476,7 @@
     margin-right: 0 !important;
     width: auto !important;
     z-index: 5 !important;
-  }
-  
-  /* Adjust navbar inner layout for mobile - ensure proper spacing */
-  .navbar1__inner {
-    position: relative !important;
-    justify-content: space-between !important;
-    padding: 0 16px !important;
-  }
-  
-  /* RTL Support - Adjust inner layout for RTL mode */
-  .navbar1.rtl .navbar1__inner,
-  .navbar1__inner.rtl-inner,
-  [dir="rtl"] .navbar1__inner {
-    flex-direction: row !important;
+    order: 2 !important; /* Middle */
   }
   
   /* Ensure hamburger bars are visible on mobile */
@@ -500,14 +513,14 @@
     background: #ffffff !important;
     border-color: #d1d5db !important;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.06) !important;
-    transform: translateY(-50%) !important;
+    transform: none !important;
   }
   
   .navbar1__hamburger:active {
     background: #f9fafb !important;
     border-color: #9ca3af !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-    transform: translateY(-50%) scale(0.98) !important;
+    transform: scale(0.98) !important;
   }
   
   /* Ensure smooth drawer animation on mobile */
@@ -880,7 +893,9 @@
 /* Responsive */
 @media (max-width: 768px) {
   .navbar1 {
-    height: 60px;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
   }
   
   body {
@@ -888,8 +903,15 @@
   }
   
   .navbar1__inner {
-    padding: 0 16px;
-    position: relative;
+    padding: 0 12px !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 100% !important;
+    gap: 8px !important;
   }
   
   .navbar1__title {
@@ -903,41 +925,80 @@
     height: 24px;
   }
   
-  /* Ensure burger menu doesn't overlap with logo */
+  /* Ensure burger menu doesn't overlap with logo - using Flexbox */
   .navbar1__hamburger {
     margin: 0 !important;
+    position: relative !important;
+    order: 1 !important; /* First in LTR */
+    flex-shrink: 0 !important;
   }
   
-  /* Ensure logo is perfectly centered and doesn't overlap */
+  /* RTL Support - Burger menu order */
+  .navbar1.rtl .navbar1__hamburger,
+  [dir="rtl"] .navbar1__hamburger {
+    order: 3 !important; /* Last in RTL */
+  }
+  
+  /* Ensure logo is perfectly centered and doesn't overlap - using Flexbox */
   .navbar1__brand {
     pointer-events: auto !important;
-    position: absolute !important;
-    left: 50% !important;
+    position: relative !important;
+    left: auto !important;
     right: auto !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    top: auto !important;
+    transform: none !important;
+    flex: 1 1 auto !important;
     margin: 0 !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     width: auto !important;
     z-index: 5 !important;
     text-align: center !important;
+    order: 2 !important; /* Middle */
+    padding: 0 8px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
   
   /* Ensure logo stays centered in RTL mode on mobile - same as LTR */
   .navbar1.rtl .navbar1__brand,
   [dir="rtl"] .navbar1__brand {
-    position: absolute !important;
-    left: 50% !important;
+    position: relative !important;
+    left: auto !important;
     right: auto !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    top: auto !important;
+    transform: none !important;
+    flex: 1 1 auto !important;
     margin: 0 !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     width: auto !important;
     z-index: 5 !important;
     text-align: center !important;
+    order: 2 !important; /* Middle */
+    padding: 0 8px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  /* Mobile language container positioning */
+  .navbar1__mobile-lang-container {
+    position: relative !important;
+    right: auto !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    order: 3 !important; /* Last in LTR */
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* RTL Support - Language container order */
+  .navbar1.rtl .navbar1__mobile-lang-container,
+  [dir="rtl"] .navbar1__mobile-lang-container {
+    order: 1 !important; /* First in RTL */
   }
   
   /* تحسينات القائمة المنبثقة للشاشات الصغيرة */
@@ -998,7 +1059,7 @@
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1024px) {
   /* Hide nav on tablet and mobile - only show on desktop */
   .navbar1__nav { 
     display: none !important;
@@ -1011,9 +1072,9 @@
     opacity: 1 !important;
   }
   
-  /* Center logo on tablet and mobile - but only apply absolute positioning on mobile */
+  /* Center logo on tablet and mobile - using Flexbox */
   .navbar1__brand {
-    flex: 1;
+    flex: 1 1 auto;
     display: flex !important;
     justify-content: center;
     align-items: center;
@@ -1025,7 +1086,7 @@
   /* Ensure logo stays centered in RTL mode on tablet */
   .navbar1.rtl .navbar1__brand,
   [dir="rtl"] .navbar1__brand {
-    flex: 1 !important;
+    flex: 1 1 auto !important;
     justify-content: center !important;
     align-items: center !important;
     text-align: center !important;
@@ -1033,21 +1094,34 @@
     margin-right: 0 !important;
   }
   
-  /* Adjust navbar inner layout for tablet and mobile */
+  /* Adjust navbar inner layout for tablet and mobile - use Flexbox */
   .navbar1__inner {
-    justify-content: space-between;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 100% !important;
+    gap: 12px !important;
   }
 }
 
-/* Tablet specific styles (between 769px and 991px) - keep original layout */
-@media (min-width: 769px) and (max-width: 991px) {
+/* Tablet specific styles (between 769px and 1024px) - keep original layout */
+@media (min-width: 769px) and (max-width: 1024px) {
   .navbar1__hamburger {
     position: relative !important;
     left: auto !important;
     right: auto !important;
     top: auto !important;
     transform: none !important;
-    order: 0;
+    order: 1 !important; /* First in LTR */
+    flex-shrink: 0 !important;
+  }
+  
+  /* RTL Support - Burger menu order on tablet */
+  .navbar1.rtl .navbar1__hamburger,
+  [dir="rtl"] .navbar1__hamburger {
+    order: 3 !important; /* Last in RTL */
   }
   
   .navbar1__brand {
@@ -1055,8 +1129,30 @@
     left: auto !important;
     top: auto !important;
     transform: none !important;
-    flex: 1 !important;
-    order: 1;
+    flex: 1 1 auto !important;
+    order: 2 !important; /* Middle */
+    padding: 0 12px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+  
+  /* RTL Support - Logo order on tablet */
+  .navbar1.rtl .navbar1__brand,
+  [dir="rtl"] .navbar1__brand {
+    order: 2 !important; /* Middle */
+  }
+  
+  /* Ensure navbar inner uses Flexbox on tablet */
+  .navbar1__inner {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 16px !important;
+    gap: 12px !important;
   }
   
   /* Menu items font size for tablet */
@@ -1464,19 +1560,24 @@ body > .App > .navbar1 {
 /* Mobile Language Switcher Button - Custom Design */
 /* Container for mobile language button and dropdown */
 .navbar1__mobile-lang-container {
-  display: none; /* Hidden by default, shown only on mobile */
-  position: absolute;
-  right: 12px; /* Default: right side for LTR (FR/EN) */
-  top: 50%;
-  transform: translateY(-50%);
+  display: none; /* Hidden by default, shown on mobile and tablet */
+  position: relative; /* Changed from absolute to relative for Flexbox */
+  right: auto;
+  left: auto;
+  top: auto;
+  transform: none;
   z-index: 10;
+  flex-shrink: 0;
+  order: 3; /* Last in LTR */
 }
 
 .navbar1__mobile-lang-btn {
   display: flex;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 48px;
+  height: 40px;
+  min-width: 48px;
+  min-height: 40px;
+  border-radius: 8px;
   background: #ffffff;
   border: 1px solid rgba(229, 231, 235, 0.8);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -1485,29 +1586,31 @@ body > .App > .navbar1 {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 0;
+  padding: 8px 10px;
   flex-direction: row;
+  flex-shrink: 0;
 }
 
 /* Move container to left side when Arabic (RTL) is selected */
 .navbar1.rtl .navbar1__mobile-lang-container,
 [dir="rtl"] .navbar1__mobile-lang-container {
   right: auto;
-  left: 12px; /* Left side for RTL (AR) */
+  left: auto;
+  order: 1; /* First in RTL */
 }
 
 .navbar1__mobile-lang-btn:hover {
   background: #f9fafb;
   border-color: #d1d5db;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.06);
-  transform: translateY(-50%) scale(1.05);
+  transform: scale(1.05);
 }
 
 .navbar1__mobile-lang-btn:active {
   background: #f3f4f6;
   border-color: #9ca3af;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transform: translateY(-50%) scale(0.98);
+  transform: scale(0.98);
 }
 
 /* Globe Icon - Mobile */
@@ -1684,10 +1787,18 @@ body > .App > .navbar1 {
   text-align: right;
 }
 
-/* Show mobile language button only on mobile */
-@media (max-width: 768px) {
+/* Show mobile language button on mobile and tablet */
+@media (max-width: 1024px) {
   .navbar1__mobile-lang-container {
     display: block !important;
+    position: relative !important;
+    right: auto !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    order: 3 !important; /* Last in LTR */
+    flex-shrink: 0 !important;
+    margin: 0 !important;
   }
   
   .navbar1__mobile-lang-btn {
@@ -1698,39 +1809,92 @@ body > .App > .navbar1 {
   .navbar1.rtl .navbar1__mobile-lang-container,
   [dir="rtl"] .navbar1__mobile-lang-container {
     right: auto !important;
-    left: 12px !important; /* Left side for RTL (AR) */
+    left: auto !important;
+    order: 1 !important; /* First in RTL */
+  }
   }
   
-  /* Ensure logo stays perfectly centered - no margins that affect centering */
+/* Mobile specific styles (max-width: 768px) */
+@media (max-width: 768px) {
+  /* Ensure logo stays perfectly centered - using Flexbox */
   .navbar1__brand {
-    position: absolute !important;
-    left: 50% !important;
+    position: relative !important;
+    left: auto !important;
     right: auto !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    top: auto !important;
+    transform: none !important;
+    flex: 1 1 auto !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     width: auto !important;
     z-index: 5 !important;
+    order: 2 !important; /* Middle */
+    padding: 0 8px !important;
   }
   
   /* Ensure logo stays centered in RTL mode - same centering as LTR */
   .navbar1.rtl .navbar1__brand,
   [dir="rtl"] .navbar1__brand {
-    position: absolute !important;
-    left: 50% !important;
+    position: relative !important;
+    left: auto !important;
     right: auto !important;
-    top: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    top: auto !important;
+    transform: none !important;
+    flex: 1 1 auto !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     width: auto !important;
     z-index: 5 !important;
+    order: 2 !important; /* Middle */
+    padding: 0 8px !important;
   }
 }
 
-/* Hide on desktop and tablet */
-@media (min-width: 769px) {
+/* Tablet specific styles (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .navbar1__mobile-lang-container {
+    display: block !important;
+    position: relative !important;
+    right: auto !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    order: 3 !important; /* Last in LTR */
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .navbar1__mobile-lang-btn {
+    display: flex !important;
+  }
+  
+  /* RTL Support for tablet */
+  .navbar1.rtl .navbar1__mobile-lang-container,
+  [dir="rtl"] .navbar1__mobile-lang-container {
+    order: 1 !important; /* First in RTL */
+  }
+  
+  /* Ensure logo stays centered on tablet */
+  .navbar1__brand {
+    flex: 1 1 auto !important;
+    order: 2 !important; /* Middle */
+    padding: 0 12px !important;
+  }
+  
+  .navbar1.rtl .navbar1__brand,
+  [dir="rtl"] .navbar1__brand {
+    flex: 1 1 auto !important;
+    order: 2 !important; /* Middle */
+    padding: 0 12px !important;
+  }
+}
+
+/* Hide on desktop only (1025px and above) */
+@media (min-width: 1025px) {
+  .navbar1__mobile-lang-container {
+    display: none !important;
+  }
+  
   .navbar1__mobile-lang-btn {
     display: none !important;
   }

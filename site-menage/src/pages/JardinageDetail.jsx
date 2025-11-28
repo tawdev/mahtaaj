@@ -157,6 +157,17 @@ export default function JardinageDetail() {
 
   return (
     <div className="jardinage-detail-page">
+      {/* Back Button - Top Left */}
+      <div className="back-button-top-container">
+        <Link 
+          to="/jardinage" 
+          className="back-button-top"
+        >
+          <span className="back-icon">←</span>
+          {t('jardinage.back_to_categories', 'Retour aux catégories')}
+        </Link>
+      </div>
+
       {/* Hero Section with Large Image */}
       <section className="jardinage-detail-hero">
         <div className="hero-background">
@@ -185,14 +196,6 @@ export default function JardinageDetail() {
         
         <div className="hero-content">
           <div className="container mx-auto px-4">
-            <Link 
-              to="/jardinage" 
-              className="back-button-hero"
-            >
-              <span className="back-icon">←</span>
-              {t('jardinage.back_to_categories', 'Retour aux catégories')}
-            </Link>
-            
             <h1 className="hero-title">
               {category.name || t('jardinage.category_not_available', 'Catégorie non disponible')}
             </h1>
