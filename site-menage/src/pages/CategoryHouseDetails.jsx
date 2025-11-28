@@ -14,6 +14,7 @@ export default function CategoryHouseDetails() {
   const [allTypes, setAllTypes] = useState([]); // Store all types for kitchen category
   const [showAllTypes, setShowAllTypes] = useState(false); // Toggle to show all types
   const [selectedTypes, setSelectedTypes] = useState([]); // Store selected types for Ménage + cuisine
+  const [selectedSingleType, setSelectedSingleType] = useState(null); // Store single selected type for menage/1 page
   const [categoriesHouseMap, setCategoriesHouseMap] = useState({}); // Map category_house_id to category info
   const [warningMessage, setWarningMessage] = useState(''); // Warning message for selection limits
   const [typeOptionsMap, setTypeOptionsMap] = useState({}); // Map type_id to options array
@@ -517,7 +518,7 @@ export default function CategoryHouseDetails() {
     });
   };
 
-  // Handle type selection for Ménage + cuisine with restrictions
+  // Handle type selection for Ménage + cuisine with restrictions, or simple selection for kitchen category
   const handleTypeSelect = (type) => {
     const isSelected = selectedTypes.some(t => t.id === type.id);
     
@@ -529,20 +530,42 @@ export default function CategoryHouseDetails() {
       return;
     }
     
-    // Check restrictions before adding
+    // For kitchen category only (not Ménage + cuisine), allow multiple selections
+    if (isKitchenCategoryCheck() && !isMenageCuisineCategory()) {
+      const updated = [...selectedTypes, type];
+      setSelectedTypes(updated);
+      console.log('✅ Kitchen type selected:', type.name, 'Total selected:', updated.length);
+      return;
+    }
+    
+    // Check restrictions before adding (for Ménage + cuisine category)
     const isCuisine = isCuisineType(type);
     const isMenage = isMenageType(type);
     
     console.log('=== Type Selection Check ===');
-    console.log('Type:', type.name, 'isCuisine:', isCuisine, 'isMenage:', isMenage);
+    console.log('Type:', {
+      id: type.id,
+      name: type.name,
+      name_fr: type.name_fr,
+      name_en: type.name_en,
+      name_ar: type.name_ar,
+      category_house_id: type.category_house_id
+    });
+    console.log('Type classification:', { isCuisine, isMenage });
     console.log('Current selected types:', selectedTypes.length);
+    console.log('Selected types details:', selectedTypes.map(t => ({
+      id: t.id,
+      name: t.name,
+      isCuisine: isCuisineType(t),
+      isMenage: isMenageType(t)
+    })));
     
     // Check if user already selected one from the same category
     const selectedCuisine = selectedTypes.find(t => isCuisineType(t));
     const selectedMenage = selectedTypes.find(t => isMenageType(t));
     
-    console.log('Already selected Cuisine:', selectedCuisine?.name);
-    console.log('Already selected Menage:', selectedMenage?.name);
+    console.log('Already selected Cuisine:', selectedCuisine ? { id: selectedCuisine.id, name: selectedCuisine.name } : null);
+    console.log('Already selected Menage:', selectedMenage ? { id: selectedMenage.id, name: selectedMenage.name } : null);
     
     // Step 1: Check if type is Cuisine AND we already have a Cuisine selected
     if (isCuisine && selectedCuisine) {
@@ -586,12 +609,51 @@ export default function CategoryHouseDetails() {
 
   // Check if both Cuisine and Menage types are selected (exactly one of each)
   const canReserve = () => {
-    if (!isMenageCuisineCategory()) return false;
+    const isMenageCuisine = isMenageCuisineCategory();
+    console.log('🔍 canReserve check:', {
+      isMenageCuisine,
+      selectedTypesCount: selectedTypes.length,
+      selectedTypes: selectedTypes.map(t => ({ id: t.id, name: t.name }))
+    });
+    
+    if (!isMenageCuisine) {
+      console.log('❌ Not Ménage + cuisine category');
+      return false;
+    }
     
     const selectedCuisine = selectedTypes.find(t => isCuisineType(t));
     const selectedMenage = selectedTypes.find(t => isMenageType(t));
     
-    return selectedCuisine !== undefined && selectedMenage !== undefined;
+    // Must have exactly one Cuisine type and exactly one Menage type
+    const cuisineCount = selectedTypes.filter(t => isCuisineType(t)).length;
+    const menageCount = selectedTypes.filter(t => isMenageType(t)).length;
+    
+    console.log('🔍 Selection details:', {
+      selectedCuisine: selectedCuisine ? { id: selectedCuisine.id, name: selectedCuisine.name } : null,
+      selectedMenage: selectedMenage ? { id: selectedMenage.id, name: selectedMenage.name } : null,
+      cuisineCount,
+      menageCount
+    });
+    
+    const canReserveResult = selectedCuisine !== undefined && 
+           selectedMenage !== undefined && 
+           cuisineCount === 1 && 
+           menageCount === 1;
+    
+    console.log('✅ canReserve result:', canReserveResult);
+    return canReserveResult;
+  };
+
+  // Check if at least one kitchen type is selected (for kitchen category only)
+  const canReserveKitchen = () => {
+    if (!isKitchenCategoryCheck() || isMenageCuisineCategory()) return false;
+    return selectedTypes.length > 0;
+  };
+
+  // Check if a type is selected for menage/1 page (single selection)
+  const canReserveMenageSingle = () => {
+    if (!isMenageSingleSelectionPage()) return false;
+    return selectedSingleType !== null;
   };
 
   // Handle reservation for Ménage + cuisine
@@ -624,9 +686,91 @@ export default function CategoryHouseDetails() {
     }
   };
 
+  // Handle reservation for Kitchen category only
+  const handleReserveKitchen = () => {
+    if (!canReserveKitchen()) return;
+    
+    const prefill = {
+      serviceTitle: service?.name || service?.title,
+      categoryTitle: category?.name,
+      selectedTypes: selectedTypes.map(t => ({ 
+        id: t.id, 
+        name: t.name,
+        category: 'Cuisine'
+      })),
+      message: `Catégorie: ${category?.name}, Types sélectionnés: ${selectedTypes.map(t => t.name).join(', ')}${surface ? `, Surface: ${surface} m²` : ''}`,
+      type: selectedTypes.map(t => t.name).join(' + '),
+      size: surface || '',
+      totalPrice: price || 0,
+    };
+    
+    try {
+      localStorage.setItem('booking_prefill', JSON.stringify(prefill));
+      navigate('/booking');
+    } catch (err) {
+      console.error('Error saving prefill:', err);
+      navigate('/booking');
+    }
+  };
+
+  // Handle reservation for menage/1 page (single selection)
+  const handleReserveMenageSingle = () => {
+    if (!canReserveMenageSingle()) return;
+    
+    const prefill = {
+      serviceTitle: service?.name || service?.title,
+      categoryTitle: category?.name,
+      selectedTypes: [{
+        id: selectedSingleType.id,
+        name: selectedSingleType.name,
+        category: 'Ménage'
+      }],
+      message: `Catégorie: ${category?.name}, Type sélectionné: ${selectedSingleType.name}${surface ? `, Surface: ${surface} m²` : ''}`,
+      type: selectedSingleType.name,
+      size: surface || '',
+      totalPrice: price || 0,
+    };
+    
+    try {
+      localStorage.setItem('booking_prefill', JSON.stringify(prefill));
+      navigate('/booking');
+    } catch (err) {
+      console.error('Error saving prefill:', err);
+      navigate('/booking');
+    }
+  };
+
+  // Check if this is menage/1 page (single selection mode)
+  const isMenageSingleSelectionPage = () => {
+    return serviceSlug === 'menage' && categorySlug === '1';
+  };
+
+  // Handle single type selection for menage/1 page (only one card can be selected)
+  const handleSingleTypeSelect = (type) => {
+    if (isMenageSingleSelectionPage()) {
+      // If clicking the same card, deselect it
+      if (selectedSingleType && selectedSingleType.id === type.id) {
+        setSelectedSingleType(null);
+      } else {
+        // Select only this card (replace any previous selection)
+        setSelectedSingleType(type);
+      }
+    }
+  };
+
+  // Check if a type is selected (for single selection mode)
+  const isSingleTypeSelected = (type) => {
+    return selectedSingleType && selectedSingleType.id === type.id;
+  };
+
   // Check if category is Ménage + cuisine
   const isMenageCuisineCategory = () => {
-    return category && (
+    if (!category) {
+      console.log('❌ isMenageCuisineCategory: No category');
+      return false;
+    }
+    
+    const result = (
       category.name_fr === 'Ménage + cuisine' ||
       category.name_fr === 'Ménage et cuisine' ||
       category.name_en === 'Housekeeping + kitchen' ||
@@ -636,8 +780,23 @@ export default function CategoryHouseDetails() {
       category.name === 'Ménage + cuisine' ||
       category.name === 'Ménage et cuisine' ||
       category.name === 'Housekeeping + kitchen' ||
-      category.name === 'Housekeeping and kitchen'
+      category.name === 'Housekeeping and kitchen' ||
+      category.id === 13 || // Also check by ID for /services/menage/13
+      (serviceSlug === 'menage' && categorySlug === '13')
     );
+    
+    console.log('🔍 isMenageCuisineCategory check:', {
+      categoryId: category.id,
+      categoryName: category.name,
+      categoryNameFr: category.name_fr,
+      categoryNameEn: category.name_en,
+      categoryNameAr: category.name_ar,
+      serviceSlug,
+      categorySlug,
+      result
+    });
+    
+    return result;
   };
 
   // Check if category is Car Cleaning
@@ -873,6 +1032,7 @@ export default function CategoryHouseDetails() {
 
       {/* Special display for Ménage + cuisine category - Two columns */}
       {isMenageCuisineCategory() && (menageTypes.length > 0 || cuisineTypes.length > 0) ? (
+        <>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -1093,6 +1253,60 @@ export default function CategoryHouseDetails() {
             </div>
           </div>
         </div>
+        
+        {/* Reserve button for Ménage + cuisine - shows only when both types are selected */}
+        {/* Button is outside the grid to prevent layout shifts */}
+        <div style={{
+          width: '100%',
+          minHeight: canReserve() ? 'auto' : '0px',
+          marginTop: '32px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '16px',
+          transition: 'opacity 0.3s ease, transform 0.3s ease',
+          opacity: canReserve() ? 1 : 0,
+          transform: canReserve() ? 'translateY(0)' : 'translateY(-10px)',
+          pointerEvents: canReserve() ? 'auto' : 'none',
+          visibility: canReserve() ? 'visible' : 'hidden'
+        }}>
+          {canReserve() && (
+            <button
+              onClick={handleReserveMenageCuisine}
+              style={{
+                padding: '14px 32px',
+                backgroundColor: '#10b981',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '600',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = '#059669';
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = '#10b981';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.4)';
+              }}
+            >
+              <span>📅</span>
+              {i18n.language === 'ar' ? 'احجز الآن' : 
+               i18n.language === 'fr' ? 'Réserver maintenant' : 
+               'Reserve now'}
+            </button>
+          )}
+        </div>
+        </>
       ) : getDisplayTypes().length > 0 ? (
         <div className="types-grid">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -1323,12 +1537,15 @@ export default function CategoryHouseDetails() {
                 );
               }
               
-              // Otherwise, render as a normal link
+              // Otherwise, render as a normal link or with select button for kitchen category or menage/1
               const typeOptions = typeOptionsMap[type.id];
+              const isKitchenPage = isKitchenCategoryCheck();
+              const isMenageSinglePage = isMenageSingleSelectionPage();
+              const selected = isKitchenPage ? isTypeSelected(type) : (isMenageSinglePage ? isSingleTypeSelected(type) : false);
+              
               return (
                 <div key={type.id} style={{ position: 'relative' }}>
-                  <Link
-                    to={`/services/${serviceSlug}/${categorySlug}/${typeSlug}`}
+                  <div
                     className="type-card"
                     style={{
                       backgroundImage: bgImage 
@@ -1336,11 +1553,137 @@ export default function CategoryHouseDetails() {
                         : undefined,
                       backgroundSize: bgImage ? 'cover' : undefined,
                       backgroundPosition: bgImage ? 'center' : undefined,
-                      backgroundRepeat: bgImage ? 'no-repeat' : undefined
+                      backgroundRepeat: bgImage ? 'no-repeat' : undefined,
+                      cursor: (isKitchenPage || isMenageSinglePage) ? 'default' : 'pointer',
+                      position: 'relative'
                     }}
+                    onClick={(!isKitchenPage && !isMenageSinglePage) ? undefined : undefined}
                   >
-                    <h4>{type.name}</h4>
-                  </Link>
+                    {/* Selection button for kitchen category */}
+                    {isKitchenPage && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTypeSelect(type);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          width: '32px',
+                          height: '32px',
+                          backgroundColor: selected ? '#10b981' : 'rgba(255, 255, 255, 0.95)',
+                          border: selected ? '2px solid #10b981' : '2px solid #3b82f6',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 10,
+                          transition: 'all 0.3s ease',
+                          boxShadow: selected 
+                            ? '0 2px 8px rgba(16, 185, 129, 0.4)' 
+                            : '0 2px 6px rgba(0, 0, 0, 0.2)'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!selected) {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+                            e.currentTarget.style.borderColor = '#2563eb';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          } else {
+                            e.currentTarget.style.backgroundColor = '#059669';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!selected) {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                            e.currentTarget.style.borderColor = '#3b82f6';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          } else {
+                            e.currentTarget.style.backgroundColor = '#10b981';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }
+                        }}
+                      >
+                        {selected && (
+                          <span style={{
+                            color: '#fff',
+                            fontSize: '20px',
+                            fontWeight: 'bold',
+                            lineHeight: '1'
+                          }}>✓</span>
+                        )}
+                      </div>
+                    )}
+                    {/* Selection button for menage/1 page (single selection) */}
+                    {isMenageSinglePage && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSingleTypeSelect(type);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          width: '32px',
+                          height: '32px',
+                          backgroundColor: selected ? '#10b981' : 'rgba(255, 255, 255, 0.95)',
+                          border: selected ? '2px solid #10b981' : '2px solid #3b82f6',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 10,
+                          transition: 'all 0.3s ease',
+                          boxShadow: selected 
+                            ? '0 2px 8px rgba(16, 185, 129, 0.4)' 
+                            : '0 2px 6px rgba(0, 0, 0, 0.2)'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!selected) {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+                            e.currentTarget.style.borderColor = '#2563eb';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          } else {
+                            e.currentTarget.style.backgroundColor = '#059669';
+                            e.currentTarget.style.transform = 'scale(1.1)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!selected) {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                            e.currentTarget.style.borderColor = '#3b82f6';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          } else {
+                            e.currentTarget.style.backgroundColor = '#10b981';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }
+                        }}
+                      >
+                        {selected && (
+                          <span style={{
+                            color: '#fff',
+                            fontSize: '20px',
+                            fontWeight: 'bold',
+                            lineHeight: '1'
+                          }}>✓</span>
+                        )}
+                      </div>
+                    )}
+                    {!isKitchenPage && !isMenageSinglePage ? (
+                      <Link
+                        to={`/services/${serviceSlug}/${categorySlug}/${typeSlug}`}
+                        style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
+                      >
+                        <h4>{type.name}</h4>
+                      </Link>
+                    ) : (
+                      <h4>{type.name}</h4>
+                    )}
+                  </div>
                   {/* Display options below the card if available */}
                   {typeOptions && typeOptions.length > 0 && (
                     <div style={{
@@ -1389,9 +1732,9 @@ export default function CategoryHouseDetails() {
               );
             })}
           </div>
-          
-          {/* Reserve button for Ménage + cuisine - shows only when both types are selected */}
-          {isMenageCuisineCategory() && canReserve() && (
+
+          {/* Reserve button for Kitchen category - shows when at least one type is selected */}
+          {isKitchenCategoryCheck() && !isMenageCuisineCategory() && canReserveKitchen() && (
             <div style={{
               marginTop: '32px',
               display: 'flex',
@@ -1400,7 +1743,7 @@ export default function CategoryHouseDetails() {
               gap: '16px'
             }}>
               <button
-                onClick={handleReserveMenageCuisine}
+                onClick={handleReserveKitchen}
                 style={{
                   padding: '14px 32px',
                   backgroundColor: '#10b981',
@@ -1427,10 +1770,55 @@ export default function CategoryHouseDetails() {
                   e.target.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.4)';
                 }}
               >
-                <span>✓</span>
+                <span>📅</span>
                 {i18n.language === 'ar' ? 'احجز الآن' : 
-                 i18n.language === 'fr' ? 'Réserver' : 
-                 'Reserve'}
+                 i18n.language === 'fr' ? 'Réserver maintenant' : 
+                 'Reserve now'}
+              </button>
+            </div>
+          )}
+
+          {/* Reserve button for menage/1 page - shows when a type is selected */}
+          {isMenageSingleSelectionPage() && canReserveMenageSingle() && (
+            <div style={{
+              marginTop: '32px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '16px'
+            }}>
+              <button
+                onClick={handleReserveMenageSingle}
+                style={{
+                  padding: '14px 32px',
+                  backgroundColor: '#10b981',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = '#059669';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = '#10b981';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.4)';
+                }}
+              >
+                <span>📅</span>
+                {i18n.language === 'ar' ? 'احجز الآن' : 
+                 i18n.language === 'fr' ? 'Réserver maintenant' : 
+                 'Reserve now'}
               </button>
             </div>
           )}
