@@ -1333,7 +1333,10 @@
     "price_per_hour": "Prix par heure",
     "price_per_day": "Prix par jour",
     "minimum_hours": "Heures minimum",
-    "minimum_jours": "Jours minimum"
+    "minimum_jours": "Jours minimum",
+    "minimum_duration_error": "La durée minimale du service est de 30 jours",
+    "contact_for_negotiation": "Moins d'un mois, veuillez nous contacter pour négocier selon la durée",
+    "monthly_rate": "Tarif mensuel (170 DH par jour)"
   },
   "hand_worker_appointment": {
     "title": "Réserver un rendez-vous",

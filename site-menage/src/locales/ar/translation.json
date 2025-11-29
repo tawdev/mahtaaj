@@ -1377,6 +1377,7 @@
     "minimum_jours": "الحد الأدنى للأيام",
     "price_per_hour": "السعر في الساعة",
     "minimum_hours": "الحد الأدنى للساعات",
+    "minimum_duration_error": "الحد الأدنى لمدة الخدمة هو 30 يوماً",
     "monthly_rate": "السعر الشهري (170 DH لكل يوم)",
     "contact_for_negotiation": "أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة"
   },

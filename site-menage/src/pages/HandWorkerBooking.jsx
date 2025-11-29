@@ -19,6 +19,7 @@ export default function HandWorkerBooking() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [durationError, setDurationError] = useState('');
 
   const [formData, setFormData] = useState({
     client_first_name: '',
@@ -30,7 +31,7 @@ export default function HandWorkerBooking() {
     service_description: '',
     preferred_date: '',
     preferred_time: '',
-    duration_days: 1,
+    duration_days: 30,
     location: '',
     address: '',
     city: '',
@@ -137,13 +138,24 @@ export default function HandWorkerBooking() {
       ...prev, 
       category_id: categoryId,
       hand_worker_id: '',
-      duration_days: category?.minimum_jours || 1 // Default to minimum days or 1
+      duration_days: category?.minimum_jours && category.minimum_jours >= 30 ? category.minimum_jours : 30 // Default to minimum days (at least 30)
     }));
     loadHandWorkers(categoryId);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Validate duration_days: minimum 30 days
+    if (name === 'duration_days') {
+      const days = parseFloat(value);
+      if (value && !isNaN(days) && days < 30) {
+        setDurationError(t('hand_worker_booking.minimum_duration_error', 'الحد الأدنى لمدة الخدمة هو 30 يوماً'));
+      } else {
+        setDurationError('');
+      }
+    }
+    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -264,12 +276,12 @@ export default function HandWorkerBooking() {
   const calculateTotalPrice = () => {
     if (selectedCategory && formData.duration_days) {
       const days = parseFloat(formData.duration_days);
-      // Calculate price if more than 30 days (170 DH per day)
-      if (days > 30) {
+      // Calculate price if 30 days or more (170 DH per day)
+      if (days >= 30) {
         const pricePerDay = 170; // Fixed price per day
         return pricePerDay * days;
       }
-      // For 30 days or less, return null (no automatic price calculation)
+      // For less than 30 days, return null (no automatic price calculation)
       return null;
     }
     return null;
@@ -278,7 +290,7 @@ export default function HandWorkerBooking() {
   const isDurationMoreThanMonth = () => {
     if (formData.duration_days) {
       const days = parseFloat(formData.duration_days);
-      return days > 30;
+      return days >= 30;
     }
     return false;
   };
@@ -293,8 +305,18 @@ export default function HandWorkerBooking() {
       return;
     }
 
+    // Validate duration_days: minimum 30 days
+    const days = parseFloat(formData.duration_days);
+    if (!formData.duration_days || isNaN(days) || days < 30) {
+      const errorMsg = t('hand_worker_booking.minimum_duration_error', 'الحد الأدنى لمدة الخدمة هو 30 يوماً');
+      setDurationError(errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
     setSubmitting(true);
     setError('');
+    setDurationError('');
 
     try {
       console.log('[HandWorkerBooking] Starting submission...');
@@ -371,7 +393,7 @@ export default function HandWorkerBooking() {
         service_description: '',
         preferred_date: '',
         preferred_time: '',
-        duration_days: 1,
+        duration_days: 30,
         location: '',
         address: '',
         city: '',
@@ -551,11 +573,14 @@ export default function HandWorkerBooking() {
                   name="duration_days"
                   value={formData.duration_days}
                   onChange={handleInputChange}
-                  className="form-input"
-                  min="1"
+                  className={`form-input ${durationError ? 'error' : ''}`}
+                  min="30"
                   step="1"
                   required
                 />
+                {durationError && (
+                  <span className="error-text">{durationError}</span>
+                )}
               </div>
               <div className="form-group">
                 <label className="form-label">{t('hand_worker_booking.preferred_date')} *</label>

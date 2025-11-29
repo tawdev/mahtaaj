@@ -24,17 +24,17 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
 
   // Calculate price based on booking type and duration
   const calculatePrice = (bookingType, duration, startDateJours = null, endDateJours = null) => {
-    const basePrice = 150; // Prix de base pour 4 heures
-    const extraHourRate = 40; // Prix par heure supplémentaire après 4 heures
-    const dayRate = 300; // Prix par jour (8 heures = 150 + 4*40 = 310, arrondi à 300)
+    const basePrice = 250; // Prix de base pour 7 heures
+    const extraHourRate = 40; // Prix par heure supplémentaire après 7 heures
+    const dayRate = 300; // Prix par jour (8 heures = 250 + 1*40 = 290, arrondi à 300)
     
     if (bookingType === 'heures') {
-      // Si ≤ 4 heures: prix de base
-      if (duration <= 4) {
+      // Si ≤ 7 heures: prix de base
+      if (duration <= 7) {
         return basePrice;
       }
-      // Si > 4 heures: prix de base + 40 DH par heure supplémentaire
-      const extraHours = duration - 4;
+      // Si > 7 heures: prix de base + 40 DH par heure supplémentaire
+      const extraHours = duration - 7;
       return basePrice + (extraHours * extraHourRate);
     } else {
       // Pour les jours: utiliser duration المحسوبة مسبقاً
@@ -697,20 +697,28 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
           <div className="price-breakdown">
             {formData.booking_type === 'heures' ? (
               <>
-                {displayDuration <= 4 ? (
-                  <div className="price-item">
-                    <span>Prix de base (4h):</span>
-                    <span>150 MAD</span>
-                  </div>
+                {displayDuration <= 7 ? (
+                  <>
+                    <div className="price-item">
+                      <span>Prix de base (7h):</span>
+                      <span>250 MAD</span>
+                    </div>
+                    <div className="price-item price-extra-info">
+                      <span>+ 1h = 40 MAD</span>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <div className="price-item">
-                      <span>Prix de base (4h):</span>
-                      <span>150 MAD</span>
+                      <span>Prix de base (7h):</span>
+                      <span>250 MAD</span>
                     </div>
                     <div className="price-item">
-                      <span>Heures supplémentaires ({displayDuration - 4} × 40 MAD):</span>
-                      <span>{(displayDuration - 4) * 40} MAD</span>
+                      <span>Heures supplémentaires ({displayDuration - 7} × 40 MAD):</span>
+                      <span>{(displayDuration - 7) * 40} MAD</span>
+                    </div>
+                    <div className="price-item price-extra-info">
+                      <span>+ 1h = 40 MAD</span>
                     </div>
                   </>
                 )}
