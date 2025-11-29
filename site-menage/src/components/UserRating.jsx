@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getRatings, getAllRatings, submitRating, hasUserRatedSite } from '../api-supabase';
 import './UserRating.css';
 
 export default function UserRating() {
+  const { t, i18n } = useTranslation();
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -18,7 +20,7 @@ export default function UserRating() {
     recent_comments: []
   });
   const [allRatings, setAllRatings] = useState([]);
-  // Show all by default (can collapse with Masquer)
+  // Afficher tout par défaut (peut être masqué avec le bouton Masquer)
   const [showAllComments, setShowAllComments] = useState(true);
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function UserRating() {
       setHasRated(result.hasRated);
       setUserRating(result.rating);
     } catch (e) {
-      console.error('Error checking user rating:', e);
+      console.error('Erreur lors de la vérification de l\'évaluation utilisateur:', e);
     } finally {
       setCheckingRating(false);
     }
@@ -46,18 +48,18 @@ export default function UserRating() {
         setStats(response.data);
       }
     } catch (e) {
-      console.error('Error loading rating stats:', e);
+      console.error('Erreur lors du chargement des statistiques d\'évaluation:', e);
     }
   };
 
   const loadAll = async () => {
     try {
       const response = await getAllRatings();
-      // accept either {success,data:{ratings:[]}} or array
+      // Accepter soit {success,data:{ratings:[]}} soit un tableau
       const list = Array.isArray(response?.data) ? response.data : (response?.data?.ratings || response?.ratings || []);
       setAllRatings(Array.isArray(list) ? list : []);
     } catch (e) {
-      console.error('Error loading all ratings:', e);
+      console.error('Erreur lors du chargement de toutes les évaluations:', e);
     }
   };
 
@@ -78,7 +80,7 @@ export default function UserRating() {
     e.preventDefault();
     
     if (rating === 0) {
-      setError('Veuillez sélectionner une note');
+      setError(t('user_rating.select_rating_error'));
       return;
     }
 
@@ -98,23 +100,23 @@ export default function UserRating() {
         setRating(0);
         setComment('');
         
-        // Reload user rating to get the new rating data
+        // Recharger l'évaluation utilisateur pour obtenir les nouvelles données
         await checkUserRating();
         
-        // Reset submitted state after 3 seconds
+        // Réinitialiser l'état de soumission après 3 secondes
         setTimeout(() => {
           setSubmitted(false);
         }, 3000);
       } else {
-        setError(response.message || 'Erreur lors de l\'envoi');
-        // If error is about already rated, update hasRated state
-        if (response.message?.includes('déjà soumis')) {
+        setError(response.message || t('user_rating.submit_error'));
+        // Si l'erreur concerne une évaluation déjà effectuée, mettre à jour l'état hasRated
+        if (response.message?.includes('déjà soumis') || response.message?.toLowerCase().includes('already')) {
           await checkUserRating();
         }
       }
     } catch (e) {
-      console.error('Error submitting rating:', e);
-      setError(e.message || 'Erreur lors de l\'envoi de votre évaluation');
+      console.error('Erreur lors de la soumission de l\'évaluation:', e);
+      setError(e.message || t('user_rating.submit_error_full'));
     } finally {
       setLoading(false);
     }
@@ -159,13 +161,13 @@ export default function UserRating() {
     const sorted = [...stats.recent_comments].sort((a, b) => {
       const da = new Date(a.created_at).getTime();
       const db = new Date(b.created_at).getTime();
-      return db - da; // newest first
+      return db - da; // plus récent en premier
     });
 
     return (
       <div className="recent-comments">
         <div className="recent-header">
-          <h4>Derniers avis</h4>
+          <h4>{t('user_rating.recent_comments')}</h4>
           <button
             type="button"
             className="outline-toggle"
@@ -182,7 +184,7 @@ export default function UserRating() {
               marginLeft: 'auto'
             }}
           >
-            {showAllComments ? 'Masquer' : 'Voir tous les avis'}
+            {showAllComments ? t('user_rating.hide') : t('user_rating.show_all')}
           </button>
         </div>
         {showAllComments && (
@@ -197,7 +199,7 @@ export default function UserRating() {
                 <div className="comment-text-area">
                   <p>"{comment.comment}"</p>
                 </div>
-                <small className="comment-date">{new Date(comment.created_at).toLocaleDateString('fr-FR')}</small>
+                <small className="comment-date">{new Date(comment.created_at).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'en' ? 'en-US' : 'fr-FR')}</small>
               </div>
             ))}
           </div>
@@ -210,27 +212,27 @@ export default function UserRating() {
     <section className="user-rating-section">
       <div className="rating-container">
         <div className="rating-header">
-          <h2 className="rating-title">Évaluez notre site 🌟</h2>
+          <h2 className="rating-title">{t('user_rating.title')}</h2>
           <p className="rating-subtitle">
-            Votre avis nous aide à améliorer nos services
+            {t('user_rating.subtitle')}
           </p>
         </div>
 
         <div className="rating-stats">
           <div className="stats-item">
             <div className="stats-value">{stats.average_rating.toFixed(1)}</div>
-            <div className="stats-label">Note moyenne</div>
+            <div className="stats-label">{t('user_rating.average_rating')}</div>
           </div>
           <div className="stats-item">
             <div className="stats-value">{stats.total_ratings}</div>
-            <div className="stats-label">Évaluations</div>
+            <div className="stats-label">{t('user_rating.total_ratings')}</div>
           </div>
         </div>
 
         {checkingRating ? (
           <div className="rating-loading">
             <div className="loading-spinner"></div>
-            <p>Vérification en cours...</p>
+            <p>{t('user_rating.checking')}</p>
           </div>
         ) : hasRated ? (
           <div className="rating-already-submitted">
@@ -239,7 +241,7 @@ export default function UserRating() {
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#fbbf24" stroke="#f59e0b" strokeWidth="2"/>
               </svg>
             </div>
-            <h3>Vous avez déjà évalué notre site</h3>
+            <h3>{t('user_rating.already_rated_title')}</h3>
             {userRating && (
               <div className="user-rating-display">
                 <div className="user-rating-stars">
@@ -251,11 +253,11 @@ export default function UserRating() {
                   <p className="user-rating-comment">"{userRating.comment}"</p>
                 )}
                 <small className="user-rating-date">
-                  Évalué le {new Date(userRating.created_at).toLocaleDateString('fr-FR')}
+                  {t('user_rating.rated_on')} {new Date(userRating.created_at).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'en' ? 'en-US' : 'fr-FR')}
                 </small>
               </div>
             )}
-            <p className="already-rated-message">Merci pour votre évaluation ! Vous ne pouvez évaluer qu'une seule fois.</p>
+            <p className="already-rated-message">{t('user_rating.already_rated_message')}</p>
           </div>
         ) : submitted ? (
           <div className="rating-success">
@@ -265,8 +267,8 @@ export default function UserRating() {
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
               </svg>
             </div>
-            <h3>Merci pour votre évaluation !</h3>
-            <p>Votre avis a été enregistré avec succès.</p>
+            <h3>{t('user_rating.success_title')}</h3>
+            <p>{t('user_rating.success_message')}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="rating-form">
@@ -277,7 +279,7 @@ export default function UserRating() {
               <div className="rating-text">
                 {rating > 0 && (
                   <span className="selected-rating">
-                    {rating} étoile{rating > 1 ? 's' : ''}
+                    {rating} {rating > 1 ? t('user_rating.stars') : t('user_rating.star')}
                   </span>
                 )}
               </div>
@@ -285,19 +287,19 @@ export default function UserRating() {
 
             <div className="comment-section">
               <label htmlFor="comment" className="comment-label">
-                Votre avis (optionnel)
+                {t('user_rating.comment_label')}
               </label>
               <textarea
                 id="comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Partagez votre expérience avec nous..."
+                placeholder={t('user_rating.comment_placeholder')}
                 className="comment-textarea"
                 rows="4"
                 maxLength="500"
               />
               <div className="comment-counter">
-                {comment.length}/500 caractères
+                {comment.length}/500 {t('user_rating.characters')}
               </div>
             </div>
 
@@ -320,10 +322,10 @@ export default function UserRating() {
               {loading ? (
                 <>
                   <div className="loading-spinner"></div>
-                  Envoi en cours...
+                  {t('user_rating.sending')}
                 </>
               ) : (
-                'Envoyer mon évaluation'
+                t('user_rating.submit')
               )}
             </button>
           </form>

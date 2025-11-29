@@ -1435,12 +1435,37 @@
   "support": {
     "title": "Support & Assistance",
     "intro": "If you encounter any issue while using the platform or have any questions, you can contact us via the following phone number or email.",
-    "message": "Our support team is available at any time to assist you. Don’t hesitate to reach out.",
+    "message": "Our support team is available at any time to assist you. Don't hesitate to reach out.",
     "phone_label": "Phone",
     "email_label": "Email",
     "hours_label": "Working Hours",
     "hours_value": "Monday to Friday – 9:00 AM to 6:00 PM",
     "call_now": "Call Now",
     "send_message": "Send a Message"
+  },
+  "user_rating": {
+    "title": "Rate our site 🌟",
+    "subtitle": "Your feedback helps us improve our services",
+    "average_rating": "Average rating",
+    "total_ratings": "Ratings",
+    "checking": "Checking...",
+    "already_rated_title": "You have already rated our site",
+    "rated_on": "Rated on",
+    "already_rated_message": "Thank you for your rating! You can only rate once.",
+    "success_title": "Thank you for your rating!",
+    "success_message": "Your feedback has been successfully recorded.",
+    "comment_label": "Your review (optional)",
+    "comment_placeholder": "Share your experience with us...",
+    "characters": "characters",
+    "select_rating_error": "Please select a rating",
+    "sending": "Sending...",
+    "submit": "Submit my rating",
+    "recent_comments": "Latest reviews",
+    "hide": "Hide",
+    "show_all": "View all reviews",
+    "star": "star",
+    "stars": "stars",
+    "submit_error": "Error sending",
+    "submit_error_full": "Error sending your rating"
   }
 }
