@@ -105,9 +105,27 @@ export default function CategoryHouseDetails() {
     }, 0);
   };
 
-  // Calculate price for carpets/sofas (using 2.5 DH per m² as default)
+  // Calculate price for carpets/sofas
   const calculateCarpetSofaPrice = () => {
     const totalArea = calculateCarpetSofaArea();
+    const categoryId = parseInt(categorySlug);
+    
+    // For tapis (category 14), use 15 DH per m²
+    if (categoryId === 14) {
+      return totalArea * 15;
+    }
+    
+    // For canapés (category 15), special pricing
+    if (categoryId === 15) {
+      // If area ≤ 8 m², fixed price of 800 DH
+      if (totalArea <= 8) {
+        return 800;
+      }
+      // If area > 8 m², price = area × 100 DH
+      return totalArea * 100;
+    }
+    
+    // Default price for other categories (both, etc.)
     return totalArea * 2.5;
   };
 
