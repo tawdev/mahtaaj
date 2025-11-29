@@ -14,6 +14,37 @@ export default function UserRating() {
   const [hasRated, setHasRated] = useState(false);
   const [userRating, setUserRating] = useState(null);
   const [checkingRating, setCheckingRating] = useState(true);
+
+  // Fonction pour formater les dates selon la langue
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+    
+    const lang = (i18n.language || 'fr').split(/[-_]/)[0].toLowerCase();
+    
+    // Extraire les composants de la date
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    
+    // Formater avec zéro devant si nécessaire
+    const dayStr = day.toString().padStart(2, '0');
+    const monthStr = month.toString().padStart(2, '0');
+    const yearStr = year.toString();
+    
+    if (lang === 'ar') {
+      // Format arabe : JJ/MM/AAAA (identique au français)
+      return `${dayStr}/${monthStr}/${yearStr}`;
+    } else if (lang === 'en') {
+      // Format américain : MM/DD/YYYY
+      return `${monthStr}/${dayStr}/${yearStr}`;
+    } else {
+      // Format français : JJ/MM/AAAA
+      return `${dayStr}/${monthStr}/${yearStr}`;
+    }
+  };
   const [stats, setStats] = useState({
     total_ratings: 0,
     average_rating: 0,
@@ -199,7 +230,7 @@ export default function UserRating() {
                 <div className="comment-text-area">
                   <p>"{comment.comment}"</p>
                 </div>
-                <small className="comment-date">{new Date(comment.created_at).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'en' ? 'en-US' : 'fr-FR')}</small>
+                <small className="comment-date">{formatDate(comment.created_at)}</small>
               </div>
             ))}
           </div>
@@ -253,7 +284,7 @@ export default function UserRating() {
                   <p className="user-rating-comment">"{userRating.comment}"</p>
                 )}
                 <small className="user-rating-date">
-                  {t('user_rating.rated_on')} {new Date(userRating.created_at).toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'en' ? 'en-US' : 'fr-FR')}
+                  {t('user_rating.rated_on')} {formatDate(userRating.created_at)}
                 </small>
               </div>
             )}
