@@ -799,6 +799,32 @@ export default function CategoryHouseDetails() {
     return result;
   };
 
+  // Check if category is Ménage (only, not Ménage + cuisine)
+  const isMenageCategory = () => {
+    if (!category) {
+      return false;
+    }
+    
+    // Check if it's Ménage category (not Ménage + cuisine)
+    const isMenage = (
+      category.name_fr === 'Ménage' ||
+      category.name_en === 'Housekeeping' ||
+      category.name_ar === 'التنظيف' ||
+      category.name_ar === 'التدبير المنزلي' ||
+      category.name === 'Ménage' ||
+      category.name === 'Housekeeping' ||
+      category.name === 'التنظيف' ||
+      (category.name_fr && category.name_fr.toLowerCase().includes('ménage') && !category.name_fr.includes('+') && !category.name_fr.includes('et')) ||
+      (category.name_en && category.name_en.toLowerCase().includes('housekeeping') && !category.name_en.includes('+') && !category.name_en.includes('and')) ||
+      (category.name_ar && (category.name_ar.includes('تنظيف') || category.name_ar.includes('تدبير')) && !category.name_ar.includes('+') && !category.name_ar.includes('و'))
+    );
+    
+    // Also check by route: /services/menage/1
+    const isMenageRoute = serviceSlug === 'menage' && categorySlug === '1';
+    
+    return isMenage || isMenageRoute;
+  };
+
   // Check if category is Car Cleaning
   const isCarCleaningCategory = () => {
     return category && (
@@ -962,7 +988,12 @@ export default function CategoryHouseDetails() {
     return (
       <main className="services-page">
         <div className="error-state">{error || t('services_page.loading_error')}</div>
-        <Link to={serviceSlug ? `/services/${serviceSlug}` : '/services'} className="back-button">{t('services_page.category_details.back_to_services')}</Link>
+        <Link 
+          to={isMenageCategory() ? '/services' : (serviceSlug ? `/services/${serviceSlug}` : '/services')} 
+          className="back-button"
+        >
+          {t('services_page.category_details.back_to_services')}
+        </Link>
       </main>
     );
   }
@@ -970,7 +1001,10 @@ export default function CategoryHouseDetails() {
   return (
     <main className="services-page">
       <div className="category-details-header">
-        <Link to={`/services/${serviceSlug}`} className="back-button">
+        <Link 
+          to={isMenageCategory() ? '/services' : `/services/${serviceSlug}`} 
+          className="back-button"
+        >
           ← {t('services_page.back')}
         </Link>
         {isCarCleaningCategory() ? (
@@ -1911,7 +1945,11 @@ export default function CategoryHouseDetails() {
                   <span>✓</span>
                   {t('services_page.forms.reserve')}
                 </button>
-                <Link to={`/services/${serviceSlug}`} className="back-services-button" style={{ marginTop: '16px', display: 'block', textAlign: 'center' }}>
+                <Link 
+                  to={isMenageCategory() ? '/services' : `/services/${serviceSlug}`} 
+                  className="back-services-button" 
+                  style={{ marginTop: '16px', display: 'block', textAlign: 'center' }}
+                >
                   {t('services_page.category_details.back_to_services')}
                 </Link>
               </div>
@@ -2054,7 +2092,10 @@ export default function CategoryHouseDetails() {
                 >
                   {t('services_page.forms.reserve')}
                 </button>
-                <Link to={`/services/${serviceSlug}`} className="back-services-button">
+                <Link 
+                  to={isMenageCategory() ? '/services' : `/services/${serviceSlug}`} 
+                  className="back-services-button"
+                >
                   {t('services_page.category_details.back_to_services')}
                 </Link>
               </div>
@@ -2091,7 +2132,10 @@ export default function CategoryHouseDetails() {
                 <button onClick={handleReserve} className="reserve-button">
                   {t('services_page.forms.reserve')}
                 </button>
-                <Link to={`/services/${serviceSlug}`} className="back-services-button">
+                <Link 
+                  to={isMenageCategory() ? '/services' : `/services/${serviceSlug}`} 
+                  className="back-services-button"
+                >
                   {t('services_page.category_details.back_to_services')}
                 </Link>
               </div>

@@ -156,7 +156,12 @@ export default function ServiceCategories() {
     return (
       <main className="services-page">
         <div className="error-state">{error || 'Service non trouvé'}</div>
-        <Link to="/services" className="back-button">Retour aux services</Link>
+        <Link 
+          to={serviceSlug === 'menage' ? '/tous-les-services' : '/services'} 
+          className="back-button"
+        >
+          Retour aux services
+        </Link>
       </main>
     );
   }
@@ -164,7 +169,12 @@ export default function ServiceCategories() {
   return (
     <main className="services-page">
       <div className="services-header">
-        <Link to="/services" className="back-button">← {t('services_page.back')}</Link>
+        <Link 
+          to={serviceSlug === 'menage' ? '/tous-les-services' : '/services'} 
+          className="back-button"
+        >
+          ← {t('services_page.back')}
+        </Link>
         <h1>{formatServiceTitle(service.name || service.title)}</h1>
       </div>
 
