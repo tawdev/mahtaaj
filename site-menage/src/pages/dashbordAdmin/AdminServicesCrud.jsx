@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LanguageFields from '../../components/LanguageFields';
 import { getServicesAdmin, createServiceAdmin, updateServiceAdmin, deleteServiceAdmin } from '../../api-supabase';
+import { supabase } from '../../lib/supabase';
 import getServiceIcon from '../../utils/serviceIcons';
 import './AdminServicesCrud.css';
 
@@ -12,6 +13,9 @@ export default function AdminServicesCrud({ token }) {
   const [showForm, setShowForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({ 
     title: '', 
     description: '', 
@@ -22,6 +26,7 @@ export default function AdminServicesCrud({ token }) {
     description_fr: '',
     description_en: '',
     slug: '',
+    image: '',
     is_active: true,
     sort_order: 0,
     order: 0
@@ -31,6 +36,100 @@ export default function AdminServicesCrud({ token }) {
   useEffect(() => {
     loadServices();
   }, [token]);
+
+  // Upload image to Supabase Storage
+  const uploadImage = async (file) => {
+    try {
+      setUploadingImage(true);
+      
+      const fileName = `service_${Date.now()}_${Math.random().toString(36).substring(7)}.${file.name.split('.').pop()}`;
+      const filePath = fileName;
+
+      console.log('[AdminServices] Uploading image:', fileName, 'to bucket: employees');
+
+      const { data, error } = await supabase.storage
+        .from('employees')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('[AdminServices] Upload error:', error);
+        
+        if (error.message?.includes('Bucket not found') || error.statusCode === '404') {
+          throw new Error('Bucket "employees" غير موجود. يرجى إنشاء bucket "employees" في Supabase Storage أولاً.');
+        }
+        
+        throw error;
+      }
+
+      console.log('[AdminServices] Upload successful:', data);
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('employees')
+        .getPublicUrl(filePath);
+
+      console.log('[AdminServices] Image uploaded successfully, public URL:', publicUrl);
+
+      if (publicUrl) {
+        setFormData(prev => ({ ...prev, image: publicUrl }));
+        setImageFile(null);
+        return publicUrl;
+      }
+      
+      throw new Error('Aucune URL d\'image retournée');
+    } catch (err) {
+      console.error('[AdminServices] Erreur lors du téléchargement de l\'image:', err);
+      setError('Erreur lors du téléchargement de l\'image: ' + err.message);
+      return null;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Handle image file selection
+  const handleImageUpload = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Veuillez sélectionner un fichier image valide');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La taille du fichier ne doit pas dépasser 5MB');
+      return;
+    }
+
+    setImageFile(file);
+    setError('');
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+
+    // Upload image immediately
+    await uploadImage(file);
+  };
+
+  // Remove image
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setFormData(prev => ({
+      ...prev,
+      image: ''
+    }));
+    const fileInput = document.getElementById('service_image_upload');
+    if (fileInput) fileInput.value = '';
+  };
 
   const loadServices = async () => {
     try {
@@ -62,6 +161,16 @@ export default function AdminServicesCrud({ token }) {
     setSuccessMessage('');
 
     try {
+      // Handle image upload if imageFile exists
+      let imageUrl = formData.image || null;
+      if (imageFile && !uploadingImage) {
+        imageUrl = await uploadImage(imageFile);
+        if (!imageUrl) {
+          setSubmitting(false);
+          return;
+        }
+      }
+
       // Prepare data - remove empty strings and null values
       const cleanData = {
         name_fr: formData.name_fr?.trim() || null,
@@ -71,6 +180,7 @@ export default function AdminServicesCrud({ token }) {
         description_ar: formData.description_ar?.trim() || null,
         description_en: formData.description_en?.trim() || null,
         slug: formData.slug?.trim() || null,
+        image: imageUrl || null,
         is_active: formData.is_active !== false,
         sort_order: parseInt(formData.sort_order) || 0,
         order: parseInt(formData.order) || 0
@@ -94,7 +204,9 @@ export default function AdminServicesCrud({ token }) {
       
       setShowForm(false);
       setEditingService(null);
-      setFormData({ title: '', description: '', name_ar:'', name_fr:'', name_en:'', description_ar:'', description_fr:'', description_en:'', slug:'', is_active: true, sort_order: 0, order: 0 });
+      setImageFile(null);
+      setImagePreview(null);
+      setFormData({ title: '', description: '', name_ar:'', name_fr:'', name_en:'', description_ar:'', description_fr:'', description_en:'', slug:'', image: '', is_active: true, sort_order: 0, order: 0 });
       
       setTimeout(() => {
         setSuccessMessage('');
@@ -122,10 +234,13 @@ export default function AdminServicesCrud({ token }) {
       description_fr: service.description_fr || '',
       description_en: service.description_en || '',
       slug: service.slug || '',
+      image: service.image || '',
       is_active: service.is_active !== false,
       sort_order: service.sort_order || 0,
       order: service.order || 0
     });
+    setImageFile(null);
+    setImagePreview(service.image || null);
     setShowForm(true);
   };
 
@@ -177,7 +292,9 @@ export default function AdminServicesCrud({ token }) {
   const handleCancel = () => {
     setShowForm(false);
     setEditingService(null);
-    setFormData({ title: '', description: '', name_ar:'', name_fr:'', name_en:'', description_ar:'', description_fr:'', description_en:'', slug:'', is_active: true, sort_order: 0, order: 0 });
+    setImageFile(null);
+    setImagePreview(null);
+    setFormData({ title: '', description: '', name_ar:'', name_fr:'', name_en:'', description_ar:'', description_fr:'', description_en:'', slug:'', image: '', is_active: true, sort_order: 0, order: 0 });
   };
 
 
@@ -251,6 +368,46 @@ export default function AdminServicesCrud({ token }) {
                   <small style={{color:'#64748b'}}>
                     L'icône est déterminée automatiquement selon le nom/slug du service.
                   </small>
+                </div>
+              </div>
+
+              <div className="admin-services-field">
+                <label htmlFor="service_image_upload">Image du service</label>
+                <div className="image-upload-container">
+                  {imagePreview && (
+                    <div className="image-preview-container">
+                      <img src={imagePreview} alt="Preview" className="image-preview" />
+                      <button type="button" onClick={removeImage} className="remove-image-btn">×</button>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    id="service_image_upload"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                  />
+                  <label
+                    htmlFor="service_image_upload"
+                    className="upload-image-btn"
+                    style={{
+                      background: uploadingImage ? '#94a3b8' : '#2563eb',
+                      color: 'white',
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      cursor: uploadingImage ? 'not-allowed' : 'pointer',
+                      display: 'inline-block',
+                      marginTop: '10px'
+                    }}
+                  >
+                    {uploadingImage ? '⏳ Téléchargement...' : '📁 Télécharger une image'}
+                  </label>
+                  {formData.image && !imagePreview && (
+                    <div className="image-preview-container" style={{ marginTop: '10px' }}>
+                      <img src={formData.image} alt="Current" className="image-preview" />
+                      <button type="button" onClick={removeImage} className="remove-image-btn">×</button>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -363,6 +520,11 @@ export default function AdminServicesCrud({ token }) {
             
             return (
               <div key={service.id} className={`admin-services-card ${!service.is_active ? 'inactive' : ''}`}>
+                {service.image && (
+                  <div className="admin-services-card-image">
+                    <img src={service.image} alt={serviceName} />
+                  </div>
+                )}
                 <div className="admin-services-card-header">
                   <span className="admin-services-icon" title="Icône dérivée automatiquement">
                     {getServiceIcon(service)}

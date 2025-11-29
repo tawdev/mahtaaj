@@ -2135,14 +2135,6 @@ export default function Booking() {
                 >
                   {loading ? t('booking.submitting', 'Envoi en cours...') : t('booking.submit', 'Envoyer la demande')}
                 </button>
-                <button 
-                  type="button" 
-                  className="submit-button" 
-                  style={{background:'#10b981'}}
-                  onClick={saveDraftAndGoServices}
-                >
-                  {t('booking.add_service', '+ Ajouter un service')}
-                </button>
               </div>
             </form>
           )}

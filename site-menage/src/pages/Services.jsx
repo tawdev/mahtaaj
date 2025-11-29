@@ -436,7 +436,7 @@ export default function Services() {
         .home-service-card {
           background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
           border-radius: 20px;
-          padding: 28px 24px;
+          padding: 0;
           box-shadow: 0 4px 20px rgba(0,0,0,0.08);
           border: 1px solid rgba(255,255,255,0.2);
           transition: all 0.4s ease-in-out;
@@ -445,9 +445,90 @@ export default function Services() {
           height: 100%;
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          align-items: center;
+          justify-content: flex-start;
+          align-items: stretch;
           text-align: center;
+        }
+        
+        .service-card-image {
+          width: 100%;
+          height: 200px;
+          margin: 0;
+          border-radius: 20px 20px 0 0;
+          overflow: hidden;
+          background: #f1f5f9;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          flex-shrink: 0;
+          transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .service-card-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 20px 20px 0 0;
+          transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .home-service-card:hover .service-card-image {
+          height: 120px;
+        }
+        
+        .home-service-card:hover .service-card-image img {
+          transform: scale(0.85);
+        }
+        
+        .service-content {
+          padding: 20px 24px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .service-title-section {
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .service-title-section h3 {
+          margin: 0;
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: #1e293b;
+          letter-spacing: -0.025em;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .service-description-section {
+          max-height: 0;
+          overflow: hidden;
+          opacity: 0;
+          transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                      opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                      margin-top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          margin-top: 0;
+        }
+        
+        .service-description-section p {
+          margin: 0;
+          color: #475569;
+          line-height: 1.6;
+          font-size: 0.95rem;
+        }
+        
+        .home-service-card:hover .service-description-section {
+          max-height: 200px;
+          opacity: 1;
+          margin-top: 8px;
+        }
+        
+        .home-service-card:hover .service-title-section h3 {
+          font-size: 1.1rem;
+          margin-bottom: 4px;
         }
         
         .home-service-card::before {
@@ -486,52 +567,6 @@ export default function Services() {
           opacity: 1;
         }
         
-        /* Strict flip structure */
-        .home-service-card { perspective: 1000px; }
-        .home-service-card .service-inner {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          transform-style: preserve-3d;
-          transition: transform 0.8s ease-in-out;
-        }
-        .home-service-card:hover .service-inner,
-        .service-card-link:hover .home-service-card .service-inner,
-        .pcard:hover .home-service-card .service-inner {
-          transform: rotateY(180deg);
-        }
-        .home-service-card .service-front,
-        .home-service-card .service-back {
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
-          width: 100%; height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 24px;
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
-        }
-        .home-service-card .service-front {
-          z-index: 2;
-          transform: rotateY(0deg);
-          text-align: center;
-        }
-        .home-service-card .service-front h3 { 
-          font-size: 1.5rem; font-weight: 700; color: #1e293b; letter-spacing: -0.025em; margin: 0;
-        }
-        .home-service-card .service-back {
-          transform: rotateY(180deg);
-          z-index: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 1rem;
-          background: rgba(255,255,255,0.9);
-          color: #000;
-          text-align: center;
-        }
-        .home-service-card .service-back p { margin: 0; line-height: 1.6; }
         
         .home-service-status {
           margin-top: 16px;
@@ -1529,6 +1564,7 @@ export default function Services() {
                   <ServiceCard 
                     title={service.name || service.title} 
                     description={service.description}
+                    image={service.image}
                     isActive={service.is_active}
                   />
                   <span className="pcard__shine" aria-hidden></span>

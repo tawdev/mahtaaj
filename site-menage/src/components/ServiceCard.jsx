@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-export default function ServiceCard({ icon, title, description, isActive = true }) {
+export default function ServiceCard({ icon, title, description, image, isActive = true }) {
   const { t } = useTranslation();
   
   // Function to get translated text or fallback to original
@@ -30,11 +30,16 @@ export default function ServiceCard({ icon, title, description, isActive = true 
 
   return (
     <article className={`home-service-card service-card ${!isActive ? 'inactive' : ''}`}>
-      <div className="service-inner">
-        <div className="service-front">
+      {image && (
+        <div className="service-card-image">
+          <img src={image} alt={title} />
+        </div>
+      )}
+      <div className="service-content">
+        <div className="service-title-section">
           <h3>{getTranslatedText(title, `services.${serviceKey}.title`)}</h3>
         </div>
-        <div className="service-back">
+        <div className="service-description-section">
           <p>{getTranslatedText(description, `services.${serviceKey}.description`)}</p>
         </div>
       </div>
