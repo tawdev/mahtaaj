@@ -17,6 +17,7 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
     name_fr: '',
     name_en: '',
     image: '',
+    price: '',
     is_active: true,
     order: 0
   });
@@ -298,7 +299,11 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
       
       const submitData = {
         ...formData,
-        image: imageUrl || formData.image || null
+        image: imageUrl || formData.image || null,
+        // price: convertir en nombre (numeric) ou null
+        price: formData.price !== '' && formData.price !== null
+          ? Number(parseFloat(formData.price).toFixed(2))
+          : null
       };
       
       let data, error;
@@ -338,6 +343,7 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
         name_fr: '', 
         name_en: '',
         image: '',
+        price: '',
         is_active: true, 
         order: 0 
       });
@@ -358,6 +364,9 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
       name_fr: categoryHouse.name_fr || '',
       name_en: categoryHouse.name_en || '',
       image: categoryHouse.image || '',
+      price: (categoryHouse.price !== null && categoryHouse.price !== undefined)
+        ? String(categoryHouse.price)
+        : '',
       is_active: categoryHouse.is_active !== undefined ? categoryHouse.is_active : true,
       order: categoryHouse.order || 0
     });
@@ -406,6 +415,7 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
       name_fr: '', 
       name_en: '',
       image: '',
+      price: '',
       is_active: true, 
       order: 0 
     });
@@ -636,6 +646,23 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
 
               <div className="form-row">
                 <div className="form-group">
+                  <label htmlFor="price">Prix (DH)</label>
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    min="0"
+                    step="0.01"
+                    placeholder="Ex: 200.00"
+                  />
+                  <small className="form-help">
+                    Prix de base pour cette catégorie (optionnel).
+                  </small>
+                </div>
+
+                <div className="form-group">
                   <label htmlFor="order">Ordre</label>
                   <input
                     type="number"
@@ -686,6 +713,7 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
               <th>Nom (AR)</th>
               <th>Nom (FR)</th>
               <th>Nom (EN)</th>
+              <th>Prix (DH)</th>
               <th>Statut</th>
               <th>Ordre</th>
               <th>Créé le</th>
@@ -700,7 +728,7 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
                 </td>
               </tr>
             ) : (
-              filteredCategoriesHouse.map(categoryHouse => {
+            filteredCategoriesHouse.map(categoryHouse => {
                 const imageUrl = getImageUrl(categoryHouse.image || categoryHouse.image_url);
                 // Extract filename for fallback to products bucket
                 const getFilename = (path) => {
@@ -752,6 +780,11 @@ export default function AdminCategoryHouseCrud({ token, onAuthError }) {
                     <td className="category-name">{categoryHouse.name_ar || '-'}</td>
                     <td className="category-name">{categoryHouse.name_fr || '-'}</td>
                     <td className="category-name">{categoryHouse.name_en || '-'}</td>
+                    <td>
+                      {categoryHouse.price !== null && categoryHouse.price !== undefined
+                        ? `${Number(categoryHouse.price).toFixed(2)} DH`
+                        : '-'}
+                    </td>
                     <td>
                       <span className={`status ${categoryHouse.is_active ? 'active' : 'inactive'}`}>
                         {categoryHouse.is_active ? 'Active' : 'Inactive'}

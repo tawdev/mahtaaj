@@ -1088,8 +1088,10 @@ export default function CategoryHouseDetails() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '24px',
-          marginTop: '24px'
+          columnGap: '40px',
+          rowGap: '32px',
+          marginTop: '32px',
+          alignItems: 'flex-start'
         }}>
           {/* Left Column - Menage Types */}
           <div>
@@ -1192,6 +1194,24 @@ export default function CategoryHouseDetails() {
                       )}
                     </div>
                     <h4>{type.name}</h4>
+                    {type.price !== null && type.price !== undefined && !isNaN(parseFloat(type.price)) && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '12px',
+                        left: '12px',
+                        right: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#10b981',
+                        textAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                      }}>
+                        {parseFloat(type.price).toFixed(2)} DH / m²
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1299,6 +1319,24 @@ export default function CategoryHouseDetails() {
                       )}
                     </div>
                     <h4>{type.name}</h4>
+                    {type.price !== null && type.price !== undefined && !isNaN(parseFloat(type.price)) && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '12px',
+                        left: '12px',
+                        right: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#10b981',
+                        textAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                      }}>
+                        {parseFloat(type.price).toFixed(2)} DH 
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -1494,6 +1532,25 @@ export default function CategoryHouseDetails() {
                       )}
                     </div>
                     <h4>{type.name}</h4>
+                    {type.price !== null && type.price !== undefined && !isNaN(parseFloat(type.price)) && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '12px',
+                        left: '12px',
+                        right: '12px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#10b981',
+                        textAlign: 'center',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        zIndex: 5
+                      }}>
+                        {parseFloat(type.price).toFixed(2)} DH / m²
+                      </div>
+                    )}
                     {/* Display options if available */}
                     {typeOptionsMap[type.id] && typeOptionsMap[type.id].length > 0 && (
                       <div style={{
@@ -1589,30 +1646,67 @@ export default function CategoryHouseDetails() {
                 );
               }
               
-              // Otherwise, render as a normal link or with select button for kitchen category or menage/1
+              // Otherwise, render as a normal link or with select button for kitchen category
               const typeOptions = typeOptionsMap[type.id];
               const isKitchenPage = isKitchenCategoryCheck();
-              const isMenageSinglePage = isMenageSingleSelectionPage();
-              const selected = isKitchenPage ? isTypeSelected(type) : (isMenageSinglePage ? isSingleTypeSelected(type) : false);
+              const selected = isKitchenPage ? isTypeSelected(type) : false;
               
               return (
                 <div key={type.id} style={{ position: 'relative' }}>
-                  <div
-                    className="type-card"
-                    style={{
-                      backgroundImage: bgImage 
-                        ? `url(${bgImage})` 
-                        : undefined,
-                      backgroundSize: bgImage ? 'cover' : undefined,
-                      backgroundPosition: bgImage ? 'center' : undefined,
-                      backgroundRepeat: bgImage ? 'no-repeat' : undefined,
-                      cursor: (isKitchenPage || isMenageSinglePage) ? 'default' : 'pointer',
-                      position: 'relative'
-                    }}
-                    onClick={(!isKitchenPage && !isMenageSinglePage) ? undefined : undefined}
-                  >
-                    {/* Selection button for kitchen category */}
-                    {isKitchenPage && (
+                  {!isKitchenPage ? (
+                    <Link
+                      to={`/services/${serviceSlug}/${categorySlug}/${typeSlug}`}
+                      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                    >
+                      <div
+                        className="type-card"
+                        style={{
+                          backgroundImage: bgImage 
+                            ? `url(${bgImage})` 
+                            : undefined,
+                          backgroundSize: bgImage ? 'cover' : undefined,
+                          backgroundPosition: bgImage ? 'center' : undefined,
+                          backgroundRepeat: bgImage ? 'no-repeat' : undefined,
+                          cursor: 'pointer',
+                          position: 'relative'
+                        }}
+                      >
+                        <h4>{type.name}</h4>
+                        {type.price !== null && type.price !== undefined && !isNaN(parseFloat(type.price)) && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '12px',
+                            left: '12px',
+                            right: '12px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            padding: '6px 10px',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#10b981',
+                            textAlign: 'center',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                          }}>
+                            {parseFloat(type.price).toFixed(2)} DH / m²
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                  ) : (
+                    <div
+                      className="type-card"
+                      style={{
+                        backgroundImage: bgImage 
+                          ? `url(${bgImage})` 
+                          : undefined,
+                        backgroundSize: bgImage ? 'cover' : undefined,
+                        backgroundPosition: bgImage ? 'center' : undefined,
+                        backgroundRepeat: bgImage ? 'no-repeat' : undefined,
+                        cursor: 'default',
+                        position: 'relative'
+                      }}
+                    >
+                      {/* Selection button for kitchen category */}
                       <div
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1667,75 +1761,27 @@ export default function CategoryHouseDetails() {
                           }}>✓</span>
                         )}
                       </div>
-                    )}
-                    {/* Selection button for menage/1 page (single selection) */}
-                    {isMenageSinglePage && (
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSingleTypeSelect(type);
-                        }}
-                        style={{
-                          position: 'absolute',
-                          top: '12px',
-                          right: '12px',
-                          width: '32px',
-                          height: '32px',
-                          backgroundColor: selected ? '#10b981' : 'rgba(255, 255, 255, 0.95)',
-                          border: selected ? '2px solid #10b981' : '2px solid #3b82f6',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          zIndex: 10,
-                          transition: 'all 0.3s ease',
-                          boxShadow: selected 
-                            ? '0 2px 8px rgba(16, 185, 129, 0.4)' 
-                            : '0 2px 6px rgba(0, 0, 0, 0.2)'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!selected) {
-                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-                            e.currentTarget.style.borderColor = '#2563eb';
-                            e.currentTarget.style.transform = 'scale(1.1)';
-                          } else {
-                            e.currentTarget.style.backgroundColor = '#059669';
-                            e.currentTarget.style.transform = 'scale(1.1)';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!selected) {
-                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-                            e.currentTarget.style.borderColor = '#3b82f6';
-                            e.currentTarget.style.transform = 'scale(1)';
-                          } else {
-                            e.currentTarget.style.backgroundColor = '#10b981';
-                            e.currentTarget.style.transform = 'scale(1)';
-                          }
-                        }}
-                      >
-                        {selected && (
-                          <span style={{
-                            color: '#fff',
-                            fontSize: '20px',
-                            fontWeight: 'bold',
-                            lineHeight: '1'
-                          }}>✓</span>
-                        )}
-                      </div>
-                    )}
-                    {!isKitchenPage && !isMenageSinglePage ? (
-                      <Link
-                        to={`/services/${serviceSlug}/${categorySlug}/${typeSlug}`}
-                        style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}
-                      >
-                        <h4>{type.name}</h4>
-                      </Link>
-                    ) : (
                       <h4>{type.name}</h4>
-                    )}
-                  </div>
+                      {type.price !== null && type.price !== undefined && !isNaN(parseFloat(type.price)) && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '12px',
+                          left: '12px',
+                          right: '12px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          padding: '6px 10px',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#10b981',
+                          textAlign: 'center',
+                          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                        }}>
+                          {parseFloat(type.price).toFixed(2)} DH
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {/* Display options below the card if available */}
                   {typeOptions && typeOptions.length > 0 && (
                     <div style={{

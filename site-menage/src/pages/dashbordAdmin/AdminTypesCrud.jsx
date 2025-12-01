@@ -22,6 +22,7 @@ export default function AdminTypesCrud({ token, onAuthError }) {
     description_fr: '',
     description_en: '',
     image: '',
+    price: '',
     is_active: true,
     order: 0
   });
@@ -244,6 +245,10 @@ export default function AdminTypesCrud({ token, onAuthError }) {
         description_fr: formData.description_fr?.trim() || null,
         description_en: formData.description_en?.trim() || null,
         image: imageUrl || formData.image || null,
+        // Price: stocké en nombre (numeric) dans la base, on garde string dans le formulaire
+        price: formData.price !== '' && formData.price !== null
+          ? Number(parseFloat(formData.price).toFixed(2))
+          : null,
         is_active: formData.is_active !== undefined ? formData.is_active : true,
         order: parseInt(formData.order) || 0
       };
@@ -261,7 +266,7 @@ export default function AdminTypesCrud({ token, onAuthError }) {
           .from('types')
           .update(typeData)
           .eq('id', editingType.id)
-          .select('id, category_house_id, name, name_ar, name_fr, name_en, description, description_ar, description_fr, description_en, image, is_active, order, created_at, updated_at');
+          .select('id, category_house_id, name, name_ar, name_fr, name_en, description, description_ar, description_fr, description_en, image, price, is_active, order, created_at, updated_at');
         data = result.data && result.data.length > 0 ? result.data[0] : null;
         error = result.error;
       } else {
@@ -269,7 +274,7 @@ export default function AdminTypesCrud({ token, onAuthError }) {
         const result = await supabase
           .from('types')
           .insert(typeData)
-          .select('id, category_house_id, name, name_ar, name_fr, name_en, description, description_ar, description_fr, description_en, image, is_active, order, created_at, updated_at')
+          .select('id, category_house_id, name, name_ar, name_fr, name_en, description, description_ar, description_fr, description_en, image, price, is_active, order, created_at, updated_at')
           .single();
         data = result.data;
         error = result.error;
@@ -327,6 +332,7 @@ export default function AdminTypesCrud({ token, onAuthError }) {
         description_fr: '',
         description_en: '',
         image: '',
+        price: '',
         is_active: true, 
         order: 0 
       });
@@ -351,6 +357,7 @@ export default function AdminTypesCrud({ token, onAuthError }) {
       description_fr: type.description_fr || '',
       description_en: type.description_en || '',
       image: type.image || '',
+      price: (type.price !== null && type.price !== undefined) ? String(type.price) : '',
       is_active: type.is_active !== undefined ? type.is_active : true,
       order: type.order || 0
     });
@@ -451,6 +458,7 @@ export default function AdminTypesCrud({ token, onAuthError }) {
       description_fr: '',
       description_en: '',
       image: '',
+      price: '',
       is_active: true, 
       order: 0 
     });
@@ -1005,6 +1013,22 @@ export default function AdminTypesCrud({ token, onAuthError }) {
 
               <div className="form-row">
                 <div className="form-group">
+                  <label htmlFor="price">Prix (DH)</label>
+                  <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    min="0"
+                    step="0.01"
+                    placeholder="Ex: 150.00"
+                  />
+                  <small className="form-help">
+                    Prix de base pour ce type (optionnel). Utilisé dans les calculs de réservation.
+                  </small>
+                </div>
+                <div className="form-group">
                   <label htmlFor="order">Ordre</label>
                   <input
                     type="number"
@@ -1056,6 +1080,7 @@ export default function AdminTypesCrud({ token, onAuthError }) {
               <th>Nom (FR)</th>
               <th>Nom (EN)</th>
               <th>Description (FR)</th>
+              <th>Prix (DH)</th>
               <th>Image</th>
               <th>Statut</th>
               <th>Ordre</th>
@@ -1103,6 +1128,11 @@ export default function AdminTypesCrud({ token, onAuthError }) {
                   <td className="category-name">{type.name_fr || '-'}</td>
                   <td className="category-name">{type.name_en || '-'}</td>
                   <td className="category-description">{type.description_fr || type.description || '-'}</td>
+                    <td>
+                      {type.price !== null && type.price !== undefined
+                        ? `${Number(type.price).toFixed(2)} DH`
+                        : '-'}
+                    </td>
                   <td>
                     {type.image_url || type.image ? (
                       <img 

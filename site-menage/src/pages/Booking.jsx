@@ -49,6 +49,18 @@ export default function Booking() {
     selectedCategory.name_ar === 'مطبخ'
   );
 
+  // Types sélectionnés depuis Ménage + cuisine
+  const hasSelectedCuisineTypes = selectedTypes.some(
+    (st) => st.category && st.category.toLowerCase().includes('cuisine')
+  );
+  const hasSelectedMenageTypes = selectedTypes.some(
+    (st) =>
+      st.category &&
+      (st.category.toLowerCase().includes('ménage') ||
+        st.category.toLowerCase().includes('menage') ||
+        st.category.toLowerCase().includes('housekeeping'))
+  );
+
   // Check if message contains "Catégorie: غسيل" or "Catégorie: كيّ"
   const isWashingOrIroningFromMessage = (() => {
     const message = messageValue || (messageRef.current?.value || '');
@@ -1485,14 +1497,142 @@ export default function Booking() {
     };
   }, [selectedService, selectedCategory, typeValue, sizeValue, fillMenageMessage, isValidMessage, i18n.language, messageAutoFilled, isMenageService]);
 
+  // Helper: récupérer le prix/m² dynamique pour les catégories Ménage (basé sur le type, sinon 2.5)
+  const getCurrentMenageRate = () => {
+    // Ne s'applique qu'aux catégories non-Cuisine avec une catégorie sélectionnée
+    if (!isCuisineCategory && selectedCategory) {
+      // Si un type est sélectionné et que la liste des types est chargée, utiliser son price
+      if (selectedTypeId && Array.isArray(types) && types.length > 0) {
+        const currentType = types.find((t) => t.id === selectedTypeId);
+        if (currentType && currentType.price !== undefined && currentType.price !== null) {
+          const parsed = parseFloat(currentType.price);
+          if (!isNaN(parsed) && parsed > 0) {
+            return parsed;
+          }
+        }
+      }
+      // Fallback: valeur par défaut 2.5 DH/m²
+      return 2.5;
+    }
+    return 2.5;
+  };
+
+  // Helper: récupérer le prix de base pour les catégories Cuisine
+  // - Si on vient de Ménage + cuisine ou de /services/menage/2 avec selectedTypes,
+  //   on somme les prix des types dont la catégorie contient "Cuisine"
+  // - Sinon, pour une catégorie Cuisine simple (un seul type), on prend le prix du type sélectionné
+  const getCuisineBasePrice = () => {
+    if (!Array.isArray(types) || types.length === 0) return 0;
+
+    // Cas 1: Ménage + cuisine OU /services/menage/2 avec selectedTypes "Cuisine"
+    if (hasSelectedCuisineTypes) {
+      let total = 0;
+      selectedTypes.forEach((st) => {
+        // On ne prend que les types de catégorie "Cuisine"
+        if (st.category && st.category.toLowerCase().includes('cuisine')) {
+          const matched = types.find((t) => t.id === st.id);
+          if (matched && matched.price !== null && matched.price !== undefined) {
+            const p = parseFloat(matched.price);
+            if (!isNaN(p) && p > 0) {
+              total += p;
+            }
+          }
+        }
+      });
+      if (total > 0) return total;
+    }
+
+    // Cas 2: catégorie Cuisine simple avec un type sélectionné
+    if (isCuisineCategory && selectedTypeId) {
+      const matched = types.find((t) => t.id === selectedTypeId);
+      if (matched && matched.price !== null && matched.price !== undefined) {
+        const p = parseFloat(matched.price);
+        if (!isNaN(p) && p > 0) {
+          return p;
+        }
+      }
+    }
+
+    return 0;
+  };
+
+  // Helper: récupérer le tarif/m² pour le type Ménage sélectionné (Ménage + cuisine)
+  const getMenageRateFromSelectedTypes = () => {
+    if (!hasSelectedMenageTypes || !Array.isArray(types) || types.length === 0) return 0;
+
+    const menageType = selectedTypes.find(
+      (st) =>
+        st.category &&
+        (st.category.toLowerCase().includes('ménage') ||
+          st.category.toLowerCase().includes('menage') ||
+          st.category.toLowerCase().includes('housekeeping'))
+    );
+
+    if (!menageType) return 0;
+
+    const matched = types.find((t) => t.id === menageType.id);
+    if (matched && matched.price !== null && matched.price !== undefined) {
+      const p = parseFloat(matched.price);
+      if (!isNaN(p) && p > 0) {
+        return p;
+      }
+    }
+
+    return 0;
+  };
+
   // Effet pour recalculer le prix quand la taille, le service ou le type change
   useEffect(() => {
-    if (selectedService && sizeValue) {
-      // Pour les catégories non-Cuisine avec Category House sélectionnée, utiliser la formule: Surface × 2.5
-      if (!isCuisineCategory && selectedCategory && sizeValue) {
+    if (!selectedService) {
+      setCalculatedPrice(0);
+      return;
+    }
+
+    // 1) Cas Ménage + cuisine : au moins un type Ménage ET un type Cuisine sélectionnés
+    if (hasSelectedCuisineTypes && hasSelectedMenageTypes) {
+      const menageRate = getMenageRateFromSelectedTypes(); // prix/m² du type Ménage sélectionné
+      const cuisinePrice = getCuisineBasePrice(); // somme des prix des types Cuisine sélectionnés
+
+      const surfaceNum = parseFloat(sizeValue);
+
+      if (!isNaN(surfaceNum) && surfaceNum > 0 && menageRate > 0) {
+        let basePrice = surfaceNum * menageRate + (cuisinePrice || 0);
+        if (promo?.discount) {
+          const d = Math.max(0, Math.min(100, Number(promo.discount)));
+          basePrice = basePrice * (1 - d / 100);
+        }
+        setCalculatedPrice(basePrice);
+      } else {
+        // Surface non renseignée ou tarif ménage manquant → pas de prix estimé
+        setCalculatedPrice(0);
+      }
+      return;
+    }
+
+    // 2) Cas Cuisine seule (ex: /services/menage/2) : utiliser uniquement le prix des types Cuisine sélectionnés
+    if (isCuisineCategory || hasSelectedCuisineTypes) {
+      const baseCuisinePrice = getCuisineBasePrice();
+      if (baseCuisinePrice > 0) {
+        let finalPrice = baseCuisinePrice;
+        if (promo?.discount) {
+          const d = Math.max(0, Math.min(100, Number(promo.discount)));
+          finalPrice = finalPrice * (1 - d / 100);
+        }
+        setCalculatedPrice(finalPrice);
+      } else {
+        setCalculatedPrice(0);
+      }
+      return;
+    }
+
+    // 3) Cas standard (non-Cuisine) basé sur la surface
+    if (sizeValue) {
+      // Pour les catégories non-Cuisine avec Category House sélectionnée, utiliser la formule: Surface × tarif dynamique
+      if (!isCuisineCategory && selectedCategory) {
         const surfaceNum = parseFloat(sizeValue);
         if (!isNaN(surfaceNum) && surfaceNum > 0) {
-          let basePrice = surfaceNum * 2.5;
+          const unitRate = getCurrentMenageRate();
+          let basePrice = surfaceNum * unitRate;
           if (promo?.discount) {
             const d = Math.max(0, Math.min(100, Number(promo.discount)));
             basePrice = basePrice * (1 - d / 100);
@@ -1501,13 +1641,14 @@ export default function Booking() {
           return;
         }
       }
+
       // Pour les autres cas (sans Category House ou autres services), utiliser la fonction calculatePrice existante
       const price = calculatePrice(selectedService, sizeValue);
       setCalculatedPrice(price);
     } else {
       setCalculatedPrice(0);
     }
-  }, [selectedService, sizeValue, typeValue, promo, isCuisineCategory, selectedCategory]);
+  }, [selectedService, sizeValue, typeValue, promo, isCuisineCategory, selectedCategory, selectedTypes, selectedTypeId, types, hasSelectedCuisineTypes, hasSelectedMenageTypes]);
 
   const totalWithExtras = (() => {
     const base = calculatedPrice || 0;
@@ -1646,7 +1787,10 @@ export default function Booking() {
     if (choixtypeId) payload.choixtype_id = choixtypeId;
     if (form.email && form.email.value.trim()) payload.email = form.email.value.trim();
     if (form.size && form.size.value.trim()) payload.size = form.size.value.trim();
-    if (calculatedPrice > 0) payload.total_price = calculatedPrice;
+    // Utiliser le même montant que celui affiché (prix de base + services ajoutés)
+    if (totalWithExtras > 0) {
+      payload.total_price = totalWithExtras;
+    }
     // Store selected_types in admin_notes as JSON if needed for reference
     if (selectedTypes.length > 0) {
       const selectedTypesInfo = selectedTypes.map(t => ({ id: t.id, name: t.name, category: t.category }));
@@ -1821,13 +1965,41 @@ export default function Booking() {
                 required
               />
 
-              {/* Size field hidden - removed per user request */}
-              <input 
-                type="hidden" 
-                id="size" 
-                name="size" 
-                value={sizeValue || ''}
-              />
+              {/* Champ surface (m²) :
+                  - visible uniquement pour les flux Ménage + cuisine (showSizeField true)
+                  - sinon gardé en champ caché pour compatibilité backend */}
+              {showSizeField ? (
+                <div className="form-group">
+                  <label htmlFor="size">
+                    {t('booking.size_label', 'Surface du type Ménage (m²)')} *
+                  </label>
+                  <input
+                    type="number"
+                    id="size"
+                    name="size"
+                    min="0"
+                    step="0.5"
+                    required
+                    value={sizeValue || ''}
+                    onChange={(e) => setSizeValue(e.target.value)}
+                    className="form-input"
+                    placeholder={t('booking.size_placeholder', 'Ex: 80')}
+                  />
+                  <small className="form-help">
+                    {t(
+                      'booking.size_help',
+                      'Indiquez la surface à nettoyer pour le type Ménage sélectionné.'
+                    )}
+                  </small>
+                </div>
+              ) : (
+                <input 
+                  type="hidden" 
+                  id="size" 
+                  name="size" 
+                  value={sizeValue || ''}
+                />
+              )}
 
               {/* Display selected types from Ménage + cuisine */}
               {selectedTypes.length > 0 && (
@@ -2054,42 +2226,18 @@ export default function Booking() {
                 </div>
               )}
 
-              {calculatedPrice > 0 && (
-                <div className="form-group price-calculation">
-                  <div className="price-display">
-                    <div className="price-label">{t('booking.estimated_price', 'Prix estimé :')}</div>
-                  <div className="price-value">{totalWithExtras.toFixed(2)} DH</div>
+              <div className="form-group price-calculation">
+                <div className="price-display">
+                  <div className="price-label">
+                    {t('booking.estimated_price', 'Prix estimé :')}
                   </div>
-                  <small className="form-help">
-                  {!isCuisineCategory && selectedCategory && sizeValue ? (
-                    // For non-Cuisine categories, show: Surface × 2.5 DH/m²
-                    t('booking.price_breakdown_simple', 'Estimation basée sur {{size}} m² × 2.5 DH/m²{{extras}}', { 
-                      size: sizeValue,
-                      extras: extraServices.length > 0 ? ` + services ajoutés` : ''
-                    })
-                  ) : (
-                    // For other cases, use the existing breakdown
-                    t('booking.price_breakdown', 'Estimation basée sur {{size}} m² × {{rate}} DH/m² + services ajoutés', { 
-                      size: sizeValue, 
-                      rate: (() => {
-                        if (selectedService === 'bureaux ou usine') {
-                          return typeValue === 'Usine' ? '4.00' : '3.00';
-                        } else if (selectedService === 'Lavage de vitres' || selectedService === 'Lavage des vitres') {
-                          return typeValue === 'Extérieur' ? '2.80' : '2.00';
-                        } else if (selectedService === 'Ligne des maisons et repassage') {
-                          return typeValue === 'Repassage' ? '2.20' : '1.50';
-                        } else if (selectedService === 'Airbnb Cleaning') {
-                          return typeValue === 'Check-out' ? '3.50' : '3.00';
-                        } else if (selectedService === 'Pool Cleaning') {
-                          return typeValue === 'Nettoyage profond' ? '2.60' : '1.80';
-                        }
-                        return calculatePrice(selectedService, 1).toFixed(2);
-                      })()
-                    })
-                  )}
-                  </small>
+                  <div className="price-value">
+                    {totalWithExtras > 0
+                      ? `${totalWithExtras.toFixed(2)} DH`
+                      : '--'}
+                  </div>
                 </div>
-              )}
+              </div>
 
               {/* PromoCode field hidden - removed per user request */}
 

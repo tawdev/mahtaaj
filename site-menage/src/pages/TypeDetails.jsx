@@ -54,12 +54,18 @@ export default function TypeDetails() {
   }, [serviceSlug, categorySlug, typeSlug, categoryId, subCategoryId, typeId]);
 
   useEffect(() => {
+    // Utiliser le prix depuis la base de données (champ price dans types) comme prix par m²
+    // avec une valeur par défaut à 2.5 si non défini.
+    const unitPrice = type && !isNaN(parseFloat(type.price))
+      ? parseFloat(type.price)
+      : 2.5;
+
     if (surface && !isNaN(parseFloat(surface))) {
-      setPrice(parseFloat(surface) * 2.5);
+      setPrice(parseFloat(surface) * unitPrice);
     } else {
       setPrice(0);
     }
-  }, [surface]);
+  }, [surface, type]);
 
   const loadType = async () => {
     // Early return if no typeSlug or typeId - this should not happen but safety check
@@ -410,6 +416,11 @@ export default function TypeDetails() {
   const currentName = getNameByLang(selectedLang);
   const currentDescription = getDescriptionByLang(selectedLang);
 
+  // Prix par m² basé sur la base de données (types.price) avec fallback à 2.5
+  const pricePerM2 = type && !isNaN(parseFloat(type.price))
+    ? parseFloat(type.price)
+    : 2.5;
+
   // Check if the category is Cuisine/مطبخ/Kitchen
   const isCuisineCategory = () => {
     return category && (
@@ -486,6 +497,24 @@ export default function TypeDetails() {
             </div>
           </div>
 
+          {/* Bloc de prix de base (prix normal depuis la base de données) */}
+          {!isCuisineCategory() && (
+            <div>
+              <div style={sectionTitle}>
+                {selectedLang === 'ar' ? '💰 السعر الأساسي' :
+                 selectedLang === 'fr' ? '💰 Prix de base' :
+                 '💰 Base price'}
+              </div>
+              <div style={priceBox}>
+                {selectedLang === 'ar'
+                  ? `السعر الأساسي: ${pricePerM2.toFixed(2)} درهم / m²`
+                  : selectedLang === 'fr'
+                    ? `Prix de base : ${pricePerM2.toFixed(2)} DH / m²`
+                    : `Base price: ${pricePerM2.toFixed(2)} DH / m²`}
+              </div>
+            </div>
+          )}
+
           {!isCuisineCategory() && serviceSlug !== 'lavage' && (
             <div>
               <div style={sectionTitle}>
@@ -545,9 +574,11 @@ export default function TypeDetails() {
                     autoComplete="off"
                   />
                   <div style={small}>
-                    {selectedLang === 'ar' ? 'يتم حساب السعر تلقائيًا (2.5 درهم لكل m²)' : 
-                     selectedLang === 'fr' ? 'Le prix est calculé automatiquement (2.5 DH par m²)' : 
-                     'Price is calculated automatically (2.5 DH per m²)'}
+                    {selectedLang === 'ar'
+                      ? `يتم حساب السعر تلقائيًا (${pricePerM2.toFixed(2)} درهم لكل m²)`
+                      : selectedLang === 'fr'
+                        ? `Le prix est calculé automatiquement (${pricePerM2.toFixed(2)} DH par m²)`
+                        : `Price is calculated automatically (${pricePerM2.toFixed(2)} DH per m²)`}
                   </div>
                 </div>
                 <div>
