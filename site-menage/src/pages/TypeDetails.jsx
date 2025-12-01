@@ -25,6 +25,8 @@ export default function TypeDetails() {
   const [error, setError] = useState('');
   const [surface, setSurface] = useState('');
   const [price, setPrice] = useState(0);
+  const [textileItems, setTextileItems] = useState([]); // Grands textiles dynamic items
+  const [clothesPieces, setClothesPieces] = useState(''); // Nombre de pièces pour Vêtements
 
   useEffect(() => {
     // Only load if we have a typeSlug or typeId (this is TypeDetails page, not CategoryHouseDetails)
@@ -54,18 +56,29 @@ export default function TypeDetails() {
   }, [serviceSlug, categorySlug, typeSlug, categoryId, subCategoryId, typeId]);
 
   useEffect(() => {
-    // Utiliser le prix depuis la base de données (champ price dans types) comme prix par m²
-    // avec une valeur par défaut à 2.5 si non défini.
+    // Utiliser le prix depuis la base de données (champ price dans types)
     const unitPrice = type && !isNaN(parseFloat(type.price))
       ? parseFloat(type.price)
       : 2.5;
 
+    // Cas spécial : Vêtements (lavage) → prix = nombre de pièces × prix de base
+    if (isClothesType()) {
+      const qty = parseFloat(clothesPieces);
+      if (!isNaN(qty) && qty > 0 && unitPrice > 0) {
+        setPrice(qty * unitPrice);
+      } else {
+        setPrice(0);
+      }
+      return;
+    }
+
+    // Cas général : prix = surface × prix/m²
     if (surface && !isNaN(parseFloat(surface))) {
       setPrice(parseFloat(surface) * unitPrice);
     } else {
       setPrice(0);
     }
-  }, [surface, type]);
+  }, [surface, type, clothesPieces]);
 
   const loadType = async () => {
     // Early return if no typeSlug or typeId - this should not happen but safety check
@@ -184,6 +197,8 @@ export default function TypeDetails() {
       description: type?.description_ar || type?.description || type?.description_fr || type?.description_en || '',
       surface: surface || '',
       estimatedPrice: price || 0,
+      // Pour la page booking/reservation, utiliser ce montant comme prix initial
+      totalPrice: price || 0,
       choixtype_id: selectedOptions.length === 1 ? selectedOptions[0]?.id : undefined,
       choixtype_name: selectedOptions.length === 1 
         ? (selectedOptions[0].name || selectedOptions[0].name_fr || selectedOptions[0].name_ar || selectedOptions[0].name_en)
@@ -193,6 +208,8 @@ export default function TypeDetails() {
         ? selectedOptions.map(opt => opt.name || opt.name_fr || opt.name_ar || opt.name_en)
         : undefined,
       selectedKitchens: selectedOptions,
+      // Nombre de pièces pour le type "Vêtements" (lavage)
+      clothes_pieces: isClothesType() && clothesPieces ? clothesPieces : undefined,
     };
 
     try {
@@ -332,49 +349,6 @@ export default function TypeDetails() {
     return '/services';
   };
 
-  // Early return if no typeSlug - this component should not render for CategoryHouseDetails route
-  if (!typeSlug && !typeId) {
-    return null;
-  }
-
-  // Map language to supported languages (needed before error check)
-  const mapToSupportedLang = (lng) => {
-    if ((lng || '').toLowerCase().startsWith('ar')) return 'ar';
-    if ((lng || '').toLowerCase().startsWith('fr')) return 'fr';
-    return 'en';
-  };
-
-  const selectedLang = mapToSupportedLang(i18n?.language);
-
-  if (loading) {
-    return (
-      <main style={bgStyle}>
-        <div style={{ maxWidth: 480, margin: '60px auto', textAlign: 'center' }}>
-          <div style={{ width: 56, height: 56, border: '4px solid #e2e8f0', borderTopColor: '#22c55e', borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
-          <div style={{ color: '#475569' }}>{t('services_page.loading') || 'جارٍ التحميل...'}</div>
-        </div>
-      </main>
-    );
-  }
-
-  if (error || !type) {
-    return (
-      <main style={bgStyle}>
-        <div style={{ maxWidth: 640, margin: '40px auto', textAlign: 'center' }}>
-          <div style={{ color: '#ef4444', fontWeight: 700, marginBottom: 8 }}>{t('services_page.loading_error') || 'حدث خطأ أثناء التحميل'}</div>
-          <div style={{ color: '#475569', marginBottom: 16 }}>{error}</div>
-          <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
-            <button style={btnBack}>
-              {selectedLang === 'ar' ? '↩️ العودة' : 
-               selectedLang === 'fr' ? '↩️ Retour' : 
-               '↩️ Back'}
-            </button>
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
   const featured = pickImageUrl(type);
 
   const getNameByLang = (lang) => {
@@ -413,6 +387,15 @@ export default function TypeDetails() {
     }
   };
 
+  // Map language to supported languages (needed before using selectedLang)
+  const mapToSupportedLang = (lng) => {
+    if ((lng || '').toLowerCase().startsWith('ar')) return 'ar';
+    if ((lng || '').toLowerCase().startsWith('fr')) return 'fr';
+    return 'en';
+  };
+
+  const selectedLang = mapToSupportedLang(i18n?.language);
+
   const currentName = getNameByLang(selectedLang);
   const currentDescription = getDescriptionByLang(selectedLang);
 
@@ -420,6 +403,63 @@ export default function TypeDetails() {
   const pricePerM2 = type && !isNaN(parseFloat(type.price))
     ? parseFloat(type.price)
     : 2.5;
+
+  // Check if this type/category is "grands textiles"
+  const isLargeTextileType = () => {
+    const typeNameFr = (type?.name_fr || '').toLowerCase();
+    const typeName = (type?.name || '').toLowerCase();
+    const catNameFr = (category?.name_fr || '').toLowerCase();
+    const catName = (category?.name || '').toLowerCase();
+    return (
+      typeNameFr.includes('grands textiles') ||
+      typeName.includes('grands textiles') ||
+      catNameFr.includes('grands textiles') ||
+      catName.includes('grands textiles')
+    );
+  };
+
+  // Check if this type/category is "Vêtements" (clothes) for lavage service
+  const isClothesType = () => {
+    const typeNameFr = (type?.name_fr || '').toLowerCase();
+    const typeName = (type?.name || '').toLowerCase();
+    const catNameFr = (category?.name_fr || '').toLowerCase();
+    const catName = (category?.name || '').toLowerCase();
+    return (
+      typeNameFr.includes('vêtements') ||
+      typeName.includes('vêtements') ||
+      catNameFr.includes('vêtements') ||
+      catName.includes('vêtements')
+    );
+  };
+
+  // Calcul de la surface totale pour grands textiles
+  const calculateTextileArea = () => {
+    if (!isLargeTextileType()) return 0;
+    return textileItems.reduce((total, item) => {
+      const q = parseFloat(item.quantity) || 0;
+      const l = parseFloat(item.length) || 0;
+      const w = parseFloat(item.width) || 0;
+      return total + q * l * w;
+    }, 0);
+  };
+
+  // Initialiser un item par défaut quand on est sur grands textiles
+  useEffect(() => {
+    if (isLargeTextileType() && textileItems.length === 0) {
+      setTextileItems([{ id: Date.now(), quantity: 1, length: '', width: '' }]);
+    }
+  }, [type, category]);
+
+  // Mettre à jour surface (m²) en fonction des items grands textiles
+  useEffect(() => {
+    if (!isLargeTextileType()) return;
+    const area = calculateTextileArea();
+    if (area > 0) {
+      setSurface(area.toFixed(2));
+    } else {
+      setSurface('');
+    }
+  }, [textileItems]);
 
   // Check if the category is Cuisine/مطبخ/Kitchen
   const isCuisineCategory = () => {
@@ -434,6 +474,68 @@ export default function TypeDetails() {
       (category.name_fr && category.name_fr.toLowerCase().includes('cuisine')) ||
       (category.name_en && category.name_en.toLowerCase().includes('kitchen'))
     );
+  };
+
+  // Early return if no typeSlug - this component should not render for CategoryHouseDetails route
+  if (!typeSlug && !typeId) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <main style={bgStyle}>
+        <div style={{ maxWidth: 480, margin: '60px auto', textAlign: 'center' }}>
+          <div style={{ width: 56, height: 56, border: '4px solid #e2e8f0', borderTopColor: '#22c55e', borderRadius: '50%', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
+          <div style={{ color: '#475569' }}>{t('services_page.loading') || 'جارٍ التحميل...'}</div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error || !type) {
+    return (
+      <main style={bgStyle}>
+        <div style={{ maxWidth: 640, margin: '40px auto', textAlign: 'center' }}>
+          <div style={{ color: '#ef4444', fontWeight: 700, marginBottom: 8 }}>{t('services_page.loading_error') || 'حدث خطأ أثناء التحميل'}</div>
+          <div style={{ color: '#475569', marginBottom: 16 }}>{error}</div>
+          <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
+            <button style={btnBack}>
+              {selectedLang === 'ar' ? '↩️ العودة' : 
+               selectedLang === 'fr' ? '↩️ Retour' : 
+               '↩️ Back'}
+            </button>
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const updateTextileItem = (id, field, value) => {
+    setTextileItems((items) =>
+      items.map((item) => {
+        if (item.id !== id) return item;
+        let parsed = value;
+        if (field === 'quantity') {
+          const n = parseInt(value, 10);
+          parsed = isNaN(n) || n <= 0 ? '' : n;
+        } else {
+          const n = parseFloat(value);
+          parsed = isNaN(n) || n <= 0 ? '' : n;
+        }
+        return { ...item, [field]: parsed };
+      })
+    );
+  };
+
+  const addTextileItem = () => {
+    setTextileItems((items) => [
+      ...items,
+      { id: Date.now() + Math.random(), quantity: 1, length: '', width: '' }
+    ]);
+  };
+
+  const removeTextileItem = (id) => {
+    setTextileItems((items) => (items.length <= 1 ? items : items.filter((item) => item.id !== id)));
   };
 
   return (
@@ -507,15 +609,16 @@ export default function TypeDetails() {
               </div>
               <div style={priceBox}>
                 {selectedLang === 'ar'
-                  ? `السعر الأساسي: ${pricePerM2.toFixed(2)} درهم / m²`
+                  ? `السعر الأساسي: ${pricePerM2.toFixed(2)} درهم `
                   : selectedLang === 'fr'
-                    ? `Prix de base : ${pricePerM2.toFixed(2)} DH / m²`
-                    : `Base price: ${pricePerM2.toFixed(2)} DH / m²`}
+                    ? `Prix de base : ${pricePerM2.toFixed(2)} DH `
+                    : `Base price: ${pricePerM2.toFixed(2)} DH `}
               </div>
             </div>
           )}
 
-          {!isCuisineCategory() && serviceSlug !== 'lavage' && (
+          {/* Formulaire standard de surface/prix pour la plupart des catégories (sauf Cuisine et lavage/grands textiles) */}
+          {!isCuisineCategory() && serviceSlug !== 'lavage' && !isLargeTextileType() && !isClothesType() && (
             <div>
               <div style={sectionTitle}>
                 {selectedLang === 'ar' ? '📏 تقدير المساحة والسعر' : 
@@ -588,6 +691,223 @@ export default function TypeDetails() {
                      'Estimated Price'}
                   </div>
                   <div style={priceBox}>{price.toFixed(2)} DH</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Formulaire simple pour Vêtements (lavage) : nombre de pièces */}
+          {!isCuisineCategory() && serviceSlug === 'lavage' && isClothesType() && (
+            <div>
+              <div style={sectionTitle}>
+                {selectedLang === 'ar'
+                  ? '📦 عدد القطع (Vêtements)'
+                  : selectedLang === 'fr'
+                  ? '📦 Nombre de pièces (Vêtements)'
+                  : '📦 Number of pieces (Clothes)'}
+              </div>
+              <div style={{ ...formRow, gridTemplateColumns: '1fr' }}>
+                <div>
+                  <div style={{ ...label, marginBottom: 6 }}>
+                    {selectedLang === 'ar'
+                      ? 'عدد القطع'
+                      : selectedLang === 'fr'
+                      ? 'Nombre de pièces'
+                      : 'Number of pieces'}
+                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={clothesPieces}
+                    onChange={(e) => setClothesPieces(e.target.value)}
+                    style={input}
+                    placeholder={
+                      selectedLang === 'ar'
+                        ? 'أدخل عدد القطع'
+                        : selectedLang === 'fr'
+                        ? 'Entrez le nombre de pièces'
+                        : 'Enter number of pieces'
+                    }
+                  />
+                  <div style={small}>
+                    {selectedLang === 'ar'
+                      ? 'سيتم إرسال عدد القطع مع تفاصيل الحجز.'
+                      : selectedLang === 'fr'
+                      ? 'Le nombre de pièces sera envoyé avec les détails de la réservation.'
+                      : 'The number of pieces will be sent with the booking details.'}
+                  </div>
+                  {price > 0 && (
+                    <div style={{ marginTop: 12 }}>
+                      <div style={{ ...label, marginBottom: 6 }}>
+                        {selectedLang === 'ar'
+                          ? 'السعر التقديري'
+                          : selectedLang === 'fr'
+                          ? 'Prix estimé'
+                          : 'Estimated price'}
+                      </div>
+                      <div style={priceBox}>{price.toFixed(2)} DH</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Formulaire spécial grands textiles (service lavage, type grands textiles) */}
+          {!isCuisineCategory() && serviceSlug === 'lavage' && isLargeTextileType() && (
+            <div style={{ marginTop: 32 }}>
+              <div
+                style={{
+                  ...sectionTitle,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 16,
+                }}
+              >
+                {selectedLang === 'ar'
+                  ? '📏 قياس القطع (grands textiles)'
+                  : selectedLang === 'fr'
+                  ? '📏 Mesures des pièces (grands textiles)'
+                  : '📏 Items measurements (grands textiles)'}
+              </div>
+              <div
+                style={{
+                  ...formRow,
+                  background: '#f8fafc',
+                  borderRadius: 16,
+                  padding: 16,
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <div style={{ flex: 1 }}>
+                  {textileItems.map((item, index) => (
+                    <div
+                      key={item.id}
+                      style={{
+                        marginBottom: 16,
+                        padding: 12,
+                        borderRadius: 12,
+                        border: '1px solid #e2e8f0',
+                        background: '#f9fafb',
+                      }}
+                    >
+                      <div style={{ ...label, marginBottom: 8 }}>
+                        {selectedLang === 'ar'
+                          ? `القطعة ${index + 1}`
+                          : selectedLang === 'fr'
+                          ? `Pièce ${index + 1}`
+                          : `Item ${index + 1}`}
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <div style={{ flex: '0 0 90px' }}>
+                          <div style={{ ...label, marginBottom: 4 }}>
+                            {selectedLang === 'ar'
+                              ? 'العدد'
+                              : selectedLang === 'fr'
+                              ? 'Qté'
+                              : 'Qty'}
+                          </div>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={item.quantity}
+                            onChange={(e) => updateTextileItem(item.id, 'quantity', e.target.value)}
+                            style={{ width: '100%' }}
+                          />
+                        </div>
+                        <div style={{ flex: '1 1 120px' }}>
+                          <div style={{ ...label, marginBottom: 4 }}>
+                            {selectedLang === 'ar'
+                              ? 'الطول (م)'
+                              : selectedLang === 'fr'
+                              ? 'Longueur (m)'
+                              : 'Length (m)'}
+                          </div>
+                          <input
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={item.length}
+                            onChange={(e) => updateTextileItem(item.id, 'length', e.target.value)}
+                            style={{ width: '100%' }}
+                          />
+                        </div>
+                        <div style={{ flex: '1 1 120px' }}>
+                          <div style={{ ...label, marginBottom: 4 }}>
+                            {selectedLang === 'ar'
+                              ? 'العرض (م)'
+                              : selectedLang === 'fr'
+                              ? 'Largeur (m)'
+                              : 'Width (m)'}
+                          </div>
+                          <input
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={item.width}
+                            onChange={(e) => updateTextileItem(item.id, 'width', e.target.value)}
+                            style={{ width: '100%' }}
+                          />
+                        </div>
+                        <div style={{ alignSelf: 'flex-end' }}>
+                          <button
+                            type="button"
+                            onClick={() => removeTextileItem(item.id)}
+                            style={{
+                              ...btnBack,
+                              padding: '8px 12px',
+                              fontSize: 12,
+                              opacity: textileItems.length === 1 ? 0.5 : 1,
+                              cursor: textileItems.length === 1 ? 'not-allowed' : 'pointer',
+                            }}
+                            disabled={textileItems.length === 1}
+                          >
+                            {selectedLang === 'ar'
+                              ? 'حذف'
+                              : selectedLang === 'fr'
+                              ? 'Supprimer'
+                              : 'Remove'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addTextileItem}
+                    style={{ ...btnReserve, marginBottom: 16 }}
+                  >
+                    {selectedLang === 'ar'
+                      ? '➕ إضافة قطعة'
+                      : selectedLang === 'fr'
+                      ? '➕ Ajouter une pièce'
+                      : '➕ Add item'}
+                  </button>
+                </div>
+                <div style={{ flex: 1 }}>
+                  {calculateTextileArea() > 0 && (
+                    <div style={priceBox}>
+                      <div style={{ marginBottom: 8 }}>
+                        {selectedLang === 'ar'
+                          ? 'المساحة الإجمالية:'
+                          : selectedLang === 'fr'
+                          ? 'Surface totale :'
+                          : 'Total area:'}{' '}
+                        {calculateTextileArea().toFixed(2)} m²
+                      </div>
+                      <div>
+                        {selectedLang === 'ar'
+                          ? 'السعر المقدر:'
+                          : selectedLang === 'fr'
+                          ? 'Prix estimé :'
+                          : 'Estimated price:'}{' '}
+                        {(calculateTextileArea() * pricePerM2).toFixed(2)} DH
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

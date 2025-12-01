@@ -65,6 +65,21 @@ export default function CategoryHouseDetails() {
     return serviceId === 7 && (categoryId === 14 || categoryId === 15 || categoryId === 16);
   };
 
+  // Check if this is the "grands textiles" category
+  // Use loaded category data (more fiable que les slug numériques)
+  const isLargeTextileCategory = () => {
+    if (!category) return false;
+    const id = category.id;
+    const nameFr = (category.name_fr || '').toLowerCase();
+    const name = (category.name || '').toLowerCase();
+    
+    return (
+      id === 20 ||
+      nameFr.includes('grands textiles') ||
+      name.includes('grands textiles')
+    );
+  };
+
   // Determine service type based on category ID
   const getCarpetSofaServiceType = () => {
     const categoryId = parseInt(categorySlug);
@@ -74,7 +89,7 @@ export default function CategoryHouseDetails() {
     return '';
   };
 
-  // Handle count change - generate dynamic fields
+  // Handle count change - generate dynamic fields for carpets/sofas
   const handleCountChange = (count) => {
     const numCount = parseInt(count) || 0;
     const validCount = Math.min(Math.max(numCount, 0), 10); // Limit to 10
@@ -90,7 +105,7 @@ export default function CategoryHouseDetails() {
     });
   };
 
-  // Handle item dimension change
+  // Handle item dimension change for carpets/sofas
   const handleItemChange = (index, field, value) => {
     const numValue = parseFloat(value) || '';
     const validValue = numValue === '' ? '' : Math.max(0.1, numValue);
@@ -138,6 +153,56 @@ export default function CategoryHouseDetails() {
     
     // Default price for other categories (both, etc.)
     return totalArea * 2.5;
+  };
+
+  // ----- Grands textiles (service 8, category 20) -----
+
+  // Dynamic items for large textiles: [{ id, quantity, length, width }]
+  const [textileItems, setTextileItems] = useState([
+    { id: Date.now(), quantity: 1, length: '', width: '' }
+  ]);
+
+  const addTextileItem = () => {
+    setTextileItems((items) => [
+      ...items,
+      { id: Date.now() + Math.random(), quantity: 1, length: '', width: '' }
+    ]);
+  };
+
+  const removeTextileItem = (id) => {
+    setTextileItems((items) => items.filter((item) => item.id !== id));
+  };
+
+  const updateTextileItem = (id, field, value) => {
+    setTextileItems((items) =>
+      items.map((item) => {
+        if (item.id !== id) return item;
+        let parsed = value;
+        if (field === 'quantity') {
+          const n = parseInt(value, 10);
+          parsed = isNaN(n) || n <= 0 ? '' : n;
+        } else {
+          const n = parseFloat(value);
+          parsed = isNaN(n) || n <= 0 ? '' : n;
+        }
+        return { ...item, [field]: parsed };
+      })
+    );
+  };
+
+  const calculateTextileArea = () => {
+    return textileItems.reduce((total, item) => {
+      const q = parseFloat(item.quantity) || 0;
+      const l = parseFloat(item.length) || 0;
+      const w = parseFloat(item.width) || 0;
+      return total + q * l * w;
+    }, 0);
+  };
+
+  const calculateTextilePrice = () => {
+    const area = calculateTextileArea();
+    const rate = getCategoryRate(); // prix/m² de la catégorie ou 2.5 par défaut
+    return area * rate;
   };
 
   // Initialize service type when category loads
@@ -1411,7 +1476,15 @@ export default function CategoryHouseDetails() {
       ) : getDisplayTypes().length > 0 ? (
         <div className="types-grid">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <h3>{t('services_page.category_details.available_types')}</h3>
+            <h3
+              style={{
+                fontSize: '18px',
+                fontWeight: 600,
+                margin: 0,
+              }}
+            >
+              {t('services_page.category_details.available_types')}
+            </h3>
             {showAllTypes && allTypes.length > 0 && !isMenageCuisineCategory() && !isKitchenCategoryCheck() && (
               <button
                 onClick={() => {
@@ -1698,7 +1771,7 @@ export default function CategoryHouseDetails() {
                             textAlign: 'center',
                             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
                           }}>
-                            {parseFloat(type.price).toFixed(2)} DH / m²
+                            {parseFloat(type.price).toFixed(2)} DH 
                           </div>
                         )}
                       </div>
@@ -2036,8 +2109,190 @@ export default function CategoryHouseDetails() {
             <p>{category.description || t('services_page.category_details.description_text')}</p>
           </div>
 
-          {/* Special Dynamic Form for Carpets/Sofas Categories */}
-          {isCarpetSofaCategory() ? (
+          {/* Special Dynamic Form for Grands Textiles (service 8, category 20) */}
+          {isLargeTextileCategory() ? (
+            <div className="carpet-sofa-form-container">
+              <div className="dynamic-form-container">
+                <div className="count-input-group">
+                  <label>
+                    {i18n.language === 'ar'
+                      ? '📦 عدد القطع'
+                      : i18n.language === 'fr'
+                      ? '📦 Nombre de pièces'
+                      : '📦 Number of pieces'}
+                  </label>
+                </div>
+
+                {/* Dynamic items */}
+                <div className="items-fields-container">
+                  {textileItems.map((item, index) => (
+                    <div key={item.id} className="item-field-group">
+                      <h4 className="item-title">
+                        {i18n.language === 'ar'
+                          ? `القطعة ${index + 1}`
+                          : i18n.language === 'fr'
+                          ? `Pièce ${index + 1}`
+                          : `Item ${index + 1}`}
+                      </h4>
+                      <div className="dimensions-inputs">
+                        <div className="dimension-input">
+                          <label>
+                            {i18n.language === 'ar'
+                              ? 'العدد'
+                              : i18n.language === 'fr'
+                              ? 'Quantité'
+                              : 'Quantity'}
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            step="1"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateTextileItem(item.id, 'quantity', e.target.value)
+                            }
+                            placeholder="1"
+                          />
+                        </div>
+                        <div className="dimension-input">
+                          <label>
+                            {i18n.language === 'ar'
+                              ? 'الطول (م)'
+                              : i18n.language === 'fr'
+                              ? 'Longueur (m)'
+                              : 'Length (m)'}
+                          </label>
+                          <input
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={item.length}
+                            onChange={(e) =>
+                              updateTextileItem(item.id, 'length', e.target.value)
+                            }
+                            placeholder="0.0"
+                          />
+                        </div>
+                        <div className="dimension-input">
+                          <label>
+                            {i18n.language === 'ar'
+                              ? 'العرض (م)'
+                              : i18n.language === 'fr'
+                              ? 'Largeur (m)'
+                              : 'Width (m)'}
+                          </label>
+                          <input
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={item.width}
+                            onChange={(e) =>
+                              updateTextileItem(item.id, 'width', e.target.value)
+                            }
+                            placeholder="0.0"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeTextileItem(item.id)}
+                        className="back-services-button"
+                        style={{ marginTop: '8px' }}
+                        disabled={textileItems.length === 1}
+                      >
+                        {i18n.language === 'ar'
+                          ? 'حذف القطعة'
+                          : i18n.language === 'fr'
+                          ? 'Supprimer la pièce'
+                          : 'Remove item'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="reserve-button"
+                  style={{ marginTop: '12px' }}
+                  onClick={addTextileItem}
+                >
+                  {i18n.language === 'ar'
+                    ? '➕ إضافة قطعة'
+                    : i18n.language === 'fr'
+                    ? '➕ Ajouter une pièce'
+                    : '➕ Add item'}
+                </button>
+
+                {/* Calculation Result */}
+                {calculateTextileArea() > 0 && (
+                  <div className="calculation-result-card" style={{ marginTop: '16px' }}>
+                    <div className="result-item">
+                      <span className="result-icon">📐</span>
+                      <span className="result-label">
+                        {i18n.language === 'ar'
+                          ? 'المساحة الإجمالية:'
+                          : i18n.language === 'fr'
+                          ? 'Surface totale :'
+                          : 'Total area:'}
+                      </span>
+                      <span className="result-value">
+                        {calculateTextileArea().toFixed(2)} m²
+                      </span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-icon">💰</span>
+                      <span className="result-label">
+                        {i18n.language === 'ar'
+                          ? 'السعر المقدر:'
+                          : i18n.language === 'fr'
+                          ? 'Prix estimé :'
+                          : 'Estimated price:'}
+                      </span>
+                      <span className="result-value price-value">
+                        {calculateTextilePrice().toFixed(2)} DH
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reserve Button */}
+                <div className="actions-section" style={{ marginTop: '2rem' }}>
+                  <button
+                    onClick={() => {
+                      const area = calculateTextileArea();
+                      const totalPrice = calculateTextilePrice();
+                      const prefill = {
+                        serviceTitle: service?.name || service?.title,
+                        message: `Catégorie: ${category?.name}${
+                          area > 0 ? `, Surface: ${area.toFixed(2)} m²` : ''
+                        }`,
+                        type: category?.name || '',
+                        size: area > 0 ? area.toFixed(2) : '',
+                        totalPrice: totalPrice || 0,
+                      };
+                      try {
+                        localStorage.setItem('booking_prefill', JSON.stringify(prefill));
+                        navigate('/booking');
+                      } catch (err) {
+                        console.error('Error saving prefill:', err);
+                        navigate('/booking');
+                      }
+                    }}
+                    className="reserve-button"
+                    disabled={calculateTextileArea() === 0}
+                  >
+                    {t('services_page.forms.reserve')}
+                  </button>
+                  <Link
+                    to={isMenageCategory() ? '/services' : `/services/${serviceSlug}`}
+                    className="back-services-button"
+                  >
+                    {t('services_page.category_details.back_to_services')}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ) : isCarpetSofaCategory() ? (
             <div className="carpet-sofa-form-container" style={{ direction: 'rtl' }}>
               {/* Special Offer Card for "Both" Option (category 16) */}
               {carpetSofaForm.serviceType === 'both' && (
