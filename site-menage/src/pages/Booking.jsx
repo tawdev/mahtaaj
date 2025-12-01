@@ -179,6 +179,21 @@ export default function Booking() {
     );
   })();
 
+  // Spécifiquement pour "تنظيف السيارات" / Nettoyage de voiture / Car cleaning
+  const isCarCleaningService = (() => {
+    if (!selectedService) return false;
+    const s = selectedService.toLowerCase().trim();
+    const carServices = [
+      'تنظيف السيارات',
+      'غسيل السيارات',
+      'nettoyage de voiture',
+      'lavage de voiture',
+      'car cleaning',
+      'car wash',
+    ];
+    return carServices.some((k) => s.includes(k.toLowerCase()) || k.toLowerCase().includes(s));
+  })();
+
   // Load category house when type is selected
   useEffect(() => {
     const loadCategoryFromType = async () => {
@@ -1990,8 +2005,9 @@ export default function Booking() {
 
               {/* Champ surface (m²) :
                   - visible uniquement pour les flux Ménage + cuisine (showSizeField true)
+                  - et caché pour certains services comme Nettoyage de voiture / تنظيف السيارات
                   - sinon gardé en champ caché pour compatibilité backend */}
-              {showSizeField ? (
+              {showSizeField && !isCarCleaningService ? (
                 <div className="form-group">
                   <label htmlFor="size">
                     {t('booking.size_label', 'Surface du type Ménage (m²)')} *

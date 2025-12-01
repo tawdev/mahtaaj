@@ -443,12 +443,20 @@ export default function CategoryHouseDetails() {
   };
 
   const handleReserve = () => {
+    // Pour certaines catégories (ex: Nettoyage des voitures), on veut utiliser le prix de base
+    // de la catégorie comme prix estimé dans la page booking.
+    const baseCategoryRate = getCategoryRate();
+    const isCarCleaning = isCarCleaningCategory();
+
     const prefill = {
       serviceTitle: service?.name || service?.title,
-      message: `Catégorie: ${category?.name}${surface ? `, Surface: ${surface} m²` : ''}`,
+      message: `Catégorie: ${category?.name}${
+        surface && !isCarCleaning ? `, Surface: ${surface} m²` : ''
+      }`,
       type: category?.name || '',
-      size: surface || '',
-      totalPrice: price || 0,
+      // Pour Nettoyage des voitures, on ne passe pas de surface, seulement le prix de base
+      size: isCarCleaning ? '' : (surface || ''),
+      totalPrice: isCarCleaning && baseCategoryRate > 0 ? baseCategoryRate : (price || 0),
     };
     
     try {
@@ -2057,6 +2065,20 @@ export default function CategoryHouseDetails() {
               <div className="description-section">
                 <h3>🧹 {t('services_page.category_details.description_label')}</h3>
                 <p>{category.description || t('services_page.category_details.car_cleaning.description')}</p>
+              </div>
+
+              {/* Bloc de prix de base pour la catégorie "تنظيف السيارات" */}
+              <div className="price-section" style={{ marginTop: '16px' }}>
+                <h3>
+                  {i18n.language === 'ar'
+                    ? '💰 السعر الأساسي'
+                    : i18n.language === 'fr'
+                    ? '💰 Prix de base'
+                    : '💰 Base price'}
+                </h3>
+                <p className="price-value">
+                  {getCategoryRate().toFixed(2)} DH
+                </p>
               </div>
 
               <div className="actions-section" style={{ marginTop: '2rem' }}>
