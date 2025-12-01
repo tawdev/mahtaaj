@@ -38,14 +38,25 @@ export default function CategoryHouseDetails() {
     loadData();
   }, [serviceSlug, categorySlug, i18n.language]);
 
+  // Helper: récupérer le tarif/m² basé sur la catégorie (si défini en base), sinon 2.5 par défaut
+  const getCategoryRate = () => {
+    if (category && category.price !== null && category.price !== undefined) {
+      const p = parseFloat(category.price);
+      if (!isNaN(p) && p > 0) {
+        return p;
+      }
+    }
+    return 2.5;
+  };
+
   useEffect(() => {
-    // Calculate price based on surface (example: 1 m² = 2.5 DH)
+    // Calculer le prix en fonction de la surface avec le tarif de la catégorie (ou 2.5 par défaut)
     if (surface && !isNaN(parseFloat(surface))) {
-      setPrice(parseFloat(surface) * 2.5);
+      setPrice(parseFloat(surface) * getCategoryRate());
     } else {
       setPrice(0);
     }
-  }, [surface]);
+  }, [surface, category]);
 
   // Check if this is a carpet/sofa category (service 7, categories 14, 15, 16)
   const isCarpetSofaCategory = () => {

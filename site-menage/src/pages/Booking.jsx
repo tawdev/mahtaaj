@@ -1235,11 +1235,30 @@ export default function Booking() {
     }
   }, [id, location.state, resetFormFields]);
 
-  // Fonction pour calculer le prix basé sur la taille
+  // Fonction pour calculer le prix basé sur la taille (fallback générique)
   const calculatePrice = (serviceTitle, size) => {
     if (!serviceTitle || !size || size <= 0) return 0;
-    
-    // Prix par m² selon le service (cohérent avec Services.jsx)
+
+    const sizeNum = parseFloat(size);
+    if (isNaN(sizeNum) || sizeNum <= 0) return 0;
+
+    // 1) Essayer d'utiliser le prix/m² depuis la base (types.price) si un type est sélectionné
+    if (selectedTypeId && Array.isArray(types) && types.length > 0) {
+      const currentType = types.find((t) => t.id === selectedTypeId);
+      if (currentType && currentType.price !== null && currentType.price !== undefined) {
+        const p = parseFloat(currentType.price);
+        if (!isNaN(p) && p > 0) {
+          let base = sizeNum * p;
+          if (promo?.discount) {
+            const d = Math.max(0, Math.min(100, Number(promo.discount)));
+            base = base * (1 - d / 100);
+          }
+          return base;
+        }
+      }
+    }
+
+    // 2) Fallback: ancienne logique basée sur des constantes par service
     const pricePerM2 = {
       // Services existants
       'Ménage à domicile': 2.50,
@@ -1258,26 +1277,26 @@ export default function Booking() {
     };
     
     const price = pricePerM2[serviceTitle];
-    if (price === 0) return 0; // Service sans prix au m²
+    if (price === 0 || price === undefined) return 0; // Service sans prix au m²
     
-    let base = parseFloat(size) * price;
+    let base = sizeNum * price;
     
     // Ajustement selon le type pour les nouveaux services
     if (serviceTitle === 'bureaux ou usine') {
-      if (typeValue === 'Usine') base = parseFloat(size) * 4.0;
-      else if (typeValue === 'Bureaux') base = parseFloat(size) * 3.0;
+      if (typeValue === 'Usine') base = sizeNum * 4.0;
+      else if (typeValue === 'Bureaux') base = sizeNum * 3.0;
     } else if (serviceTitle === 'Lavage de vitres' || serviceTitle === 'Lavage des vitres') {
-      if (typeValue === 'Extérieur') base = parseFloat(size) * 2.8;
-      else if (typeValue === 'Intérieur') base = parseFloat(size) * 2.0;
+      if (typeValue === 'Extérieur') base = sizeNum * 2.8;
+      else if (typeValue === 'Intérieur') base = sizeNum * 2.0;
     } else if (serviceTitle === 'Ligne des maisons et repassage') {
-      if (typeValue === 'Repassage') base = parseFloat(size) * 2.2;
-      else if (typeValue === 'Lavage') base = parseFloat(size) * 1.5;
+      if (typeValue === 'Repassage') base = sizeNum * 2.2;
+      else if (typeValue === 'Lavage') base = sizeNum * 1.5;
     } else if (serviceTitle === 'Airbnb Cleaning') {
-      if (typeValue === 'Check-out') base = parseFloat(size) * 3.5;
-      else if (typeValue === 'Check-in') base = parseFloat(size) * 3.0;
+      if (typeValue === 'Check-out') base = sizeNum * 3.5;
+      else if (typeValue === 'Check-in') base = sizeNum * 3.0;
     } else if (serviceTitle === 'Pool Cleaning') {
-      if (typeValue === 'Nettoyage profond') base = parseFloat(size) * 2.6;
-      else if (typeValue === 'Standard') base = parseFloat(size) * 1.8;
+      if (typeValue === 'Nettoyage profond') base = sizeNum * 2.6;
+      else if (typeValue === 'Standard') base = sizeNum * 1.8;
     }
     
     if (promo?.discount) {
@@ -1583,8 +1602,8 @@ export default function Booking() {
 
   // Effet pour recalculer le prix quand la taille, le service ou le type change
   useEffect(() => {
+    // Si pas de service sélectionné, ne pas toucher au prix (peut être un prix pré-rempli)
     if (!selectedService) {
-      setCalculatedPrice(0);
       return;
     }
 
@@ -1644,10 +1663,14 @@ export default function Booking() {
 
       // Pour les autres cas (sans Category House ou autres services), utiliser la fonction calculatePrice existante
       const price = calculatePrice(selectedService, sizeValue);
-      setCalculatedPrice(price);
-    } else {
-      setCalculatedPrice(0);
+      // Mettre à jour le prix seulement si on a calculé un prix valide (> 0)
+      // Si price === 0, cela peut signifier que le service n'a pas de prix défini,
+      // dans ce cas on garde le prix actuel (peut être un prix pré-rempli depuis CategoryHouseDetails)
+      if (price > 0) {
+        setCalculatedPrice(price);
+      }
     }
+    // Si pas de sizeValue, on garde le prix actuel (peut être un prix pré-rempli depuis CategoryHouseDetails)
   }, [selectedService, sizeValue, typeValue, promo, isCuisineCategory, selectedCategory, selectedTypes, selectedTypeId, types, hasSelectedCuisineTypes, hasSelectedMenageTypes]);
 
   const totalWithExtras = (() => {
