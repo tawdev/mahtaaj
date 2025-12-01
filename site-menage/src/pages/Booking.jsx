@@ -38,6 +38,8 @@ export default function Booking() {
   const [loadingTypeOptions, setLoadingTypeOptions] = useState(false);
   const [messageValue, setMessageValue] = useState(''); // Track message value to detect changes
   const [messageAutoFilled, setMessageAutoFilled] = useState(false); // Track if message was auto-filled
+  const [numberOfRooms, setNumberOfRooms] = useState(''); // Nombre de chambres depuis prefill
+  const [rooms, setRooms] = useState([]); // Données des chambres depuis prefill [{ roomNumber, surface }]
   const locationRef = useRef(null);
   const serviceSelectRef = useRef(null);
   const messageRef = useRef(null);
@@ -1231,6 +1233,16 @@ export default function Booking() {
         // Note: selectedTypeOption will be set when typeOptions are loaded
       }
       
+      // Handle rooms data from prefill (nombre de chambres et leurs surfaces)
+      if (prefill?.numberOfRooms) {
+        setNumberOfRooms(prefill.numberOfRooms.toString());
+        console.log('Number of rooms from prefill:', prefill.numberOfRooms);
+      }
+      if (prefill?.rooms && Array.isArray(prefill.rooms) && prefill.rooms.length > 0) {
+        setRooms(prefill.rooms);
+        console.log('Rooms data from prefill:', prefill.rooms);
+      }
+      
       // Don't load draft data - it causes old data to persist
       // Draft data should only be used when explicitly requested (e.g., from multi-services page)
       // For new bookings, we want clean fields
@@ -1835,6 +1847,24 @@ export default function Booking() {
       payload.admin_notes = (payload.admin_notes || '') + 
         (payload.admin_notes ? '\n\n' : '') + 
         `Selected Types: ${JSON.stringify(selectedTypesInfo)}`;
+    }
+    
+    // Store rooms data (nombre de chambres et leurs surfaces) in admin_notes
+    if (numberOfRooms && rooms.length > 0) {
+      const roomsInfo = {
+        numberOfRooms: numberOfRooms,
+        rooms: rooms.map(room => ({
+          roomNumber: room.roomNumber,
+          surface: room.surface
+        })),
+        totalSurface: rooms.reduce((sum, room) => {
+          const surface = parseFloat(room.surface) || 0;
+          return sum + surface;
+        }, 0)
+      };
+      payload.admin_notes = (payload.admin_notes || '') + 
+        (payload.admin_notes ? '\n\n' : '') + 
+        `Rooms Data: ${JSON.stringify(roomsInfo)}`;
     }
     
     try {

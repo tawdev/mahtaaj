@@ -27,6 +27,9 @@ export default function TypeDetails() {
   const [price, setPrice] = useState(0);
   const [textileItems, setTextileItems] = useState([]); // Grands textiles dynamic items
   const [clothesPieces, setClothesPieces] = useState(''); // Nombre de pièces pour Vêtements
+  const [roomsOrFloors, setRoomsOrFloors] = useState(''); // Nombre de chambres ou étages selon le type
+  const [numberOfRooms, setNumberOfRooms] = useState(''); // Nombre de chambres
+  const [rooms, setRooms] = useState([]); // Tableau des chambres avec leurs surfaces [{ id, surface }]
 
   useEffect(() => {
     // Only load if we have a typeSlug or typeId (this is TypeDetails page, not CategoryHouseDetails)
@@ -72,13 +75,29 @@ export default function TypeDetails() {
       return;
     }
 
+    // Cas avec chambres : calculer la somme des surfaces de toutes les chambres
+    if (rooms.length > 0) {
+      const totalSurface = rooms.reduce((sum, room) => {
+        const roomSurface = parseFloat(room.surface) || 0;
+        return sum + roomSurface;
+      }, 0);
+      if (totalSurface > 0) {
+        setPrice(totalSurface * unitPrice);
+        setSurface(totalSurface.toFixed(2));
+      } else {
+        setPrice(0);
+        setSurface('');
+      }
+      return;
+    }
+
     // Cas général : prix = surface × prix/m²
     if (surface && !isNaN(parseFloat(surface))) {
       setPrice(parseFloat(surface) * unitPrice);
     } else {
       setPrice(0);
     }
-  }, [surface, type, clothesPieces]);
+  }, [surface, type, clothesPieces, rooms]);
 
   const loadType = async () => {
     // Early return if no typeSlug or typeId - this should not happen but safety check
@@ -210,6 +229,12 @@ export default function TypeDetails() {
       selectedKitchens: selectedOptions,
       // Nombre de pièces pour le type "Vêtements" (lavage)
       clothes_pieces: isClothesType() && clothesPieces ? clothesPieces : undefined,
+      // Nombre de chambres et leurs surfaces (pour tous les types de ménage)
+      numberOfRooms: numberOfRooms || undefined,
+      rooms: rooms.length > 0 ? rooms.map((room, index) => ({
+        roomNumber: index + 1,
+        surface: room.surface || ''
+      })) : undefined,
     };
 
     try {
@@ -418,6 +443,38 @@ export default function TypeDetails() {
     );
   };
 
+  // Check if type is villa, hotel, maison d'hôte, maison, appartement, etc. (pour tous les types de ménage)
+  // Cette fonction est utilisée pour déterminer si on doit afficher le champ "nombre d'étages" ou non
+  // Pour tous les types de ménage, on utilise maintenant le système de chambres, donc cette fonction peut retourner true pour tous
+  const isVillaHotelMaisonDHote = () => {
+    if (!type) return false;
+    const typeNameFr = (type?.name_fr || '').toLowerCase();
+    const typeName = (type?.name || '').toLowerCase();
+    const typeNameAr = (type?.name_ar || '').toLowerCase();
+    const typeNameEn = (type?.name_en || '').toLowerCase();
+    
+    // Inclure tous les types de ménage : villa, hotel, maison d'hôte, maison, appartement, resort hotel, etc.
+    const keywords = [
+      'villa', 
+      'hotel', 
+      'hôtel',
+      'resort',
+      'maison d\'hôte', 
+      'maison d\'hote', 
+      'maison dhote',
+      'maison',
+      'appartement',
+      'apartment',
+      'riad'
+    ];
+    return keywords.some(keyword => 
+      typeNameFr.includes(keyword) ||
+      typeName.includes(keyword) ||
+      typeNameAr.includes(keyword) ||
+      typeNameEn.includes(keyword)
+    );
+  };
+
   // Check if this type/category is "Vêtements" (clothes) for lavage service
   const isClothesType = () => {
     const typeNameFr = (type?.name_fr || '').toLowerCase();
@@ -449,6 +506,30 @@ export default function TypeDetails() {
       setTextileItems([{ id: Date.now(), quantity: 1, length: '', width: '' }]);
     }
   }, [type, category]);
+
+  // Gérer le nombre de chambres : créer/supprimer des chambres dynamiquement
+  useEffect(() => {
+    const numRooms = parseInt(numberOfRooms) || 0;
+    if (numRooms > 0) {
+      // Créer ou ajuster le tableau des chambres
+      setRooms(prevRooms => {
+        const newRooms = [];
+        for (let i = 0; i < numRooms; i++) {
+          // Garder les chambres existantes si elles existent, sinon créer de nouvelles
+          if (prevRooms[i]) {
+            newRooms.push(prevRooms[i]);
+          } else {
+            newRooms.push({ id: Date.now() + i, surface: '' });
+          }
+        }
+        return newRooms;
+      });
+    } else {
+      // Si le nombre de chambres est 0 ou vide, réinitialiser
+      setRooms([]);
+      setSurface('');
+    }
+  }, [numberOfRooms]);
 
   // Mettre à jour surface (m²) en fonction des items grands textiles
   useEffect(() => {
@@ -627,62 +708,90 @@ export default function TypeDetails() {
               </div>
               <div style={formRow}>
                 <div>
+                  {/* Champ : nombre des chambres */}
                   <div style={{ ...label, marginBottom: 6 }}>
-                    {selectedLang === 'ar' ? 'المساحة التقريبية (m²)' : 
-                     selectedLang === 'fr' ? 'Surface approximative (m²)' : 
-                     'Approximate Area (m²)'}
+                    {selectedLang === 'ar' ? 'عدد الغرف' : 
+                     selectedLang === 'fr' ? 'Nombre des chambres' : 
+                     'Number of rooms'}
                   </div>
                   <input 
                     type="number" 
                     min="0" 
-                    step="any"
-                    value={surface} 
+                    step="1"
+                    value={numberOfRooms} 
                     onChange={(e) => {
                       const value = e.target.value;
-                      // Allow empty string, numbers, and decimal points
-                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                        setSurface(value);
+                      if (value === '' || /^\d+$/.test(value)) {
+                        setNumberOfRooms(value);
                       }
                     }}
-                    onKeyDown={(e) => {
-                      // Allow: backspace, delete, tab, escape, enter, decimal point
-                      if ([46, 8, 9, 27, 13, 110, 190].indexOf(e.keyCode) !== -1 ||
-                        // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
-                        (e.keyCode === 65 && e.ctrlKey === true) ||
-                        (e.keyCode === 67 && e.ctrlKey === true) ||
-                        (e.keyCode === 86 && e.ctrlKey === true) ||
-                        (e.keyCode === 88 && e.ctrlKey === true) ||
-                        // Allow: home, end, left, right
-                        (e.keyCode >= 35 && e.keyCode <= 39)) {
-                        return;
-                      }
-                      // Ensure that it is a number and stop the keypress
-                      if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#3b82f6';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                    placeholder={selectedLang === 'ar' ? 'أدخل المساحة (m²)' : 
-                                 selectedLang === 'fr' ? 'Entrez la surface (m²)' : 
-                                 'Enter the area (m²)'} 
+                    placeholder={selectedLang === 'ar' ? 'أدخل عدد الغرف (مثلاً: 2)' : 
+                                 selectedLang === 'fr' ? 'Entrez le nombre de chambres (ex: 2)' : 
+                                 'Enter number of rooms (ex: 2)'} 
                     style={input}
-                    inputMode="decimal"
+                    inputMode="numeric"
                     autoComplete="off"
                   />
                   <div style={small}>
                     {selectedLang === 'ar'
-                      ? `يتم حساب السعر تلقائيًا (${pricePerM2.toFixed(2)} درهم لكل m²)`
+                      ? 'بعد إدخال عدد الغرف، ستظهر حقول لإدخال مساحة كل غرفة'
                       : selectedLang === 'fr'
-                        ? `Le prix est calculé automatiquement (${pricePerM2.toFixed(2)} DH par m²)`
-                        : `Price is calculated automatically (${pricePerM2.toFixed(2)} DH per m²)`}
+                        ? 'Après avoir saisi le nombre de chambres, des champs apparaîtront pour saisir la surface de chaque chambre'
+                        : 'After entering the number of rooms, fields will appear to enter the area of each room'}
                   </div>
+
+                  {/* Champs dynamiques pour chaque chambre */}
+                  {rooms.length > 0 && (
+                    <div style={{ marginTop: 20 }}>
+                      <div style={{ ...label, marginBottom: 12, fontSize: 13, fontWeight: 600 }}>
+                        {selectedLang === 'ar' ? 'مساحة كل غرفة (m²)' : 
+                         selectedLang === 'fr' ? 'Surface de chaque chambre (m²)' : 
+                         'Area of each room (m²)'}
+                      </div>
+                      {rooms.map((room, index) => (
+                        <div key={room.id} style={{ marginBottom: 12 }}>
+                          <div style={{ ...label, marginBottom: 6, fontSize: 12 }}>
+                            {selectedLang === 'ar' ? `الغرفة ${index + 1}` : 
+                             selectedLang === 'fr' ? `Chambre ${index + 1}` : 
+                             `Room ${index + 1}`}
+                          </div>
+                          <input 
+                            type="number" 
+                            min="0" 
+                            step="any"
+                            value={room.surface} 
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                                setRooms(prevRooms => 
+                                  prevRooms.map(r => 
+                                    r.id === room.id ? { ...r, surface: value } : r
+                                  )
+                                );
+                              }
+                            }}
+                            placeholder={selectedLang === 'ar' ? `أدخل مساحة الغرفة ${index + 1} (m²)` : 
+                                         selectedLang === 'fr' ? `Entrez la surface de la chambre ${index + 1} (m²)` : 
+                                         `Enter area of room ${index + 1} (m²)`} 
+                            style={input}
+                            inputMode="decimal"
+                            autoComplete="off"
+                          />
+                        </div>
+                      ))}
+                      {rooms.length > 0 && (
+                        <div style={{ ...small, marginTop: 12, color: '#059669', fontWeight: 500 }}>
+                          {selectedLang === 'ar'
+                            ? `المساحة الإجمالية: ${surface || '0'} m²`
+                            : selectedLang === 'fr'
+                              ? `Surface totale : ${surface || '0'} m²`
+                              : `Total area: ${surface || '0'} m²`}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Le champ "nombre d'étages" a été supprimé car tous les types de ménage utilisent maintenant le système de chambres */}
                 </div>
                 <div>
                   <div style={{ ...label, marginBottom: 6 }}>
@@ -690,7 +799,18 @@ export default function TypeDetails() {
                      selectedLang === 'fr' ? 'Prix estimé' : 
                      'Estimated Price'}
                   </div>
-                  <div style={priceBox}>{price.toFixed(2)} DH</div>
+                  <div style={priceBox}>
+                    {price.toFixed(2)} DH
+                    {rooms.length > 0 && surface && (
+                      <div style={{ ...small, marginTop: 8, color: '#059669' }}>
+                        {selectedLang === 'ar'
+                          ? `(${pricePerM2.toFixed(2)} DH/m² × ${surface} m²)`
+                          : selectedLang === 'fr'
+                            ? `(${pricePerM2.toFixed(2)} DH/m² × ${surface} m²)`
+                            : `(${pricePerM2.toFixed(2)} DH/m² × ${surface} m²)`}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
