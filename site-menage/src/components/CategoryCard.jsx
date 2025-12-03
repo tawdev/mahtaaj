@@ -49,6 +49,24 @@ export default function CategoryCard({ category, onClick, index }) {
     return `${formatted}${t('hand_workers.jours_suffix', { defaultValue: ' jour(s)' })}`;
   };
 
+  // Check if category name should hide the monthly booking message
+  const shouldHideMonthlyMessage = (category) => {
+    if (!category || !category.name) return false;
+    const categoryName = category.name;
+    const excludedNames = [
+      'Ouvrier des égouts',
+      'Serrurier',
+      'Menuisier',
+      'عامل الصرف الصحي',
+      'الحداد',
+      'النجار',
+      'Sewer Worker',
+      'Locksmith',
+      'Carpenter'
+    ];
+    return excludedNames.includes(categoryName);
+  };
+
   return (
     <div
       className="category-card"
@@ -88,12 +106,6 @@ export default function CategoryCard({ category, onClick, index }) {
         )}
       </div>
       
-      <div className="category-content">
-        <p className="category-description" title={category.description}>
-          {category.description}
-        </p>
-      </div>
-      
       <div className="category-footer">
         <div className="category-price">
           <span className="price-label">{t('hand_workers.price_per_day') || 'Prix par jour'}</span>
@@ -103,9 +115,11 @@ export default function CategoryCard({ category, onClick, index }) {
           <span className="minimum-label">{t('hand_workers.minimum_jours') || 'Jours minimum'}</span>
           <span className="minimum-value">{formatMinimumJours(category.minimum_jours)}</span>
         </div>
-        <div className="category-message">
-          <p className="message-text">أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة</p>
-        </div>
+        {!shouldHideMonthlyMessage(category) && (
+          <div className="category-message">
+            <p className="message-text">{t('hand_workers.less_than_month_message', { defaultValue: 'أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة' })}</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -155,14 +155,14 @@
   overflow-wrap: break-word;
 }
 
-.categories-grid {
+.hand-workers-page .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   margin-top: 2rem;
 }
 
-.category-card {
+.hand-workers-page .category-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 20px;
   padding: 0;
@@ -180,7 +180,7 @@
 }
 
 /* Category Image Container */
-.category-image-container {
+.hand-workers-page .category-image-container {
   width: 100%;
   height: 200px;
   position: relative;
@@ -190,7 +190,7 @@
   border-radius: 20px 20px 0 0;
 }
 
-.category-image {
+.hand-workers-page .category-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -199,12 +199,12 @@
   transition: transform 0.4s ease;
 }
 
-.category-card:hover .category-image {
+.hand-workers-page .category-card:hover .category-image {
   transform: scale(1.08);
 }
 
 /* Category Name Overlay on Image */
-.category-name-overlay {
+.hand-workers-page .category-name-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -220,7 +220,7 @@
   box-sizing: border-box;
 }
 
-.category-content {
+.hand-workers-page .category-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -230,12 +230,12 @@
   z-index: 1;
 }
 
-.category-footer {
-  margin-top: auto;
+.hand-workers-page .category-footer {
+  margin-top: 24px;
   padding: 0 24px 20px 24px;
 }
 
-.category-card::before {
+.hand-workers-page .category-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -247,18 +247,18 @@
   transition: opacity 0.3s ease;
 }
 
-.category-card:hover {
+.hand-workers-page .category-card:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   border-color: rgba(59, 130, 246, 0.3);
 }
 
-.category-card:hover::before {
+.hand-workers-page .category-card:hover::before {
   opacity: 1;
 }
 
-.category-icon {
+.hand-workers-page .category-icon {
   font-size: 3rem;
   color: #3b82f6;
   margin-bottom: 0;
@@ -274,7 +274,7 @@
 }
 
 /* Category Title - Overlay on Image */
-.category-title {
+.hand-workers-page .category-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #ffffff;
@@ -302,7 +302,7 @@
   hyphens: auto;
 }
 
-.category-description {
+.hand-workers-page .category-description {
   color: #64748b;
   font-size: 1rem;
   line-height: 1.6;
@@ -317,7 +317,7 @@
   text-overflow: ellipsis;
 }
 
-.category-price {
+.hand-workers-page .category-price {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -328,19 +328,19 @@
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.price-label {
+.hand-workers-page .price-label {
   font-weight: 600;
   color: #374151;
   font-size: 0.95rem;
 }
 
-.price-value {
+.hand-workers-page .price-value {
   font-size: 1.25rem;
   font-weight: 700;
   color: #059669;
 }
 
-.category-minimum {
+.hand-workers-page .category-minimum {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -350,19 +350,19 @@
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.minimum-label {
+.hand-workers-page .minimum-label {
   font-weight: 600;
   color: #374151;
   font-size: 0.9rem;
 }
 
-.minimum-value {
+.hand-workers-page .minimum-value {
   font-size: 1.1rem;
   font-weight: 700;
   color: #dc2626;
 }
 
-.category-message {
+.hand-workers-page .category-message {
   margin-top: 12px;
   padding: 12px 16px;
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
@@ -371,7 +371,7 @@
   text-align: center;
 }
 
-.message-text {
+.hand-workers-page .message-text {
   margin: 0;
   font-size: 0.9rem;
   color: #92400e;
@@ -413,11 +413,11 @@
 }
 
 /* Category Details Section */
-.category-details-section {
+.hand-workers-page .category-details-section {
   margin-top: 2rem;
 }
 
-.category-header {
+.hand-workers-page .category-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -426,7 +426,7 @@
   gap: 16px;
 }
 
-.back-button {
+.hand-workers-page .back-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -443,7 +443,7 @@
   cursor: pointer;
 }
 
-.back-button:hover {
+.hand-workers-page .back-button:hover {
   background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(107, 114, 128, 0.4);
@@ -451,18 +451,18 @@
   color: white;
 }
 
-.category-details-title {
+.hand-workers-page .category-details-title {
   font-size: 2rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
 }
 
-.category-info {
+.hand-workers-page .category-info {
   margin-bottom: 3rem;
 }
 
-.category-info-card {
+.hand-workers-page .category-info-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 20px;
   padding: 28px;
@@ -472,7 +472,7 @@
   overflow: hidden;
 }
 
-.category-info-card::before {
+.hand-workers-page .category-info-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -482,14 +482,14 @@
   background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
 }
 
-.category-info-header {
+.hand-workers-page .category-info-header {
   display: flex;
   align-items: center;
   gap: 20px;
   margin-bottom: 24px;
 }
 
-.category-info-icon {
+.hand-workers-page .category-info-icon {
   font-size: 3rem;
   color: #3b82f6;
   display: flex;
@@ -502,27 +502,27 @@
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.category-info-details h3 {
+.hand-workers-page .category-info-details h3 {
   font-size: 1.75rem;
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 8px;
 }
 
-.category-info-details p {
+.hand-workers-page .category-info-details p {
   color: #64748b;
   font-size: 1.1rem;
   line-height: 1.6;
   margin: 0;
 }
 
-.category-info-pricing {
+.hand-workers-page .category-info-pricing {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
 }
 
-.pricing-item {
+.hand-workers-page .pricing-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -532,19 +532,19 @@
   border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
-.pricing-label {
+.hand-workers-page .pricing-label {
   font-weight: 600;
   color: #374151;
   font-size: 0.95rem;
 }
 
-.pricing-value {
+.hand-workers-page .pricing-value {
   font-size: 1.25rem;
   font-weight: 700;
   color: #059669;
 }
 
-.category-info-message {
+.hand-workers-page .category-info-message {
   margin-top: 16px;
   padding: 14px 18px;
   background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
@@ -557,7 +557,7 @@
   flex-wrap: wrap;
 }
 
-.category-info-message .message-text {
+.hand-workers-page .category-info-message .message-text {
   margin: 0;
   font-size: 0.95rem;
   color: #92400e;
@@ -598,29 +598,29 @@
 }
 
 /* RTL Support */
-[dir="rtl"] .category-info-message {
+[dir="rtl"] .hand-workers-page .category-info-message {
   flex-direction: row-reverse;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .category-info-message {
+  .hand-workers-page .category-info-message {
     flex-direction: column;
     align-items: stretch;
     text-align: center;
   }
 
-  .category-info-message .message-text {
+  .hand-workers-page .category-info-message .message-text {
     min-width: auto;
     margin-bottom: 12px;
   }
 
-  .booking-button-inline {
+  .hand-workers-page .booking-button-inline {
     width: 100%;
     justify-content: center;
   }
 
-  [dir="rtl"] .category-info-message {
+  [dir="rtl"] .hand-workers-page .category-info-message {
     flex-direction: column;
   }
 }
@@ -925,7 +925,7 @@
     box-sizing: border-box;
   }
 
-  .categories-grid {
+  .hand-workers-page .categories-grid {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
     display: grid !important;
@@ -936,7 +936,7 @@
     box-sizing: border-box;
   }
 
-  .category-card {
+  .hand-workers-page .category-card {
     padding: 20px 16px !important;
     display: block !important;
     visibility: visible !important;
@@ -947,20 +947,20 @@
     margin: 0 !important;
   }
 
-  .category-image-container {
+  .hand-workers-page .category-image-container {
     height: 180px !important;
   }
 
-  .category-icon {
+  .hand-workers-page .category-icon {
     font-size: 2.5rem;
     height: 60px;
   }
 
-  .category-name-overlay {
+  .hand-workers-page .category-name-overlay {
     padding: 12px 14px !important;
   }
 
-  .category-title {
+  .hand-workers-page .category-title {
     font-size: 1.25rem !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -968,36 +968,36 @@
     line-height: 1.2 !important;
   }
 
-  .category-description {
+  .hand-workers-page .category-description {
     font-size: 0.9rem !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
 
-  .category-header {
+  .hand-workers-page .category-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .category-details-title {
+  .hand-workers-page .category-details-title {
     font-size: 1.5rem !important;
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
 
-  .category-info-header {
+  .hand-workers-page .category-info-header {
     flex-direction: column;
     text-align: center;
     gap: 16px;
   }
 
-  .category-info-icon {
+  .hand-workers-page .category-info-icon {
     width: 60px;
     height: 60px;
     font-size: 2rem;
   }
 
-  .category-info-pricing {
+  .hand-workers-page .category-info-pricing {
     grid-template-columns: 1fr;
   }
 
@@ -1070,33 +1070,33 @@
     padding: 0 12px !important;
   }
 
-  .category-card {
+  .hand-workers-page .category-card {
     padding: 16px 12px !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
 
-  .category-image-container {
+  .hand-workers-page .category-image-container {
     height: 160px !important;
   }
 
-  .category-icon {
+  .hand-workers-page .category-icon {
     font-size: 2rem;
     height: 50px;
   }
 
-  .category-name-overlay {
+  .hand-workers-page .category-name-overlay {
     padding: 10px 12px !important;
   }
 
-  .category-title {
+  .hand-workers-page .category-title {
     font-size: 1.1rem !important;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.6) !important;
     line-height: 1.2 !important;
   }
 
-  .category-description {
+  .hand-workers-page .category-description {
     font-size: 0.85rem !important;
   }
 
@@ -1133,26 +1133,33 @@
     padding: 0 24px !important;
   }
 
-  .categories-grid {
+  .hand-workers-page .categories-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 20px !important;
   }
 
-  .category-card {
+  .hand-workers-page .category-card {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
 
-  .category-image-container {
+  .hand-workers-page .category-image-container {
     height: 200px !important;
   }
 
-  .category-name-overlay {
+  .hand-workers-page .category-name-overlay {
     padding: 14px 16px !important;
   }
 
-  .category-title {
+  .hand-workers-page .category-title {
     font-size: 1.4rem !important;
+  }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1025px) {
+  .hand-workers-page .categories-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
   }
 }

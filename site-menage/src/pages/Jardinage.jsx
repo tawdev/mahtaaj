@@ -252,14 +252,14 @@ export default function Jardinage() {
         {!selectedCategory ? (
           <div className="categories-section">
             <h2 className="section-title">{t('jardinage.categories.title')}</h2>
-            <div className="categories-grid">
+            <div className="jardinage-categories-grid">
               {categories.map((category) => (
                 <Link
                   key={category.id}
                   to={`/jardinage/details/${category.id}`}
-                  className="category-card"
+                  className="jardinage-category-card"
                 >
-                  <div className="category-image">
+                  <div className="jardinage-category-image">
                     {(() => {
                       const imagePath = category.image;
                       let imageUrl = imagePath;
@@ -289,19 +289,30 @@ export default function Jardinage() {
                         />
                       ) : null;
                     })()}
-                    <div className="category-image-placeholder" style={{display: category.image ? 'none' : 'flex'}}>
+                    <div className="jardinage-category-image-placeholder" style={{display: category.image ? 'none' : 'flex'}}>
                       🌱
                     </div>
-                    {/* Category Name Overlay */}
-                    <div className="category-name-overlay">
-                      <h3 className="category-name">{category.name || t('jardinage.category_not_available')}</h3>
+                    {/* Category Name + short description Overlay */}
+                    <div className="jardinage-category-name-overlay">
+                      <div className="jardinage-category-name-line">
+                        <span className="jardinage-category-name">
+                          {category.name || t('jardinage.category_not_available')}
+                        </span>
+                      </div>
+                      <div className="jardinage-category-desc-line">
+                        <span className="jardinage-category-description-overlay">
+                          {category.description_fr ||
+                           category.description ||
+                           category.description_en ||
+                           category.description_ar ||
+                           t('jardinage.description_not_available')}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="category-content">
-                    <p className="category-description">{category.description || t('jardinage.description_not_available')}</p>
-                  </div>
-                  <div className="category-overlay">
-                    <span className="view-icon">🌱</span>
+                 
+                  <div className="jardinage-category-overlay">
+                    
                     <span className="view-text">{t('jardinage.categories.view_services')}</span>
                   </div>
                 </Link>
@@ -324,7 +335,7 @@ export default function Jardinage() {
                 <p>{t('jardinage.loading.services')}</p>
               </div>
             ) : (
-              <div className="jardins-grid">
+              <div className="jardinage-jardins-grid">
                 {jardins.length > 0 ? (
                   jardins.map((jardin) => (
                     <div key={jardin.id} className="jardin-card">

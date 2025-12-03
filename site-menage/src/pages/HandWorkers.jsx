@@ -189,6 +189,24 @@ export default function HandWorkers() {
     return 'Non disponible';
   };
 
+  // Check if category name should hide the monthly booking message
+  const shouldHideMonthlyMessage = (category) => {
+    if (!category) return false;
+    const categoryName = getLocalizedValue(category, 'name');
+    const excludedNames = [
+      'Ouvrier des égouts',
+      'Serrurier',
+      'Menuisier',
+      'عامل الصرف الصحي',
+      'الحداد',
+      'النجار',
+      'Sewer Worker',
+      'Locksmith',
+      'Carpenter'
+    ];
+    return excludedNames.includes(categoryName);
+  };
+
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
@@ -538,15 +556,17 @@ export default function HandWorkers() {
                     <span className="pricing-value">{formatMinimumJoursValue(selectedCategory.minimum_jours)}</span>
                   </div>
                 </div>
-                <div className="category-info-message">
-                  <p className="message-text">{t('hand_workers.less_than_month_booking_message', 'أقل من شهر — المرجو الضغط على هذا الزر لحجز موعد')}</p>
-                  <Link 
-                    to={`/hand-workers/appointment?category=${selectedCategory.id}`}
-                    className="booking-button-inline"
-                  >
-                    {t('hand_workers.book_appointment', 'Réserver un rendez-vous')}
-                  </Link>
-                </div>
+                {!shouldHideMonthlyMessage(selectedCategory) && (
+                  <div className="category-info-message">
+                    <p className="message-text">{t('hand_workers.less_than_month_booking_message', 'أقل من شهر — المرجو الضغط على هذا الزر لحجز موعد')}</p>
+                    <Link 
+                      to={`/hand-workers/appointment?category=${selectedCategory.id}`}
+                      className="booking-button-inline"
+                    >
+                      {t('hand_workers.book_appointment', 'Réserver un rendez-vous')}
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
 

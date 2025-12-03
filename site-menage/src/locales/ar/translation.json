@@ -1271,6 +1271,7 @@
     "book_appointment": "احجز موعد",
     "register_as_worker": "التسجيل كعامل",
     "less_than_month_booking_message": "أقل من شهر — المرجو الضغط على هذا الزر لحجز موعد",
+    "less_than_month_message": "أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة",
     "categories": {
       "maçon": {
         "title": "بنّاء",

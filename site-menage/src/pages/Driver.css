@@ -64,30 +64,48 @@
   font-size: 16px;
 }
 
-.loading-state,
-.error-state,
-.no-categories {
+.driver-page .loading-state,
+.driver-page .error-state,
+.driver-page .no-categories {
   text-align: center;
   padding: 3rem;
   font-size: 1.2rem;
   color: #6b7280;
 }
 
-.error-state {
+.driver-page .error-state {
   color: #ef4444;
 }
 
-.categories-grid {
+.driver-page .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  justify-items: center;
+  padding: 0 1rem;
 }
 
-.category-card {
+/* Tablet: 2 columns */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .driver-page .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 2 columns starting from 1024px */
+@media (min-width: 1024px) {
+  .driver-page .categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.driver-page .category-card {
   position: relative;
   min-height: 250px;
+  width: 100%;
+  max-width: 100%;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -95,12 +113,12 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.category-card:hover {
+.driver-page .category-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
-.category-card-overlay {
+.driver-page .category-card-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -110,7 +128,7 @@
   color: #fff;
 }
 
-.category-name {
+.driver-page .category-name {
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
@@ -118,7 +136,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.category-description {
+.driver-page .category-description {
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.5;
@@ -127,7 +145,7 @@
 }
 
 /* RTL Support */
-[dir="rtl"] .category-card-overlay {
+[dir="rtl"] .driver-page .category-card-overlay {
   text-align: right;
 }
 
@@ -171,12 +189,13 @@
     font-size: 2rem;
   }
 
-  .categories-grid {
+  .driver-page .categories-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
-
-  .category-card {
+  
+  .driver-page .category-card {
+    max-width: 100%;
     min-height: 200px;
   }
 }

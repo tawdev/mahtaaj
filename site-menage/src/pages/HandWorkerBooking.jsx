@@ -131,14 +131,36 @@ export default function HandWorkerBooking() {
     }
   };
 
+  // Check if category name should exclude minimum 30 days requirement
+  const isExcludedCategory = (category) => {
+    if (!category) return false;
+    const categoryName = category.name || category.name_fr || category.name_ar || category.name_en || '';
+    const excludedNames = [
+      'Ouvrier des égouts',
+      'Serrurier',
+      'Menuisier',
+      'عامل الصرف الصحي',
+      'الحداد',
+      'النجار',
+      'Sewer Worker',
+      'Locksmith',
+      'Carpenter'
+    ];
+    return excludedNames.includes(categoryName);
+  };
+
   const handleCategoryChange = (categoryId) => {
     const category = categories.find(cat => cat.id == categoryId);
     setSelectedCategory(category);
+    const isExcluded = isExcludedCategory(category);
+    const defaultDuration = isExcluded 
+      ? (category?.minimum_jours || 1) 
+      : (category?.minimum_jours && category.minimum_jours >= 30 ? category.minimum_jours : 30);
     setFormData(prev => ({ 
       ...prev, 
       category_id: categoryId,
       hand_worker_id: '',
-      duration_days: category?.minimum_jours && category.minimum_jours >= 30 ? category.minimum_jours : 30 // Default to minimum days (at least 30)
+      duration_days: defaultDuration
     }));
     loadHandWorkers(categoryId);
   };
@@ -146,11 +168,18 @@ export default function HandWorkerBooking() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // Validate duration_days: minimum 30 days
+    // Validate duration_days: minimum 30 days (except for excluded categories)
     if (name === 'duration_days') {
       const days = parseFloat(value);
-      if (value && !isNaN(days) && days < 30) {
-        setDurationError(t('hand_worker_booking.minimum_duration_error', 'الحد الأدنى لمدة الخدمة هو 30 يوماً'));
+      const isExcluded = isExcludedCategory(selectedCategory);
+      const minDays = isExcluded ? (selectedCategory?.minimum_jours || 1) : 30;
+      
+      if (value && !isNaN(days) && days < minDays) {
+        if (isExcluded) {
+          setDurationError(t('hand_worker_booking.minimum_duration_error', `الحد الأدنى لمدة الخدمة هو ${minDays} يوماً`));
+        } else {
+          setDurationError(t('hand_worker_booking.minimum_duration_error', 'الحد الأدنى لمدة الخدمة هو 30 يوماً'));
+        }
       } else {
         setDurationError('');
       }
@@ -276,7 +305,15 @@ export default function HandWorkerBooking() {
   const calculateTotalPrice = () => {
     if (selectedCategory && formData.duration_days) {
       const days = parseFloat(formData.duration_days);
-      // Calculate price if 30 days or more (170 DH per day)
+      const isExcluded = isExcludedCategory(selectedCategory);
+      
+      // For excluded categories, always calculate price using category's price_per_day
+      if (isExcluded) {
+        const pricePerDay = selectedCategory.price_per_day || selectedCategory.price_per_hour * 8 || 0;
+        return pricePerDay * days;
+      }
+      
+      // For other categories, calculate price if 30 days or more (170 DH per day)
       if (days >= 30) {
         const pricePerDay = 170; // Fixed price per day
         return pricePerDay * days;
@@ -288,8 +325,16 @@ export default function HandWorkerBooking() {
   };
 
   const isDurationMoreThanMonth = () => {
-    if (formData.duration_days) {
+    if (formData.duration_days && selectedCategory) {
       const days = parseFloat(formData.duration_days);
+      const isExcluded = isExcludedCategory(selectedCategory);
+      
+      // For excluded categories, always show price breakdown (no minimum 30 days requirement)
+      if (isExcluded) {
+        return true;
+      }
+      
+      // For other categories, check if 30 days or more
       return days >= 30;
     }
     return false;
@@ -305,10 +350,15 @@ export default function HandWorkerBooking() {
       return;
     }
 
-    // Validate duration_days: minimum 30 days
+    // Validate duration_days: minimum 30 days (except for excluded categories)
     const days = parseFloat(formData.duration_days);
-    if (!formData.duration_days || isNaN(days) || days < 30) {
-      const errorMsg = t('hand_worker_booking.minimum_duration_error', 'الحد الأدنى لمدة الخدمة هو 30 يوماً');
+    const isExcluded = isExcludedCategory(selectedCategory);
+    const minDays = isExcluded ? (selectedCategory?.minimum_jours || 1) : 30;
+    
+    if (!formData.duration_days || isNaN(days) || days < minDays) {
+      const errorMsg = isExcluded 
+        ? t('hand_worker_booking.minimum_duration_error', `الحد الأدنى لمدة الخدمة هو ${minDays} يوماً`)
+        : t('hand_worker_booking.minimum_duration_error', 'الحد الأدنى لمدة الخدمة هو 30 يوماً');
       setDurationError(errorMsg);
       setError(errorMsg);
       return;
@@ -574,7 +624,7 @@ export default function HandWorkerBooking() {
                   value={formData.duration_days}
                   onChange={handleInputChange}
                   className={`form-input ${durationError ? 'error' : ''}`}
-                  min="30"
+                  min={isExcludedCategory(selectedCategory) ? (selectedCategory?.minimum_jours || 1) : 30}
                   step="1"
                   required
                 />
@@ -685,7 +735,11 @@ export default function HandWorkerBooking() {
                 <div className="price-breakdown">
                   <div className="price-item">
                     <span>{t('hand_worker_booking.monthly_rate') || 'السعر الشهري (170 DH لكل يوم)'}</span>
-                    <span>170 DH</span>
+                    <span>
+                      {isExcludedCategory(selectedCategory) 
+                        ? `${selectedCategory.price_per_day || selectedCategory.price_per_hour * 8 || 0} DH`
+                        : '170 DH'}
+                    </span>
                   </div>
                   <div className="price-item">
                     <span>{t('hand_worker_booking.duration') || 'المدة'}</span>
@@ -697,11 +751,13 @@ export default function HandWorkerBooking() {
                   </div>
                 </div>
               ) : (
-                <div className="price-message">
-                  <p className="negotiation-message">
-                    {t('hand_worker_booking.contact_for_negotiation') || 'أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة'}
-                  </p>
-                </div>
+                !isExcludedCategory(selectedCategory) && (
+                  <div className="price-message">
+                    <p className="negotiation-message">
+                      {t('hand_worker_booking.contact_for_negotiation') || 'أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة'}
+                    </p>
+                  </div>
+                )
               )}
             </div>
           )}

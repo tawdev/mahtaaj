@@ -1246,6 +1246,7 @@
     "book_appointment": "Book an appointment",
     "register_as_worker": "Register as Worker",
     "less_than_month_booking_message": "Less than a month — Please click this button to book an appointment",
+    "less_than_month_message": "Less than a month, please contact us to negotiate according to the duration",
     "categories": {
       "maçon": {
         "title": "Mason",

@@ -38,6 +38,31 @@ export default function BebeSetting() {
     }
   }, [i18n.language]);
 
+  // Load first service automatically when categories are loaded
+  useEffect(() => {
+    const loadFirstServiceAuto = async () => {
+      if (categories.length > 0 && !selectedService && !selectedCategory) {
+        const firstCategory = categories[0];
+        const { data } = await supabase
+          .from('bebe_settings')
+          .select('*')
+          .eq('category_id', firstCategory.id)
+          .eq('is_active', true)
+          .order('order', { ascending: true })
+          .limit(1);
+        
+        if (data && data.length > 0) {
+          setSelectedService(data[0]);
+          setSelectedCategory(firstCategory);
+        }
+      }
+    };
+    
+    if (categories.length > 0) {
+      loadFirstServiceAuto();
+    }
+  }, [categories]);
+
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
@@ -296,9 +321,15 @@ export default function BebeSetting() {
         <>
           <div className="bebe-setting-header">
             <div className="header-content">
-              <h1 className="page-title">{t('bebe_setting.title')}</h1>
+              <h1 className="page-title">
+                {i18n.language === 'ar' ? 'رعاية الأطفال' : 
+                 i18n.language === 'fr' ? 'soins pour les enfants' : 
+                 'Childcare'}
+              </h1>
               <p className="page-subtitle">
-                {t('bebe_setting.subtitle')}
+                {i18n.language === 'ar' ? 'تجهيز وتزيين غرفة الطفل' : 
+                 i18n.language === 'fr' ? 'Aménagement et décoration de chambre pour bébé' : 
+                 'Baby room setup and decoration'}
               </p>
             </div>
             <div className="back-to-home">
@@ -307,206 +338,238 @@ export default function BebeSetting() {
                 className="back-button"
                 onClick={() => window.history.back()}
               >
-                ← رجوع
+                {i18n.language === 'ar' ? '← رجوع' : 
+                 i18n.language === 'fr' ? '← Retour' : 
+                 '← Back'}
               </button>
             </div>
           </div>
 
           <div className="bebe-setting-content">
-        {!selectedCategory ? (
-          <div className="categories-section">
-            <h2 className="section-title">{t('bebe_setting.categories.title')}</h2>
-            <div className="categories-grid">
-              {categories.map((category) => (
-                <div
-                  key={category.id}
-                  className="category-card"
-                  onClick={() => handleCategoryClick(category.id)}
-                >
-                  <div className="category-image">
+            <div className="service-info-card" style={{
+              maxWidth: '800px',
+              margin: '0 auto',
+              padding: '32px',
+              background: '#ffffff',
+              borderRadius: '16px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              textAlign: 'center'
+            }}>
+              {/* Service Image */}
+              <div style={{
+                marginBottom: '24px',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                maxHeight: '300px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                background: '#f3f4f6'
+              }}>
+                {(() => {
+                  // Try to get image from selectedService first
+                  let imagePath = null;
+                  if (selectedService) {
+                    imagePath = Array.isArray(selectedService.photo) 
+                      ? selectedService.photo[0] 
+                      : (selectedService.photo || selectedService.image);
+                  }
+                  
+                  // If no service image, try to get from selectedCategory
+                  if (!imagePath && selectedCategory) {
+                    imagePath = selectedCategory.image;
+                  }
+                  
+                  // If still no image, try first category image
+                  if (!imagePath && categories.length > 0) {
+                    imagePath = categories[0].image;
+                  }
+                  
+                  const imageUrl = imagePath ? getImageUrl(imagePath) : null;
+                  const defaultImage = '/serveces/a_مربية_أطفال_مغربية_ت.png';
+                  
+                  return (
+                    <img
+                      src={imageUrl || defaultImage}
+                      alt={i18n.language === 'ar' ? 'رعاية الأطفال' : 
+                           i18n.language === 'fr' ? 'soins pour les enfants' : 
+                           'Childcare'}
+                      style={{
+                        width: '100%',
+                        height: 'auto',
+                        maxHeight: '300px',
+                        objectFit: 'cover',
+                        display: 'block'
+                      }}
+                      onError={(e) => {
+                        e.target.src = defaultImage;
+                      }}
+                    />
+                  );
+                })()}
+              </div>
+
+              <h2 style={{
+                fontSize: '28px',
+                fontWeight: '700',
+                marginBottom: '16px',
+                color: '#1f2937'
+              }}>
+                {i18n.language === 'ar' ? 'رعاية الأطفال' : 
+                 i18n.language === 'fr' ? 'soins pour les enfants' : 
+                 'Childcare'}
+              </h2>
+              
+              <p style={{
+                fontSize: '18px',
+                color: '#6b7280',
+                marginBottom: '32px',
+                lineHeight: '1.6'
+              }}>
+                {i18n.language === 'ar' ? 'تجهيز وتزيين غرفة الطفل' : 
+                 i18n.language === 'fr' ? 'Aménagement et décoration de chambre pour bébé' : 
+                 'Baby room setup and decoration'}
+              </p>
+
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '32px',
+                marginBottom: '32px',
+                flexWrap: 'wrap'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#6b7280',
+                    fontWeight: '500'
+                  }}>
+                    {i18n.language === 'ar' ? 'السعر:' : 
+                     i18n.language === 'fr' ? 'Prix:' : 
+                     'Price:'}
+                  </span>
+                  <span style={{
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    color: '#10b981'
+                  }}>
                     {(() => {
-                      const imagePath = category.image;
-                      const imageUrl = imagePath ? getImageUrl(imagePath) : null;
-                      const defaultImage = '/serveces/a_مربية_أطفال_مغربية_ت.png';
-                      return imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={category.name}
-                          onError={(e) => {
-                            console.log('[BebeSetting] Image failed to load:', imageUrl, 'Original path:', imagePath);
-                            e.target.src = defaultImage;
-                          }}
-                          onLoad={() => {
-                            console.log('[BebeSetting] Image loaded successfully:', imageUrl);
-                          }}
-                        />
-                      ) : (
-                        <img
-                          src={defaultImage}
-                          alt={category.name}
-                          onError={(e) => {
-                            console.log('[BebeSetting] Default image failed to load');
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      );
+                      if (selectedService) {
+                        const priceValue = selectedService.price;
+                        if (priceValue != null && priceValue !== '') {
+                          const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
+                          if (!isNaN(price) && price >= 0) {
+                            return `${price} DH`;
+                          }
+                        }
+                      }
+                      if (settings && settings.length > 0 && settings[0]) {
+                        const priceValue = settings[0].price;
+                        if (priceValue != null && priceValue !== '') {
+                          const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
+                          if (!isNaN(price) && price >= 0) {
+                            return `${price} DH`;
+                          }
+                        }
+                      }
+                      return 'Prix sur demande';
                     })()}
-                    {/* Category Name Overlay on Image */}
-                    <div className="category-name-overlay">
-                      <h3 className="category-name">{category.name || t('bebe_setting.category_not_available')}</h3>
-                    </div>
-                  </div>
-                  <div className="category-content">
-                    <p className="category-description">{category.description || t('bebe_setting.description_not_available')}</p>
-                  </div>
-                  <div className="category-overlay">
-                    <span className="view-icon">👁️</span>
-                    <span className="view-text">{t('bebe_setting.categories.view_details')}</span>
-                  </div>
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="details-section">
-            <div className="details-header">
-              <button onClick={handleBackToCategories} className="back-to-categories">
-                <span className="back-icon">←</span>
-                {t('bebe_setting.services.back_to_categories')}
+                
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#6b7280',
+                    fontWeight: '500'
+                  }}>
+                    {i18n.language === 'ar' ? 'المدة:' : 
+                     i18n.language === 'fr' ? 'Durée:' : 
+                     'Duration:'}
+                  </span>
+                  <span style={{
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    color: '#3b82f6'
+                  }}>
+                    2 heures
+                  </span>
+                </div>
+              </div>
+
+              <button 
+                className="reserve-button"
+                onClick={async () => {
+                  // Load first service if not already loaded
+                  if (!selectedService && categories.length > 0) {
+                    const firstCategory = categories[0];
+                    await handleCategoryClick(firstCategory.id);
+                  }
+                  
+                  if (selectedService) {
+                    setShowReservationForm(true);
+                  } else {
+                    // If no service found, try to load the first one
+                    const loadFirstService = async () => {
+                      if (categories.length > 0) {
+                        const firstCategory = categories[0];
+                        const { data } = await supabase
+                          .from('bebe_settings')
+                          .select('*')
+                          .eq('category_id', firstCategory.id)
+                          .eq('is_active', true)
+                          .order('order', { ascending: true })
+                          .limit(1);
+                        
+                        if (data && data.length > 0) {
+                          setSelectedService(data[0]);
+                          setSelectedCategory(firstCategory);
+                          setShowReservationForm(true);
+                        }
+                      }
+                    };
+                    loadFirstService();
+                  }
+                }}
+                style={{
+                  padding: '16px 32px',
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#ffffff',
+                  background: '#10b981',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#059669';
+                  e.target.style.transform = 'scale(1.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = '#10b981';
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >
+                <span>📅</span>
+                {i18n.language === 'ar' ? 'احجز' : 
+                 i18n.language === 'fr' ? 'Réserver' : 
+                 'Reserve'}
               </button>
             </div>
-
-            {loadingDetails ? (
-              <div className="loading-details">
-                <div className="loader"></div>
-                <p>{t('bebe_setting.loading.services')}</p>
-              </div>
-            ) : (
-              <div className="category-details-card">
-                {/* Category Image */}
-                <div className="category-details-image">
-                  {(() => {
-                    const imagePath = selectedCategory.image;
-                    const imageUrl = imagePath ? getImageUrl(imagePath) : null;
-                    const defaultImage = '/serveces/a_مربية_أطفال_مغربية_ت.png';
-                    return imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        alt={selectedCategory.name}
-                        onError={(e) => {
-                          console.log('[BebeSetting] Category image failed to load:', imageUrl);
-                          e.target.src = defaultImage;
-                        }}
-                      />
-                    ) : (
-                      <img
-                        src={defaultImage}
-                        alt={selectedCategory.name}
-                        onError={(e) => {
-                          console.log('[BebeSetting] Default image failed to load');
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    );
-                  })()}
-                </div>
-
-                {/* Category Info */}
-                <div className="category-details-content">
-                  <h1 className="category-details-name">{selectedCategory.name || t('bebe_setting.category_not_available')}</h1>
-                  
-                  <div className="category-details-description">
-                    <p>{selectedCategory.description || t('bebe_setting.description_not_available')}</p>
-                  </div>
-
-                  {/* Price and Duration from first service */}
-                  <div className="category-details-info">
-                    <div className="price-info">
-                      <span className="price-label">{t('bebe_setting.services.price')}</span>
-                      <span className="price-value">
-                        {(() => {
-                          // Try selectedService first
-                          if (selectedService) {
-                            const priceValue = selectedService.price;
-                            console.log('[BebeSetting] Displaying price from selectedService:', {
-                              price: priceValue,
-                              type: typeof priceValue,
-                              isNull: priceValue == null,
-                              isEmpty: priceValue === ''
-                            });
-                            
-                            if (priceValue != null && priceValue !== '') {
-                              const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
-                              if (!isNaN(price) && price >= 0) {
-                                return `${price} DH`;
-                              }
-                            }
-                          }
-                          // Try first setting from settings array
-                          if (settings && settings.length > 0 && settings[0]) {
-                            const priceValue = settings[0].price;
-                            console.log('[BebeSetting] Displaying price from settings[0]:', {
-                              price: priceValue,
-                              type: typeof priceValue
-                            });
-                            
-                            if (priceValue != null && priceValue !== '') {
-                              const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
-                              if (!isNaN(price) && price >= 0) {
-                                return `${price} DH`;
-                              }
-                            }
-                          }
-                          // Default fallback
-                          console.warn('[BebeSetting] Using default price: 100 DH');
-                          return '100 DH';
-                        })()}
-                      </span>
-                    </div>
-                    <div className="duration-info">
-                      <span className="duration-label">{t('bebe_setting.services.duration')}</span>
-                      <span className="duration-value">
-                        {selectedService?.duration || (settings && settings.length > 0 && settings[0]?.duration) || '2 heures'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Reserve Button */}
-                  <div className="category-details-actions">
-                    <button 
-                      className="reserve-button"
-                      onClick={() => {
-                        if (selectedService) {
-                          setShowReservationForm(true);
-                        } else {
-                          // If no service found, try to load the first one
-                          const loadFirstService = async () => {
-                            const { data } = await supabase
-                              .from('bebe_settings')
-                              .select('*')
-                              .eq('category_id', selectedCategory.id)
-                              .eq('is_active', true)
-                              .order('order', { ascending: true })
-                              .limit(1);
-                            
-                            if (data && data.length > 0) {
-                              setSelectedService(data[0]);
-                              setShowReservationForm(true);
-                            }
-                          };
-                          loadFirstService();
-                        }
-                      }}
-                    >
-                      <span className="reserve-icon">📅</span>
-                      {t('bebe_setting.services.reserve')}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
           </div>
         </>
       )}

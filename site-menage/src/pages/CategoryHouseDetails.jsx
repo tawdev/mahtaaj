@@ -1750,18 +1750,18 @@ export default function CategoryHouseDetails() {
                       to={`/services/${serviceSlug}/${categorySlug}/${typeSlug}`}
                       style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
                     >
-                      <div
-                        className="type-card"
-                        style={{
-                          backgroundImage: bgImage 
-                            ? `url(${bgImage})` 
-                            : undefined,
-                          backgroundSize: bgImage ? 'cover' : undefined,
-                          backgroundPosition: bgImage ? 'center' : undefined,
-                          backgroundRepeat: bgImage ? 'no-repeat' : undefined,
+                  <div
+                    className="type-card"
+                    style={{
+                      backgroundImage: bgImage 
+                        ? `url(${bgImage})` 
+                        : undefined,
+                      backgroundSize: bgImage ? 'cover' : undefined,
+                      backgroundPosition: bgImage ? 'center' : undefined,
+                      backgroundRepeat: bgImage ? 'no-repeat' : undefined,
                           cursor: 'pointer',
-                          position: 'relative'
-                        }}
+                      position: 'relative'
+                    }}
                       >
                         <h4>{type.name}</h4>
                         {type.price !== null && type.price !== undefined && !isNaN(parseFloat(type.price)) && (
@@ -1797,8 +1797,8 @@ export default function CategoryHouseDetails() {
                         cursor: 'default',
                         position: 'relative'
                       }}
-                    >
-                      {/* Selection button for kitchen category */}
+                  >
+                    {/* Selection button for kitchen category */}
                       <div
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1870,9 +1870,9 @@ export default function CategoryHouseDetails() {
                           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
                         }}>
                           {parseFloat(type.price).toFixed(2)} DH
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
+                  </div>
                   )}
                   {/* Display options below the card if available */}
                   {typeOptions && typeOptions.length > 0 && (

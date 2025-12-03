@@ -131,7 +131,11 @@ export default function Security() {
       }
 
       console.log('[Security] Loaded roles:', data?.length || 0, 'roles');
-      console.log('[Security] Roles data:', data);
+      if (data && data.length > 0) {
+        console.log('[Security] First role sample:', data[0]);
+        console.log('[Security] First role image field:', data[0].image);
+        console.log('[Security] First role all fields:', Object.keys(data[0]));
+      }
       
       // Ensure we set roles even if data is null/undefined
       const rolesData = Array.isArray(data) ? data : [];
@@ -877,20 +881,28 @@ export default function Security() {
               }
               // Helper function to get image URL from role
               const getRoleImageUrl = (imagePath) => {
-                if (!imagePath) return null;
+                if (!imagePath) {
+                  console.log('[Security] No image path provided for role:', role.name);
+                  return null;
+                }
+                
+                console.log('[Security] Processing image path for role:', role.name, 'Path:', imagePath);
                 
                 // If it's already a full URL, return it
                 if (imagePath.includes('http') || imagePath.includes('supabase.co/storage')) {
+                  console.log('[Security] Image is already a full URL:', imagePath);
                   return imagePath;
                 }
                 
                 // If it's an old Laravel path, extract filename and try to get from Supabase
-                if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/')) {
+                if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/') || imagePath.startsWith('/images/')) {
                   const filename = imagePath.split('/').pop();
                   if (filename) {
+                    console.log('[Security] Extracting filename from Laravel path:', filename);
                     const { data: { publicUrl } } = supabase.storage
                       .from('employees')
                       .getPublicUrl(filename);
+                    console.log('[Security] Generated Supabase URL:', publicUrl);
                     return publicUrl;
                   }
                   return null;
@@ -898,16 +910,27 @@ export default function Security() {
                 
                 // If it's just a filename, try to get from Supabase Storage
                 if (!imagePath.includes('/') && !imagePath.includes('http')) {
+                  console.log('[Security] Treating as filename, getting from Supabase:', imagePath);
                   const { data: { publicUrl } } = supabase.storage
                     .from('employees')
                     .getPublicUrl(imagePath);
+                  console.log('[Security] Generated Supabase URL:', publicUrl);
                   return publicUrl;
                 }
                 
+                console.log('[Security] Returning image path as-is:', imagePath);
                 return imagePath;
               };
 
-              const roleImageUrl = role.image ? getRoleImageUrl(role.image) : null;
+              // Try multiple possible image field names
+              const imagePath = role.image || role.image_url || role.photo || role.photo_url || null;
+              const roleImageUrl = imagePath ? getRoleImageUrl(imagePath) : null;
+              
+              // Debug: Log role data to see what fields are available
+              if (!roleImageUrl) {
+                console.log('[Security] No image URL found for role:', role.name, 'Available fields:', Object.keys(role));
+                console.log('[Security] Role data:', role);
+              }
 
               return (
                 <article 
@@ -923,18 +946,36 @@ export default function Security() {
                 >
                   <div className="security-card-content">
                     {/* Image du rôle */}
-                    {roleImageUrl && (
-                      <div className="security-card-image-container">
+                    <div className="security-card-image-container">
+                      {roleImageUrl ? (
                         <img 
                           src={roleImageUrl} 
                           alt={role.name || 'Role image'}
                           className="security-card-image"
                           onError={(e) => {
+                            console.error('[Security] Image failed to load:', roleImageUrl);
                             e.target.style.display = 'none';
+                            // Show placeholder icon
+                            const container = e.target.parentElement;
+                            if (container && !container.querySelector('.image-placeholder')) {
+                              const placeholder = document.createElement('div');
+                              placeholder.className = 'image-placeholder';
+                              placeholder.innerHTML = '🔒';
+                              placeholder.style.cssText = 'font-size: 3rem; color: #94a3b8; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;';
+                              container.appendChild(placeholder);
+                            }
                           }}
+                          onLoad={(e) => {
+                            e.target.style.opacity = '1';
+                          }}
+                          style={{ opacity: 0, transition: 'opacity 0.3s ease' }}
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div className="image-placeholder" style={{fontSize: '3rem', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%'}}>
+                          🔒
+                        </div>
+                      )}
+                    </div>
                     <h3 className="security-name">
                       {role.name || getTranslatedRole(role.name) || t('security_page.role_not_available')}
                     </h3>
@@ -984,7 +1025,7 @@ export default function Security() {
                 }}
                 className="role-back-button"
               >
-                ← {t('security_page.back_to_roles')}
+                {t('security_page.back_to_roles')}
               </button>
 
               {/* Titre */}
@@ -1037,7 +1078,7 @@ export default function Security() {
                 className="role-back-button"
                 style={{marginTop: '16px'}}
               >
-                ← {t('security_page.back_to_roles')}
+                {t('security_page.back_to_roles')}
               </button>
             </div>
           )

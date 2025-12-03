@@ -142,20 +142,38 @@
   width: 100%;
   height: 200px;
   overflow: hidden;
-  border-radius: 12px 12px 0 0;
-  margin: -20px -20px 0 -20px;
+  border-radius: 12px;
+  margin: 0 0 15px 0;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .security-card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform 0.3s ease;
+  display: block;
 }
 
 .security-card:hover .security-card-image {
   transform: scale(1.1);
+}
+
+/* Fallback for missing images */
+.security-card-image-container:empty::before {
+  content: '🔒';
+  font-size: 3rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 /* Role card specific text styles */

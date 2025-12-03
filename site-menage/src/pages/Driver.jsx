@@ -159,9 +159,6 @@ export default function Driver() {
               >
                 <div className="category-card-overlay">
                   <h3 className="category-name">{categoryName}</h3>
-                  {categoryDescription && (
-                    <p className="category-description">{categoryDescription}</p>
-                  )}
                 </div>
               </Link>
             );

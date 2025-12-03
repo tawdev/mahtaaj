@@ -1249,6 +1249,7 @@
     "book_appointment": "Réserver un rendez-vous",
     "register_as_worker": "S'inscrire comme Ouvrier",
     "less_than_month_booking_message": "Moins d'un mois — Veuillez cliquer sur ce bouton pour réserver un rendez-vous",
+    "less_than_month_message": "Moins d'un mois, veuillez nous contacter pour négocier selon la durée",
     "categories": {
       "maçon": {
         "title": "Maçon",

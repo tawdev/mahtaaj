@@ -83,15 +83,23 @@
   text-align: center;
 }
 
-/* Categories Grid */
-.categories-grid {
+/* Categories Grid (Jardinage only) - Isolated to prevent conflicts */
+.jardinage-categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 40px;
 }
 
-.category-card {
+/* Desktop: 4 columns starting from 1024px */
+@media (min-width: 1024px) {
+  .jardinage-categories-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Jardinage-specific card styles - Isolated to prevent conflicts */
+.jardinage-page .jardinage-category-card {
   background: #ffffff;
   border-radius: 16px;
   overflow: hidden;
@@ -107,19 +115,19 @@
   height: 100%;
 }
 
-.category-card:hover {
+.jardinage-page .jardinage-category-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
-.category-image {
+.jardinage-page .jardinage-category-image {
   height: 250px;
   overflow: hidden;
   position: relative;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
 }
 
-.category-image img {
+.jardinage-page .jardinage-category-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -128,11 +136,11 @@
   display: block;
 }
 
-.category-card:hover .category-image img {
+.jardinage-page .jardinage-category-card:hover .jardinage-category-image img {
   transform: scale(1.08);
 }
 
-.category-image-placeholder {
+.jardinage-page .jardinage-category-image-placeholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -143,22 +151,36 @@
   color: #059669;
 }
 
-/* Category Name Overlay on Image */
-.category-name-overlay {
+/* Category Name Overlay on Image - Jardinage only */
+.jardinage-page .jardinage-category-name-overlay {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.5) 50%, transparent 100%);
-  padding: 20px 18px 18px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 50%, transparent 100%);
+  padding: 24px 20px 20px;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: center;
 }
 
-.category-name {
+.jardinage-page .jardinage-category-name-line,
+.jardinage-page .jardinage-category-desc-line {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.jardinage-page .jardinage-category-name-line .jardinage-category-name {
   font-size: 1.5rem;
   font-weight: 700;
   color: #ffffff;
   margin: 0;
+  padding: 0;
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -166,16 +188,36 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  text-align: center;
 }
 
-.category-content {
+/* Short description shown over image on Jardinage cards */
+.jardinage-page .jardinage-category-desc-line .jardinage-category-description-overlay {
+  margin: 0;
+  padding: 0;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #f1f5f9;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  opacity: 0.95;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.jardinage-page .jardinage-category-content {
   padding: 20px 24px 24px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.category-description {
+.jardinage-page .jardinage-category-description {
   font-size: 1rem;
   color: #64748b;
   line-height: 1.6;
@@ -187,7 +229,7 @@
   text-overflow: ellipsis;
 }
 
-.category-overlay {
+.jardinage-page .jardinage-category-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -203,7 +245,7 @@
   color: white;
 }
 
-.category-card:hover .category-overlay {
+.jardinage-page .jardinage-category-card:hover .jardinage-category-overlay {
   opacity: 1;
 }
 
@@ -254,11 +296,27 @@
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
 }
 
-/* Jardins Grid */
-.jardins-grid {
+/* Jardins Grid (Jardinage only) - Isolated to prevent conflicts */
+.jardinage-jardins-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  width: 100%;
+  /* Default: 1 column for mobile */
+  grid-template-columns: 1fr;
   gap: 24px;
+}
+
+/* Tablet: 1 or 2 columns based on design */
+@media (min-width: 600px) and (max-width: 1023px) {
+  .jardinage-jardins-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 2 columns starting from 1024px */
+@media (min-width: 1024px) {
+  .jardinage-jardins-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .jardin-card {
@@ -817,26 +875,33 @@
     font-size: 1rem;
   }
 
-  .categories-grid {
+  .jardinage-categories-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .category-image {
+  .jardinage-page .jardinage-category-image {
     height: 220px;
   }
 
-  .category-name {
+  .jardinage-page .jardinage-category-name {
     font-size: 1.3rem;
   }
 
-  .category-content {
+  .jardinage-page .jardinage-category-content {
     padding: 16px 20px 20px;
   }
 
-  .jardins-grid {
+  .jardinage-jardins-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+  
+  /* Ensure 2 columns on tablets */
+  @media (min-width: 600px) and (max-width: 768px) {
+    .jardinage-jardins-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   .jardin-details {
@@ -860,16 +925,16 @@
     padding: 16px;
   }
 
-  .category-image {
+  .jardinage-page .jardinage-category-image {
     height: 200px;
   }
 
-  .category-name {
+  .jardinage-page .jardinage-category-name {
     font-size: 1.2rem;
     padding: 16px 14px 14px;
   }
 
-  .category-name-overlay {
+  .jardinage-page .jardinage-category-name-overlay {
     padding: 16px 14px 14px;
   }
 
