@@ -1,0 +1,309 @@
+/* Villa specific styles */
+
+.villa-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .villa-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .villa-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.villa-card-price {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.villa-card-reserve-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 8px;
+}
+
+.villa-card-reserve-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.villa-card-reserve-btn:active {
+  transform: translateY(0);
+}
+
+.villa-card-image {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.villa-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Reservation Form Styles */
+.villa-reservation-form {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.villa-form-group {
+  margin-bottom: 20px;
+}
+
+.villa-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.villa-form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.villa-form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Rooms, Bathrooms, Salons Lists */
+.villa-rooms-list,
+.villa-bathrooms-list,
+.villa-salons-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.villa-room-item,
+.villa-bathroom-item,
+.villa-salon-item {
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.villa-room-header,
+.villa-bathroom-header,
+.villa-salon-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.villa-room-title,
+.villa-bathroom-title,
+.villa-salon-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.villa-room-price,
+.villa-bathroom-price,
+.villa-salon-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.villa-dimensions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.villa-dimension-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.villa-dimension-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.villa-dimension-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.villa-dimension-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Garden Section */
+.villa-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.villa-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.villa-garden-section {
+  margin-top: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.villa-garden-header {
+  margin-bottom: 10px;
+}
+
+.villa-garden-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.villa-garden-price {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  text-align: right;
+}
+
+/* Pool Section */
+.villa-radio-group {
+  display: flex;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.villa-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.villa-radio {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.villa-pool-section {
+  margin-top: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.villa-pool-header {
+  margin-bottom: 10px;
+}
+
+.villa-pool-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.villa-pool-price {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  text-align: right;
+}
+
+/* Final Price */
+.villa-final-price {
+  margin-top: 20px;
+  padding: 16px;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.villa-final-price-label {
+  font-weight: 600;
+}
+
+.villa-final-price-value {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* Disabled Button */
+.villa-card-reserve-btn-disabled {
+  background: #94a3b8 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.villa-card-reserve-btn-disabled:hover {
+  transform: none !important;
+  background: #94a3b8 !important;
+}
+

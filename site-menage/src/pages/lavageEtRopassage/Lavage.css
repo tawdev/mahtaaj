@@ -1,0 +1,734 @@
+.lavage-page {
+  padding: 40px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.lavage-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.lavage-back-btn {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.lavage-back-btn:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  transform: translateX(-4px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.lavage-back-btn:active {
+  transform: translateX(-2px);
+  background: #2563eb;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.lavage-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.lavage-loading,
+.lavage-error,
+.lavage-empty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.lavage-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .lavage-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .lavage-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+.lavage-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lavage-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.lavage-card-image {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.lavage-card-image img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.lavage-card-body {
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.lavage-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.lavage-card-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+  flex: 1;
+  text-align: center;
+}
+
+.lavage-options-section {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.lavage-options-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.lavage-options-container {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.lavage-option-wrapper {
+  flex: 1;
+  display: flex;
+}
+
+.lavage-option-wrapper-left {
+  justify-content: flex-start;
+}
+
+.lavage-option-wrapper-right {
+  justify-content: flex-end;
+}
+
+.lavage-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  min-width: 0;
+}
+
+.lavage-option-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  transform: translateX(2px);
+}
+
+.lavage-option-btn-selected {
+  border-color: #2563eb;
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.lavage-option-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #cbd5e1;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.lavage-option-btn-selected .lavage-option-checkbox {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.lavage-option-label {
+  flex: 1;
+  user-select: none;
+}
+
+.lavage-card-reserve-btn {
+  width: 100%;
+  padding: 12px 24px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.lavage-card-reserve-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.lavage-card-reserve-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.lavage-card-reserve-btn-disabled {
+  background: #94a3b8 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.lavage-card-reserve-btn-disabled:hover {
+  background: #94a3b8 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.lavage-details-container {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.lavage-details-wrapper {
+  flex: 1;
+  display: flex;
+}
+
+.lavage-details-wrapper-left {
+  justify-content: flex-start;
+}
+
+.lavage-details-wrapper-right {
+  justify-content: flex-end;
+}
+
+.lavage-vetements-sub-options {
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  min-width: 0;
+}
+
+.lavage-sub-options-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.lavage-sub-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lavage-sub-option-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lavage-sub-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  justify-content: space-between;
+}
+
+.lavage-sub-option-btn:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.lavage-sub-option-btn-selected {
+  border-color: #2563eb;
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.lavage-sub-option-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  margin-left: auto;
+}
+
+.lavage-quantity-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.lavage-quantity-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.lavage-quantity-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lavage-quantity-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.lavage-sub-option-total {
+  margin-top: 4px;
+  padding: 6px 10px;
+  background: #e0f2fe;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0369a1;
+  text-align: center;
+  border: 1px solid #bae6fd;
+}
+
+.lavage-final-price {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.15));
+  border-radius: 8px;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lavage-final-price-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.lavage-final-price-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.lavage-grands-textiles-section {
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  min-width: 0;
+}
+
+.lavage-grands-textiles-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* Long types section */
+.lavage-long-types-section {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.lavage-long-types-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.lavage-long-types-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lavage-long-type-item {
+  width: 100%;
+}
+
+.lavage-long-type-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.lavage-long-type-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.lavage-long-type-btn-selected {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+
+.lavage-long-type-btn-selected:hover {
+  background: #bfdbfe;
+  border-color: #2563eb;
+}
+
+.lavage-long-type-price {
+  margin-left: auto;
+  font-weight: 600;
+  color: #3b82f6;
+  font-size: 14px;
+}
+
+.lavage-long-type-details-section {
+  margin-top: 20px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.lavage-grands-textiles-details-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.lavage-price-per-m2 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b82f6;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.lavage-grands-textiles-count-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.lavage-grands-textiles-count-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.lavage-grands-textiles-count-input {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lavage-grands-textiles-count-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.lavage-grands-textiles-pieces {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.lavage-grands-textiles-piece-item {
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.lavage-piece-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.lavage-piece-number {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.lavage-piece-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.lavage-piece-dimensions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lavage-piece-dimension-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lavage-piece-dimension-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.lavage-piece-dimension-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lavage-piece-dimension-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.lavage-piece-area {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #e0f2fe;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0369a1;
+  text-align: center;
+  border: 1px solid #bae6fd;
+}
+
+.lavage-piece-validation {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #92400e;
+  text-align: center;
+}
+
+@media (max-width: 639px) {
+  .lavage-options-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .lavage-option-wrapper {
+    width: 100%;
+  }
+  
+  .lavage-option-wrapper-left,
+  .lavage-option-wrapper-right {
+    justify-content: stretch;
+  }
+  
+  .lavage-details-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .lavage-details-wrapper {
+    width: 100%;
+  }
+  
+  .lavage-details-wrapper-left,
+  .lavage-details-wrapper-right {
+    justify-content: stretch;
+  }
+}
+
+@media (min-width: 640px) {
+  .lavage-quantity-input-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .lavage-quantity-label {
+    flex: 0 0 120px;
+  }
+  
+  .lavage-quantity-input {
+    flex: 0 0 80px;
+  }
+  
+  .lavage-sub-option-total {
+    margin-top: 0;
+    flex: 1;
+    text-align: right;
+  }
+  
+  .lavage-grands-textiles-count-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .lavage-grands-textiles-count-label {
+    flex: 0 0 140px;
+  }
+  
+  .lavage-grands-textiles-count-input {
+    flex: 0 0 100px;
+  }
+  
+  .lavage-piece-dimension-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .lavage-piece-dimension-label {
+    flex: 0 0 120px;
+  }
+  
+  .lavage-piece-dimension-input {
+    flex: 1;
+  }
+}
+

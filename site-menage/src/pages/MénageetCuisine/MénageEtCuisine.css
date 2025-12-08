@@ -1,0 +1,114 @@
+.menage-et-cuisine-page {
+  padding: 40px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.menage-et-cuisine-back-button {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.menage-et-cuisine-back-button:hover {
+  color: #2563eb;
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateX(-4px);
+}
+
+.menage-et-cuisine-back-button:active {
+  transform: translateX(-2px);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.menage-et-cuisine-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.menage-et-cuisine-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .menage-et-cuisine-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .menage-et-cuisine-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.menage-et-cuisine-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menage-et-cuisine-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.menage-et-cuisine-card-clickable {
+  cursor: pointer;
+}
+
+.menage-et-cuisine-card-clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.menage-et-cuisine-card-image {
+  width: 100%;
+  height: 200px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.menage-et-cuisine-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menage-et-cuisine-card-body {
+  padding: 16px 20px;
+}
+
+.menage-et-cuisine-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  text-align: center;
+}
+

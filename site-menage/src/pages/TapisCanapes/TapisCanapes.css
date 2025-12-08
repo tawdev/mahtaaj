@@ -1,0 +1,132 @@
+.tapis-canapes-page {
+  padding: 40px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.tapis-canapes-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.tapis-canapes-back-btn {
+  align-self: flex-start;
+  padding: 10px 20px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tapis-canapes-back-btn:hover {
+  background: #1d4ed8;
+  transform: translateX(-2px);
+}
+
+.tapis-canapes-back-btn:active {
+  transform: translateX(0);
+}
+
+.tapis-canapes-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+}
+
+.tapis-canapes-loading,
+.tapis-canapes-error,
+.tapis-canapes-empty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.tapis-canapes-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .tapis-canapes-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .tapis-canapes-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.tapis-canapes-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tapis-canapes-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tapis-canapes-card-clickable {
+  cursor: pointer;
+}
+
+.tapis-canapes-card-clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  border-color: #2563eb;
+}
+
+.tapis-canapes-card-image {
+  width: 100%;
+  height: 160px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.tapis-canapes-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tapis-canapes-card-body {
+  padding: 12px 14px 16px;
+}
+
+.tapis-canapes-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #1e293b;
+}
+
+.tapis-canapes-card-description {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 0;
+  min-height: 40px;
+  line-height: 1.5;
+}
+

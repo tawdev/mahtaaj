@@ -1,0 +1,386 @@
+.canapes-page {
+  padding: 40px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.canapes-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.canapes-back-btn {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.canapes-back-btn:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  transform: translateX(-4px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.canapes-back-btn:active {
+  transform: translateX(-2px);
+  background: #2563eb;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.canapes-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.canapes-loading,
+.canapes-error,
+.canapes-empty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.canapes-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .canapes-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .canapes-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+.canapes-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.canapes-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.canapes-card-image {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.canapes-card-image img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.canapes-card-body {
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.canapes-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.canapes-card-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+  flex: 1;
+  text-align: center;
+}
+
+.canapes-card-price-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.canapes-card-price-per-meter {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 6px 10px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.canapes-card-price-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.canapes-card-price-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.canapes-card-price-note {
+  font-size: 12px;
+  font-weight: 500;
+  color: #f59e0b;
+  text-align: center;
+  padding: 4px 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.canapes-card-team-message {
+  font-size: 12px;
+  font-weight: 400;
+  color: #64748b;
+  text-align: center;
+  padding: 4px 8px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.canapes-card-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: #059669;
+  margin: 8px 0;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.15));
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.canapes-card-reserve-btn {
+  padding: 12px 20px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 4px;
+}
+
+.canapes-card-reserve-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.canapes-card-reserve-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* Canape Count and Dimensions Section */
+.canapes-canape-section {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.canapes-canape-count-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.canapes-canape-count-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  width: 80px;
+  text-align: center;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.canapes-canape-count-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.canapes-canapes-dimensions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.canapes-canape-dimension-group {
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.canapes-canape-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.canapes-canape-number {
+  font-size: 14px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.canapes-remove-btn {
+  padding: 6px 12px;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.canapes-remove-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+}
+
+.canapes-remove-btn:active {
+  transform: translateY(0);
+  background: #b91c1c;
+  box-shadow: 0 1px 2px rgba(239, 68, 68, 0.2);
+}
+
+.canapes-dimension-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.canapes-dimension-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.canapes-dimension-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.canapes-dimension-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+@media (min-width: 640px) {
+  .canapes-dimension-inputs {
+    flex-direction: row;
+    gap: 12px;
+  }
+  
+  .canapes-dimension-label {
+    flex: 1;
+  }
+}
+
+.canapes-validation-message {
+  margin-top: 16px;
+  padding: 10px 12px;
+  background: #fef3c7;
+  border: 1px solid #fbbf24;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #92400e;
+  text-align: center;
+}
+
+.canapes-card-reserve-btn-disabled {
+  background: #94a3b8 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.canapes-card-reserve-btn-disabled:hover {
+  background: #94a3b8 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+

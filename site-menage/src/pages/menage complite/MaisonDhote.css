@@ -1,0 +1,274 @@
+/* Maison d'hôte specific styles */
+
+.maison-dhote-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .maison-dhote-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .maison-dhote-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.maison-dhote-card-price {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.maison-dhote-card-reserve-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 8px;
+}
+
+.maison-dhote-card-reserve-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.maison-dhote-card-reserve-btn:active {
+  transform: translateY(0);
+}
+
+.maison-dhote-card-image {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.maison-dhote-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Reservation Form Styles */
+.maison-dhote-reservation-form {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.maison-dhote-form-group {
+  margin-bottom: 20px;
+}
+
+.maison-dhote-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.maison-dhote-form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.maison-dhote-form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Rooms, Suites Lists */
+.maison-dhote-rooms-list,
+.maison-dhote-suites-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.maison-dhote-room-item,
+.maison-dhote-suite-item {
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.maison-dhote-room-header,
+.maison-dhote-suite-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.maison-dhote-room-title,
+.maison-dhote-suite-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.maison-dhote-room-price,
+.maison-dhote-suite-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.maison-dhote-dimensions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.maison-dhote-dimension-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.maison-dhote-dimension-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.maison-dhote-dimension-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.maison-dhote-dimension-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Checkbox Styles */
+.maison-dhote-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.maison-dhote-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Service Prices */
+.maison-dhote-breakfast-price,
+.maison-dhote-sheets-price {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2563eb;
+  text-align: right;
+}
+
+/* Pool and Garden Sections */
+.maison-dhote-pool-section,
+.maison-dhote-garden-section {
+  margin-top: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.maison-dhote-pool-header,
+.maison-dhote-garden-header {
+  margin-bottom: 10px;
+}
+
+.maison-dhote-pool-title,
+.maison-dhote-garden-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.maison-dhote-pool-price,
+.maison-dhote-garden-price {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  text-align: right;
+}
+
+/* Final Price */
+.maison-dhote-final-price {
+  margin-top: 20px;
+  padding: 16px;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.maison-dhote-final-price-label {
+  font-weight: 600;
+}
+
+.maison-dhote-final-price-value {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* Disabled Button */
+.maison-dhote-card-reserve-btn-disabled {
+  background: #94a3b8 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.maison-dhote-card-reserve-btn-disabled:hover {
+  transform: none !important;
+  background: #94a3b8 !important;
+}
+

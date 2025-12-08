@@ -1,0 +1,273 @@
+/* Appartement specific styles */
+
+.appartement-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .appartement-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .appartement-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.appartement-card-price {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.appartement-card-reserve-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 8px;
+}
+
+.appartement-card-reserve-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+.appartement-card-reserve-btn:active {
+  transform: translateY(0);
+}
+
+.appartement-card-image {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.appartement-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Reservation Form Styles */
+.appartement-reservation-form {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.appartement-form-group {
+  margin-bottom: 20px;
+}
+
+.appartement-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.appartement-form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.appartement-form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Rooms, Salons, Bathrooms Lists */
+.appartement-rooms-list,
+.appartement-salons-list,
+.appartement-bathrooms-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.appartement-room-item,
+.appartement-salon-item,
+.appartement-bathroom-item {
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.appartement-room-header,
+.appartement-salon-header,
+.appartement-bathroom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.appartement-room-title,
+.appartement-salon-title,
+.appartement-bathroom-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.appartement-room-price,
+.appartement-salon-price,
+.appartement-bathroom-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.appartement-dimensions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.appartement-dimension-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.appartement-dimension-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.appartement-dimension-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.appartement-dimension-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Kitchen Section */
+.appartement-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.appartement-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.appartement-kitchen-section {
+  margin-top: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.appartement-kitchen-header {
+  margin-bottom: 10px;
+}
+
+.appartement-kitchen-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.appartement-kitchen-price {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  text-align: right;
+}
+
+/* Laundry Section */
+.appartement-laundry-price {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2563eb;
+  text-align: right;
+}
+
+/* Final Price */
+.appartement-final-price {
+  margin-top: 20px;
+  padding: 16px;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.appartement-final-price-label {
+  font-weight: 600;
+}
+
+.appartement-final-price-value {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+/* Disabled Button */
+.appartement-card-reserve-btn-disabled {
+  background: #94a3b8 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.appartement-card-reserve-btn-disabled:hover {
+  transform: none !important;
+  background: #94a3b8 !important;
+}
+

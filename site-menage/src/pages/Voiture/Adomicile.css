@@ -1,0 +1,169 @@
+.adomicile-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: #f8fafc;
+}
+
+.adomicile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.adomicile-back-btn {
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.adomicile-back-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateX(-2px);
+}
+
+.adomicile-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.adomicile-loading,
+.adomicile-error,
+.adomicile-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 1.125rem;
+  color: #64748b;
+}
+
+.adomicile-error {
+  color: #dc2626;
+}
+
+.adomicile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .adomicile-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .adomicile-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.adomicile-card {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.adomicile-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.adomicile-card-image {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  overflow: hidden;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.adomicile-card-image img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.adomicile-card:hover .adomicile-card-image img {
+  transform: scale(1.05);
+}
+
+.adomicile-card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 0.75rem;
+}
+
+.adomicile-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.adomicile-card-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.adomicile-card-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #059669;
+  margin-top: 0.5rem;
+}
+
+.adomicile-card-reserve-btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.adomicile-card-reserve-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.adomicile-card-reserve-btn:active {
+  transform: translateY(0);
+}
+

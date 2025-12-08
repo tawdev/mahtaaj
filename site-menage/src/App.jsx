@@ -50,6 +50,49 @@ import HandWorkerRegistration from './pages/HandWorkerRegistration';
 import Driver from './pages/Driver';
 import DriverCategoryDetails from './pages/DriverCategoryDetails';
 import TousLesServices from './pages/TousLesServices';
+import Menage from './pages/Menage';
+import TapisCanapes from './pages/TapisCanapes/TapisCanapes';
+import TapisEtCanapes from './pages/TapisCanapes/TapisEtCanapes';
+import Tapis from './pages/TapisCanapes/Tapis';
+import Canapes from './pages/TapisCanapes/Canapes';
+import ReservationTapisCanapes from './pages/TapisCanapes/reservationTapisCanapes';
+import ReservationVoiture from './pages/Voiture/reservationVoiture';
+import LavageEtRopassage from './pages/lavageEtRopassage/lavageEtRopassage';
+import Lavage from './pages/lavageEtRopassage/Lavage';
+import Ropassage from './pages/lavageEtRopassage/Ropassage';
+import ReservationLavageRopassage from './pages/lavageEtRopassage/reservationLavageRopassage';
+import BureuxEtUsin from './pages/bureuxEtUsin/bureuxEtUsin';
+import Usin from './pages/bureuxEtUsin/Usin';
+import Bureaux from './pages/bureuxEtUsin/Bureaux';
+import ReservationBureuxUsin from './pages/bureuxEtUsin/ReservationBureuxUsin';
+import Voiture from './pages/Voiture/voiture';
+import Centre from './pages/Voiture/Centre';
+import Adomicile from './pages/Voiture/Adomicile';
+import Airbnb from './pages/Airbnb/Airbnb';
+import NettoyageRapide from './pages/Airbnb/NettoyageRapide';
+import NettoyageComplet from './pages/Airbnb/NettoyageComplet';
+import ReservationAirbnb from './pages/Airbnb/ReservationAirbnb';
+import Pisin from './pages/Pisin/Pisin';
+import Profond from './pages/Pisin/Profond';
+import Standard from './pages/Pisin/Standard';
+import Chassoures from './pages/Chassures/Chassoures';
+import LastrageChassures from './pages/Chassures/LastrageChassures';
+import NettoyageChassures from './pages/Chassures/NettoyageChassures';
+import ReservationChassoures from './pages/Chassures/reservationChassoures';
+import ReservationPisin from './pages/Pisin/ReservationPisin';
+import MenageComplite from './pages/menage complite/menageComplite';
+import ResortHotel from './pages/menage complite/ResortHotel';
+import Maison from './pages/menage complite/Maison';
+import Appartement from './pages/menage complite/Appartement';
+import Hotel from './pages/menage complite/Hotel';
+import MaisonDhote from './pages/menage complite/MaisonDhote';
+import Villa from './pages/menage complite/villa';
+import ReservationMenageComplite from './pages/menage complite/ReservationMenageComplite';
+import MénageEtCuisine from './pages/MénageetCuisine/MénageEtCuisine';
+import Cuisin from './pages/MénageetCuisine/Cuisin';
+import MénageCuisine from './pages/MénageetCuisine/MénageCuisine';
+import ReservationCuisin from './pages/MénageetCuisine/ReservationCuisin';
+import ReservationMenageCuine from './pages/MénageetCuisine/ReservationMenageCuine';
 import RegisterEmployee1 from './pages/employees/RegisterEmployee1';
 import SecurityRegister from './pages/employees/SecurityRegister';
 import BebeSettingRegister from './pages/employees/BebeSettingRegister';
@@ -116,6 +159,11 @@ export default function App() {
           <Route path="/services/:serviceSlug/:categorySlug/:typeSlug" element={<TypeDetails />} />
           <Route path="/services/:serviceSlug/:categorySlug" element={<CategoryHouseDetails />} />
           <Route path="/tous-les-services" element={<TousLesServices />} />
+          <Route path="/menage-et-cuisine" element={<MénageEtCuisine />} />
+          <Route path="/menage-cuisine" element={<MénageCuisine />} />
+          <Route path="/cuisin" element={<Cuisin />} />
+          <Route path="/reservation-cuisin" element={<ReservationCuisin />} />
+          <Route path="/reservation-menage-cuisine" element={<ReservationMenageCuine />} />
           <Route path="/service/:id" element={<ServiceDetails />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/info" element={<Info />} />
@@ -127,6 +175,45 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/reservation/:id" element={<Booking />} />
+          <Route path="/menage" element={<Menage />} />
+          <Route path="/tapis-canapes" element={<TapisCanapes />} />
+          <Route path="/tapis-et-canapes" element={<TapisEtCanapes />} />
+          <Route path="/tapis-et-canape" element={<TapisEtCanapes />} />
+          <Route path="/tapis" element={<Tapis />} />
+          <Route path="/canapes" element={<Canapes />} />
+          <Route path="/reservation-tapis-canapes" element={<ReservationTapisCanapes />} />
+          <Route path="/reservation-voiture" element={<ReservationVoiture />} />
+          <Route path="/reservation-chaussures" element={<ReservationChassoures />} />
+          <Route path="/reservation-piscine" element={<ReservationPisin />} />
+          <Route path="/lavage-et-ropassage" element={<LavageEtRopassage />} />
+          <Route path="/lavage" element={<Lavage />} />
+          <Route path="/ropassage" element={<Ropassage />} />
+          <Route path="/reservation-lavage-ropassage" element={<ReservationLavageRopassage />} />
+          <Route path="/bureaux-et-usine" element={<BureuxEtUsin />} />
+          <Route path="/usine" element={<Usin />} />
+          <Route path="/bureaux" element={<Bureaux />} />
+          <Route path="/reservation-bureaux-usin" element={<ReservationBureuxUsin />} />
+          <Route path="/lavage-de-voiture" element={<Voiture />} />
+          <Route path="/lavage-en-centre" element={<Centre />} />
+          <Route path="/lavage-a-domicile" element={<Adomicile />} />
+          <Route path="/airbnb" element={<Airbnb />} />
+          <Route path="/nettoyage-rapide" element={<NettoyageRapide />} />
+          <Route path="/nettoyage-complet" element={<NettoyageComplet />} />
+          <Route path="/reservation-airbnb" element={<ReservationAirbnb />} />
+          <Route path="/piscine" element={<Pisin />} />
+          <Route path="/nettoyage-profond" element={<Profond />} />
+          <Route path="/nettoyage-standard" element={<Standard />} />
+          <Route path="/chaussures" element={<Chassoures />} />
+          <Route path="/cirage-chaussures" element={<LastrageChassures />} />
+          <Route path="/nettoyage-chaussures" element={<NettoyageChassures />} />
+          <Route path="/menage-complet" element={<MenageComplite />} />
+          <Route path="/resort-hotel" element={<ResortHotel />} />
+          <Route path="/maison" element={<Maison />} />
+          <Route path="/appartement" element={<Appartement />} />
+          <Route path="/hotel" element={<Hotel />} />
+          <Route path="/maison-dhote" element={<MaisonDhote />} />
+          <Route path="/villa" element={<Villa />} />
+          <Route path="/reservation-menage-complite" element={<ReservationMenageComplite />} />
           <Route path="/services/details/:main/:sub" element={<ServiceTypeDetails />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/support" element={<Support />} />
@@ -259,6 +346,14 @@ export default function App() {
           />
           <Route
             path="/admin/housekeeping/categories-house"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/menage"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/types-menage"
             element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
           />
           <Route

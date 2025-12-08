@@ -1,0 +1,147 @@
+.menage-cuisine-page {
+  padding: 40px 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.menage-cuisine-back-button {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.menage-cuisine-back-button:hover {
+  color: #2563eb;
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateX(-4px);
+}
+
+.menage-cuisine-title {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 32px;
+  text-align: center;
+  color: #1e293b;
+}
+
+.menage-cuisine-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.menage-section,
+.cuisine-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #1e293b;
+  text-align: center;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.error-state {
+  color: #ef4444;
+}
+
+/* Menage Grid Styles */
+.menage-section .menage-complite-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .menage-section .menage-complite-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .menage-section .menage-complite-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Cuisine Grid Styles - Same as Menage */
+.cuisine-section .menage-complite-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .cuisine-section .menage-complite-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .cuisine-section .menage-complite-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.menage-complite-card-selected {
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .menage-cuisine-container {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  
+  .menage-section .menage-complite-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .cuisine-section .menage-complite-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .menage-cuisine-container {
+    gap: 40px;
+  }
+  
+  .menage-section .menage-complite-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .cuisine-section .menage-complite-grid {
+    grid-template-columns: 1fr;
+  }
+}
+

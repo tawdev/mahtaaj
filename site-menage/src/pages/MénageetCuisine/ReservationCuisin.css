@@ -1,0 +1,233 @@
+.reservation-cuisin-page {
+  padding: 40px 16px;
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: calc(100vh - 200px);
+}
+
+.reservation-cuisin-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reservation-cuisin-back-button {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.reservation-cuisin-back-button:hover {
+  color: #2563eb;
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateX(-4px);
+}
+
+.reservation-cuisin-header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.reservation-cuisin-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+}
+
+.reservation-cuisin-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+}
+
+.selected-types-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.selected-types-summary h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.types-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.type-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.type-name {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.type-price {
+  font-weight: 600;
+  color: #10b981;
+}
+
+.total-price {
+  padding-top: 16px;
+  border-top: 2px solid #e2e8f0;
+  text-align: right;
+  font-size: 18px;
+  color: #1e293b;
+}
+
+.reservation-cuisin-error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.reservation-cuisin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.form-group .required {
+  color: #ef4444;
+}
+
+.form-group .optional {
+  color: #64748b;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reservation-cuisin-submit-button {
+  padding: 14px 32px;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.reservation-cuisin-submit-button:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.reservation-cuisin-submit-button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.reservation-cuisin-success {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.success-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+}
+
+.reservation-cuisin-success h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #10b981;
+  margin: 0 0 16px 0;
+}
+
+.reservation-cuisin-success p {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.redirect-message {
+  font-size: 14px;
+  color: #94a3b8;
+  font-style: italic;
+}
+

@@ -1,0 +1,255 @@
+.lastrage-chassures-page {
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  background: #f8fafc;
+}
+
+.lastrage-chassures-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.lastrage-chassures-back-btn {
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.lastrage-chassures-back-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateX(-2px);
+}
+
+.lastrage-chassures-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.lastrage-chassures-loading,
+.lastrage-chassures-error,
+.lastrage-chassures-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 1.125rem;
+  color: #64748b;
+}
+
+.lastrage-chassures-error {
+  color: #dc2626;
+}
+
+.lastrage-chassures-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .lastrage-chassures-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .lastrage-chassures-grid {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.lastrage-chassures-card {
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.lastrage-chassures-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.lastrage-chassures-card-image {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  overflow: hidden;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lastrage-chassures-card-image img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.lastrage-chassures-card:hover .lastrage-chassures-card-image img {
+  transform: scale(1.05);
+}
+
+.lastrage-chassures-card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 0.75rem;
+}
+
+.lastrage-chassures-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.lastrage-chassures-card-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.lastrage-chassures-card-price-per-item {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #059669;
+  margin-top: 0.5rem;
+}
+
+.lastrage-chassures-shoe-section {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.lastrage-chassures-shoe-count-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.lastrage-chassures-shoe-count-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  width: 80px;
+  text-align: center;
+  background: #ffffff;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lastrage-chassures-shoe-count-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.lastrage-chassures-card-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 0.5rem;
+  padding: 12px 16px;
+  background: #f0fdf4;
+  border-radius: 6px;
+  border: 1px solid #86efac;
+}
+
+.lastrage-chassures-price-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.lastrage-chassures-price-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+.lastrage-chassures-card-reserve-btn {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+}
+
+.lastrage-chassures-card-reserve-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.lastrage-chassures-card-reserve-btn:active {
+  transform: translateY(0);
+}
+
+.lastrage-chassures-card-reserve-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.lastrage-chassures-card-reserve-btn:disabled:hover {
+  background: #94a3b8;
+  transform: none;
+  box-shadow: none;
+}
+
+.lastrage-chassures-validation-error {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+

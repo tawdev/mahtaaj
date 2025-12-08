@@ -1,0 +1,247 @@
+.reservation-tapis-canapes-page {
+  padding: 40px 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.reservation-tapis-canapes-header {
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.reservation-tapis-canapes-back-btn {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.reservation-tapis-canapes-back-btn:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  transform: translateX(-4px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.reservation-tapis-canapes-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+  color: #1e293b;
+}
+
+.reservation-tapis-canapes-form {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.reservation-tapis-canapes-error {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.reservation-tapis-canapes-success {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 48px 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
+.reservation-tapis-canapes-success h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #059669;
+  margin: 0 0 12px 0;
+}
+
+.reservation-tapis-canapes-success p {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.location-group {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.location-group input {
+  flex: 1;
+}
+
+.location-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.location-button:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.location-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.reservation-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.reservation-summary h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.summary-total {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px solid #e2e8f0;
+}
+
+.summary-total-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.reservation-tapis-canapes-submit-btn {
+  width: 100%;
+  padding: 14px 24px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 8px;
+}
+
+.reservation-tapis-canapes-submit-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.reservation-tapis-canapes-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.reservation-tapis-canapes-submit-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (max-width: 640px) {
+  .reservation-tapis-canapes-form {
+    padding: 24px 16px;
+  }
+}
+

@@ -9,6 +9,8 @@ import AdminReservationCrud from './AdminReservationCrud';
 import AdminCategoriesCrud from './AdminCategoriesCrud';
 import AdminTypesCrud from './AdminTypesCrud';
 import AdminCategoryHouseCrud from './AdminCategoryHouseCrud';
+import AdminMenageCrud from './AdminMenageCrud';
+import AdminTypesMenageCrud from './AdminTypesMenageCrud';
 import AdminRatingCrud from './AdminRatingCrud';
 import AdminProductCrud from './AdminProductCrud';
 import AdminProductTypesCrud from './AdminProductTypesCrud';
@@ -622,6 +624,18 @@ export default function Admin() {
                   <h3 className="stat-title">Catégories House</h3>
                 </div>
               </div>
+              <div className="stat-card categories-card clickable" onClick={() => navigate('/admin/housekeeping/menage')}>
+                <div className="stat-icon categories-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Ménage</h3>
+                </div>
+              </div>
+              <div className="stat-card types-card clickable" onClick={() => navigate('/admin/housekeeping/types-menage')}>
+                <div className="stat-icon types-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Types Ménage</h3>
+                </div>
+              </div>
             </div>
           </section>
         </>
@@ -722,6 +736,34 @@ export default function Admin() {
             </button>
           </div>
           <AdminCategoryHouseCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/menage' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminMenageCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/types-menage' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminTypesMenageCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
         </>
       )}
 

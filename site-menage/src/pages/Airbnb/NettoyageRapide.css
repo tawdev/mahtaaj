@@ -1,0 +1,276 @@
+.nettoyage-rapide-page {
+  padding: 40px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nettoyage-rapide-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.nettoyage-rapide-back-btn {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.nettoyage-rapide-back-btn:hover {
+  background: #3b82f6;
+  color: #ffffff;
+  transform: translateX(-4px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.nettoyage-rapide-back-btn:active {
+  transform: translateX(-2px);
+  background: #2563eb;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+.nettoyage-rapide-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.nettoyage-rapide-loading,
+.nettoyage-rapide-error,
+.nettoyage-rapide-empty {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.nettoyage-rapide-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .nettoyage-rapide-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .nettoyage-rapide-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}
+
+.nettoyage-rapide-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.nettoyage-rapide-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nettoyage-rapide-card-image {
+  width: 100%;
+  min-height: 200px;
+  max-height: 400px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.nettoyage-rapide-card-image img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  object-position: center;
+}
+
+.nettoyage-rapide-card-body {
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.nettoyage-rapide-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.nettoyage-rapide-card-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+  flex: 1;
+  text-align: center;
+}
+
+.nettoyage-rapide-card-price-per-meter {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 6px 10px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.nettoyage-rapide-pack-card {
+  margin: 16px auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  max-width: 500px;
+  width: 100%;
+}
+
+.nettoyage-rapide-pack-header {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.nettoyage-rapide-pack-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.nettoyage-rapide-pack-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.nettoyage-rapide-pack-item {
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+  gap: 12px;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+  width: 100%;
+  max-width: 400px;
+}
+
+.nettoyage-rapide-pack-item:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateX(4px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.nettoyage-rapide-pack-item-icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.nettoyage-rapide-pack-item-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: center;
+}
+
+.nettoyage-rapide-card-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 185, 129, 0.15));
+  border-radius: 8px;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.nettoyage-rapide-price-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.nettoyage-rapide-price-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #059669;
+}
+
+.nettoyage-rapide-card-reserve-btn {
+  width: 100%;
+  padding: 12px 24px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.nettoyage-rapide-card-reserve-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.nettoyage-rapide-card-reserve-btn:active {
+  transform: translateY(0);
+}
+
+@media (min-width: 640px) {
+  .nettoyage-rapide-pack-items {
+    gap: 14px;
+  }
+  
+  .nettoyage-rapide-pack-item {
+    padding: 14px 18px;
+  }
+}
+
