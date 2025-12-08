@@ -115,7 +115,7 @@ export default function CategoryCard({ category, onClick, index }) {
           <span className="minimum-label">{t('hand_workers.minimum_jours') || 'Jours minimum'}</span>
           <span className="minimum-value">{formatMinimumJours(category.minimum_jours)}</span>
         </div>
-        {!shouldHideMonthlyMessage(category) && (
+        {!shouldHideMonthlyMessage(category) && category.minimum_jours > 1 && (
           <div className="category-message">
             <p className="message-text">{t('hand_workers.less_than_month_message', { defaultValue: 'أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة' })}</p>
           </div>

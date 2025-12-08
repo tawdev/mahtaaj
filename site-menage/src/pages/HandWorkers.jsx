@@ -342,43 +342,6 @@ export default function HandWorkers() {
           >
             {t('hand_workers.subtitle')}
           </p>
-          <div 
-            className="hand-workers-actions" 
-            data-aos="fade-up" 
-            data-aos-delay="300"
-            style={{
-              display: 'flex',
-              visibility: 'visible',
-              opacity: 1,
-              animation: 'none',
-              transform: 'none'
-            }}
-          >
-            <Link 
-              to="/tous-les-services"
-              className="back-services-button"
-              style={{
-                display: 'inline-flex',
-                visibility: 'visible',
-                opacity: 1
-              }}
-            >
-              <i className="fas fa-arrow-left"></i>
-              {t('hand_workers.return_to_services')}
-            </Link>
-            <Link 
-              to="/hand-workers/register"
-              className="register-button"
-              style={{
-                display: 'inline-flex',
-                visibility: 'visible',
-                opacity: 1
-              }}
-            >
-              <i className="fas fa-user-plus"></i>
-              {t('hand_workers.register_as_worker')}
-            </Link>
-          </div>
         </div>
       </div>
 
@@ -556,7 +519,7 @@ export default function HandWorkers() {
                     <span className="pricing-value">{formatMinimumJoursValue(selectedCategory.minimum_jours)}</span>
                   </div>
                 </div>
-                {!shouldHideMonthlyMessage(selectedCategory) && (
+                {!shouldHideMonthlyMessage(selectedCategory) && selectedCategory.minimum_jours > 1 && (
                   <div className="category-info-message">
                     <p className="message-text">{t('hand_workers.less_than_month_booking_message', 'أقل من شهر — المرجو الضغط على هذا الزر لحجز موعد')}</p>
                     <Link 
