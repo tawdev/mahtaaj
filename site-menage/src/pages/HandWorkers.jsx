@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import CategoryCard from '../components/CategoryCard';
 import i18n from '../i18n';
 import { supabase } from '../lib/supabase';
@@ -8,11 +8,11 @@ import './HandWorkers.css';
 
 export default function HandWorkers() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
-  const [handWorkers, setHandWorkers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(null);
 
   // Load categories function with useCallback
   const loadCategories = useCallback(async () => {
@@ -142,6 +142,7 @@ export default function HandWorkers() {
     }
   }, [categories.length, loading]);
 
+
   const getCurrentLang = () => (localStorage.getItem('currentLang') || i18n.language || 'fr').split(/[-_]/)[0].toLowerCase();
 
   const getNumberLocale = () => {
@@ -246,45 +247,15 @@ export default function HandWorkers() {
     return null;
   };
 
-  const loadHandWorkers = async (categoryId) => {
-    try {
-      console.log('[HandWorkers] Loading hand workers for category:', categoryId);
-      
-      const { data, error } = await supabase
-        .from('hand_workers')
-        .select('*')
-        .eq('category_id', categoryId)
-        .eq('is_available', true)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('[HandWorkers] Error loading hand workers:', error);
-        return;
-      }
-      
-      console.log('[HandWorkers] Loaded hand workers:', data?.length || 0);
-      setHandWorkers(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error('[HandWorkers] Exception loading hand workers:', e);
-    }
-  };
-
   const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    // Workers are hidden when category is selected, so we don't load them
-    setHandWorkers([]);
-  };
-
-  const handleBackToCategories = () => {
-    setSelectedCategory(null);
-    setHandWorkers([]);
+    // Navigate to category details page instead of showing in same page
+    navigate(`/hand-workers/category/${category.id}`);
   };
 
   // Debug: Log current state on every render
   console.log('[HandWorkers] Render state:', { 
     loading, 
     categoriesCount: categories.length, 
-    selectedCategory: !!selectedCategory,
     error: !!error,
     hasCategories: categories.length > 0
   });
@@ -383,14 +354,14 @@ export default function HandWorkers() {
       )}
 
       {/* Empty state - no categories and not loading */}
-      {!loading && !selectedCategory && categories.length === 0 && !error && (
+      {!loading && categories.length === 0 && !error && (
         <div style={{textAlign: 'center', margin: '40px 0', color: '#64748b'}}>
           <p>{t('hand_workers.no_categories_available') || 'No categories available'}</p>
         </div>
       )}
 
       <div className="hand-workers-content">
-        {!selectedCategory && categories.length > 0 && (
+        {categories.length > 0 && (
           <div 
             className="categories-section"
             style={{
@@ -450,104 +421,6 @@ export default function HandWorkers() {
           </div>
         )}
 
-        {selectedCategory && (
-          <div className="category-details-section">
-            <div className="category-header">
-              <button 
-                className="back-button" 
-                onClick={handleBackToCategories}
-                data-aos="fade-up" 
-                data-aos-delay="100"
-              >
-                ← {t('hand_workers.back_to_categories')}
-              </button>
-              <h2 className="category-details-title" data-aos="fade-up" data-aos-delay="200">
-                {getLocalizedValue(selectedCategory, 'name')}
-              </h2>
-            </div>
-
-            <div className="category-info" data-aos="fade-up" data-aos-delay="300">
-              <div className="category-info-card">
-                <div className="category-info-header">
-                  {(() => {
-                    const imagePath = selectedCategory.image;
-                    const imageUrl = imagePath ? getImageUrl(imagePath) : null;
-                    return imageUrl ? (
-                      <div className="category-info-image">
-                        <img
-                          src={imageUrl}
-                          alt={getLocalizedValue(selectedCategory, 'name')}
-                          className="category-detail-image"
-                          onError={(e) => {
-                            console.log('[HandWorkers] Detail image failed to load:', imageUrl);
-                            e.target.style.display = 'none';
-                            if (e.target.nextSibling) {
-                              e.target.nextSibling.style.display = 'flex';
-                            }
-                          }}
-                        />
-                        <div className="category-info-icon" style={{display: 'none'}}>
-                          {selectedCategory.icon ? (
-                            <i className={selectedCategory.icon}></i>
-                          ) : (
-                            <i className="fas fa-tools"></i>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="category-info-icon">
-                        {selectedCategory.icon ? (
-                          <i className={selectedCategory.icon}></i>
-                        ) : (
-                          <i className="fas fa-tools"></i>
-                        )}
-                      </div>
-                    );
-                  })()}
-                  <div className="category-info-details">
-                    <h3>{getLocalizedValue(selectedCategory, 'name')}</h3>
-                    <p>{getLocalizedValue(selectedCategory, 'description')}</p>
-                  </div>
-                </div>
-                <div className="category-info-pricing">
-                  <div className="pricing-item">
-                    <span className="pricing-label">{t('hand_workers.price_per_day') || 'Prix par jour'}</span>
-                    <span className="pricing-value">{formatPriceValue(selectedCategory.price_per_day || selectedCategory.price_per_hour)}</span>
-                  </div>
-                  <div className="pricing-item">
-                    <span className="pricing-label">{t('hand_workers.minimum_jours') || 'Jours minimum'}</span>
-                    <span className="pricing-value">{formatMinimumJoursValue(selectedCategory.minimum_jours)}</span>
-                  </div>
-                </div>
-                {!shouldHideMonthlyMessage(selectedCategory) && selectedCategory.minimum_jours > 1 && (
-                  <div className="category-info-message">
-                    <p className="message-text">{t('hand_workers.less_than_month_booking_message', 'أقل من شهر — المرجو الضغط على هذا الزر لحجز موعد')}</p>
-                    <Link 
-                      to={`/hand-workers/appointment?category=${selectedCategory.id}`}
-                      className="booking-button-inline"
-                    >
-                      {t('hand_workers.book_appointment', 'Réserver un rendez-vous')}
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-
-
-            <div className="reservation-section" data-aos="fade-up" data-aos-delay="600">
-              <div className="reservation-card">
-                <h3>{t('hand_workers.book_service')}</h3>
-                <p>{t('hand_workers.book_service_description')}</p>
-                <Link 
-                  to={`/hand-workers/booking?category=${selectedCategory.id}`}
-                  className="booking-button"
-                >
-                  {t('hand_workers.book_now')}
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </main>
   );

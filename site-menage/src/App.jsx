@@ -44,6 +44,7 @@ import BebeSetting from './pages/BebeSetting';
 import Jardinage from './pages/Jardinage';
 import JardinageDetail from './pages/JardinageDetail';
 import HandWorkers from './pages/HandWorkers';
+import HandWorkerCategoryDetails from './pages/HandWorkerCategoryDetails';
 import HandWorkerBooking from './pages/HandWorkerBooking';
 import HandWorkerAppointment from './pages/HandWorkerAppointment';
 import HandWorkerRegistration from './pages/HandWorkerRegistration';
@@ -231,6 +232,7 @@ export default function App() {
           <Route path="/jardinage" element={<Jardinage />} />
           <Route path="/jardinage/details/:id" element={<JardinageDetail />} />
           <Route path="/hand-workers" element={<HandWorkers />} />
+          <Route path="/hand-workers/category/:id" element={<HandWorkerCategoryDetails />} />
           <Route path="/hand-workers/booking" element={<HandWorkerBooking />} />
           <Route path="/hand-workers/appointment" element={<HandWorkerAppointment />} />
           <Route path="/hand-workers/register" element={<HandWorkerRegistration />} />

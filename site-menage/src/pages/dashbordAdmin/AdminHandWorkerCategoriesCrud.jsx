@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AdminHandWorkerCategoriesCrud.css';
 import LanguageFields from '../../components/LanguageFields';
 import { supabase } from '../../lib/supabase';
+import { getSupabaseAdmin } from '../../lib/supabaseAdmin';
 
 export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
   // Resolve preferred UI language (used only for a few labels)
@@ -37,6 +38,9 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+
+  // Get admin client for write operations (bypasses RLS)
+  const supabaseAdmin = getSupabaseAdmin();
 
   useEffect(() => {
     loadCategories();
@@ -257,8 +261,9 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         const filePath = fileName;
         
         // Upload to Supabase Storage (employees bucket)
-        // This should work even without Supabase Auth session if public upload policy is set
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        // Use admin client for upload to bypass RLS
+        const storageClient = supabaseAdmin?.storage || supabase.storage;
+        const { data: uploadData, error: uploadError } = await storageClient
           .from('employees')
           .upload(filePath, imageFile, {
             cacheControl: '3600',
@@ -318,10 +323,13 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       });
       
       let data, error;
+      // Use admin client for write operations to bypass RLS
+      const writeClient = supabaseAdmin || supabase;
+      
       if (editingCategory && editingCategory.id) {
         // Update existing category (use editingCategory.id, not formData.id)
         console.log('[AdminHandWorkerCategories] Updating category with ID:', editingCategory.id);
-        const { data: updateData, error: updateError } = await supabase
+        const { data: updateData, error: updateError } = await writeClient
           .from('hand_worker_categories')
           .update(payload)
           .eq('id', editingCategory.id)
@@ -350,7 +358,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         
         console.log('[AdminHandWorkerCategories] Inserting with clean payload:', cleanPayload);
         
-        const { data: insertData, error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await writeClient
           .from('hand_worker_categories')
           .insert(cleanPayload)
           .select();
@@ -453,7 +461,9 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       }
       
       // Delete the category
-      const { error } = await supabase
+      // Use admin client for delete operation to bypass RLS
+      const writeClient = supabaseAdmin || supabase;
+      const { error } = await writeClient
         .from('hand_worker_categories')
         .delete()
         .eq('id', id);
@@ -522,6 +532,46 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
           + Ajouter une catégorie
         </button>
       </div>
+
+      {!supabaseAdmin && (
+        <div className="warning-message" style={{
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '8px',
+          padding: '15px',
+          marginBottom: '20px',
+          color: '#856404',
+          lineHeight: '1.6'
+        }}>
+          <strong>⚠️ تحذير: Service Role Key غير معرّف</strong>
+          <br />
+          <p style={{ margin: '10px 0' }}>
+            عمليات الحفظ والتعديل قد تفشل بسبب RLS (Row Level Security).
+          </p>
+          <div style={{ marginTop: '10px', fontSize: '14px' }}>
+            <strong>الحل:</strong>
+            <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
+              <li>افتح Supabase Dashboard</li>
+              <li>اذهب إلى <code>Settings → API</code></li>
+              <li>انسخ <code>service_role</code> key</li>
+              <li>أنشئ ملف <code>.env</code> في مجلد <code>site-menage</code></li>
+              <li>أضف السطر التالي:
+                <pre style={{ 
+                  backgroundColor: '#f8f9fa', 
+                  padding: '8px', 
+                  borderRadius: '4px', 
+                  marginTop: '5px',
+                  fontSize: '12px',
+                  overflow: 'auto'
+                }}>
+REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+                </pre>
+              </li>
+              <li>أعد تشغيل التطبيق (<code>npm start</code>)</li>
+            </ol>
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="form-overlay">

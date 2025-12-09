@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import './HandWorkerAppointment.css';
 
@@ -109,7 +109,14 @@ export default function HandWorkerAppointment() {
             <p>{t('hand_worker_appointment.success_message', 'Votre demande de rendez-vous a été soumise. Nous vous contacterons bientôt pour confirmer les détails.')}</p>
             <button 
               className="back-to-home-button"
-              onClick={() => navigate('/hand-workers')}
+              onClick={() => {
+                // Navigate back to category details page if categoryId exists, otherwise to main page
+                if (categoryId) {
+                  navigate(`/hand-workers/category/${categoryId}`);
+                } else {
+                  navigate('/hand-workers');
+                }
+              }}
             >
               {t('hand_worker_appointment.back_to_hand_workers', 'Retour aux services')}
             </button>
@@ -123,13 +130,31 @@ export default function HandWorkerAppointment() {
     <main className="hand-worker-appointment-page">
       {/* Back Button - Top Left */}
       <div className="back-button-top-container">
-        <Link 
-          to="/hand-workers" 
+        <button
+          onClick={() => {
+            // Navigate back to category details page if categoryId exists, otherwise to main page
+            if (categoryId) {
+              navigate(`/hand-workers/category/${categoryId}`);
+            } else {
+              navigate('/hand-workers');
+            }
+          }}
           className="back-button-top"
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: 0,
+            color: 'inherit',
+            textDecoration: 'none'
+          }}
         >
           <span className="back-icon">←</span>
           {t('hand_worker_appointment.back_to_hand_workers', 'Retour aux services')}
-        </Link>
+        </button>
       </div>
 
       <div className="appointment-header">

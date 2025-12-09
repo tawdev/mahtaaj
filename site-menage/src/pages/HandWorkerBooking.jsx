@@ -21,6 +21,9 @@ export default function HandWorkerBooking() {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [durationError, setDurationError] = useState('');
 
+  // Get categoryId from URL params to use for back navigation
+  const categoryId = searchParams.get('category');
+
   const [formData, setFormData] = useState({
     client_first_name: '',
     client_last_name: '',
@@ -480,7 +483,14 @@ export default function HandWorkerBooking() {
           <p>{t('hand_worker_booking.success_message')}</p>
           <button 
             className="back-to-home-button"
-            onClick={() => navigate('/hand-workers')}
+            onClick={() => {
+              // Navigate back to category details page if categoryId exists, otherwise to main page
+              if (categoryId) {
+                navigate(`/hand-workers/category/${categoryId}`);
+              } else {
+                navigate('/hand-workers');
+              }
+            }}
           >
             {t('hand_worker_booking.back_to_hand_workers')}
           </button>
@@ -493,13 +503,31 @@ export default function HandWorkerBooking() {
     <main className="hand-worker-booking-page">
       {/* Back Button - Top Left */}
       <div className="back-button-top-container">
-        <Link 
-          to="/hand-workers" 
+        <button
+          onClick={() => {
+            // Navigate back to category details page if categoryId exists, otherwise to main page
+            if (categoryId) {
+              navigate(`/hand-workers/category/${categoryId}`);
+            } else {
+              navigate('/hand-workers');
+            }
+          }}
           className="back-button-top"
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: 0,
+            color: 'inherit',
+            textDecoration: 'none'
+          }}
         >
           <span className="back-icon">←</span>
           {t('hand_worker_booking.back_to_hand_workers', 'Retour aux services')}
-        </Link>
+        </button>
       </div>
 
       <div className="booking-header">
