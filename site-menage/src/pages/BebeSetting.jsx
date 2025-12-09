@@ -319,6 +319,20 @@ export default function BebeSetting() {
     <main className="bebe-setting-page">
       {!showServiceDetails && (
         <>
+          {/* Back Button Container */}
+          <div className="back-button-container">
+            <button
+              type="button"
+              className="hand-workers-back-button"
+              onClick={() => window.history.back()}
+              title={i18n.language === 'ar' ? 'رجوع' : i18n.language === 'fr' ? 'Retour' : 'Back'}
+            >
+              ← {i18n.language === 'ar' ? 'رجوع' : 
+                 i18n.language === 'fr' ? 'Retour' : 
+                 'Back'}
+            </button>
+          </div>
+
           <div className="bebe-setting-header">
             <div className="header-content">
               <h1 className="page-title">
@@ -331,17 +345,6 @@ export default function BebeSetting() {
                  i18n.language === 'fr' ? 'Aménagement et décoration de chambre pour bébé' : 
                  'Baby room setup and decoration'}
               </p>
-            </div>
-            <div className="back-to-home">
-              <button
-                type="button"
-                className="back-button"
-                onClick={() => window.history.back()}
-              >
-                {i18n.language === 'ar' ? '← رجوع' : 
-                 i18n.language === 'fr' ? '← Retour' : 
-                 '← Back'}
-              </button>
             </div>
           </div>
 
@@ -458,27 +461,7 @@ export default function BebeSetting() {
                     fontWeight: '700',
                     color: '#10b981'
                   }}>
-                    {(() => {
-                      if (selectedService) {
-                        const priceValue = selectedService.price;
-                        if (priceValue != null && priceValue !== '') {
-                          const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
-                          if (!isNaN(price) && price >= 0) {
-                            return `${price} DH`;
-                          }
-                        }
-                      }
-                      if (settings && settings.length > 0 && settings[0]) {
-                        const priceValue = settings[0].price;
-                        if (priceValue != null && priceValue !== '') {
-                          const price = typeof priceValue === 'number' ? priceValue : parseFloat(priceValue);
-                          if (!isNaN(price) && price >= 0) {
-                            return `${price} DH`;
-                          }
-                        }
-                      }
-                      return 'Prix sur demande';
-                    })()}
+                    250 DH
                   </span>
                 </div>
                 
@@ -502,7 +485,9 @@ export default function BebeSetting() {
                     fontWeight: '700',
                     color: '#3b82f6'
                   }}>
-                    2 heures
+                    {i18n.language === 'ar' ? '7 ساعات' : 
+                     i18n.language === 'fr' ? '7 heures' : 
+                     '7 hours'}
                   </span>
                 </div>
               </div>

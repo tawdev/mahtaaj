@@ -806,6 +806,22 @@ export default function Security() {
         </div>
       )}
       <div className="shop-container">
+        {/* Back Button Container */}
+        <div style={{ 
+          maxWidth: '1200px', 
+          margin: '0 auto', 
+          padding: '0 20px',
+          marginTop: '20px',
+          marginBottom: '20px'
+        }}>
+          <Link to="/tous-les-services" className="back-button">
+            <span className="back-icon">←</span>
+            {i18n.language === 'ar' ? 'العودة' : 
+             i18n.language === 'fr' ? 'Retour' : 
+             'Back'}
+          </Link>
+        </div>
+
         <header className="shop-header" style={{marginBottom: 24}}>
           <div className="shop-header-content">
             <h1 className="shop-title" data-aos="fade-up" data-aos-delay="100">
@@ -814,14 +830,6 @@ export default function Security() {
             <p className="shop-description" data-aos="fade-up" data-aos-delay="200">
               {t('security_page.subtitle')}
             </p>
-          </div>
-          <div className="back-to-services">
-            <Link to="/tous-les-services" className="back-button">
-              <span className="back-icon">←</span>
-              {i18n.language === 'ar' ? 'العودة' : 
-               i18n.language === 'fr' ? 'Retour' : 
-               'Back'}
-            </Link>
           </div>
         </header>
 
@@ -941,7 +949,7 @@ export default function Security() {
                     cursor: 'pointer'
                   }}
                   onClick={() => {
-                    loadRoleDetails(role.id);
+                    navigate(`/security/role/${role.id}`);
                   }}
                 >
                   <div className="security-card-content">
@@ -986,7 +994,7 @@ export default function Security() {
                       className="security-card-button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        loadRoleDetails(role.id);
+                        navigate(`/security/role/${role.id}`);
                       }}
                     >
                       {t('security_page.click_to_see_agents')}
@@ -997,333 +1005,9 @@ export default function Security() {
             })}
           </div>
         )}
-
-        {selectedRole && (
-          // Page de détail du rôle
-          loading && !selectedRoleData ? (
-            <div style={{textAlign: 'center', margin: '40px 0'}}>
-              <div style={{
-                display: 'inline-block',
-                width: '40px',
-                height: '40px',
-                border: '4px solid #f3f4f6',
-                borderTop: '4px solid #667eea',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-                marginBottom: '16px'
-              }}></div>
-              <p style={{color: '#64748b', fontSize: '0.95rem'}}>{t('security_page.loading')}</p>
-            </div>
-          ) : selectedRoleData ? (
-            <div className="role-detail-page">
-              {/* Bouton de retour */}
-              <button 
-                onClick={() => {
-                  setSelectedRole(null);
-                  setSelectedRoleData(null);
-                  setRoleImage(null);
-                }}
-                className="role-back-button"
-              >
-                {t('security_page.back_to_roles')}
-              </button>
-
-              {/* Titre */}
-              <h1 className="role-detail-title">
-                {getTranslatedRole(selectedRoleData.name) || selectedRoleData.name || t('security_page.role_not_available')}
-              </h1>
-
-              {/* Image */}
-              {roleImage && (
-                <div className="role-image-container">
-                  <img 
-                    src={roleImage} 
-                    alt={selectedRoleData.name}
-                    className="role-detail-image"
-                  />
-                  <div className="role-image-overlay">
-                    <p className="role-image-text">
-                      {getTranslatedRole(selectedRoleData.name) || selectedRoleData.name}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Description */}
-              <div className="role-description-section">
-                <p className="role-description-text">
-                  {selectedRoleData.description || getTranslatedRoleDescription(selectedRoleData.name) || t('security_page.description_not_available')}
-                </p>
-              </div>
-
-              
-
-              {/* Bouton de réservation */}
-              <button 
-                onClick={openReservationForm}
-                className="role-booking-button"
-              >
-                🛡️ {t('security_page.book_role_now')}
-              </button>
-            </div>
-          ) : (
-            <div style={{textAlign: 'center', margin: '40px 0', color: '#64748b'}}>
-              <p>{t('security_page.role_not_found') || 'Role not found'}</p>
-              <button 
-                onClick={() => {
-                  setSelectedRole(null);
-                  setSelectedRoleData(null);
-                  setRoleImage(null);
-                }}
-                className="role-back-button"
-                style={{marginTop: '16px'}}
-              >
-                {t('security_page.back_to_roles')}
-              </button>
-            </div>
-          )
-        )}
       </div>
       
-      {/* Modal de réservation */}
-      {showReservationForm && (
-        <div className="evaluation-modal-overlay" style={{ zIndex: 10000 }}>
-          <div className="evaluation-modal">
-            <div className="evaluation-modal-header" style={{ flexShrink: 0 }}>
-              <h3>{t('security_page.reserve')} {selectedRoleData?.name || t('security_page.security_role')}</h3>
-              <button 
-                className="evaluation-modal-close"
-                onClick={() => setShowReservationForm(false)}
-              >
-                ×
-              </button>
-            </div>
-            <form onSubmit={submitReservation} className="evaluation-form">
-              {/* Type de réservation */}
-              <div className="evaluation-form-group">
-                <label>📋 {t('security_page.reservation_type') || 'Type de réservation'}</label>
-                <select
-                  value={reservationForm.type_reservation}
-                  onChange={(e) => {
-                    updateReservationField('type_reservation', e.target.value);
-                    // Reset related fields when changing type
-                    if (e.target.value === 'heures') {
-                      updateReservationField('date_debut', '');
-                      updateReservationField('date_fin', '');
-                    } else {
-                      updateReservationField('date_reservation', '');
-                      updateReservationField('heure_debut', '');
-                      updateReservationField('nombre_heures', 1);
-                    }
-                  }}
-                  style={{
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: '1px solid #ddd',
-                    fontSize: '1rem',
-                    width: '100%'
-                  }}
-                >
-                  <option value="heures">🕒 Par heures</option>
-                  <option value="jours">📅 Par jours</option>
-                </select>
-              </div>
-
-              {/* Champs pour réservation par heures */}
-              {reservationForm.type_reservation === 'heures' && (
-                <>
-                  <div className="evaluation-form-group">
-                    <label>📅 {t('security_page.date') || 'Date'}</label>
-                    <input
-                      type="date"
-                      value={reservationForm.date_reservation}
-                      onChange={(e) => updateReservationField('date_reservation', e.target.value)}
-                      min={new Date().toISOString().split('T')[0]}
-                      required
-                      style={{
-                        padding: '10px',
-                        borderRadius: '8px',
-                        border: '1px solid #ddd',
-                        fontSize: '1rem',
-                        width: '100%'
-                      }}
-                    />
-                  </div>
-
-                  <div className="evaluation-form-group">
-                    <label>⏰ Heure de début</label>
-                    <input
-                      type="time"
-                      value={reservationForm.heure_debut}
-                      onChange={(e) => updateReservationField('heure_debut', e.target.value)}
-                      required
-                      style={{
-                        padding: '10px',
-                        borderRadius: '8px',
-                        border: '1px solid #ddd',
-                        fontSize: '1rem',
-                        width: '100%'
-                      }}
-                    />
-                  </div>
-
-                  <div className="evaluation-form-group">
-                    <label>⏱️ Nombre d'heures</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="24"
-                      value={reservationForm.nombre_heures}
-                      onChange={(e) => updateReservationField('nombre_heures', parseInt(e.target.value) || 1)}
-                      required
-                      style={{
-                        padding: '10px',
-                        borderRadius: '8px',
-                        border: '1px solid #ddd',
-                        fontSize: '1rem',
-                        width: '100%'
-                      }}
-                    />
-                    <small style={{ display: 'block', marginTop: '5px', color: '#666', fontSize: '0.875rem' }}>
-                      Prix de base (4h): 150 DH | Heure supplémentaire: 40 DH
-                    </small>
-                  </div>
-                </>
-              )}
-
-              {/* Champs pour réservation par jours */}
-              {reservationForm.type_reservation === 'jours' && (
-                <>
-                  <div className="evaluation-form-group">
-                    <label>📅 Date de début</label>
-                    <input
-                      type="date"
-                      value={reservationForm.date_debut}
-                      onChange={(e) => updateReservationField('date_debut', e.target.value)}
-                      min={new Date().toISOString().split('T')[0]}
-                      required
-                      style={{
-                        padding: '10px',
-                        borderRadius: '8px',
-                        border: '1px solid #ddd',
-                        fontSize: '1rem',
-                        width: '100%'
-                      }}
-                    />
-                  </div>
-
-                  <div className="evaluation-form-group">
-                    <label>📅 Date de fin</label>
-                    <input
-                      type="date"
-                      value={reservationForm.date_fin}
-                      onChange={(e) => updateReservationField('date_fin', e.target.value)}
-                      min={reservationForm.date_debut || new Date().toISOString().split('T')[0]}
-                      required
-                      style={{
-                        padding: '10px',
-                        borderRadius: '8px',
-                        border: '1px solid #ddd',
-                        fontSize: '1rem',
-                        width: '100%'
-                      }}
-                    />
-                    <small style={{ display: 'block', marginTop: '5px', color: '#666', fontSize: '0.875rem' }}>
-                      Chaque jour = 8 heures (150 DH pour 4h + 40 DH/heure supplémentaire)
-                    </small>
-                  </div>
-                </>
-              )}
-
-              {/* Numéro de téléphone */}
-              <div className="evaluation-form-group">
-                <label>📞 {t('security_page.phone_number') || 'Numéro de téléphone'}</label>
-                <input
-                  type="tel"
-                  value={reservationForm.phone}
-                  onChange={(e) => updateReservationField('phone', e.target.value)}
-                  placeholder={t('security_page.phone_placeholder') || 'Ex: 0612345678'}
-                  required
-                  pattern="[0-9\s\+\-\(\)]{10,}"
-                  title={t('security_page.phone_validation') || 'Numéro de téléphone valide'}
-                  style={{
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: '1px solid #ddd',
-                    fontSize: '1rem',
-                    width: '100%'
-                  }}
-                />
-              </div>
-
-              {/* Affichage du prix total */}
-              <div style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                borderRadius: 12,
-                padding: 20,
-                textAlign: 'center',
-                fontWeight: 700,
-                color: '#fff',
-                marginTop: 16,
-                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-              }}>
-                <div style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: 8 }}>
-                  {t('security_page.total_price') || 'Prix total'}
-                </div>
-                <div style={{ fontSize: '2rem', fontWeight: 800 }}>
-                  {calculateReservationPrice(reservationForm).toFixed(2)} DH
-                </div>
-                {reservationForm.type_reservation === 'heures' && (
-                  <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: 8 }}>
-                    {reservationForm.nombre_heures <= 4 
-                      ? `${reservationForm.nombre_heures} heure(s) - Prix de base`
-                      : `4h (base) + ${reservationForm.nombre_heures - 4} heure(s) supplémentaire(s)`
-                    }
-                  </div>
-                )}
-                {reservationForm.type_reservation === 'jours' && reservationForm.date_debut && reservationForm.date_fin && (
-                  <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: 8 }}>
-                    {(() => {
-                      const dateDebut = new Date(reservationForm.date_debut);
-                      const dateFin = new Date(reservationForm.date_fin);
-                      // Normaliser les dates
-                      dateDebut.setHours(0, 0, 0, 0);
-                      dateFin.setHours(0, 0, 0, 0);
-                      // Calculer la différence
-                      const diffTime = dateFin.getTime() - dateDebut.getTime();
-                      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                      const nombreJours = Math.max(1, diffDays + 1); // Au moins 1 jour, +1 pour inclure le jour de début
-                      const totalHeures = nombreJours * 8;
-                      const prixParJour = 150 + ((8 - 4) * 40); // 310 DH par jour
-                      return `${nombreJours} jour(s) × ${prixParJour} DH = ${prixParJour * nombreJours} DH (${totalHeures} heures au total)`;
-                    })()}
-                  </div>
-                )}
-              </div>
-
-              <div className="evaluation-form-actions">
-                <button 
-                  type="button" 
-                  className="evaluation-cancel-btn" 
-                  onClick={() => setShowReservationForm(false)}
-                  disabled={reservationLoading}
-                >
-                  {t('security_page.cancel')}
-                </button>
-                <button 
-                  type="submit" 
-                  className="evaluation-submit-btn"
-                  disabled={reservationLoading}
-                >
-                  {reservationLoading ? t('security_page.confirming') : t('security_page.confirm_reservation')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Modal de réservation - Supprimé car maintenant dans SecurityRoleDetails */}
     </div>
   );
 }
-
-

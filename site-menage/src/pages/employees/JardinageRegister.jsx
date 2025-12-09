@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import './jardinageRegister.css';
 
@@ -200,6 +201,18 @@ export default function JardinageRegister() {
           </div>
         </div>
       )}
+      {/* Back Button Container */}
+      <div className="back-button-container">
+        <Link 
+          to="/employees/register" 
+          className="hand-workers-back-button"
+          title={i18n.language === 'ar' ? 'العودة' : i18n.language === 'fr' ? 'Retour' : 'Back'}
+        >
+          ← {i18n.language === 'ar' ? 'العودة' : 
+             i18n.language === 'fr' ? 'Retour' : 
+             'Back'}
+        </Link>
+      </div>
       <div className="form-card" data-aos="fade-up">
         <h1>{t('employees.register.join_team','انضم إلى فريقنا')}</h1>
         <p className="subtitle">{t('employees.register.fill_form','يرجى ملء النموذج أدناه')}</p>

@@ -28,6 +28,43 @@ header.navbar1 {
   opacity: 1 !important;
 }
 
+/* Back Button Container */
+.back-button-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+/* Reusing hand-workers-back-button styles */
+.hand-workers-back-button {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.hand-workers-back-button:hover {
+  color: #2563eb;
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateX(-4px);
+}
+
+.hand-workers-back-button:active {
+  transform: translateX(0);
+}
+
 /* Page wrapper */
 .re1-page {
   background: var(--re1-bg);
@@ -40,6 +77,16 @@ header.navbar1 {
 @media (max-width: 768px) {
   .re1-page {
     padding-top: 60px; /* Smaller navbar height on mobile */
+  }
+
+  .back-button-container {
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+
+  .hand-workers-back-button {
+    font-size: 14px;
+    padding: 6px 12px;
   }
 }
 

@@ -231,20 +231,25 @@ export default function Jardinage() {
 
   return (
     <main className="jardinage-page">
+      {/* Back Button Container */}
+      <div className="back-button-container">
+        <Link 
+          to="/tous-les-services" 
+          className="hand-workers-back-button"
+          title={i18n.language === 'ar' ? 'العودة' : i18n.language === 'fr' ? 'Retour' : 'Back'}
+        >
+          ← {i18n.language === 'ar' ? 'العودة' : 
+             i18n.language === 'fr' ? 'Retour' : 
+             'Back'}
+        </Link>
+      </div>
+
       <div className="jardinage-header">
         <div className="header-content">
           <h1 className="page-title">{t('jardinage.title')}</h1>
           <p className="page-subtitle">
             {t('jardinage.subtitle')}
           </p>
-        </div>
-        <div className="back-to-home">
-          <Link to="/tous-les-services" className="back-button">
-            <span className="back-icon">←</span>
-            {i18n.language === 'ar' ? 'العودة' : 
-             i18n.language === 'fr' ? 'Retour' : 
-             'Back'}
-          </Link>
         </div>
       </div>
 

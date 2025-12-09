@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { translateHandWorkerCategories } from '../services/handWorkerTranslation';
 import { supabase } from '../lib/supabase';
 import './HandWorkerRegistration.css';
@@ -396,6 +397,18 @@ export default function HandWorkerRegistration() {
           </div>
         </div>
       )}
+      {/* Back Button Container */}
+      <div className="back-button-container">
+        <Link 
+          to="/employees/register" 
+          className="hand-workers-back-button"
+          title={i18n.language === 'ar' ? 'العودة' : i18n.language === 'fr' ? 'Retour' : 'Back'}
+        >
+          ← {i18n.language === 'ar' ? 'العودة' : 
+             i18n.language === 'fr' ? 'Retour' : 
+             'Back'}
+        </Link>
+      </div>
       <div className="form-card" data-aos="fade-up">
         <h1>{t('hand_worker_registration.title')}</h1>
         <p className="subtitle">{t('hand_worker_registration.subtitle')}</p>

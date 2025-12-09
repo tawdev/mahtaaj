@@ -23,6 +23,7 @@ import Checkout from './pages/Checkout';
 import LoginRegister from './pages/LoginRegister';
 import Profile from './pages/Profile';
 import Security from './pages/Security';
+import SecurityRoleDetails from './pages/SecurityRoleDetails';
 import Admin from './pages/dashbordAdmin/Admin';
 import AdminForbidden from './pages/dashbordAdmin/AdminForbidden';
 import PrivateRoute from './routes/PrivateRoute';
@@ -219,6 +220,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/support" element={<Support />} />
           <Route path="/security" element={<Security />} />
+          <Route path="/security/role/:id" element={<SecurityRoleDetails />} />
           <Route path="/employees/register" element={<RegisterEmployee1 />} />
           {/* Section-specific pages */}
           <Route path="/employees/register/security" element={<SecurityRegister />} />

@@ -5,13 +5,50 @@
   padding: 20px;
 }
 
+/* Back Button Container */
+.back-button-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+/* Reusing hand-workers-back-button styles */
+.hand-workers-back-button {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.hand-workers-back-button:hover {
+  color: #2563eb;
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateX(-4px);
+}
+
+.hand-workers-back-button:active {
+  transform: translateX(0);
+}
+
 /* Header Styles */
 .bebe-setting-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
   margin-bottom: 40px;
-  padding: 20px 0;
+  padding: 20px;
+  text-align: center;
 }
 
 .header-content {
@@ -36,39 +73,7 @@
   line-height: 1.6;
 }
 
-.back-to-home {
-  margin-left: 20px;
-}
-
-.back-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 18px;
-  min-width: 120px;
-  background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 999px;
-  color: #0f172a;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.back-button:hover {
-  background: #f8fafc;
-  border-color: rgba(15, 23, 42, 0.2);
-  color: #0f172a;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-}
-
-.back-icon {
-  font-size: 16px;
-}
+/* back-to-home and back-button styles removed - now using hand-workers-back-button */
 
 /* Content Styles */
 .bebe-setting-content {
@@ -853,14 +858,18 @@
   }
 
   .bebe-setting-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 20px;
+    text-align: center;
+    padding: 20px 16px;
   }
 
-  .back-to-home {
-    margin-left: 0;
-    align-self: flex-end;
+  .back-button-container {
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+
+  .hand-workers-back-button {
+    font-size: 14px;
+    padding: 6px 12px;
   }
 
   .page-title {

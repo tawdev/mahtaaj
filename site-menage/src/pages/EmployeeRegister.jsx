@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiClock, FiCheck } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import './EmployeeRegister.css';
 
@@ -352,6 +353,18 @@ export default function EmployeeRegister() {
           </div>
         </div>
       )}
+      {/* Back Button Container */}
+      <div className="back-button-container">
+        <Link 
+          to="/employees/register" 
+          className="hand-workers-back-button"
+          title={i18n.language === 'ar' ? 'العودة' : i18n.language === 'fr' ? 'Retour' : 'Back'}
+        >
+          ← {i18n.language === 'ar' ? 'العودة' : 
+             i18n.language === 'fr' ? 'Retour' : 
+             'Back'}
+        </Link>
+      </div>
       <div className="form-card" data-aos="fade-up">
         <h1>{t('employee_register.title')}</h1>
         <p className="subtitle">{t('employee_register.subtitle')}</p>

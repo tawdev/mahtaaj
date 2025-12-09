@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CategoryCard from '../components/CategoryCard';
 import i18n from '../i18n';
 import { supabase } from '../lib/supabase';
@@ -262,6 +262,23 @@ export default function HandWorkers() {
 
   return (
     <main className="hand-workers-page">
+      {/* Back Button Container */}
+      <div style={{ 
+        maxWidth: '1200px', 
+        margin: '0 auto', 
+        padding: '0 20px',
+        marginTop: '20px',
+        marginBottom: '20px'
+      }}>
+        <button 
+          className="hand-workers-back-button"
+          onClick={() => navigate('/tous-les-services')}
+          title={t('common.back', { defaultValue: 'Retour' })}
+        >
+          ← {t('common.back', { defaultValue: 'Retour' })}
+        </button>
+      </div>
+
       {/* Header - Always visible, not dependent on loading state */}
       <div 
         className="hand-workers-header"

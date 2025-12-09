@@ -704,7 +704,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
                       <span>250 MAD</span>
                     </div>
                     <div className="price-item price-extra-info">
-                      <span>+ 1h = 40 MAD</span>
+                      <span>Après 7h, chaque heure supplémentaire = 40 MAD</span>
                     </div>
                   </>
                 ) : (
@@ -718,7 +718,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
                       <span>{(displayDuration - 7) * 40} MAD</span>
                     </div>
                     <div className="price-item price-extra-info">
-                      <span>+ 1h = 40 MAD</span>
+                      <span>Après 7h, chaque heure supplémentaire = 40 MAD</span>
                     </div>
                   </>
                 )}

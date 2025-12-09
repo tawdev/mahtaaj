@@ -1,11 +1,61 @@
+/* Back Button Container */
+.back-button-container {
+  max-width: 1000px;
+  margin: 0 auto 20px auto;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Reusing hand-workers-back-button styles */
+.hand-workers-back-button {
+  background: transparent;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: #3b82f6;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.hand-workers-back-button:hover {
+  color: #2563eb;
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateX(-4px);
+}
+
+.hand-workers-back-button:active {
+  transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+  .back-button-container {
+    padding: 0 16px;
+    margin-bottom: 16px;
+  }
+
+  .hand-workers-back-button {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+}
+
 /* Unified Simple & Clean Form Style */
 
 .employee-register {
   min-height: 100vh;
   padding: 40px 16px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   background: #f5f7fa;
 }
 

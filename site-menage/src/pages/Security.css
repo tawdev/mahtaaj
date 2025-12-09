@@ -863,7 +863,7 @@
 /* Header styles for desktop */
 .shop-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-bottom: 3rem;
   padding: 20px 0;
@@ -874,32 +874,26 @@
   text-align: center;
 }
 
-.back-to-services {
-  margin-left: 20px;
-}
-
 .back-button {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
-  border: 1px solid rgba(31, 41, 55, 0.2);
-  border-radius: 12px;
-  color: #1f2937;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #667eea;
+  border-radius: 8px;
+  color: #667eea;
   text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-size: 16px;
+  transition: all 0.2s ease;
 }
 
 .back-button:hover {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e5e7eb 100%);
-  border-color: rgba(31, 41, 55, 0.4);
-  color: #111827;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: #5568d3;
+  border-color: #5568d3;
+  background: rgba(102, 126, 234, 0.05);
+  transform: translateX(-4px);
   text-decoration: none;
 }
 
@@ -909,12 +903,7 @@
 
 /* RTL Support */
 [dir="rtl"] .shop-header {
-  flex-direction: row-reverse;
-}
-
-[dir="rtl"] .back-to-services {
-  margin-left: 0;
-  margin-right: 20px;
+  flex-direction: row;
 }
 
 [dir="rtl"] .back-icon {
@@ -961,18 +950,6 @@
     box-sizing: border-box;
   }
 
-  .back-to-services {
-    margin-left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-top: 16px;
-  }
-
-  .back-button {
-    width: auto;
-  }
-
   .shop-title {
     font-size: 1.75rem !important;
     word-wrap: break-word;
@@ -987,48 +964,10 @@
     overflow-wrap: break-word;
   }
 
-  /* Back button styles */
-  .back-to-services {
-    margin-left: 20px;
-  }
-
   .back-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
-    border: 1px solid rgba(31, 41, 55, 0.2);
-    border-radius: 12px;
-    color: #1f2937;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  .back-button:hover {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e5e7eb 100%);
-    border-color: rgba(31, 41, 55, 0.4);
-    color: #111827;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    text-decoration: none;
-  }
-
-  .back-icon {
-    font-size: 16px;
-  }
-
-  /* RTL Support */
-  [dir="rtl"] .shop-header {
-    flex-direction: row-reverse;
-  }
-
-  [dir="rtl"] .back-to-services {
-    margin-left: 0;
-    margin-right: 20px;
+    width: auto;
+    font-size: 13px;
+    padding: 10px 16px;
   }
 
   [dir="rtl"] .back-icon {
