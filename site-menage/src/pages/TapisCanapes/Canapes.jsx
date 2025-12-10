@@ -524,7 +524,7 @@ export default function Canapes() {
                   )}
                   {canapeCounts[item.id] > 0 && !isValidDimensions(item.id) && (
                     <div className="canapes-validation-message">
-                      {t('canapes_page.validation_message', '⚠️ يجب أن تكون جميع قيم Longueur و Largeur أكبر من 0')}
+                      {t('canapes_page.validation_message', '⚠️ Longueur et Largeur doivent être > 0')}
                     </div>
                   )}
                 </div>

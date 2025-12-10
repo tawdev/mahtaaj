@@ -13,7 +13,7 @@ export default function Lavage() {
   // State for selected options per item
   const [selectedOptions, setSelectedOptions] = useState({}); // { itemId: ['vetements', 'grands_textiles'] }
   // State for Vêtements sub-options and quantities per item
-  const [vetementsDetails, setVetementsDetails] = useState({}); // { itemId: { 'option1': { selected: true, quantity: 2 }, ... } }
+  const [vetementsDetails, setVetementsDetails] = useState({}); // { itemId: { 'option1': { selected: true, quantity: 2 }, 'option2': { selected: true, materials: { coton: 2, laine: 1 } }, ... } }
   // State for Grands textiles: number of pieces and dimensions per piece, separated by long type
   const [grandsTextilesDetails, setGrandsTextilesDetails] = useState({}); // { itemId: { draps: { count: 2, pieces: [...] }, couverte: { count: 1, pieces: [...] }, ... } }
   // State for Long types selection (draps, couverte, couverte_protegee)
@@ -116,9 +116,20 @@ export default function Lavage() {
   // Prices for Vêtements sub-options
   const vetementsPrices = {
     option1: 5, // T-shirt, Sweatshirts, Short, Jeans
-    option2: 10, // Jaket
+    option2: 10, // Jaket (base price, will be overridden by material prices)
     option3: 15, // Manteaux
     option4: 12 // Jacket cuire
+  };
+
+  // Prices for Jaket materials
+  const jaketMaterialPrices = {
+    coton: 15,
+    laine: 16,
+    cuir: 17,
+    daim: 18,
+    soie: 19,
+    cachemire: 20,
+    lin: 21
   };
 
   const longTypesPrices = {
@@ -202,14 +213,111 @@ export default function Lavage() {
           [itemId]: Object.keys(newDetails).length > 0 ? newDetails : undefined
         };
       } else {
-        // Add sub-option with quantity 0
+        // Add sub-option
+        if (subOption === 'option2') {
+          // For Jaket, initialize with empty materials array
+          return {
+            ...prev,
+            [itemId]: {
+              ...currentDetails,
+              [subOption]: {
+                selected: true,
+                materials: []
+              }
+            }
+          };
+        } else {
+          // For other options, use quantity
+          return {
+            ...prev,
+            [itemId]: {
+              ...currentDetails,
+              [subOption]: {
+                selected: true,
+                quantity: 0
+              }
+            }
+          };
+        }
+      }
+    });
+  };
+
+  // Handle Jaket material toggle
+  const handleJaketMaterialToggle = (itemId, material) => {
+    setVetementsDetails(prev => {
+      const currentDetails = prev[itemId] || {};
+      const option2Details = currentDetails.option2 || { selected: true, materials: {} };
+      const currentMaterials = option2Details.materials || {};
+      const isSelected = currentMaterials.hasOwnProperty(material) && currentMaterials[material] > 0;
+      
+      if (isSelected) {
+        // Remove material
+        const newMaterials = { ...currentMaterials };
+        delete newMaterials[material];
         return {
           ...prev,
           [itemId]: {
             ...currentDetails,
-            [subOption]: {
-              selected: true,
-              quantity: 0
+            option2: {
+              ...option2Details,
+              materials: newMaterials
+            }
+          }
+        };
+      } else {
+        // Add material with quantity 0
+        return {
+          ...prev,
+          [itemId]: {
+            ...currentDetails,
+            option2: {
+              ...option2Details,
+              materials: {
+                ...currentMaterials,
+                [material]: 0
+              }
+            }
+          }
+        };
+      }
+    });
+  };
+
+  // Handle Jaket material quantity change
+  const handleJaketMaterialQuantityChange = (itemId, material, quantity) => {
+    const numQuantity = parseInt(quantity) || 0;
+    setVetementsDetails(prev => {
+      const currentDetails = prev[itemId] || {};
+      const option2Details = currentDetails.option2 || { selected: true, materials: {} };
+      const currentMaterials = option2Details.materials || {};
+      
+      if (numQuantity === 0) {
+        // Remove material if quantity is 0
+        const newMaterials = { ...currentMaterials };
+        delete newMaterials[material];
+        return {
+          ...prev,
+          [itemId]: {
+            ...currentDetails,
+            option2: {
+              ...option2Details,
+              materials: newMaterials
+            }
+          }
+        };
+      } else {
+        // Update quantity
+        return {
+          ...prev,
+          [itemId]: {
+            ...currentDetails,
+            option2: {
+              ...option2Details,
+              materials: {
+                ...currentMaterials,
+                [material]: numQuantity
+              }
             }
           }
         };
@@ -399,10 +507,23 @@ export default function Lavage() {
       // Calculate price for Vêtements
       const vetementsDetailsItem = vetementsDetails[item.id] || {};
       Object.keys(vetementsDetailsItem).forEach(subOption => {
-        if (vetementsDetailsItem[subOption]?.selected && vetementsDetailsItem[subOption]?.quantity > 0) {
-          const price = vetementsPrices[subOption] || 0;
-          const quantity = vetementsDetailsItem[subOption].quantity || 0;
-          total += price * quantity;
+        if (vetementsDetailsItem[subOption]?.selected) {
+          if (subOption === 'option2') {
+            // For Jaket, calculate based on selected materials and quantities
+            const materials = vetementsDetailsItem[subOption].materials || {};
+            Object.keys(materials).forEach(material => {
+              const quantity = materials[material] || 0;
+              const materialPrice = jaketMaterialPrices[material] || 0;
+              total += materialPrice * quantity;
+            });
+          } else {
+            // For other options, use quantity
+            const quantity = vetementsDetailsItem[subOption].quantity || 0;
+            if (quantity > 0) {
+              const price = vetementsPrices[subOption] || 0;
+              total += price * quantity;
+            }
+          }
         }
       });
       
@@ -434,13 +555,21 @@ export default function Lavage() {
     // Must have at least one main option selected
     if (selected.length === 0) return false;
     
-    // If Vêtements is selected, must have at least one sub-option with quantity > 0
+    // If Vêtements is selected, must have at least one sub-option with quantity > 0 or materials selected
     if (selected.includes('vetements')) {
       const details = vetementsDetails[itemId] || {};
-      const hasValidQuantity = Object.keys(details).some(subOption => 
-        details[subOption]?.selected && details[subOption]?.quantity > 0
-      );
-      if (!hasValidQuantity) return false;
+      const hasValidSelection = Object.keys(details).some(subOption => {
+        if (!details[subOption]?.selected) return false;
+        if (subOption === 'option2') {
+          // For Jaket, check if at least one material has quantity > 0
+          const materials = details[subOption].materials || {};
+          return Object.keys(materials).some(material => (materials[material] || 0) > 0);
+        } else {
+          // For other options, check quantity
+          return (details[subOption].quantity || 0) > 0;
+        }
+      });
+      if (!hasValidSelection) return false;
     }
     
     // If Grands textiles is selected, must have at least one long type selected with count > 0 and all pieces with valid dimensions
@@ -691,26 +820,69 @@ export default function Lavage() {
                                   <span className="lavage-option-label">
                                     {t('lavage_page.option2_label', 'Jaket')}
                                   </span>
-                                  <span className="lavage-sub-option-price">
-                                    {vetementsPrices.option2} DH
-                                  </span>
                                 </button>
                                 {vetementsDetails[item.id]?.option2?.selected && (
-                                  <div className="lavage-quantity-input-group">
-                                    <label className="lavage-quantity-label">
-                                      {t('lavage_page.quantity', 'Nombre de pièces')}:
-                                    </label>
-                                    <input
-                                      type="number"
-                                      min="0"
-                                      value={vetementsDetails[item.id]?.option2?.quantity || 0}
-                                      onChange={(e) => handleQuantityChange(item.id, 'option2', e.target.value)}
-                                      className="lavage-quantity-input"
-                                      placeholder="0"
-                                    />
-                                    {vetementsDetails[item.id]?.option2?.quantity > 0 && (
-                                      <div className="lavage-sub-option-total">
-                                        {vetementsPrices.option2 * (vetementsDetails[item.id]?.option2?.quantity || 0)} DH
+                                  <div className="lavage-jaket-materials-group">
+                                    <div className="lavage-jaket-materials-title">
+                                      {t('lavage_page.select_jaket_material', 'Sélectionnez le type de matériau')}:
+                                    </div>
+                                    <div className="lavage-jaket-materials-container">
+                                      {Object.keys(jaketMaterialPrices).map((material) => {
+                                        const materials = vetementsDetails[item.id]?.option2?.materials || {};
+                                        const isSelected = materials.hasOwnProperty(material);
+                                        const quantity = materials[material] || 0;
+                                        const materialName = t(`lavage_page.jaket_material_${material}`, material.charAt(0).toUpperCase() + material.slice(1));
+                                        return (
+                                          <div key={material} className="lavage-jaket-material-item">
+                                            <button
+                                              type="button"
+                                              className={`lavage-jaket-material-btn ${isSelected ? 'lavage-jaket-material-btn-selected' : ''}`}
+                                              onClick={() => handleJaketMaterialToggle(item.id, material)}
+                                            >
+                                              <span className="lavage-option-checkbox">
+                                                {isSelected ? '✓' : ''}
+                                              </span>
+                                              <span className="lavage-option-label">
+                                                {materialName}
+                                              </span>
+                                              <span className="lavage-jaket-material-price">
+                                                {jaketMaterialPrices[material]} DH
+                                              </span>
+                                            </button>
+                                            {isSelected && (
+                                              <>
+                                                <div className="lavage-jaket-quantity-group">
+                                                  <label className="lavage-quantity-label">
+                                                    {t('lavage_page.quantity', 'Nombre de pièces')}:
+                                                  </label>
+                                                  <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={quantity}
+                                                    onChange={(e) => handleJaketMaterialQuantityChange(item.id, material, e.target.value)}
+                                                    className="lavage-quantity-input"
+                                                    placeholder="0"
+                                                  />
+                                                </div>
+                                                {quantity > 0 && (
+                                                  <div className="lavage-jaket-material-subtotal">
+                                                    {jaketMaterialPrices[material] * quantity} DH
+                                                  </div>
+                                                )}
+                                              </>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                    {Object.keys(vetementsDetails[item.id]?.option2?.materials || {}).length > 0 && (
+                                      <div className="lavage-jaket-total">
+                                        {t('lavage_page.total', 'Total')}: {
+                                          Object.keys(vetementsDetails[item.id]?.option2?.materials || {}).reduce((sum, material) => {
+                                            const quantity = vetementsDetails[item.id]?.option2?.materials[material] || 0;
+                                            return sum + (jaketMaterialPrices[material] || 0) * quantity;
+                                          }, 0)
+                                        } DH
                                       </div>
                                     )}
                                   </div>

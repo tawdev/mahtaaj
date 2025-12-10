@@ -1486,7 +1486,8 @@
     "carpet": "Carpet",
     "length": "Length (cm)",
     "width": "Width (cm)",
-    "remove": "Remove"
+    "remove": "Remove",
+    "validation_message": "⚠️ Length and Width must be > 0"
   },
   "canapes_page": {
     "title": "Sofas",
@@ -1498,7 +1499,8 @@
     "width": "Width (cm)",
     "remove": "Remove",
     "minimum_note": "Minimum is 8 meters",
-    "team_message": "Dispatch a team of 2 or 3 people with their equipment"
+    "team_message": "Dispatch a team of 2 or 3 people with their equipment",
+    "validation_message": "⚠️ Length and Width must be > 0"
   },
   "reservation_tapis_canapes": {
     "title": "Reservation Form",
@@ -1901,7 +1903,16 @@
     "length": "Length (cm)",
     "width": "Width (cm)",
     "area": "Area",
-    "dimensions_required": "⚠️ Length and Width must be > 0"
+    "dimensions_required": "⚠️ Length and Width must be > 0",
+    "select_jaket_material": "Select material type",
+    "jaket_material_coton": "Cotton",
+    "jaket_material_laine": "Wool",
+    "jaket_material_cuir": "Leather",
+    "jaket_material_daim": "Suede",
+    "jaket_material_soie": "Silk",
+    "jaket_material_cachemire": "Cashmere",
+    "jaket_material_lin": "Linen",
+    "total": "Total"
   },
   "ropassage_page": {
     "title": "Ironing",
@@ -1933,7 +1944,16 @@
     "length": "Length (cm)",
     "width": "Width (cm)",
     "area": "Area",
-    "dimensions_required": "⚠️ Length and Width must be > 0"
+    "dimensions_required": "⚠️ Length and Width must be > 0",
+    "select_jaket_material": "Select material type",
+    "jaket_material_coton": "Cotton",
+    "jaket_material_laine": "Wool",
+    "jaket_material_cuir": "Leather",
+    "jaket_material_daim": "Suede",
+    "jaket_material_soie": "Silk",
+    "jaket_material_cachemire": "Cashmere",
+    "jaket_material_lin": "Linen",
+    "total": "Total"
   },
   "maison_page": {
     "title": "House",

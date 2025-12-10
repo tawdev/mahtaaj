@@ -239,6 +239,30 @@
 .tapis-et-canapes-promo-icon {
   font-size: 20px;
   margin-left: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tapis-et-canapes-promo-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Couleurs pour les icônes */
+.tapis-et-canapes-icon-sofa svg {
+  color: #8B4513;
+  fill: #8B4513;
+}
+
+.tapis-et-canapes-icon-carpet svg {
+  color: #DC143C;
+  fill: #DC143C;
+}
+
+.tapis-et-canapes-icon-spray svg {
+  color: #1E90FF;
+  fill: #1E90FF;
 }
 
 .tapis-et-canapes-promo-divider {

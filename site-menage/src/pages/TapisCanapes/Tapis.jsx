@@ -501,7 +501,7 @@ export default function Tapis() {
                   )}
                   {carpetCounts[item.id] > 0 && !isValidDimensions(item.id) && (
                     <div className="tapis-validation-message">
-                      {t('tapis_page.validation_message', '⚠️ يجب أن تكون جميع قيم Longueur و Largeur أكبر من 0')}
+                      {t('tapis_page.validation_message', '⚠️ Longueur et Largeur doivent être > 0')}
                     </div>
                   )}
                 </div>

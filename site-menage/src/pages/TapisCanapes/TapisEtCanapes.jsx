@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { GiRedCarpet, GiSofa } from 'react-icons/gi';
+import { FaSprayCan } from 'react-icons/fa';
 import './TapisEtCanapes.css';
 
 export default function TapisEtCanapes() {
@@ -306,19 +308,25 @@ export default function TapisEtCanapes() {
                   <span className="tapis-et-canapes-promo-text">
                     {lang === 'ar' ? '6 م أرائك' : lang === 'en' ? '6 m sofas' : '6 m canapés'}
                   </span>
-                  <span className="tapis-et-canapes-promo-icon">🛋️</span>
+                  <span className="tapis-et-canapes-promo-icon tapis-et-canapes-icon-sofa">
+                    <GiSofa />
+                  </span>
                 </div>
                 <div className="tapis-et-canapes-promo-item">
                   <span className="tapis-et-canapes-promo-text">
                     {lang === 'ar' ? '3 × 2.5م سجاد' : lang === 'en' ? '3 × 2.5 m carpets' : '3 × 2.5 m tapis'}
                   </span>
-                  <span className="tapis-et-canapes-promo-icon">🧶</span>
+                  <span className="tapis-et-canapes-promo-icon tapis-et-canapes-icon-carpet">
+                    <GiRedCarpet />
+                  </span>
                 </div>
                 <div className="tapis-et-canapes-promo-item">
                   <span className="tapis-et-canapes-promo-text">
                     {lang === 'ar' ? '2 أسرة مضادة للبكتيريا' : lang === 'en' ? '2 anti-bacterial beds' : '2 lits anti-bactériens'}
                   </span>
-                  <span className="tapis-et-canapes-promo-icon">🛏️</span>
+                  <span className="tapis-et-canapes-promo-icon tapis-et-canapes-icon-spray">
+                    <FaSprayCan />
+                  </span>
                 </div>
                 <div className="tapis-et-canapes-promo-divider"></div>
                 <div className="tapis-et-canapes-promo-price-section">

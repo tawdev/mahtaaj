@@ -1489,7 +1489,8 @@
     "carpet": "Tapis",
     "length": "Longueur (cm)",
     "width": "Largeur (cm)",
-    "remove": "Annuler"
+    "remove": "Annuler",
+    "validation_message": "⚠️ Longueur et Largeur doivent être > 0"
   },
   "canapes_page": {
     "title": "Canapés",
@@ -1501,7 +1502,8 @@
     "width": "Largeur (cm)",
     "remove": "Annuler",
     "minimum_note": "Le minimum est de 8 mètres",
-    "team_message": "Déplacement d'une équipe de 2 ou 3 personnes avec leur machine"
+    "team_message": "Déplacement d'une équipe de 2 ou 3 personnes avec leur machine",
+    "validation_message": "⚠️ Longueur et Largeur doivent être > 0"
   },
   "reservation_tapis_canapes": {
     "title": "Formulaire de Réservation",
@@ -1904,7 +1906,16 @@
     "length": "Longueur (cm)",
     "width": "Largeur (cm)",
     "area": "Surface",
-    "dimensions_required": "⚠️ Longueur et Largeur doivent être > 0"
+    "dimensions_required": "⚠️ Longueur et Largeur doivent être > 0",
+    "select_jaket_material": "Sélectionnez le type de matériau",
+    "jaket_material_coton": "Coton",
+    "jaket_material_laine": "Laine",
+    "jaket_material_cuir": "Cuir",
+    "jaket_material_daim": "Daim",
+    "jaket_material_soie": "Soie",
+    "jaket_material_cachemire": "Cachemire",
+    "jaket_material_lin": "Lin",
+    "total": "Total"
   },
   "ropassage_page": {
     "title": "Repassage",
@@ -1936,7 +1947,16 @@
     "length": "Longueur (cm)",
     "width": "Largeur (cm)",
     "area": "Surface",
-    "dimensions_required": "⚠️ Longueur et Largeur doivent être > 0"
+    "dimensions_required": "⚠️ Longueur et Largeur doivent être > 0",
+    "select_jaket_material": "Sélectionnez le type de matériau",
+    "jaket_material_coton": "Coton",
+    "jaket_material_laine": "Laine",
+    "jaket_material_cuir": "Cuir",
+    "jaket_material_daim": "Daim",
+    "jaket_material_soie": "Soie",
+    "jaket_material_cachemire": "Cachemire",
+    "jaket_material_lin": "Lin",
+    "total": "Total"
   },
   "maison_page": {
     "title": "Maison",

@@ -1511,7 +1511,8 @@
     "carpet": "السجادة",
     "length": "الطول (cm)",
     "width": "العرض (cm)",
-    "remove": "إلغاء"
+    "remove": "إلغاء",
+    "validation_message": "⚠️ يجب أن يكون الطول والعرض أكبر من 0"
   },
   "canapes_page": {
     "title": "الأرائك",
@@ -1523,7 +1524,8 @@
     "width": "العرض (cm)",
     "remove": "إلغاء",
     "minimum_note": "الحد الأدنى هو 8 متر",
-    "team_message": "نقل فريق من 2 أو 3 أشخاص مع آلاتهم"
+    "team_message": "نقل فريق من 2 أو 3 أشخاص مع آلاتهم",
+    "validation_message": "⚠️ يجب أن يكون الطول والعرض أكبر من 0"
   },
   "reservation_tapis_canapes": {
     "title": "نموذج الحجز",
@@ -1926,7 +1928,16 @@
     "length": "الطول (سم)",
     "width": "العرض (سم)",
     "area": "المساحة",
-    "dimensions_required": "⚠️ يجب أن يكون الطول والعرض أكبر من 0"
+    "dimensions_required": "⚠️ يجب أن يكون الطول والعرض أكبر من 0",
+    "select_jaket_material": "اختر نوع المادة",
+    "jaket_material_coton": "قطن",
+    "jaket_material_laine": "صوف",
+    "jaket_material_cuir": "جلد",
+    "jaket_material_daim": "جلد الغزال",
+    "jaket_material_soie": "حرير",
+    "jaket_material_cachemire": "كشمير",
+    "jaket_material_lin": "كتان",
+    "total": "المجموع"
   },
   "ropassage_page": {
     "title": "الكي",
@@ -1958,7 +1969,16 @@
     "length": "الطول (سم)",
     "width": "العرض (سم)",
     "area": "المساحة",
-    "dimensions_required": "⚠️ يجب أن يكون الطول والعرض أكبر من 0"
+    "dimensions_required": "⚠️ يجب أن يكون الطول والعرض أكبر من 0",
+    "select_jaket_material": "اختر نوع المادة",
+    "jaket_material_coton": "قطن",
+    "jaket_material_laine": "صوف",
+    "jaket_material_cuir": "جلد",
+    "jaket_material_daim": "جلد الغزال",
+    "jaket_material_soie": "حرير",
+    "jaket_material_cachemire": "كشمير",
+    "jaket_material_lin": "كتان",
+    "total": "المجموع"
   },
   "maison_page": {
     "title": "منزل",
