@@ -41,7 +41,8 @@ export default function AdminEmployeesCrud({ token, onAuthError }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [competencies, setCompetencies] = useState({}); // id -> name
+  const [competencies, setCompetencies] = useState({}); // housekeeping service id -> name
+  const [cuisineTypes, setCuisineTypes] = useState({}); // cuisine type id -> name
   const [updatingId, setUpdatingId] = useState(null);
   const [flash, setFlash] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -76,6 +77,21 @@ export default function AdminEmployeesCrud({ token, onAuthError }) {
       // Transform data to match expected format
       const transformed = housekeepingEmployees.map(emp => {
         const metadata = emp.metadata || {};
+        // Normalize menage competencies
+        let competencyIds = [];
+        if (Array.isArray(metadata.competency_ids) && metadata.competency_ids.length) {
+          competencyIds = metadata.competency_ids.map(String);
+        } else if (metadata.competency_id) {
+          competencyIds = [String(metadata.competency_id)];
+        }
+        // Normalize cuisine competencies
+        let cuisineIds = [];
+        if (Array.isArray(metadata.cuisine_type_ids) && metadata.cuisine_type_ids.length) {
+          cuisineIds = metadata.cuisine_type_ids.map(String);
+        } else if (metadata.cuisine_type_id) {
+          cuisineIds = [String(metadata.cuisine_type_id)];
+        }
+
         return {
           id: emp.id,
           name: metadata.name || emp.full_name?.split(' ')[0] || '',
@@ -87,9 +103,13 @@ export default function AdminEmployeesCrud({ token, onAuthError }) {
           address: emp.address || metadata.adresse || '',
           photo: emp.photo || emp.photo_url || null,
           photo_url: emp.photo_url || emp.photo || null,
+          // Legacy single competency fields (kept for backward compatibility)
           competency_id: metadata.competency_id || null,
           competency_name: metadata.competency_name || null,
           competency: metadata.competency || null,
+          // New multi-competency fields
+          competency_ids: competencyIds,
+          cuisine_type_ids: cuisineIds,
           jours_disponibles: metadata.availability || metadata.jours_disponibles || metadata.days || {},
           status: emp.status || 'pending',
           is_active: emp.is_active || false,
@@ -110,29 +130,51 @@ export default function AdminEmployeesCrud({ token, onAuthError }) {
 
   const loadCompetencies = async () => {
     try {
-      console.log('[AdminEmployeesCrud] Loading competencies from Supabase...');
-      
-      // Try to load from competencies table if it exists
-      const { data: competenciesData, error } = await supabase
-        .from('competencies')
-        .select('*');
-      
-      if (error) {
-        console.warn('[AdminEmployeesCrud] Competencies table not found or error:', error);
-        // If table doesn't exist, use empty map
-        setCompetencies({});
-        return;
+      console.log('[AdminEmployeesCrud] Loading competencies (services & types) from Supabase...');
+
+      // Housekeeping services (menage)
+      const { data: servicesData, error: servicesError } = await supabase
+        .from('services')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('order', { ascending: true });
+
+      if (servicesError) {
+        console.warn('[AdminEmployeesCrud] Error loading services for competencies:', servicesError);
       }
-      
-      const map = {};
-      if (Array.isArray(competenciesData)) {
-        competenciesData.forEach(c => { 
-          if (c?.id) map[c.id] = c.name || c.name_fr || c.name_ar || c.name_en || `#${c.id}`; 
+
+      const competenciesMap = {};
+      if (Array.isArray(servicesData)) {
+        servicesData.forEach(s => {
+          if (!s?.id) return;
+          const label = s.name_fr || s.name_en || s.name_ar || s.name || s.title_fr || s.title_en || s.title_ar || `#${s.id}`;
+          competenciesMap[String(s.id)] = label;
         });
       }
-      
-      console.log('[AdminEmployeesCrud] Loaded competencies:', Object.keys(map).length);
-      setCompetencies(map);
+
+      // Cuisine types
+      const { data: typesData, error: typesError } = await supabase
+        .from('types')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (typesError) {
+        console.warn('[AdminEmployeesCrud] Error loading cuisine types:', typesError);
+      }
+
+      const cuisineMap = {};
+      if (Array.isArray(typesData)) {
+        typesData.forEach(t => {
+          if (!t?.id) return;
+          const label = t.name_fr || t.name_en || t.name_ar || t.name || t.title_fr || t.title_en || t.title_ar || `#${t.id}`;
+          cuisineMap[String(t.id)] = label;
+        });
+      }
+
+      console.log('[AdminEmployeesCrud] Loaded housekeeping competencies:', Object.keys(competenciesMap).length);
+      console.log('[AdminEmployeesCrud] Loaded cuisine types:', Object.keys(cuisineMap).length);
+      setCompetencies(competenciesMap);
+      setCuisineTypes(cuisineMap);
     } catch (e) {
       console.warn('[AdminEmployeesCrud] Exception loading competencies:', e);
       setCompetencies({});
@@ -270,13 +312,47 @@ export default function AdminEmployeesCrud({ token, onAuthError }) {
                 <td className="admin-td">{e.phone || '-'}</td>
                 <td className="admin-td">{e.address || e.metadata?.adresse || '-'}</td>
                 <td className="admin-td">
-                  <span className="admin-badge employee-competency-badge">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    {competencies[e.competency_id] || e.competency_name || e.competency || `#${e.competency_id}`}
-                  </span>
+                  <div style={{display:'flex',flexDirection:'column',gap:4}}>
+                    {/* Ménage */}
+                    {Array.isArray(e.competency_ids) && e.competency_ids.length > 0 && (
+                      <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                        {e.competency_ids.map((id) => (
+                          <span key={id} className="admin-badge employee-competency-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {competencies[id] || `#${id}`}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {/* Cuisine */}
+                    {Array.isArray(e.cuisine_type_ids) && e.cuisine_type_ids.length > 0 && (
+                      <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                        {e.cuisine_type_ids.map((id) => (
+                          <span key={id} className="admin-badge employee-competency-badge cuisine-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            {cuisineTypes[id] || `#${id}`}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {/* Fallback ancien format */}
+                    {(!Array.isArray(e.competency_ids) || e.competency_ids.length === 0) &&
+                      (!Array.isArray(e.cuisine_type_ids) || e.cuisine_type_ids.length === 0) && (
+                      <span className="admin-badge employee-competency-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        {competencies[e.competency_id] || e.competency_name || e.competency || (e.competency_id ? `#${e.competency_id}` : '-')}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="admin-td"><pre className="employee-json">{typeof e.jours_disponibles === 'string' ? e.jours_disponibles : JSON.stringify(e.jours_disponibles, null, 2)}</pre></td>
                 <td className="admin-td">
@@ -388,9 +464,27 @@ export default function AdminEmployeesCrud({ token, onAuthError }) {
               <div className="detail-section">
                 <h4>Informations Professionnelles</h4>
                 <div className="detail-item">
-                  <span className="detail-label">Compétence:</span>
+                  <span className="detail-label">Compétence (Ménage):</span>
                   <span className="detail-value">
-                    {competencies[selectedEmployee.competency_id] || selectedEmployee.competency_name || selectedEmployee.competency || `#${selectedEmployee.competency_id}`}
+                    {Array.isArray(selectedEmployee.competency_ids) && selectedEmployee.competency_ids.length ? (
+                      selectedEmployee.competency_ids
+                        .map(id => competencies[id] || `#${id}`)
+                        .join(' , ')
+                    ) : (
+                      competencies[selectedEmployee.competency_id] || selectedEmployee.competency_name || selectedEmployee.competency || (selectedEmployee.competency_id ? `#${selectedEmployee.competency_id}` : 'Non définie')
+                    )}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Compétence (Cuisine):</span>
+                  <span className="detail-value">
+                    {Array.isArray(selectedEmployee.cuisine_type_ids) && selectedEmployee.cuisine_type_ids.length ? (
+                      selectedEmployee.cuisine_type_ids
+                        .map(id => cuisineTypes[id] || `#${id}`)
+                        .join(' , ')
+                    ) : (
+                      'Non définie'
+                    )}
                   </span>
                 </div>
                 <div className="detail-item">

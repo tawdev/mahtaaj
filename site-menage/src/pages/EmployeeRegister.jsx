@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import './EmployeeRegister.css';
+import { CITY_QUARTIERS } from '../constants/cities';
 
 export default function EmployeeRegister() {
   const { t } = useTranslation();
@@ -15,43 +16,90 @@ export default function EmployeeRegister() {
   // Get translated day names
   const DAYS = DAY_KEYS.map(key => t(`employee_register.days.${key}`));
   const [form, setForm] = useState({
-    name: '', prenom: '', birth_date: '', age: '', email: '', phone: '', adresse: '', competency_id: '', photo: null, auto_entrepreneur: '', last_experience: '', company_name: '', preferred_work_time: ''
+    name: '',
+    prenom: '',
+    birth_date: '',
+    age: '',
+    email: '',
+    phone: '',
+    city: '',
+    quartier: '',
+    // Allow multiple menage domains
+    competency_ids: [],
+    // Allow multiple cuisine domain selections
+    cuisine_type_ids: [],
+    photo: null,
+    auto_entrepreneur: '',
+    last_experience: '',
+    company_name: '',
+    preferred_work_time: '',
   });
   const [services, setServices] = useState([]);
+  const [types, setTypes] = useState([]);
+  const [availableQuartiers, setAvailableQuartiers] = useState([]);
   const [days, setDays] = useState({}); // { lundi: { checked:true, start:'', end:'' }, ... }
   const [lastSelectedHours, setLastSelectedHours] = useState(null); // { start:'09:00', end:'18:00' }
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [isLocating, setIsLocating] = useState(false);
   const [timeErrors, setTimeErrors] = useState({});
   const { i18n } = useTranslation();
+
+  // Keep quartiers list in sync with selected city
+  useEffect(() => {
+    if (form.city && CITY_QUARTIERS[form.city]) {
+      setAvailableQuartiers(CITY_QUARTIERS[form.city]);
+      // If current quartier is not in the new list, reset it
+      if (!CITY_QUARTIERS[form.city].includes(form.quartier)) {
+        setForm((prev) => ({ ...prev, quartier: '' }));
+      }
+    } else {
+      setAvailableQuartiers([]);
+      if (form.quartier) {
+        setForm((prev) => ({ ...prev, quartier: '' }));
+      }
+    }
+  }, [form.city]);
 
   useEffect(() => {
     (async () => {
       try {
-        console.log('[EmployeeRegister] Loading services from Supabase');
+        console.log('[EmployeeRegister] Loading services & types from Supabase');
         
         // Load services from Supabase
-        const { data, error } = await supabase
+        const { data: servicesData, error: servicesError } = await supabase
           .from('services')
           .select('*')
           .eq('is_active', true)
           .order('sort_order', { ascending: true })
           .order('order', { ascending: true });
         
-        if (error) {
-          console.error('[EmployeeRegister] Error loading services:', error);
+        if (servicesError) {
+          console.error('[EmployeeRegister] Error loading services:', servicesError);
           setServices([]);
-          return;
+        } else {
+          console.log('[EmployeeRegister] Loaded services:', servicesData?.length || 0);
+          setServices(Array.isArray(servicesData) ? servicesData : []);
         }
-        
-        console.log('[EmployeeRegister] Loaded services:', data?.length || 0);
-        setServices(Array.isArray(data) ? data : []);
+
+        // Load types from Supabase (for Cuisine domain)
+        const { data: typesData, error: typesError } = await supabase
+          .from('types')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (typesError) {
+          console.error('[EmployeeRegister] Error loading types:', typesError);
+          setTypes([]);
+        } else {
+          console.log('[EmployeeRegister] Loaded types:', typesData?.length || 0);
+          setTypes(Array.isArray(typesData) ? typesData : []);
+        }
       } catch (err) {
-        console.error('[EmployeeRegister] Exception loading services:', err);
+        console.error('[EmployeeRegister] Exception loading services/types:', err);
         setServices([]);
+        setTypes([]);
       }
     })();
   }, [i18n.language]);
@@ -163,32 +211,6 @@ export default function EmployeeRegister() {
     });
   };
 
-  const handleUseLocation = async () => {
-    try {
-      setIsLocating(true);
-      setError(null);
-      if (!navigator.geolocation) {
-        throw new Error(t('employee_register.location.not_supported'));
-      }
-      const coords = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-          (err) => reject(new Error(t('employee_register.location.error'))),
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      });
-      // Reverse geocoding via Nominatim (public OSM)
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lon}` , { headers: { 'Accept': 'application/json' }});
-      const data = await res.json();
-      const display = data?.display_name || `${coords.lat.toFixed(5)}, ${coords.lon.toFixed(5)}`;
-      setForm(prev => ({ ...prev, adresse: display }));
-    } catch (e) {
-      setError(e.message || t('employee_register.location.location_error'));
-    } finally {
-      setIsLocating(false);
-    }
-  };
-
   const validateTime = (day, startTime, endTime) => {
     if (startTime && endTime) {
       const start = new Date(`2000-01-01T${startTime}`);
@@ -227,7 +249,19 @@ export default function EmployeeRegister() {
   };
 
   const validate = () => {
-    if (!form.name || !form.prenom || !form.birth_date || !form.age || !form.email || !form.adresse || !form.competency_id) return t('employee_register.validation.all_fields_required');
+    if (
+      !form.name ||
+      !form.prenom ||
+      !form.birth_date ||
+      !form.age ||
+      !form.email ||
+      !form.city ||
+      !form.quartier ||
+      !Array.isArray(form.competency_ids) ||
+      form.competency_ids.length === 0
+    ) {
+      return t('employee_register.validation.all_fields_required');
+    }
     // Only require days if preferred_work_time is not selected
     if (!form.preferred_work_time && Object.keys(selectedDaysPayload).length === 0) return t('employee_register.validation.select_at_least_one_day');
     return null;
@@ -278,7 +312,10 @@ export default function EmployeeRegister() {
         full_name: `${form.name} ${form.prenom}`.trim(),
         email: form.email || null,
         phone: form.phone || null,
-        address: form.adresse, // Map adresse to address
+        // Store full address as "City - Quartier" for backward compatibility
+        address: `${form.city} - ${form.quartier}`,
+        city: form.city || null,
+        quartier: form.quartier || null,
         photo: photoUrl || null,
         photo_url: photoUrl || null,
         status: 'pending',
@@ -287,13 +324,29 @@ export default function EmployeeRegister() {
           prenom: form.prenom,
           birth_date: form.birth_date,
           age: Number(form.age),
-          competency_id: Number(form.competency_id),
+          // Menage: first selected as main id, and full array for multi-choice
+          competency_id: Array.isArray(form.competency_ids) && form.competency_ids.length
+            ? form.competency_ids[0]
+            : null,
+          competency_ids: Array.isArray(form.competency_ids) && form.competency_ids.length
+            ? form.competency_ids
+            : null,
+          // Cuisine: store first selected as main id for backward compatibility,
+          // and full list as an array.
+          cuisine_type_id: Array.isArray(form.cuisine_type_ids) && form.cuisine_type_ids.length
+            ? form.cuisine_type_ids[0]
+            : null,
+          cuisine_type_ids: Array.isArray(form.cuisine_type_ids) && form.cuisine_type_ids.length
+            ? form.cuisine_type_ids
+            : null,
           auto_entrepreneur: form.auto_entrepreneur || null,
           last_experience: form.last_experience || null,
           company_name: form.company_name || null,
           preferred_work_time: form.preferred_work_time || null,
-          jours_disponibles: Object.keys(selectedDaysPayload).length > 0 ? selectedDaysPayload : null
-        }
+          jours_disponibles: Object.keys(selectedDaysPayload).length > 0 ? selectedDaysPayload : null,
+          city: form.city || null,
+          quartier: form.quartier || null,
+        },
       };
       
       console.log('[EmployeeRegister] Submitting employee data:', employeeData);
@@ -311,7 +364,23 @@ export default function EmployeeRegister() {
       
       setMessage('Inscription réussie!');
       setShowSuccess(true);
-      setForm({ name:'', prenom:'', birth_date:'', age:'', email:'', phone:'', adresse:'', competency_id:'', photo: null, auto_entrepreneur: '', last_experience: '', company_name: '', preferred_work_time: '' });
+      setForm({
+        name: '',
+        prenom: '',
+        birth_date: '',
+        age: '',
+        email: '',
+        phone: '',
+        city: '',
+        quartier: '',
+        competency_ids: [],
+        cuisine_type_ids: [],
+        photo: null,
+        auto_entrepreneur: '',
+        last_experience: '',
+        company_name: '',
+        preferred_work_time: '',
+      });
       setDays({});
       // Auto-hide after 4s
       setTimeout(() => setShowSuccess(false), 4000);
@@ -443,8 +512,8 @@ export default function EmployeeRegister() {
               <input type="tel" value={form.phone} onChange={(e)=>setForm({...form, phone:e.target.value})} placeholder={t('employee_register.form.phone_placeholder')} />
             </div>
           </div>
-          <div className="form-group full">
-            <label>{t('employee_register.form.address')}</label>
+          <div className="form-group">
+            <label>{t('multi_service_employees.city_label')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -452,14 +521,46 @@ export default function EmployeeRegister() {
                   <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
                 </svg>
               </span>
-              <input type="text" value={form.adresse} onChange={(e)=>setForm({...form, adresse:e.target.value})} required />
-              <button type="button" className="location-btn" onClick={handleUseLocation} disabled={isLocating} title={t('employee_register.form.use_location')}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2V4M12 20V22M4 12H2M22 12H20M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M4.93 19.07L6.34 17.66M17.66 6.34L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/>
+              <select
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+                required
+              >
+                <option value="">
+                  {t('multi_services.city_placeholder', 'اختر المدينة')}
+                </option>
+                {Object.keys(CITY_QUARTIERS).map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label>{t('multi_service_employees.quartier_label')}</label>
+            <div className="input-with-icon">
+              <span className="ifi-icon" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 21C12 21 5 14.9706 5 10.5C5 7.46243 7.46243 5 10.5 5C13.5376 5 16 7.46243 16 10.5C16 14.9706 12 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
                 </svg>
-                {isLocating ? t('employee_register.form.locating') : t('employee_register.form.locate')}
-              </button>
+              </span>
+              <select
+                value={form.quartier}
+                onChange={(e) => setForm({ ...form, quartier: e.target.value })}
+                disabled={!form.city || availableQuartiers.length === 0}
+                required
+              >
+                <option value="">
+                  {t('multi_services.quartier_placeholder', 'اختر الحي')}
+                </option>
+                {availableQuartiers.map((q) => (
+                  <option key={q} value={q}>
+                    {q}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="form-group full">
@@ -476,21 +577,115 @@ export default function EmployeeRegister() {
           </div>
           <div className="form-group full">
             <label>{t('employee_register.form.competency')}</label>
-            <div className="input-with-icon">
+            <div className="input-with-icon" style={{flexDirection: 'column', alignItems: 'flex-start', gap: '8px'}}>
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </span>
-              <select value={form.competency_id || ''} onChange={(e)=>setForm({...form, competency_id:e.target.value})} required>
-                <option value="">{t('employee_register.form.select_competency')}</option>
-                {services.map(service => (
-                  <option key={service.id} value={service.id}>
-                    {getServiceDisplayTitle(service)}
-                  </option>
-                ))}
-              </select>
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                {services.map(service => {
+                  const idStr = String(service.id);
+                  const checked = Array.isArray(form.competency_ids) && form.competency_ids.includes(idStr);
+                  return (
+                    <label
+                      key={idStr}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '4px 8px',
+                        borderRadius: '999px',
+                        border: '1px solid #e2e8f0',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        backgroundColor: checked ? '#0f766e' : 'transparent',
+                        color: checked ? '#ffffff' : 'inherit'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setForm(prev => {
+                            const current = Array.isArray(prev.competency_ids) ? prev.competency_ids : [];
+                            if (current.includes(idStr)) {
+                              return {
+                                ...prev,
+                                competency_ids: current.filter(v => v !== idStr)
+                              };
+                            }
+                            return {
+                              ...prev,
+                              competency_ids: [...current, idStr]
+                            };
+                          });
+                        }}
+                        style={{accentColor: '#0f766e'}}
+                      />
+                      <span>{getServiceDisplayTitle(service)}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group full">
+            <label>{t('employee_register.form.competency_cuisine')}</label>
+            <div className="input-with-icon" style={{flexDirection: 'column', alignItems: 'flex-start', gap: '8px'}}>
+              <span className="ifi-icon" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+              <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                {types.map((type) => {
+                  const idStr = String(type.id);
+                  const checked = Array.isArray(form.cuisine_type_ids) && form.cuisine_type_ids.includes(idStr);
+                  return (
+                    <label
+                      key={idStr}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        padding: '4px 8px',
+                        borderRadius: '999px',
+                        border: '1px solid #e2e8f0',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                        backgroundColor: checked ? '#0f766e' : 'transparent',
+                        color: checked ? '#ffffff' : 'inherit'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setForm(prev => {
+                            const current = Array.isArray(prev.cuisine_type_ids) ? prev.cuisine_type_ids : [];
+                            if (current.includes(idStr)) {
+                              return {
+                                ...prev,
+                                cuisine_type_ids: current.filter(v => v !== idStr)
+                              };
+                            }
+                            return {
+                              ...prev,
+                              cuisine_type_ids: [...current, idStr]
+                            };
+                          });
+                        }}
+                        style={{accentColor: '#0f766e'}}
+                      />
+                      <span>{getServiceDisplayTitle(type)}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

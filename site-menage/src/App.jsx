@@ -45,6 +45,13 @@ import BebeSetting from './pages/BebeSetting';
 import Jardinage from './pages/Jardinage';
 import JardinageDetail from './pages/JardinageDetail';
 import HandWorkers from './pages/HandWorkers';
+import MultiServiceEmployees from './pages/MultiServiceEmployees';
+import MultiServiceMenageCuisine from './pages/MultiServiceMenageCuisine';
+import MultiServiceSecurite from './pages/MultiServiceSecurite';
+import MultiServiceBebe from './pages/MultiServiceBebe';
+import MultiServiceJardinage from './pages/MultiServiceJardinage';
+import MultiServiceTravauxManuels from './pages/MultiServiceTravauxManuels';
+import MultiServiceChauffeur from './pages/MultiServiceChauffeur';
 import HandWorkerCategoryDetails from './pages/HandWorkerCategoryDetails';
 import HandWorkerBooking from './pages/HandWorkerBooking';
 import HandWorkerAppointment from './pages/HandWorkerAppointment';
@@ -238,6 +245,13 @@ export default function App() {
           <Route path="/hand-workers/booking" element={<HandWorkerBooking />} />
           <Route path="/hand-workers/appointment" element={<HandWorkerAppointment />} />
           <Route path="/hand-workers/register" element={<HandWorkerRegistration />} />
+          <Route path="/multi-services-employees" element={<MultiServiceEmployees />} />
+          <Route path="/multi-services-employees/menage_cuisine" element={<MultiServiceMenageCuisine />} />
+          <Route path="/multi-services-employees/securite" element={<MultiServiceSecurite />} />
+          <Route path="/multi-services-employees/bebe" element={<MultiServiceBebe />} />
+          <Route path="/multi-services-employees/jardinage" element={<MultiServiceJardinage />} />
+          <Route path="/multi-services-employees/travaux_manuels" element={<MultiServiceTravauxManuels />} />
+          <Route path="/multi-services-employees/chauffeur" element={<MultiServiceChauffeur />} />
           <Route path="/driver" element={<Driver />} />
           <Route path="/driver/:id" element={<DriverCategoryDetails />} />
           {/* Admin Panel Routes */}

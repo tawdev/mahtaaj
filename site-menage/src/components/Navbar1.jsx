@@ -345,6 +345,7 @@ export default function Navbar1() {
                 {/* Navigation links in normal order */}
                 <li><Link to="/" onClick={closeMenu}>{t('nav.home')}</Link></li>
                 <li><Link to="/tous-les-services" onClick={closeMenu}>{t('nav.all_services')}</Link></li>
+               
                 <li><Link to="/shop" onClick={closeMenu}>{t('nav.shop')}</Link></li>
                 <li><Link to="/support" onClick={closeMenu}>الدعم</Link></li>
                 {isLoggedIn && (
@@ -644,6 +645,7 @@ export default function Navbar1() {
           <ul className="navbar1__drawer-links">
             <li><Link to="/" onClick={closeMenu}>{t('nav.home')}</Link></li>
             <li><Link to="/tous-les-services" onClick={closeMenu}>{t('nav.all_services')}</Link></li>
+            <li><Link to="/multi-services-employees" onClick={closeMenu}>{t('nav.multi_services', 'Multi-services')}</Link></li>
             <li><Link to="/shop" onClick={closeMenu}>{t('nav.shop')}</Link></li>
             <li><Link to="/contact" onClick={closeMenu}>{t('nav.contact')}</Link></li>
             <li><Link to="/support" onClick={closeMenu}>{isRTL ? 'الدعم' : 'Support'}</Link></li>

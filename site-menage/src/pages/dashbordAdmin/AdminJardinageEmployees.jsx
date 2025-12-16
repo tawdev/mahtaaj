@@ -38,6 +38,8 @@ export default function AdminJardinageEmployees({ token, onAuthError }) {
         employee_type: emp.employee_type || '-',
         location: emp.location || '',
         address: emp.address || '',
+        city: emp.city || '',
+        quartier: emp.quartier || '',
         birth_date: emp.birth_date || '',
         age: emp.age || null,
         auto_entrepreneur: emp.auto_entrepreneur || '',
@@ -229,6 +231,8 @@ export default function AdminJardinageEmployees({ token, onAuthError }) {
                 <th>Expertise</th>
                 <th>نوع العامل</th>
                 <th>Ville</th>
+                <th>Quartier</th>
+                <th>Dernière expérience</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>
@@ -261,11 +265,9 @@ export default function AdminJardinageEmployees({ token, onAuthError }) {
                     )}
                   </td>
                   <td>{emp.employee_type || '-'}</td>
-                  <td>
-                    <span className="jardinage-employees-location">
-                      {emp.location || '-'}
-                    </span>
-                  </td>
+                  <td>{emp.city || '-'}</td>
+                  <td>{emp.quartier || '-'}</td>
+                  <td>{emp.last_experience || '-'}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input 

@@ -1,27 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import './AdminBebeEmployees.css';
+import { supabase } from '../../lib/supabase';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-
+// Liste des employés bébé validés (status = 'approved')
 export default function AdminBebeEmployeesValid({ token, onAuthError }) {
 	const [items, setItems] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
-	const getToken = () => token || localStorage.getItem('adminToken');
-
 	const load = async () => {
 		try {
 			setLoading(true);
 			setError('');
-			const res = await fetch(`${API_BASE_URL}/api/admin/bebe-employees-valid`, {
-				headers: { 'Authorization': `Bearer ${getToken()}`, 'Accept':'application/json' }
-			});
-			if (res.status === 401) { onAuthError && onAuthError(); return; }
-			const data = await res.json();
-			if (!res.ok || data?.success === false) throw new Error(data.message || 'Load failed');
-			setItems(data.data || []);
-		} catch (e) { setError(e.message); } finally { setLoading(false); }
+
+			const { data, error } = await supabase
+				.from('bebe_employees')
+				.select('*')
+				.eq('status', 'approved')
+				.order('created_at', { ascending: false });
+
+			if (error) {
+				console.error('[AdminBebeEmployeesValid] Error loading validated employees:', error);
+				throw new Error(error.message || 'Impossible de charger les employés validés');
+			}
+
+			setItems(Array.isArray(data) ? data : []);
+		} catch (e) {
+			setError(e.message || 'Erreur de chargement');
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	useEffect(()=>{ load(); }, []);
@@ -29,12 +37,22 @@ export default function AdminBebeEmployeesValid({ token, onAuthError }) {
 	const remove = async (id) => {
 		if (!window.confirm('Supprimer cet enregistrement validé ?')) return;
 		try {
-			const res = await fetch(`${API_BASE_URL}/api/admin/bebe-employees-valid/${id}`, {
-				method: 'DELETE', headers: { 'Authorization': `Bearer ${getToken()}` }
-			});
-			if (res.status === 401) { onAuthError && onAuthError(); return; }
-			if (res.ok) setItems(prev => prev.filter(i => i.id !== id));
-		} catch {}
+			const { error } = await supabase
+				.from('bebe_employees')
+				.delete()
+				.eq('id', id);
+
+			if (error) {
+				console.error('[AdminBebeEmployeesValid] Error deleting validated employee:', error);
+				alert(error.message || 'Erreur lors de la suppression');
+				return;
+			}
+
+			setItems(prev => prev.filter(i => i.id !== id));
+		} catch (e) {
+			console.error('[AdminBebeEmployeesValid] Exception deleting validated employee:', e);
+			alert(e.message || 'Erreur lors de la suppression');
+		}
 	};
 
 	return (

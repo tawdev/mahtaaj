@@ -1090,7 +1090,7 @@ export default function AdminTypesCrud({ token, onAuthError }) {
           <tbody>
             {filteredTypes.length === 0 ? (
               <tr>
-                <td colSpan="12" className="no-data">
+                <td colSpan="13" className="no-data">
                   Aucun type trouvé
                 </td>
               </tr>
@@ -1127,12 +1127,14 @@ export default function AdminTypesCrud({ token, onAuthError }) {
                   <td className="category-name">{type.name_ar || '-'}</td>
                   <td className="category-name">{type.name_fr || '-'}</td>
                   <td className="category-name">{type.name_en || '-'}</td>
-                  <td className="category-description">{type.description_fr || type.description || '-'}</td>
-                    <td>
-                      {type.price !== null && type.price !== undefined
-                        ? `${Number(type.price).toFixed(2)} DH`
-                        : '-'}
-                    </td>
+                  <td className="category-description">
+                    {type.description_fr || type.description || '-'}
+                  </td>
+                  <td className="price-cell">
+                    {type.price !== null && type.price !== undefined
+                      ? `${Number(type.price).toFixed(2)} DH`
+                      : '-'}
+                  </td>
                   <td>
                     {type.image_url || type.image ? (
                       <img 

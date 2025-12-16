@@ -21,7 +21,8 @@
     "gardening": "Gardening",
     "hand_workers": "Hand Workers",
     "brand_name": "ForNowSolution",
-    "all_services": "All our services"
+    "all_services": "All our services",
+    "multi_services": "Search for worker"
   },
   "home": {
     "title": "ForNowSolution",
@@ -262,7 +263,23 @@
     "unexpected_error": "An unexpected error occurred"
   },
   "employees": {
+    "security": {
+      "expertise": {
+        "guard": "Security guard",
+        "supervisor": "Security supervisor",
+        "camera": "Camera monitoring"
+      }
+    },
+    "jardinage": {
+      "expertise": {
+        "planting": "Planting",
+        "pruning": "Pruning / trimming",
+        "maintenance": "Garden maintenance"
+      }
+    },
     "register": {
+      "employee_type": "Worker type",
+      "select_employee_type": "Select worker type",
       "join_team": "Join our team",
       "fill_form": "Please fill out the form below",
       "required_fields": "Please fill in the required fields",
@@ -311,13 +328,6 @@
         "home_nursery": "Home nursery",
         "nanny": "Nanny",
         "home_assistant": "Home assistant for child"
-      }
-    },
-    "jardinage": {
-      "expertise": {
-        "planting": "Planting",
-        "pruning": "Pruning",
-        "maintenance": "Garden maintenance"
       }
     },
     "landing": {
@@ -793,7 +803,9 @@
       "phone": "Phone",
       "address": "Address",
       "photo": "Photo (optional)",
-      "competency": "Field of expertise",
+      "competency": "Field of expertise (Housekeeping)",
+      "competency_cuisine": "Field of expertise (Kitchen)",
+      "competency_cuisine_multi": "Multi choice (several cuisines)",
       "available_days": "Available days",
       "select_competency": "Select…",
       "phone_placeholder": "Ex: +212 6 12 34 56 78",
@@ -1382,6 +1394,7 @@
     "photo": "Profile Photo",
     "work_samples": "Work Samples",
     "bio": "Biography",
+    "employee_type": "Worker type",
     "experience_years": "Years of Experience",
     "submit": "Register",
     "submitting": "Submitting...",
@@ -1392,8 +1405,13 @@
     "password_confirmation_placeholder": "Repeat your password",
     "select_category": "Select your specialty",
     "address_placeholder": "Your complete address",
-    "city_placeholder": "Your city",
+    "city_placeholder": "Choose the city",
+    "quartier": "District",
+    "quartier_placeholder": "Choose the district",
     "bio_placeholder": "Tell us about your experience and skills...",
+    "select_employee_type": "Select worker type",
+    "employee_type_worker": "Worker",
+    "employee_type_assistant": "Assistant",
     "photo_help": "Profile photo (optional, max 2MB)",
     "work_samples_help": "Photos of your work (optional, max 5 files)",
     "full_name_required": "Full name is required",
@@ -2102,5 +2120,26 @@
     "error_location": "Please enter your address",
     "error_submit": "Error submitting reservation. Please try again.",
     "error_permission": "Permission error. Please verify that the table exists and RLS policies are correctly configured."
+  },
+  "multi_services": {
+    "grid_title": "Choose the service that fits your needs",
+    "grid_subtitle": "Click on a card, then filter by city and district to see available employees.",
+    "services_title": "Available services",
+    "service_card_description": "Click to see available employees for this service and filter by city and district.",
+    "filter_title": "Filter by address",
+    "filter_subtitle": "Choose the city and district to show employees registered for this service only.",
+    "city_label": "City",
+    "city_placeholder": "Choose a city",
+    "quartier_label": "District",
+    "quartier_placeholder": "Choose a district",
+    "work_type_label": "Work type",
+    "work_type_placeholder": "Choose a work type",
+    "no_employees": "No matching employees currently for this service at this address.",
+    "button_details": "View details",
+    "button_book": "Book now"
+  },
+  "multi_service_employees": {
+    "city_label": "City",
+    "quartier_label": "District"
   }
 }

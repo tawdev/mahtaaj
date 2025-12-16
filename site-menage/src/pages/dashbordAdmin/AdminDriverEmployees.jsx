@@ -21,6 +21,8 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
     full_name: '',
     phone: '', 
     cin_number: '', 
+    city: '',
+    quartier: '',
     address: ''
   });
 
@@ -79,7 +81,7 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
       
       setShowForm(false);
       setEditingEmployee(null);
-      setFormData({ full_name: '', phone: '', cin_number: '', address: '' });
+      setFormData({ full_name: '', phone: '', cin_number: '', city: '', quartier: '', address: '' });
       loadEmployees();
     } catch (e) {
       const errorMsg = e.message || 'Erreur lors de la sauvegarde';
@@ -93,6 +95,8 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
       full_name: employee.full_name || '', 
       phone: employee.phone || '', 
       cin_number: employee.cin_number || '', 
+      city: employee.city || '', 
+      quartier: employee.quartier || '', 
       address: employee.address || ''
     });
     setShowForm(true);
@@ -131,7 +135,7 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
   const handleCancel = () => {
     setShowForm(false);
     setEditingEmployee(null);
-    setFormData({ full_name: '', phone: '', cin_number: '', address: '' });
+    setFormData({ full_name: '', phone: '', cin_number: '', city: '', quartier: '', address: '' });
     setError('');
     setSuccess('');
   };
@@ -142,6 +146,8 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
       (employee.full_name || '').toLowerCase().includes(searchLower) ||
       (employee.phone || '').toLowerCase().includes(searchLower) ||
       (employee.cin_number || '').toLowerCase().includes(searchLower) ||
+      (employee.city || '').toLowerCase().includes(searchLower) ||
+      (employee.quartier || '').toLowerCase().includes(searchLower) ||
       (employee.address || '').toLowerCase().includes(searchLower)
     );
   });
@@ -159,7 +165,7 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
       <div className="admin-crud-header">
         <h2>Gestion des Employés Chauffeurs</h2>
         <button 
-          onClick={() => { setShowForm(true); setEditingEmployee(null); setFormData({ full_name: '', phone: '', cin_number: '', address: '' }); }}
+          onClick={() => { setShowForm(true); setEditingEmployee(null); setFormData({ full_name: '', phone: '', cin_number: '', city: '', quartier: '', address: '' }); }}
           className="admin-crud-add-button"
         >
           + Ajouter un Employé
@@ -204,6 +210,26 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
                   onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   required
                   placeholder="+212 6XX XXX XXX"
+                />
+              </div>
+              <div className="admin-crud-field">
+                <label htmlFor="city">Ville</label>
+                <input
+                  id="city"
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  placeholder="Ville"
+                />
+              </div>
+              <div className="admin-crud-field">
+                <label htmlFor="quartier">Quartier</label>
+                <input
+                  id="quartier"
+                  type="text"
+                  value={formData.quartier}
+                  onChange={(e) => setFormData({...formData, quartier: e.target.value})}
+                  placeholder="Quartier"
                 />
               </div>
               <div className="admin-crud-field">
@@ -258,6 +284,8 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
               <th>Nom Complet</th>
               <th>Téléphone</th>
               <th>CIN</th>
+              <th>Ville</th>
+              <th>Quartier</th>
               <th>Adresse</th>
               <th>Créé le</th>
               <th>Actions</th>
@@ -275,6 +303,8 @@ export default function AdminDriverEmployees({ token, onAuthError }) {
                   <td>{employee.full_name || '-'}</td>
                   <td>{employee.phone || '-'}</td>
                   <td>{employee.cin_number || '-'}</td>
+                  <td>{employee.city || '-'}</td>
+                  <td>{employee.quartier || '-'}</td>
                   <td>{employee.address || '-'}</td>
                   <td>{new Date(employee.created_at).toLocaleDateString()}</td>
                   <td>

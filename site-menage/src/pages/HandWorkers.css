@@ -11,6 +11,16 @@
   opacity: 1;
 }
 
+/* Generic back button container used on multi-service pages and forms */
+.back-button-container {
+  max-width: 1200px;
+  margin: 0 auto 16px auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+}
+
 .hand-workers-back-button {
   background: transparent;
   border: 1px solid #667eea;
@@ -20,7 +30,7 @@
   font-weight: 600;
   cursor: pointer;
   padding: 8px 16px;
-  margin: 0 20px 20px 20px;
+  margin: 0 0 8px 0;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -40,8 +50,12 @@
 }
 
 @media (max-width: 768px) {
+  .back-button-container {
+    padding: 0 16px;
+    margin-bottom: 12px;
+  }
+
   .hand-workers-back-button {
-    margin: 0 16px 16px 16px;
     font-size: 14px;
     padding: 6px 12px;
   }
@@ -226,6 +240,26 @@
   border-radius: 20px 20px 0 0;
 }
 
+/* Avatar icon for multi-service employees cards */
+.hand-workers-page .multi-service-user-avatar {
+  position: relative;
+  z-index: 3;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.45);
+  border: 2px solid rgba(248, 250, 252, 0.9);
+}
+
+.hand-workers-page .multi-service-user-avatar span {
+  font-size: 2rem;
+  color: #0f172a;
+}
+
 .hand-workers-page .category-image {
   width: 100%;
   height: 100%;
@@ -340,17 +374,12 @@
 
 .hand-workers-page .category-description {
   color: #64748b;
-  font-size: 1rem;
+  font-size: 0.98rem;
   line-height: 1.6;
   margin-bottom: 20px;
-  min-height: 3.2em; /* Ensure enough space for 2 lines */
-  overflow: visible;
+  min-height: 3.6em; /* Slightly more space for multi-line descriptions */
   word-wrap: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 3; /* Show up to 3 lines */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: break-word;
 }
 
 .hand-workers-page .category-price {
@@ -664,6 +693,48 @@
 /* Hand Workers Section */
 .hand-workers-section {
   margin-bottom: 3rem;
+}
+
+/* Multi-service filters (city / quartier) */
+.multi-service-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem 1.75rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #e5f0ff 100%);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+}
+
+.multi-service-filters .form-input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  background: #ffffff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.multi-service-filters .form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
+  transform: translateY(-1px);
+}
+
+.multi-service-filters label {
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+@media (max-width: 768px) {
+  .multi-service-filters {
+    padding: 1.25rem 1.25rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .hand-workers-title {

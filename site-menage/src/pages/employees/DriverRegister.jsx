@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { CITY_QUARTIERS } from '../../constants/cities';
 import './driverRegister.css';
 
 export default function DriverRegister() {
@@ -11,6 +12,8 @@ export default function DriverRegister() {
     full_name: '',
     phone: '',
     cin_number: '',
+    city: '',
+    quartier: '',
     address: ''
   });
   
@@ -19,6 +22,22 @@ export default function DriverRegister() {
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [availableQuartiers, setAvailableQuartiers] = useState([]);
+
+  // Keep quartiers list in sync with selected city
+  useEffect(() => {
+    if (form.city && CITY_QUARTIERS[form.city]) {
+      setAvailableQuartiers(CITY_QUARTIERS[form.city]);
+      if (!CITY_QUARTIERS[form.city].includes(form.quartier)) {
+        setForm((prev) => ({ ...prev, quartier: '' }));
+      }
+    } else {
+      setAvailableQuartiers([]);
+      if (form.quartier) {
+        setForm((prev) => ({ ...prev, quartier: '' }));
+      }
+    }
+  }, [form.city]);
 
   const handleUseLocation = async () => {
     try {
@@ -47,7 +66,7 @@ export default function DriverRegister() {
   };
 
   const validate = () => {
-    if (!form.full_name || !form.phone || !form.cin_number || !form.address) {
+    if (!form.full_name || !form.phone || !form.cin_number || (!form.address && (!form.city || !form.quartier))) {
       return t('employee_register.validation.all_fields_required', 'جميع الحقول مطلوبة');
     }
     // Validate phone format
@@ -79,7 +98,7 @@ export default function DriverRegister() {
         full_name: form.full_name.trim(),
         phone: form.phone.trim(),
         cin_number: form.cin_number.trim(),
-        address: form.address.trim() || null
+        address: (form.address || (form.city && form.quartier ? `${form.city} - ${form.quartier}` : '')).trim() || null
       };
       
       console.log('[DriverRegister] Submitting employee data to driver_employees:', employeeData);
@@ -103,6 +122,8 @@ export default function DriverRegister() {
         full_name: '',
         phone: '',
         cin_number: '',
+        city: '',
+        quartier: '',
         address: ''
       });
       // Auto-hide after 4s
@@ -215,8 +236,59 @@ export default function DriverRegister() {
             </div>
           </div>
 
+          <div className="form-group">
+            <label>{t('multi_service_employees.city_label')}</label>
+            <div className="input-with-icon">
+              <span className="ifi-icon" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 21C12 21 5 14.9706 5 10.5C5 7.46243 7.46243 5 10.5 5C13.5376 5 16 7.46243 16 10.5C16 14.9706 12 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </span>
+              <select
+                value={form.city}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              >
+                <option value="">
+                  {t('multi_services.city_placeholder', 'اختر المدينة')}
+                </option>
+                {Object.keys(CITY_QUARTIERS).map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>{t('multi_service_employees.quartier_label')}</label>
+            <div className="input-with-icon">
+              <span className="ifi-icon" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 21C12 21 5 14.9706 5 10.5C5 7.46243 7.46243 5 10.5 5C13.5376 5 16 7.46243 16 10.5C16 14.9706 12 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </span>
+              <select
+                value={form.quartier}
+                onChange={(e) => setForm({ ...form, quartier: e.target.value })}
+                disabled={!form.city || availableQuartiers.length === 0}
+              >
+                <option value="">
+                  {t('multi_services.quartier_placeholder', 'اختر الحي')}
+                </option>
+                {availableQuartiers.map((q) => (
+                  <option key={q} value={q}>
+                    {q}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div className="form-group full">
-            <label>{t('employees.register.address', 'العنوان')} *</label>
+            <label>{t('employees.register.address', 'العنوان')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -228,7 +300,6 @@ export default function DriverRegister() {
                 type="text" 
                 value={form.address} 
                 onChange={(e) => setForm({...form, address: e.target.value})} 
-                required
                 placeholder={t('employees.register.address_placeholder', 'أدخل العنوان الكامل')}
               />
               <button 

@@ -22,7 +22,8 @@
     "hand_workers": "Travaux Manuels",
     "driver": "Chauffeur",
     "brand_name": "SolutionPourMaintenant",
-    "all_services": "Tous nos services"
+    "all_services": "Tous nos services",
+    "multi_services": "Recherche d'employé"
   },
   "home": {
     "title": "SolutionPourMaintenant",
@@ -263,7 +264,23 @@
     "unexpected_error": "Une erreur inattendue est survenue"
   },
   "employees": {
+    "security": {
+      "expertise": {
+        "guard": "Gardien de sécurité",
+        "supervisor": "Superviseur de sécurité",
+        "camera": "Surveillance caméras"
+      }
+    },
+    "jardinage": {
+      "expertise": {
+        "planting": "Plantation",
+        "pruning": "Taille / élagage",
+        "maintenance": "Entretien des jardins"
+      }
+    },
     "register": {
+      "employee_type": "Type de travail",
+      "select_employee_type": "Sélectionnez le type de travail",
       "join_team": "Rejoignez notre équipe",
       "fill_form": "Veuillez remplir le formulaire ci-dessous",
       "required_fields": "Veuillez remplir les champs requis",
@@ -314,13 +331,6 @@
         "home_nursery": "Garde à domicile",
         "nanny": "Nounou",
         "home_assistant": "Assistante à domicile pour enfant"
-      }
-    },
-    "jardinage": {
-      "expertise": {
-        "planting": "Plantation",
-        "pruning": "Taille",
-        "maintenance": "Entretien de jardin"
       }
     },
     "landing": {
@@ -796,7 +806,9 @@
       "phone": "Téléphone",
       "address": "Adresse",
       "photo": "Photo (optionnel)",
-      "competency": "Domaine de compétence",
+      "competency": "Domaine de compétence (Ménage)",
+      "competency_cuisine": "Domaine de compétence (Cuisine)",
+      "competency_cuisine_multi": "Multi choix (plusieurs cuisines)",
       "available_days": "Jours disponibles",
       "select_competency": "Sélectionner…",
       "phone_placeholder": "Ex: +212 6 12 34 56 78",
@@ -1385,6 +1397,7 @@
     "photo": "Photo de Profil",
     "work_samples": "Échantillons de Travail",
     "bio": "Biographie",
+    "employee_type": "Type de Travail",
     "experience_years": "Années d'Expérience",
     "submit": "S'inscrire",
     "submitting": "Envoi en cours...",
@@ -1395,8 +1408,13 @@
     "password_confirmation_placeholder": "Répétez votre mot de passe",
     "select_category": "Sélectionnez votre spécialité",
     "address_placeholder": "Votre adresse complète",
-    "city_placeholder": "Votre ville",
+    "city_placeholder": "Choisissez la ville",
+    "quartier": "Quartier",
+    "quartier_placeholder": "Choisissez le quartier",
     "bio_placeholder": "Parlez-nous de votre expérience et de vos compétences...",
+    "select_employee_type": "Sélectionnez le type de travail",
+    "employee_type_worker": "Ouvrier",
+    "employee_type_assistant": "Assistant",
     "photo_help": "Photo de profil (optionnel, max 2MB)",
     "work_samples_help": "Photos de vos réalisations (optionnel, max 5 fichiers)",
     "full_name_required": "Le nom complet est requis",
@@ -2105,5 +2123,26 @@
     "error_location": "Veuillez entrer votre adresse",
     "error_submit": "Erreur lors de l'envoi de la réservation. Veuillez réessayer.",
     "error_permission": "Erreur de permission. Veuillez vérifier que la table existe et que les politiques RLS sont correctement configurées."
+  },
+  "multi_services": {
+    "grid_title": "Choisissez le service adapté à vos besoins",
+    "grid_subtitle": "Cliquez sur une carte puis filtrez par ville et quartier pour voir les employés disponibles.",
+    "services_title": "Services disponibles",
+    "service_card_description": "Cliquez pour voir les employés disponibles pour ce service et filtrer par ville et quartier.",
+    "filter_title": "Filtrer par adresse",
+    "filter_subtitle": "Choisissez la ville et le quartier pour afficher les employés inscrits dans ce service uniquement.",
+    "city_label": "Ville",
+    "city_placeholder": "Choisissez la ville",
+    "quartier_label": "Quartier",
+    "quartier_placeholder": "Choisissez le quartier",
+    "work_type_label": "Type de travail",
+    "work_type_placeholder": "Choisissez un type de travail",
+    "no_employees": "Aucun employé correspondant actuellement pour ce service à cette adresse.",
+    "button_details": "Voir les détails",
+    "button_book": "Réserver maintenant"
+  },
+  "multi_service_employees": {
+    "city_label": "Ville",
+    "quartier_label": "Quartier"
   }
 }

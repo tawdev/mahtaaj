@@ -37,6 +37,8 @@ export default function AdminSecurityEmployeesValid({ token, onAuthError }) {
         email: emp.email || '',
         phone: emp.phone || '',
         address: emp.address || '',
+        city: emp.city || '',
+        quartier: emp.quartier || '',
         location: emp.location || '',
         birth_date: emp.birth_date || '',
         age: emp.age || null,

@@ -38,29 +38,37 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 			}
 			
 			// Transform data to match expected format
-			const transformedData = (data || []).map(item => ({
-				id: item.id,
-				first_name: item.first_name || '',
-				last_name: item.last_name || '',
-				full_name: `${item.first_name || ''} ${item.last_name || ''}`.trim() || '-',
-				email: item.email || '-',
-				phone: item.phone || '-',
-				category: item.hand_worker_categories ? {
-					name: item.hand_worker_categories.name || 
-					       item.hand_worker_categories.name_fr || 
-					       item.hand_worker_categories.name_ar || 
-					       item.hand_worker_categories.name_en || '-'
-				} : null,
-				city: item.city || '-',
-				address: item.address || '-',
-				bio: item.bio || '',
-				photo: item.photo || item.photo_url || '',
-				experience_years: item.experience_years || 0,
-				employee_type: item.employee_type || '-',
-				status: item.status === 'active' ? 'approved' : (item.status === 'inactive' ? 'rejected' : (item.status || 'pending')),
-				is_available: item.is_available || false,
-				...item
-			}));
+			const transformedData = (data || []).map(item => {
+				const fullName = `${item.first_name || ''} ${item.last_name || ''}`.trim();
+				const bio = item.bio || '';
+				const shortBio = bio.length > 120 ? `${bio.slice(0, 117)}...` : bio;
+
+				return {
+					id: item.id,
+					first_name: item.first_name || '',
+					last_name: item.last_name || '',
+					full_name: fullName || '-',
+					email: item.email || '-',
+					phone: item.phone || '-',
+					category: item.hand_worker_categories ? {
+						name: item.hand_worker_categories.name || 
+								   item.hand_worker_categories.name_fr || 
+								   item.hand_worker_categories.name_ar || 
+								   item.hand_worker_categories.name_en || '-'
+					} : null,
+					city: item.city || '-',
+					quartier: item.quartier || '-',
+					address: item.address || '-',
+					bio,
+					bio_short: shortBio,
+					photo: item.photo || item.photo_url || '',
+					experience_years: item.experience_years || 0,
+					employee_type: item.employee_type || '-',
+					status: item.status === 'active' ? 'approved' : (item.status === 'inactive' ? 'rejected' : (item.status || 'pending')),
+					is_available: item.is_available || false,
+					...item
+				};
+			});
 			
 			console.log('[AdminHandWorkerEmployees] Loaded registrations:', transformedData.length);
 			setItems(transformedData);
@@ -242,8 +250,10 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 								<th>Téléphone</th>
 								<th>Catégorie</th>
 								<th>Ville</th>
+								<th>Quartier</th>
 								<th>Expérience</th>
 								<th>نوع العامل</th>
+								<th>Bio</th>
 								<th>Statut</th>
 								<th>Actions</th>
 							</tr>
@@ -259,8 +269,10 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 									<td>{emp.phone || '-'}</td>
 									<td>{emp.category?.name || '-'}</td>
 									<td>{emp.city || '-'}</td>
+									<td>{emp.quartier || '-'}</td>
 									<td>{emp.experience_years || 0} ans</td>
 									<td>{emp.employee_type || '-'}</td>
+									<td style={{maxWidth: '260px'}}>{emp.bio_short || '-'}</td>
 									<td>
 										<span className={`handworker-employees-status ${emp.status || 'pending'}`}>
 											{emp.status === 'pending' ? '⏳ En attente' : 
@@ -283,7 +295,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 							))}
 							{filtered.length === 0 && (
 								<tr>
-									<td colSpan={10} className="handworker-employees-empty">Aucune inscription trouvée</td>
+									<td colSpan={12} className="handworker-employees-empty">Aucune inscription trouvée</td>
 								</tr>
 							)}
 						</tbody>

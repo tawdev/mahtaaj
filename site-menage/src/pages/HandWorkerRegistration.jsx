@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { translateHandWorkerCategories } from '../services/handWorkerTranslation';
 import { supabase } from '../lib/supabase';
+import { CITY_QUARTIERS } from '../constants/cities';
 import './HandWorkerRegistration.css';
 
 export default function HandWorkerRegistration() {
@@ -20,6 +21,7 @@ export default function HandWorkerRegistration() {
     category_id: '',
     address: '',
     city: '',
+    quartier: '',
     photo: null,
     work_samples: [],
     bio: '',
@@ -28,7 +30,7 @@ export default function HandWorkerRegistration() {
   });
 
   const [formErrors, setFormErrors] = useState({});
-  const [gettingLocation, setGettingLocation] = useState(false);
+  const [availableQuartiers, setAvailableQuartiers] = useState([]);
 
   useEffect(() => {
     loadCategories();
@@ -43,6 +45,21 @@ export default function HandWorkerRegistration() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i18n.language]);
+
+  // Keep quartiers list in sync with selected city
+  useEffect(() => {
+    if (formData.city && CITY_QUARTIERS[formData.city]) {
+      setAvailableQuartiers(CITY_QUARTIERS[formData.city]);
+      if (!CITY_QUARTIERS[formData.city].includes(formData.quartier)) {
+        setFormData((prev) => ({ ...prev, quartier: '' }));
+      }
+    } else {
+      setAvailableQuartiers([]);
+      if (formData.quartier) {
+        setFormData((prev) => ({ ...prev, quartier: '' }));
+      }
+    }
+  }, [formData.city]);
 
   const loadCategories = async () => {
     try {
@@ -101,95 +118,6 @@ export default function HandWorkerRegistration() {
     }
   };
 
-  const getCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      setError(t('hand_worker_registration.geolocation_not_supported') || 'Geolocation is not supported by your browser');
-      return;
-    }
-
-    setGettingLocation(true);
-    setError('');
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          
-          // استخدام OpenStreetMap Nominatim API لتحويل الإحداثيات إلى عنوان
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=${i18n.language || 'en'}`,
-            {
-              headers: {
-                'User-Agent': 'NettoyageApp/1.0'
-              }
-            }
-          );
-          
-          const data = await response.json();
-          
-          if (data && data.address) {
-            const addressParts = [];
-            
-            // بناء العنوان من بيانات OSM
-            if (data.address.road) addressParts.push(data.address.road);
-            if (data.address.house_number) addressParts.push(data.address.house_number);
-            if (data.address.suburb || data.address.neighbourhood) {
-              addressParts.push(data.address.suburb || data.address.neighbourhood);
-            }
-            if (data.address.city || data.address.town || data.address.village) {
-              addressParts.push(data.address.city || data.address.town || data.address.village);
-            }
-            if (data.address.state || data.address.region) {
-              addressParts.push(data.address.state || data.address.region);
-            }
-            
-            const fullAddress = addressParts.join(', ') || data.display_name || '';
-            
-            if (fullAddress) {
-              setFormData(prev => ({ 
-                ...prev, 
-                address: fullAddress,
-                city: data.address.city || data.address.town || data.address.village || prev.city
-              }));
-            } else {
-              setError(t('hand_worker_registration.location_not_found') || 'Could not determine address from location');
-            }
-          } else {
-            setError(t('hand_worker_registration.location_not_found') || 'Could not determine address from location');
-          }
-        } catch (error) {
-          console.error('Error fetching address:', error);
-          setError(t('hand_worker_registration.location_error') || 'Error fetching location address');
-        } finally {
-          setGettingLocation(false);
-        }
-      },
-      (error) => {
-        console.error('Geolocation error:', error);
-        let errorMessage = t('hand_worker_registration.location_error') || 'Error getting location';
-        
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = t('hand_worker_registration.location_permission_denied') || 'Location permission denied';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = t('hand_worker_registration.location_unavailable') || 'Location information unavailable';
-            break;
-          case error.TIMEOUT:
-            errorMessage = t('hand_worker_registration.location_timeout') || 'Location request timeout';
-            break;
-        }
-        
-        setError(errorMessage);
-        setGettingLocation(false);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
-    );
-  };
 
   const validateForm = () => {
     const errors = {};
@@ -291,6 +219,7 @@ export default function HandWorkerRegistration() {
         category_id: formData.category_id ? parseInt(formData.category_id, 10) : null,
         address: (formData.address || '').trim() || null,
         city: (formData.city || '').trim() || null,
+        quartier: (formData.quartier || '').trim() || null,
         photo: photoUrl || null,
         photo_url: photoUrl || null,
         bio: (formData.bio || '').trim() || null,
@@ -344,6 +273,7 @@ export default function HandWorkerRegistration() {
         category_id: '',
         address: '',
         city: '',
+        quartier: '',
         photo: null,
         work_samples: [],
         bio: '',
@@ -542,9 +472,9 @@ export default function HandWorkerRegistration() {
                 className={formErrors.employee_type ? 'error' : ''}
                 required
               >
-                <option value="">{t('hand_worker_registration.select_employee_type', 'اختر نوع العامل')}</option>
-                <option value="عامل">عامل</option>
-                <option value="مساعد">مساعد</option>
+                <option value="">{t('hand_worker_registration.select_employee_type')}</option>
+                <option value="عامل">{t('hand_worker_registration.employee_type_worker', 'عامل')}</option>
+                <option value="مساعد">{t('hand_worker_registration.employee_type_assistant', 'مساعد')}</option>
               </select>
             </div>
             {formErrors.employee_type && <span className="error-message">{formErrors.employee_type}</span>}
@@ -569,37 +499,6 @@ export default function HandWorkerRegistration() {
             </div>
           </div>
           <div className="form-group">
-            <label>{t('hand_worker_registration.address')}</label>
-            <div className="input-with-icon">
-              <span className="ifi-icon" aria-hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 21C12 21 5 14.9706 5 10.5C5 7.46243 7.46243 5 10.5 5C13.5376 5 16 7.46243 16 10.5C16 14.9706 12 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
-                </svg>
-              </span>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                placeholder={t('hand_worker_registration.address_placeholder')}
-              />
-              <button
-                type="button"
-                className="location-btn"
-                onClick={getCurrentLocation}
-                disabled={gettingLocation}
-                title={t('hand_worker_registration.get_location') || 'Get current location'}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2V4M12 20V22M4 12H2M22 12H20M4.93 4.93L6.34 6.34M17.66 17.66L19.07 19.07M4.93 19.07L6.34 17.66M17.66 6.34L19.07 4.93" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2"/>
-                </svg>
-                {gettingLocation ? t('employee_register.form.locating') : t('employee_register.form.locate')}
-              </button>
-            </div>
-          </div>
-          <div className="form-group">
             <label>{t('hand_worker_registration.city')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
@@ -608,14 +507,43 @@ export default function HandWorkerRegistration() {
                   <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
                 </svg>
               </span>
-              <input
-                type="text"
+              <select
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
-                placeholder={t('hand_worker_registration.city_placeholder')}
-              />
+                className={formErrors.city ? 'error' : ''}
+              >
+                <option value="">{t('hand_worker_registration.city_placeholder')}</option>
+                {Object.keys(CITY_QUARTIERS).map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
             </div>
+            {formErrors.city && <span className="error-message">{formErrors.city}</span>}
+          </div>
+          <div className="form-group">
+            <label>{t('hand_worker_registration.quartier')}</label>
+            <div className="input-with-icon">
+              <span className="ifi-icon" aria-hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 21C12 21 5 14.9706 5 10.5C5 7.46243 7.46243 5 10.5 5C13.5376 5 16 7.46243 16 10.5C16 14.9706 12 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
+                </svg>
+              </span>
+              <select
+                name="quartier"
+                value={formData.quartier}
+                onChange={handleInputChange}
+                disabled={!formData.city || availableQuartiers.length === 0}
+                className={formErrors.quartier ? 'error' : ''}
+              >
+                <option value="">{t('hand_worker_registration.quartier_placeholder')}</option>
+                {availableQuartiers.map(quartier => (
+                  <option key={quartier} value={quartier}>{quartier}</option>
+                ))}
+              </select>
+            </div>
+            {formErrors.quartier && <span className="error-message">{formErrors.quartier}</span>}
           </div>
           <div className="form-group">
             <label>{t('hand_worker_registration.photo')}</label>

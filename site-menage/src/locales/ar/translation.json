@@ -21,7 +21,8 @@
     "gardening": "الحدائق",
     "hand_workers": "الأعمال اليدوية",
     "brand_name": "حل_الوقت_الحالي",
-    "all_services": "جميع خدماتنا"
+    "all_services": "جميع خدماتنا",
+    "multi_services": "البحت عن عامل"
   },
   "home": {
     "title": "حل_الوقت_الحالي",
@@ -820,7 +821,9 @@
       "phone": "رقم الهاتف",
       "address": "العنوان",
       "photo": "الصورة (اختياري)",
-      "competency": "مجال الخبرة",
+      "competency": "مجال الخبرة (التدبير المنزلي)",
+      "competency_cuisine": "مجال الخبرة (المطبخ)",
+      "competency_cuisine_multi": "اختيار متعدد (عدة مطابخ)",
       "available_days": "الأيام المتاحة",
       "select_competency": "اختر…",
       "phone_placeholder": "مثال: +212 6 12 34 56 78",
@@ -1407,6 +1410,7 @@
     "photo": "صورة الملف الشخصي",
     "work_samples": "عينات العمل",
     "bio": "السيرة الذاتية",
+    "employee_type": "نوع العامل",
     "experience_years": "سنوات الخبرة",
     "submit": "تسجيل",
     "submitting": "جاري الإرسال...",
@@ -1419,6 +1423,9 @@
     "address_placeholder": "عنوانك الكامل",
     "city_placeholder": "مدينتك",
     "bio_placeholder": "أخبرنا عن خبرتك ومهاراتك...",
+    "select_employee_type": "اختر نوع العامل",
+    "employee_type_worker": "عامل",
+    "employee_type_assistant": "مساعد",
     "photo_help": "صورة الملف الشخصي (اختياري، حد أقصى 2 ميجابايت)",
     "work_samples_help": "صور من أعمالك (اختياري، حد أقصى 5 ملفات)",
     "full_name_required": "الاسم الكامل مطلوب",
@@ -2127,5 +2134,26 @@
     "error_location": "يرجى إدخال عنوانك",
     "error_submit": "حدث خطأ أثناء إرسال الحجز. يرجى المحاولة مرة أخرى.",
     "error_permission": "خطأ في الصلاحيات. يرجى التحقق من وجود الجدول وأن سياسات RLS محددة بشكل صحيح."
+  },
+  "multi_services": {
+    "grid_title": "اختر الخدمة المناسبة لك",
+    "grid_subtitle": "اضغط على إحدى البطاقات ثم قم بتحديد المدينة والحي لعرض الموظفين المناسبين.",
+    "services_title": "الخدمات المتوفرة",
+    "service_card_description": "اضغط لعرض الموظفين المتاحين لهذه الخدمة مع فلترة حسب المدينة والحي.",
+    "filter_title": "الفلترة حسب العنوان",
+    "filter_subtitle": "اختر المدينة والحي لعرض الموظفين المسجلين في هذه الخدمة فقط.",
+    "city_label": "المدينة",
+    "city_placeholder": "اختر المدينة",
+    "quartier_label": "الحي",
+    "quartier_placeholder": "اختر الحي",
+    "work_type_label": "نوع العمل",
+    "work_type_placeholder": "اختر نوع العمل",
+    "no_employees": "لا يوجد موظفون مطابقون حالياً لهذه الخدمة في هذا العنوان.",
+    "button_details": "عرض التفاصيل",
+    "button_book": "احجز الآن"
+  },
+  "multi_service_employees": {
+    "city_label": "المدينة",
+    "quartier_label": "الحي"
   }
 }

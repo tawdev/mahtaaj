@@ -37,6 +37,8 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
         email: emp.email || '',
         phone: emp.phone || '',
         address: emp.address || '',
+        city: emp.city || '',
+        quartier: emp.quartier || '',
         location: emp.location || '',
         birth_date: emp.birth_date || '',
         age: emp.age || null,
@@ -125,6 +127,8 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
           email: employee.email,
           phone: employee.phone,
           address: employee.address,
+          city: employee.city,
+          quartier: employee.quartier,
           location: employee.location,
           expertise: employee.expertise,
           auto_entrepreneur: employee.auto_entrepreneur,
@@ -230,6 +234,10 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
                 <th>Email</th>
                 <th>Téléphone</th>
                 <th>Ville</th>
+                <th>Quartier</th>
+                <th>Expertise</th>
+                <th>Auto-entrepreneur</th>
+                <th>Dernière expérience</th>
                 <th>Statut</th>
                 <th>Actions</th>
               </tr>
@@ -243,7 +251,11 @@ export default function AdminSecurityEmployees({ token, onAuthError }) {
                     <a href={`mailto:${emp.email}`} className="security-employees-email">{emp.email || '-'}</a>
                   </td>
                   <td>{emp.phone || '-'}</td>
-                  <td>{emp.location || '-'}</td>
+                  <td>{emp.city || '-'}</td>
+                  <td>{emp.quartier || '-'}</td>
+                  <td>{emp.expertise || '-'}</td>
+                  <td>{emp.auto_entrepreneur || '-'}</td>
+                  <td>{emp.last_experience || '-'}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input 

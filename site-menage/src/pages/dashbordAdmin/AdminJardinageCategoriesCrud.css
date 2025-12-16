@@ -287,7 +287,8 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   margin-bottom: 24px;
   max-width: 100%;
-  white-space: nowrap; /* enable horizontal scroll-friendly layout */
+  /* allow normal wrapping inside cells so all information is visible */
+  white-space: normal;
 }
 
 /* Custom scrollbar styling */
@@ -312,9 +313,9 @@
 
 .categories-table {
   width: 100%;
-  min-width: 1200px;
+  /* keep a reasonable minimum width but let table shrink on smaller screens */
+  min-width: 900px;
   border-collapse: collapse;
-  white-space: nowrap; /* keep cells on one line; use scroll instead of wrap */
 }
 
 .categories-table th {
@@ -331,7 +332,8 @@
   padding: 16px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
-  white-space: nowrap;
+  /* allow text to wrap so long titles / descriptions are fully readable */
+  white-space: normal;
 }
 
 .categories-table tr:hover {
@@ -341,14 +343,24 @@
 .category-name {
   font-weight: 600;
   color: #1e293b;
+  /* avoid text looking too large / heavy when there are many languages */
+  font-size: 14px;
 }
 
 .category-description {
   color: #64748b;
   font-size: 14px;
-  white-space: pre-wrap;
+  white-space: normal;
   word-break: break-word;
   line-height: 1.4;
+  max-width: 260px;
+}
+
+.price-cell {
+  font-weight: 600;
+  color: #0f172a;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .category-icon {
@@ -376,8 +388,19 @@
 
 .actions {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   min-width: 120px; /* ensure space for edit/delete */
+}
+
+/* Harmonise la taille des petits boutons d’action (✏️ ⚙️ 🗑️) */
+.actions .btn-sm {
+  width: 10px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px; /* taille lisible pour les icônes emoji */
 }
 
 /* Keep Actions column visible (stick to left) when scrolling horizontally */

@@ -1,0 +1,76 @@
+// Shared list of cities and quartiers used in forms and filters
+// Adjust/extend freely according to your target zones
+
+export const CITY_QUARTIERS = {
+  Casablanca: [
+    'Maarif',
+    'Gauthier',
+    'Oasis',
+    'Ain Diab',
+    'Sidi Maarouf',
+    'Ain Chock',
+    'Derb Sultan',
+    'Bourgogne',
+    'Anfa',
+    'Sidi Bernoussi',
+    'California',
+    'Hay Hassani',
+    'Sbata',
+  ],
+  Rabat: [
+    'Agdal',
+    'Hay Riad',
+    'Centre Ville',
+    'Yacoub El Mansour',
+    'Akkari',
+    'Océan',
+    'Touarga',
+    'Hay Nahda',
+    'Hay El Fath',
+  ],
+  Salé: [
+    'Tabriquet',
+    'Hay Salam',
+    'Bettana',
+    'Laayayda',
+    'Sidi Moussa',
+    'Hay Chmaou',
+    'Hay El Karia',
+  ],
+  Marrakech: [
+    'Gueliz',
+    'Hivernage',
+    'Medina',
+    'Targa',
+    'Sidi Youssef Ben Ali',
+    'Massira',
+    'Daoudiate',
+    'Sidi Ghanem',
+  ],
+  Tanger: [
+    'Malabata',
+    'Iberia',
+    'Marchan',
+    'Boukhalef',
+    'Mzala',
+    'Beleksar',
+    'Charf',
+  ],
+  Fès: [
+    'Ville Nouvelle',
+    'Ancienne Médina',
+    'Narjiss',
+    'Sais',
+    'Ben Debbab',
+    'Mont-Fleuri',
+  ],
+  Meknès: [
+    'Hamria',
+    'Ville Nouvelle',
+    'Sidi Bouzekri',
+    'Toulal',
+    'Marjane',
+  ],
+};
+
+

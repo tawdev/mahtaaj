@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './AdminBebeEmployees.css';
+import { supabase } from '../../lib/supabase';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+// NOTE:
+// Cette version utilise directement Supabase (comme les autres pages admin)
+// au lieu d'appeler l'ancienne API Laravel sur http://localhost:8000.
 
 export default function AdminBebeEmployees({ token, onAuthError }) {
 	const [items, setItems] = useState([]);
@@ -9,28 +12,24 @@ export default function AdminBebeEmployees({ token, onAuthError }) {
 	const [error, setError] = useState('');
 	const [filter, setFilter] = useState('all');
 
-	const getToken = () => token || localStorage.getItem('adminToken');
-
 	const load = async () => {
 		try {
 			setLoading(true);
 			setError('');
-			const authToken = getToken();
-			const res = await fetch(`${API_BASE_URL}/api/admin/bebe-employees`, {
-				headers: {
-					'Authorization': `Bearer ${authToken}`,
-					'Accept': 'application/json'
-				}
-			});
-			if (res.status === 401) {
-				if (onAuthError) onAuthError();
-				throw new Error('Non autorisé');
+
+			const { data, error } = await supabase
+				.from('bebe_employees')
+				.select('*')
+				.order('created_at', { ascending: false });
+
+			if (error) {
+				console.error('[AdminBebeEmployees] Error loading employees:', error);
+				throw new Error(error.message || 'Impossible de charger les employés');
 			}
-			const data = await res.json();
-			if (!res.ok || data?.success === false) throw new Error(data.message || 'Load failed');
-			setItems(data.data || []);
+
+			setItems(Array.isArray(data) ? data : []);
 		} catch (e) {
-			setError(e.message);
+			setError(e.message || 'Erreur de chargement');
 		} finally {
 			setLoading(false);
 		}
@@ -47,63 +46,73 @@ export default function AdminBebeEmployees({ token, onAuthError }) {
 
 	const toggleActive = async (id, next) => {
 		try {
-			const authToken = getToken();
-			const res = await fetch(`${API_BASE_URL}/api/admin/bebe-employees/${id}`, {
-				method: 'PUT',
-				headers: {
-					'Authorization': `Bearer ${authToken}`,
-					'Content-Type': 'application/json',
-					'Accept': 'application/json'
-				},
-				body: JSON.stringify({ is_active: !!next })
-			});
-			if (res.status === 401) { onAuthError && onAuthError(); return; }
-			if (res.ok) setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: !!next } : i));
+			const { error } = await supabase
+				.from('bebe_employees')
+				.update({
+					is_active: !!next,
+					status: next ? 'approved' : 'pending',
+					updated_at: new Date().toISOString()
+				})
+				.eq('id', id);
+
+			if (error) {
+				console.error('[AdminBebeEmployees] Error toggling active:', error);
+				alert(error.message || 'Erreur lors de la mise à jour du statut');
+				return;
+			}
+
+			setItems(prev => prev.map(i => i.id === id ? { ...i, is_active: !!next, status: next ? 'approved' : 'pending' } : i));
 		} catch (e) {
-			console.error('Error toggling active:', e);
+			console.error('[AdminBebeEmployees] Exception toggling active:', e);
+			alert(e.message || 'Erreur lors de la mise à jour du statut');
 		}
 	};
 
 	const remove = async (id) => {
 		if (!window.confirm('Supprimer cet employé ?')) return;
 		try {
-			const authToken = getToken();
-			const res = await fetch(`${API_BASE_URL}/api/admin/bebe-employees/${id}`, {
-				method: 'DELETE',
-				headers: {
-					'Authorization': `Bearer ${authToken}`,
-					'Accept': 'application/json'
-				}
-			});
-			if (res.status === 401) { onAuthError && onAuthError(); return; }
-			if (res.ok) setItems(prev => prev.filter(i => i.id !== id));
+			const { error } = await supabase
+				.from('bebe_employees')
+				.delete()
+				.eq('id', id);
+
+			if (error) {
+				console.error('[AdminBebeEmployees] Error removing employee:', error);
+				alert(error.message || 'Erreur lors de la suppression');
+				return;
+			}
+
+			setItems(prev => prev.filter(i => i.id !== id));
 		} catch (e) {
-			console.error('Error removing employee:', e);
+			console.error('[AdminBebeEmployees] Exception removing employee:', e);
+			alert(e.message || 'Erreur lors de la suppression');
 		}
 	};
 
 	const validateEmployee = async (id) => {
 		try {
-			const authToken = getToken();
-			const res = await fetch(`${API_BASE_URL}/api/admin/bebe-employees-valid`, {
-				method: 'POST',
-				headers: {
-					'Authorization': `Bearer ${authToken}`,
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ employee_id: id })
-			});
-			if (res.status === 401) { onAuthError && onAuthError(); return; }
-			if (!res.ok) {
-				const err = await res.json().catch(()=>({message:'Erreur'}));
-				alert(err.message || 'Validation échouée');
+			// On considère qu'un employé validé est un employé avec status='approved' et is_active=true
+			const { error } = await supabase
+				.from('bebe_employees')
+				.update({
+					status: 'approved',
+					is_active: true,
+					updated_at: new Date().toISOString()
+				})
+				.eq('id', id);
+
+			if (error) {
+				console.error('[AdminBebeEmployees] Error validating employee:', error);
+				alert(error.message || 'Validation échouée');
 				return;
 			}
+
+			// Retirer de la liste "en attente" (comme avant)
 			setItems(prev => prev.filter(i => i.id !== id));
 			alert('Employé validé ✅');
 		} catch (e) {
-			console.error('Validate error', e);
+			console.error('[AdminBebeEmployees] Exception validating employee:', e);
+			alert(e.message || 'Validation échouée');
 		}
 	};
 
@@ -144,6 +153,7 @@ export default function AdminBebeEmployees({ token, onAuthError }) {
 								<th>Téléphone</th>
 								<th>Expertise</th>
 								<th>Ville</th>
+								<th>Quartier</th>
 								<th>Statut</th>
 								<th>Actions</th>
 							</tr>
@@ -158,7 +168,8 @@ export default function AdminBebeEmployees({ token, onAuthError }) {
 									</td>
 									<td>{emp.phone || '-'}</td>
 									<td>{emp.expertise || '-'}</td>
-									<td>{emp.location || '-'}</td>
+									<td>{emp.city || (emp.address ? String(emp.address).split(' - ')[0] : '') || '-'}</td>
+									<td>{emp.quartier || (emp.address && String(emp.address).includes(' - ') ? String(emp.address).split(' - ')[1] : '') || '-'}</td>
 									<td>
 										<div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 											<input 

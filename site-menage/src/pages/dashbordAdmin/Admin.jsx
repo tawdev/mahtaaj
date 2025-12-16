@@ -484,7 +484,7 @@ export default function Admin() {
 
       
 
-      {activeTab === 'dashboard' && (
+      {activeTab === 'dashboard' && !location.pathname.startsWith('/admin/housekeeping') && (
         <DashboardStats 
           token={localStorage.getItem('adminToken')} 
           onAuthError={handleAuthError}
