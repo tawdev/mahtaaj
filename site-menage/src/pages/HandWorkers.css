@@ -242,7 +242,10 @@
 
 /* Avatar icon for multi-service employees cards */
 .hand-workers-page .multi-service-user-avatar {
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 3;
   width: 72px;
   height: 72px;
@@ -267,6 +270,10 @@
   object-position: center;
   display: block;
   transition: transform 0.4s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 
 .hand-workers-page .category-card:hover .category-image {
@@ -1267,6 +1274,6 @@
 /* Desktop: 3 columns */
 @media (min-width: 1025px) {
   .hand-workers-page .categories-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(3, 1fr) !important;
   }
 }

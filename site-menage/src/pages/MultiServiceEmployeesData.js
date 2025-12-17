@@ -1,12 +1,36 @@
 // Shared data for multi-service employees demo pages
 
 export const SERVICES = [
-  { id: 'menage_cuisine', label: '🧹 Ménage et cuisine' },
-  { id: 'securite', label: '🛡️ Sécurité' },
-  { id: 'bebe', label: '👶 Bébé Sitting' },
-  { id: 'jardinage', label: '🌿 Jardinage' },
-  { id: 'travaux_manuels', label: '🛠️ Travaux Manuels' },
-  { id: 'chauffeur', label: '🚗 Chauffeur' },
+  { 
+    id: 'menage_cuisine', 
+    label: '🧹 Ménage et cuisine',
+    image: '/image/serveces/Airbnb1.jpeg'
+  },
+  { 
+    id: 'securite', 
+    label: '🛡️ Sécurité',
+    image: '/image/a_عون_أمن_مغربي_يقف_أم.png'
+  },
+  { 
+    id: 'bebe', 
+    label: '👶 Bébé Sitting',
+    image: '/image/a_مربية_أطفال_مغربية_ت.png'
+  },
+  { 
+    id: 'jardinage', 
+    label: '🌿 Jardinage',
+    image: '/image/b_عامل_بستنة_مغربي_يزر.png'
+  },
+  { 
+    id: 'travaux_manuels', 
+    label: '🛠️ Travaux Manuels',
+    image: '/image/gemini-2.5-flash-image-preview (nano-banana)_a_نجّار_مغربي_يعمل_على.png'
+  },
+  { 
+    id: 'chauffeur', 
+    label: '🚗 Chauffeur',
+    image: '/image/Gemini_Generated_Image_mw2wgwmw2wgwmw2w.png'
+  },
 ];
 
 // Simple mock data – can be replaced later with Supabase queries

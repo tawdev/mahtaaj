@@ -39,7 +39,40 @@ export default function MultiServiceEmployees() {
                 onClick={() => navigate(`/multi-services-employees/${service.id}`)}
               >
                 <div className="category-image-container">
-                  <div className="multi-service-user-avatar">
+                  <img 
+                    src={service.image || '/produitNettoyage.jpg'} 
+                    alt={service.label}
+                    className="category-image"
+                    onError={(e) => {
+                      // Fallback to default images if service image fails
+                      const defaultImages = [
+                        '/produitNettoyage.jpg',
+                        '/nettoyage1.jpg',
+                        '/nettoyage2.jpg',
+                        '/nettoyage3.jpg',
+                        '/canaper.jpg'
+                      ];
+                      const currentSrc = e.target.src;
+                      const currentIndex = defaultImages.findIndex(img => currentSrc.includes(img));
+                      const nextIndex = currentIndex < defaultImages.length - 1 ? currentIndex + 1 : 0;
+                      
+                      // Try next default image
+                      if (currentSrc !== window.location.origin + defaultImages[nextIndex]) {
+                        e.target.src = defaultImages[nextIndex];
+                      } else {
+                        // All images failed, show avatar fallback
+                        e.target.style.display = 'none';
+                        const fallback = e.target.nextElementSibling;
+                        if (fallback) {
+                          fallback.style.display = 'flex';
+                        }
+                      }
+                    }}
+                  />
+                  <div 
+                    className="multi-service-user-avatar"
+                    style={{ display: 'none' }}
+                  >
                     <span>👤</span>
                   </div>
                   <div className="category-name-overlay">
