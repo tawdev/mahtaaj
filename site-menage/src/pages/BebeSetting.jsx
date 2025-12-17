@@ -36,6 +36,7 @@ export default function BebeSetting() {
       const updated = settings.find(s => s.id === selectedService.id);
       if (updated) setSelectedService(updated);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i18n.language]);
 
   // Load first service automatically when categories are loaded
@@ -61,6 +62,7 @@ export default function BebeSetting() {
     if (categories.length > 0) {
       loadFirstServiceAuto();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories]);
 
   // Helper function to get image URL from Supabase Storage
@@ -223,11 +225,6 @@ export default function BebeSetting() {
     setShowServiceDetails(false);
     setSelectedService(null);
     setShowReservationForm(false);
-  };
-
-  const handleServiceClick = (service) => {
-    setSelectedService(service);
-    setShowServiceDetails(true);
   };
 
   const handleReservationSuccess = (data) => {

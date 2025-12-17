@@ -4,7 +4,7 @@ import { createDriverReservation } from '../api-supabase';
 import './BookingDriverForm.css';
 
 export default function BookingDriverForm({ category, onSuccess, onCancel }) {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);

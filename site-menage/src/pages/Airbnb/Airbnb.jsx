@@ -114,6 +114,7 @@ export default function Airbnb() {
     };
 
     loadAirbnb();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getLocalizedText = (item) => {
@@ -240,7 +241,7 @@ export default function Airbnb() {
       </div>
       <div className="airbnb-grid">
         {items.map((item) => {
-          const { name, description } = getLocalizedText(item);
+          const { name } = getLocalizedText(item);
           const clickable = isNettoyageRapide(item) || isNettoyageComplet(item);
           return (
             <article 

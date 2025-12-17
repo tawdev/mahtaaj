@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Home.css';
-import ServiceCard from '../components/ServiceCard';
 import Contact from './Contact';
 import UserRating from '../components/UserRating';
 import { Link, useNavigate } from 'react-router-dom';
@@ -20,13 +19,11 @@ export default function Home() {
   const [currentImage, setCurrentImage] = useState(null);
   const [categoryImages, setCategoryImages] = useState([]); // All images for selected category
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Index for hero slider
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [hiddenButtons, setHiddenButtons] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   
   // Gallery slider state
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   
   // Scroll-to-top button state
@@ -332,7 +329,7 @@ export default function Home() {
     return () => {
       isMounted = false;
     };
-  }, [i18n.language, getImageUrl]);
+  }, [i18n.language, getImageUrl, selectedCategory]);
 
   // Update selectedCategory when language changes to reflect localized names
   useEffect(() => {
@@ -363,7 +360,7 @@ export default function Home() {
         });
       }
     }
-  }, [i18n.language, categories, selectedCategory?.id]);
+  }, [i18n.language, categories, selectedCategory, selectedCategory?.id]);
 
   // Load images for selected category
   useEffect(() => {
@@ -566,7 +563,7 @@ export default function Home() {
       console.log('[Home] Slider: Cleaning up interval');
       clearInterval(interval);
     };
-  }, [galleryImages, categoryImages, categories]);
+  }, [galleryImages, categoryImages, categories, currentImage, currentImageIndex]);
 
   // Update selected category when current image changes
   useEffect(() => {
@@ -604,34 +601,6 @@ export default function Home() {
 
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const nextSlide = () => {
-    if (galleryImages.length > 0) {
-      setCurrentSlide((prev) => (prev + 1) % galleryImages.length);
-    }
-  };
-
-  const prevSlide = () => {
-    if (galleryImages.length > 0) {
-      setCurrentSlide((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
-    }
-  };
-
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
-  };
-
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
-  };
-
-  // Category selection handler - navigates to the category page
-  const handleCategorySelect = (category) => {
-    if (isTransitioning) return;
-    
-    const categoryPath = getCategoryPath(category.name);
-    navigate(categoryPath);
   };
 
   // Auto-rotate through categories - DISABLED: Now buttons navigate to pages instead of changing images
@@ -736,7 +705,7 @@ export default function Home() {
                   <button
                     key={category.id}
                     onClick={() => navigate('/driver')}
-                    className={`service-button category-button ${selectedCategory?.id === category.id ? 'active' : ''} ${hiddenButtons.has(category.id) ? 'fade-out' : 'fade-in'}`}
+                    className={`service-button category-button ${selectedCategory?.id === category.id ? 'active' : ''}`}
                     title={displayName}
                     aria-label={displayName}
                   >
@@ -750,7 +719,7 @@ export default function Home() {
                 <Link
                   key={category.id}
                   to={categoryPath}
-                  className={`service-button category-button ${selectedCategory?.id === category.id ? 'active' : ''} ${hiddenButtons.has(category.id) ? 'fade-out' : 'fade-in'}`}
+                  className={`service-button category-button ${selectedCategory?.id === category.id ? 'active' : ''}`}
                   title={displayName}
                   aria-label={displayName}
                 >

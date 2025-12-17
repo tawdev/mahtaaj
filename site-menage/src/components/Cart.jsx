@@ -18,12 +18,6 @@ const Cart = ({ isOpen, onClose, token }) => {
 
   const formatPrice = (value) => toNumber(value).toFixed(2);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadCartItems();
-    }
-  }, [isOpen]);
-
   const loadCartItems = async () => {
     try {
       setLoading(true);
@@ -85,6 +79,13 @@ const Cart = ({ isOpen, onClose, token }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      loadCartItems();
+    }
+  }, [isOpen]);
 
   const updateQuantity = async (cartItemId, newQuantity) => {
     if (newQuantity <= 0) {

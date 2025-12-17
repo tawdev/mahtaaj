@@ -434,7 +434,7 @@ export async function deleteServiceAdmin(token, id) {
     }
 
     // Check if we have a valid Supabase session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     
     if (!session && !token) {
       console.warn('No Supabase session or token found');
@@ -690,7 +690,7 @@ export async function deleteTypeAdmin(token, id) {
     }
 
     // Check if we have a valid Supabase session
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     
     if (!session && !token) {
       console.warn('[deleteTypeAdmin] No Supabase session or token found');

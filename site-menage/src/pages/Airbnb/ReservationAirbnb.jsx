@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase';
 import './ReservationAirbnb.css';
 
 export default function ReservationAirbnb() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
@@ -129,7 +129,7 @@ export default function ReservationAirbnb() {
       };
 
       // Insert reservation
-      const { data, error: insertError } = await supabase
+      const { error: insertError } = await supabase
         .from('airbnb_reservations')
         .insert([reservationPayload])
         .select()

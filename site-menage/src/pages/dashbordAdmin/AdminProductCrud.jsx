@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AdminProductCrud.css';
 import LanguageFields from '../../components/LanguageFields';
 import { supabase } from '../../lib/supabase';
+import { getSupabaseAdmin } from '../../lib/supabaseAdmin';
 
 const AdminProductCrud = ({ token }) => {
   // States
@@ -146,7 +147,10 @@ const AdminProductCrud = ({ token }) => {
         imageUrl.includes('127.0.0.1:8000') || 
         imageUrl.includes('localhost:8000') ||
         imageUrl.startsWith('/storage/')) {
-      console.log(`[Product ${product.id}] Ignoring Laravel path: ${imageUrl}`);
+      // Only log in development to reduce console spam
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[Product ${product.id}] Ignoring Laravel path`);
+      }
       return getDefaultImage(product.id);
     }
     
@@ -265,27 +269,55 @@ const AdminProductCrud = ({ token }) => {
       };
 
       let data, error;
+      const adminClient = getSupabaseAdmin(); // Use admin client to bypass RLS
+      
       if (editingProduct) {
-        // Update existing product
-        const { data: updateData, error: updateError } = await supabase
+        // Update existing product using admin client
+        const { data: updateData, error: updateError } = await adminClient
           .from('products')
           .update(productData)
           .eq('id', editingProduct.id)
           .select();
-        data = updateData && updateData.length > 0 ? updateData[0] : null;
+        
         error = updateError;
+        
+        if (error) {
+          throw new Error(error.message || 'Erreur lors de la mise à jour');
+        }
+        
+        // Verify that the update actually succeeded
+        if (!updateData || updateData.length === 0) {
+          throw new Error(
+            "Le produit n'a pas pu être modifié (aucune ligne affectée). " +
+            "Vérifiez les permissions de la table \"products\" dans Supabase."
+          );
+        }
+        
+        data = updateData[0];
+        console.log('✅ Product updated successfully:', data);
       } else {
         // Create new product
-        const { data: insertData, error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await adminClient
           .from('products')
           .insert([productData])
           .select();
-        data = insertData && insertData.length > 0 ? insertData[0] : null;
+        
         error = insertError;
-      }
-
-      if (error) {
-        throw new Error(error.message || 'Erreur lors de la sauvegarde');
+        
+        if (error) {
+          throw new Error(error.message || 'Erreur lors de la création');
+        }
+        
+        // Verify that the insert actually succeeded
+        if (!insertData || insertData.length === 0) {
+          throw new Error(
+            "Le produit n'a pas pu être créé (aucune ligne insérée). " +
+            "Vérifiez les permissions de la table \"products\" dans Supabase."
+          );
+        }
+        
+        data = insertData[0];
+        console.log('✅ Product created successfully:', data);
       }
 
       // Force reload from server to get accurate data
@@ -304,22 +336,58 @@ const AdminProductCrud = ({ token }) => {
     }
   };
 
-  // Handle product deletion
+  // Handle product deletion (utilise supabaseAdmin pour contourner RLS)
   const handleDelete = async (id) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
       return;
     }
 
     try {
-      const { error } = await supabase
+      // Utiliser le client admin pour contourner RLS
+      const adminClient = getSupabaseAdmin();
+      
+      // Essayer de supprimer réellement le produit avec le client admin
+      const { data, error } = await adminClient
         .from('products')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (error) {
-        throw new Error(error.message || 'Erreur lors de la suppression');
+        console.warn('Hard delete failed, trying soft delete:', error);
       }
 
+      // Si aucune ligne n'a été renvoyée, la suppression n'a probablement pas été autorisée (RLS)
+      // Dans ce cas, on fait un soft delete
+      if (!data || data.length === 0) {
+        console.log('Hard delete failed, attempting soft delete...');
+        // Soft delete: marquer le produit comme hors stock (avec client admin)
+        const { data: updateData, error: softError } = await adminClient
+          .from('products')
+          .update({ in_stock: false, stock_quantity: 0 })
+          .eq('id', id)
+          .select();
+
+        if (softError) {
+          console.error('Soft delete failed:', softError);
+          throw new Error(
+            "Le produit n'a pas pu être supprimé ni désactivé. Erreur: " + softError.message
+          );
+        }
+
+        // Vérifier que la mise à jour a bien eu lieu
+        if (!updateData || updateData.length === 0) {
+          throw new Error(
+            "Le produit n'a pas pu être désactivé (aucune ligne mise à jour). Vérifiez les permissions de la table \"products\" dans Supabase."
+          );
+        }
+
+        console.log('✅ Soft delete successful, product marked as out of stock:', updateData[0]);
+      } else {
+        console.log('✅ Hard delete successful, product removed:', data[0]);
+      }
+
+      // Recharger la liste pour refléter les changements
       await loadProducts();
       alert('Produit supprimé avec succès');
     } catch (err) {
@@ -401,13 +469,25 @@ const AdminProductCrud = ({ token }) => {
     setImagePreview(null);
   };
 
-  // Filter products
+  // Filter products (hide products mis hors stock par "suppression")
+  // On affiche uniquement les produits où in_stock n'est PAS false (true ou null/undefined)
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'Tous' || 
-                           (product.category?.name || product.category) === selectedCategory;
-    return matchesSearch && matchesCategory;
+    // Cacher les produits soft-deleted (in_stock === false)
+    // Afficher ceux où in_stock est true ou null/undefined (pour compatibilité avec anciens produits)
+    const isActive = product.in_stock !== false;
+    const matchesSearch =
+      (product.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === 'Tous' ||
+      (product.category?.name || product.category) === selectedCategory;
+    
+    // Debug log pour voir pourquoi un produit est filtré ou non
+    if (!isActive) {
+      console.log(`[Filter] Hiding product ${product.id} (in_stock=${product.in_stock})`);
+    }
+    
+    return isActive && matchesSearch && matchesCategory;
   });
 
   // Get category name

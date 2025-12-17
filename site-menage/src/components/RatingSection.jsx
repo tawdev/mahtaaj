@@ -19,6 +19,7 @@ const RatingSection = ({ serviceId, serviceType }) => {
   useEffect(() => {
     loadRatings();
     checkUserRating();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceId]);
 
   const checkUserRating = async () => {

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import './HandWorkerStats.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 export default function HandWorkerStats() {
-  const { t } = useTranslation();
   const [stats, setStats] = useState({
     totalCategories: 0,
     totalWorkers: 0,
@@ -89,7 +87,7 @@ export default function HandWorkerStats() {
 
         // Trouver les noms des catégories
         Object.keys(categoryStats).forEach(categoryId => {
-          const category = categories.find(c => c.id == categoryId);
+          const category = categories.find(c => c.id === Number(categoryId));
           if (category) {
             categoryStats[categoryId].category = category;
           }

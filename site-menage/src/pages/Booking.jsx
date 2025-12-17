@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { postContact, getServices, getTypes, getTypeById, getServiceById, createReservation, getCategoryHouseById, getTypeOptions } from '../api-supabase';
-import PromoCode from '../components/PromoCode';
-import getServiceIcon from '../utils/serviceIcons';
+import { getServices, getTypes, getTypeById, getServiceById, createReservation, getCategoryHouseById, getTypeOptions } from '../api-supabase';
 import './Booking.css';
 
 export default function Booking() {
@@ -28,7 +26,7 @@ export default function Booking() {
   const [typesLoading, setTypesLoading] = useState(false);
   const [typeError, setTypeError] = useState('');
   const [serviceAutoFillError, setServiceAutoFillError] = useState('');
-  const [promo, setPromo] = useState(null); // { code, discount }
+  const [promo] = useState(null); // { code, discount }
   const [extraServices, setExtraServices] = useState([]); // [{title, size, type, details, estimate}]
   const [selectedCategory, setSelectedCategory] = useState(null); // Category House information
   const [selectedTypes, setSelectedTypes] = useState([]); // Selected types from Ménage + cuisine

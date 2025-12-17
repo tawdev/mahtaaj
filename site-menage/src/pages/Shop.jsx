@@ -37,86 +37,61 @@ const getProductImageUrl = (product) => {
     return defaultImages[imageIndex];
   }
   
-  // Old Laravel storage path - extract filename and try to load from Supabase
+  // Old Laravel storage path (ancien backend Laravel)
+  // → On ESSAIE de récupérer l'image depuis Supabase Storage à partir du filename,
+  //   et on NE demande plus jamais directement l'URL Laravel (pour éviter ERR_CONNECTION_REFUSED)
   if (imagePath.includes('/storage/images/products/') || 
       imagePath.includes('127.0.0.1:8000') || 
       imagePath.includes('localhost:8000') ||
       imagePath.startsWith('/storage/')) {
-    console.log('[Shop] Detected Laravel path, extracting filename:', imagePath);
+    console.log('[Shop] Detected legacy Laravel image URL in DB, converting to Supabase:', imagePath);
     
-    // Extract filename from Laravel path
+    // Extraire le filename depuis l'URL Laravel
     let filename = '';
     if (imagePath.includes('/storage/images/products/')) {
       const parts = imagePath.split('/storage/images/products/');
-      filename = parts[parts.length - 1];
-    } else if (imagePath.includes('/products/')) {
-      const parts = imagePath.split('/products/');
       filename = parts[parts.length - 1];
     } else {
       const parts = imagePath.split('/');
       filename = parts[parts.length - 1];
     }
     
-    // Remove query parameters if any
+    // Supprimer les éventuels paramètres de requête
     if (filename.includes('?')) {
       filename = filename.split('?')[0];
     }
     
     if (filename) {
-      // Try to get public URL from Supabase Storage
       try {
         const { data: { publicUrl } } = supabase.storage
           .from('products')
           .getPublicUrl(filename);
         
         if (publicUrl) {
-          // Check if URL is valid (doesn't contain double 'products/')
-          let finalUrl = publicUrl;
-          if (publicUrl.includes('products/products/')) {
-            console.warn('[Shop] ⚠️ Double products/ in URL, fixing:', publicUrl);
-            finalUrl = publicUrl.replace('/products/products/', '/products/');
-            console.log('[Shop] Fixed URL:', finalUrl);
+          // Only log in development
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[Shop] Converted Laravel filename to Supabase URL:', filename);
           }
-          
-          console.log('[Shop] ✅ Generated Supabase URL:', finalUrl, 'from Laravel path:', imagePath);
-          
-          // Note: We return the URL even if file might not exist
-          // The onError handler in the img tag will handle 404 errors
-          return finalUrl;
+          return publicUrl;
         }
       } catch (err) {
-        console.warn('[Shop] Error getting public URL:', err);
+        // Silently fall back to default image
       }
     }
     
-    // If we can't generate URL, return null (will show placeholder)
-    console.warn('[Shop] Could not extract filename from Laravel path:', imagePath);
-    return null;
+    // Si on ne peut pas convertir, on retournera plus bas une image par défaut
   }
   
-  // If it's already an absolute URL (Supabase Storage URLs)
+  // If it's already an absolute URL (Supabase Storage URLs ou autres)
   if (/^https?:\/\//i.test(imagePath)) {
-    // Check if it's a Laravel URL - ignore it
+    // Si c'est encore une URL Laravel, la branch précédente aura déjà essayé de la convertir.
+    // Ici, on garde uniquement les URLs non-Laravel.
     if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000')) {
-      console.log('[Shop] Ignoring Laravel URL:', imagePath);
-      const defaultImages = [
-        '/produitNettoyage.jpg',
-        '/nettoyage1.jpg',
-        '/nettoyage2.jpg',
-        '/nettoyage3.jpg',
-        '/canaper.jpg'
-      ];
-      const imageIndex = (product.id || 0) % defaultImages.length;
-      return defaultImages[imageIndex];
-    }
-    
-    // Supabase Storage URLs - use directly
-    if (imagePath.includes('supabase.co') || imagePath.includes('supabase.in')) {
+      console.warn('[Shop] Ignoring unreachable Laravel URL, falling back to default image:', imagePath);
+      // On laisse continuer vers le fallback plus bas.
+    } else {
       return imagePath;
     }
-    
-    // Other external URLs - use as is
-    return imagePath;
   }
   
   // Supabase Storage path - get public URL
@@ -213,12 +188,29 @@ const ProductImage = ({ product }) => {
     }
     ev.currentTarget.dataset.errorHandled = 'true';
     
-    console.warn('[Shop] Image load error:', {
-      currentSrc: ev.currentTarget.src,
-      originalUrl: imageUrl,
-      productId: product.id,
-      attempt: attemptCount
-    });
+    // Only log error if it's not a Supabase 404 (expected when files aren't uploaded yet)
+    const isSupabase404 = ev.currentTarget.src.includes('supabase.co/storage') || 
+                          ev.currentTarget.src.includes('supabase.in/storage');
+    if (!isSupabase404) {
+      console.warn('[Shop] Image load error:', {
+        currentSrc: ev.currentTarget.src,
+        originalUrl: imageUrl,
+        productId: product.id,
+        attempt: attemptCount
+      });
+    }
+    
+    // If Supabase URL failed, immediately use default image (don't try other defaults)
+    if (isSupabase404 && attemptCount === 0) {
+      setImgSrc(defaultImage);
+      setAttemptCount(1);
+      setTimeout(() => {
+        if (imgRef.current) {
+          imgRef.current.dataset.errorHandled = 'false';
+        }
+      }, 100);
+      return;
+    }
     
     // Try default images if original failed
     if (attemptCount < defaultImages.length - 1) {
@@ -240,7 +232,7 @@ const ProductImage = ({ product }) => {
         placeholder.style.display = 'flex';
       }
     }
-  }, [attemptCount, defaultImages, imageUrl, product.id]);
+  }, [attemptCount, defaultImages, imageUrl, product.id, defaultImage]);
   
   const handleImageLoad = React.useCallback(() => {
     setImageLoaded(true);
@@ -250,10 +242,10 @@ const ProductImage = ({ product }) => {
       imgRef.current.style.opacity = '1';
       imgRef.current.style.visibility = 'visible';
     }
-    console.log('[Shop] ✅ Image loaded successfully:', {
-      src: imgSrc,
-      productId: product.id
-    });
+    // Only log in development and for non-default images
+    if (process.env.NODE_ENV === 'development' && !imgSrc.startsWith('/')) {
+      console.log('[Shop] ✅ Image loaded:', product.id);
+    }
   }, [imgSrc, product.id]);
   
   if (!imageUrl && !defaultImage) {

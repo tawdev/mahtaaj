@@ -1,39 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import './Contact.css';
-import { postContact } from '../api-supabase';
 
 export default function Contact() {
   const { t } = useTranslation();
-  const [submitted, setSubmitted] = useState(false);
-  const [locLoading, setLocLoading] = useState(false);
-  const [locError, setLocError] = useState('');
-  const locationRef = useRef(null);
   
   const backgroundImage = `${process.env.PUBLIC_URL}/canaper.jpg`;
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-    const payload = {
-      firstname: form.firstname.value.trim(),
-      phone: form.phone.value.trim(),
-      location: form.location.value.trim(),
-      service: form.service.value,
-      message: form.message.value.trim(),
-      email: form.email ? form.email.value.trim() : undefined,
-    };
-    try {
-      await postContact(payload);
-      setSubmitted(true);
-    } catch (err) {
-      alert(t('contact.form.submit_error'));
-    }
-  }
 
   return (
     <main 
