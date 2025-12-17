@@ -375,6 +375,42 @@ export default function App() {
             element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
+            path="/admin/housekeeping/reservations/tapis-canapes"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/reservations/piscine"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/reservations/menage-cuisine"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/reservations/menage-complet"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/reservations/lavage-repassage"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/reservations/cuisine"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/reservations/chaussures"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/reservations/bureaux-usine"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
+            path="/admin/housekeeping/reservations/airbnb"
+            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+          />
+          <Route
             path="/admin/product-types"
             element={<PrivateRoute allowedRoles={['admin']} element={<Admin />} />}
           />

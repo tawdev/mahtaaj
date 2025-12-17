@@ -510,7 +510,10 @@ export default function DashboardStats({ token, onAuthError, onCardClick, role }
 
       // Calculer les statistiques des employés
       const pendingEmployees = safeEmployees.filter(e => e.status === 'pending').length;
-      const validatedEmployees = safeEmployees.filter(e => e.status === 'validated').length;
+      // Les employés validés sont ceux avec status 'accepted' ou (status 'active' et is_active === true)
+      const validatedEmployees = safeEmployees.filter(e => {
+        return e.status === 'accepted' || (e.status === 'active' && e.is_active === true);
+      }).length;
 
       // Calculer les statistiques des promotions
       const activePromotions = safePromotions.filter(p => p.is_active).length;

@@ -813,46 +813,48 @@ export default function Home() {
           
           <TousLesServices />
         </section>
-        <section className="about-us" id="about" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>
-          <div className="about-container" data-aos="fade-up" data-aos-delay="100" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>
-            <h2 className="gallery-title" style={{marginBottom: 8, display: 'block', visibility: 'visible', opacity: 1}}>{t('home_page.about.title')}</h2>
-            <div className="gallery-description" style={{maxWidth: 820, margin: '0 auto 16px', display: 'block', visibility: 'visible', opacity: 1}}>
-              <p className="about-tagline" data-aos="fade-up" data-aos-delay="120" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>
+        <section className="about-us" id="about">
+          {/* Section À propos simplifiée pour éviter tout blocage de scroll */}
+          <div className="about-container">
+            <h2 className="gallery-title" style={{ marginBottom: 8 }}>{t('home_page.about.title')}</h2>
+            <div className="gallery-description" style={{ maxWidth: 820, margin: '0 auto 16px' }}>
+              <p className="about-tagline">
                 {t('home_page.about.tagline')}
               </p>
-              <div style={{ display: 'block', visibility: 'visible', opacity: 1 }}>
+              <div>
                 {t('home_page.about.description')}
               </div>
             </div>
             
-            <div className="about-highlights" style={{ display: 'grid', visibility: 'visible', opacity: 1 }}>
-              <div className="about-card" data-aos="fade-up" data-aos-delay="150" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>
-                <div className="icon" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>✅</div>
-                <h3 style={{ display: 'block', visibility: 'visible', opacity: 1 }}>{t('home_page.about.highlights.guaranteed_quality.title')}</h3>
-                <p style={{ display: 'block', visibility: 'visible', opacity: 1 }}>{t('home_page.about.highlights.guaranteed_quality.description')}</p>
+            <div className="about-highlights">
+              <div className="about-card">
+                <div className="icon">✅</div>
+                <h3>{t('home_page.about.highlights.guaranteed_quality.title')}</h3>
+                <p>{t('home_page.about.highlights.guaranteed_quality.description')}</p>
               </div>
-              <div className="about-card" data-aos="fade-up" data-aos-delay="200" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>
-                <div className="icon" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>🧪</div>
-                <h3 style={{ display: 'block', visibility: 'visible', opacity: 1 }}>{t('home_page.about.highlights.ecological_products.title')}</h3>
-                <p style={{ display: 'block', visibility: 'visible', opacity: 1 }}>{t('home_page.about.highlights.ecological_products.description')}</p>
+              <div className="about-card">
+                <div className="icon">🧪</div>
+                <h3>{t('home_page.about.highlights.ecological_products.title')}</h3>
+                <p>{t('home_page.about.highlights.ecological_products.description')}</p>
               </div>
-              <div className="about-card" data-aos="fade-up" data-aos-delay="250" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>
-                <div className="icon" style={{ display: 'block', visibility: 'visible', opacity: 1 }}>⏱️</div>
-                <h3 style={{ display: 'block', visibility: 'visible', opacity: 1 }}>{t('home_page.about.highlights.rapid_intervention.title')}</h3>
-                <p style={{ display: 'block', visibility: 'visible', opacity: 1 }}>{t('home_page.about.highlights.rapid_intervention.description')}</p>
+              <div className="about-card">
+                <div className="icon">⏱️</div>
+                <h3>{t('home_page.about.highlights.rapid_intervention.title')}</h3>
+                <p>{t('home_page.about.highlights.rapid_intervention.description')}</p>
               </div>
             </div>
           </div>
         </section>
         
         <section className="process">
-          <p className="process-eyebrow" data-aos="fade-up" data-aos-delay="100">{t('home_page.process.eyebrow')}</p>
-          <h2 className="process-title" data-aos="fade-up" data-aos-delay="200">{t('home_page.process.title')}</h2>
-          <p className="process-intro" data-aos="fade-up" data-aos-delay="300">
+          {/* Removed AOS animations here to éviter les micro-blocages de scroll sur certaines machines */}
+          <p className="process-eyebrow">{t('home_page.process.eyebrow')}</p>
+          <h2 className="process-title">{t('home_page.process.title')}</h2>
+          <p className="process-intro">
             {t('home_page.process.intro')}
           </p>
           <div className="process-steps">
-            <div className="process-step" data-aos="fade-up" data-aos-delay="400">
+            <div className="process-step">
               <div
                 className="step-photo"
                 style={{ backgroundImage: `url(${(process.env.PUBLIC_URL || '') + '/galerie/' + encodeURIComponent('حجز عبر الإنترنت.jpeg')})` }}
@@ -860,7 +862,7 @@ export default function Home() {
               <div className="step-number">1</div>
               <h3>{t('home_page.process.steps.step1')}</h3>
             </div>
-            <div className="process-step" data-aos="fade-up" data-aos-delay="500">
+            <div className="process-step">
               <div
                 className="step-photo"
                 style={{ backgroundImage: `url(${(process.env.PUBLIC_URL || '') + '/galerie/' + encodeURIComponent('مكالمة مع وكالتنا لمزيد من المعلومات.jpeg')})` }}
@@ -868,7 +870,7 @@ export default function Home() {
               <div className="step-number">2</div>
               <h3>{t('home_page.process.steps.step2')}</h3>
             </div>
-            <div className="process-step" data-aos="fade-up" data-aos-delay="600">
+            <div className="process-step">
               <div
                 className="step-photo"
                 style={{ backgroundImage: `url(${(process.env.PUBLIC_URL || '') + '/galerie/' + encodeURIComponent('استمتع بعرضنا الترويجي.jpeg')})` }}

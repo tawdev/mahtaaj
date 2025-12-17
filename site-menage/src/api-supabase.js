@@ -1270,16 +1270,26 @@ export async function getEmployeesAdmin(token) {
 
 export async function getConfirmedEmployeesAdmin(token) {
   try {
-    // Note: This might need to be adjusted based on your actual table structure
-    // Assuming there's a confirmed_employees table or a status field
-    const { data, error } = await supabase
+    // Load all employees, then filter for confirmed housekeeping employees
+    const { data: allEmployees, error } = await supabase
       .from('employees')
       .select('*')
-      .eq('status', 'confirmed')
-      .order('created_at', { ascending: false });
+      .order('updated_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+
+    // Filter for confirmed housekeeping employees (matching AdminConfirmedEmployeesCrud logic)
+    const confirmedEmployees = Array.isArray(allEmployees) ? allEmployees.filter(emp => {
+      const metadata = emp.metadata || {};
+      const empType = metadata.type;
+      // Include housekeeping employees or employees without type (default to housekeeping)
+      const isHousekeeping = !empType || empType === 'housekeeping' || empType === 'houseKlean';
+      // Must be confirmed/accepted
+      const isConfirmed = emp.status === 'accepted' || (emp.status === 'active' && emp.is_active === true);
+      return isHousekeeping && isConfirmed;
+    }) : [];
+
+    return confirmedEmployees;
   } catch (error) {
     handleApiError(error);
     throw error;

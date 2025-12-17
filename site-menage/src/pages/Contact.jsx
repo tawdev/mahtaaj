@@ -57,7 +57,7 @@ export default function Contact() {
           {t('contact.description')}
         </p>
         <div className="contact-cta">
-          <a href="tel:+33666262106" className="contact-button">06 66 26 21 06</a>
+          <a href="tel:+33666262106" className="contact-button">+212 524308038</a>
         </div>
         {/* <section className="contact-form">
           {submitted ? (

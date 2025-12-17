@@ -51,6 +51,7 @@ import DashboardStats from './DashboardStats';
 import ProductStats from './ProductStats';
 import './Admin.css';
 import AdminSecurityRolesCrud from './AdminSecurityRolesCrud';
+import AdminHousekeepingReservations from './AdminHousekeepingReservations';
 
 export default function Admin() {
   const location = useLocation();
@@ -315,6 +316,29 @@ export default function Admin() {
     return roles.includes(adminData.role);
   };
 
+  // Helper function to navigate to dashboard based on admin role
+  const navigateToDashboard = () => {
+    setActiveTab('dashboard');
+    const role = adminData?.role;
+    
+    if (role === 'adminSecurity') {
+      navigate('/admin/security');
+    } else if (role === 'adminHandWorker') {
+      navigate('/admin/handworker');
+    } else if (role === 'adminHouseKeeping') {
+      navigate('/admin/housekeeping');
+    } else if (role === 'adminBebe') {
+      navigate('/admin/adminBebe');
+    } else if (role === 'adminJardinaje') {
+      navigate('/admin/adminJardinaje');
+    } else if (role === 'adminDriver' || role === 'driver') {
+      navigate('/admin/driver');
+    } else {
+      // Default to main dashboard for admin and other roles
+      navigate('/admin/dashboard');
+    }
+  };
+
   // Handle card clicks from dashboard stats
   const handleCardClick = (cardType) => {
     switch (cardType) {
@@ -468,14 +492,6 @@ export default function Admin() {
           </p>
         </div>
         <div className="admin-kpis">
-          <div className="admin-kpi">
-            <div className="admin-kpi-label">Total</div>
-            <div className="admin-kpi-value">{items.length}</div>
-          </div>
-          <div className="admin-kpi">
-            <div className="admin-kpi-label">Filtrés</div>
-            <div className="admin-kpi-value">{filtered.length}</div>
-          </div>
           <button onClick={handleLogout} className="admin-logout-button">
             Déconnexion
           </button>
@@ -512,7 +528,7 @@ export default function Admin() {
             </div>
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -572,7 +588,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -636,6 +652,60 @@ export default function Admin() {
                   <h3 className="stat-title">Types Ménage</h3>
                 </div>
               </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/tapis-canapes')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Tapis & Canapés</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/piscine')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Piscine</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/menage-cuisine')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Ménage & Cuisine</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/menage-complet')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Ménage Complet</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/lavage-repassage')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Lavage & Repassage</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/cuisine')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Cuisine</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/chaussures')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Chaussures</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/bureaux-usine')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Bureaux & Usine</h3>
+                </div>
+              </div>
+              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/airbnb')}>
+                <div className="stat-icon reservations-icon"></div>
+                <div className="stat-content">
+                  <h3 className="stat-title">Airbnb</h3>
+                </div>
+              </div>
             </div>
           </section>
         </>
@@ -646,7 +716,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -767,12 +837,184 @@ export default function Admin() {
         </>
       )}
 
+      {/* Housekeeping Reservations Sections */}
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/tapis-canapes' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="tapis_canapes_reservations"
+            title="Réservations Tapis & Canapés"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/piscine' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="piscine_reservations"
+            title="Réservations Piscine"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/menage-cuisine' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="menage_cuisine_reservations"
+            title="Réservations Ménage & Cuisine"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/menage-complet' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="menage_complet_reservations"
+            title="Réservations Ménage Complet"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/lavage-repassage' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="lavage_ropassage_reservations"
+            title="Réservations Lavage & Repassage"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/cuisine' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="cuisine_reservations"
+            title="Réservations Cuisine"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/chaussures' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="chaussures_reservations"
+            title="Réservations Chaussures"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/bureaux-usine' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="bureaux_usin_reservations"
+            title="Réservations Bureaux & Usine"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
+      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/airbnb' && (
+        <>
+          <div className="admin-page-header">
+            <button 
+              className="admin-back-to-dashboard"
+              onClick={() => navigate('/admin/housekeeping')}
+            >
+              📊 Statistiques du Site
+            </button>
+          </div>
+          <AdminHousekeepingReservations 
+            tableName="airbnb_reservations"
+            title="Réservations Airbnb"
+            token={localStorage.getItem('adminToken')} 
+            onAuthError={handleAuthError} 
+          />
+        </>
+      )}
+
       {activeTab === 'reservations' && (
         <>
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -786,7 +1028,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -800,7 +1042,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -831,7 +1073,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -845,7 +1087,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -859,7 +1101,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -873,7 +1115,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -887,7 +1129,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -962,7 +1204,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -976,7 +1218,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -990,7 +1232,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1004,7 +1246,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1018,7 +1260,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1032,7 +1274,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1046,7 +1288,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1061,7 +1303,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1117,7 +1359,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1131,7 +1373,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1145,7 +1387,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1159,7 +1401,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1173,7 +1415,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1187,7 +1429,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1202,7 +1444,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1258,7 +1500,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1272,7 +1514,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1286,7 +1528,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1300,7 +1542,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1314,7 +1556,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1328,7 +1570,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1343,7 +1585,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1387,7 +1629,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1401,7 +1643,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1415,7 +1657,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1429,7 +1671,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1443,7 +1685,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1458,7 +1700,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1559,7 +1801,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1573,7 +1815,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>
@@ -1587,7 +1829,7 @@ export default function Admin() {
           <div className="admin-page-header">
             <button 
               className="admin-back-to-dashboard"
-              onClick={() => setActiveTab('dashboard')}
+              onClick={navigateToDashboard}
             >
               📊 Statistiques du Site
             </button>

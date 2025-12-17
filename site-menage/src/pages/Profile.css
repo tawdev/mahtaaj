@@ -290,29 +290,38 @@
 /* Buttons */
 .edit-button {
   padding: 10px 24px;
-  border-radius: 12px;
+  border-radius: 999px;
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid #007bff;
-  background: #007bff;
-  color: white;
+  transition: all 0.25s ease;
+  border: 2px solid #1e293b;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.35);
 }
 
 .edit-button:hover {
-  background: #0056b3;
-  border-color: #0056b3;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  background: linear-gradient(135deg, #111827 0%, #020617 100%);
+  border-color: #020617;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.45);
 }
 
 .edit-button.cancel {
   border-color: #ef4444;
+}
+
+/* Forcer le style du bouton Modifier uniquement sur la page profil,
+   même si d'autres fichiers CSS définissent .edit-button */
+.profile-page .tab-card-header .edit-button {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  color: #ffffff !important;
+  border-color: #1e293b !important;
   background: transparent;
   color: #ef4444;
 }
