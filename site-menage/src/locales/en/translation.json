@@ -20,12 +20,12 @@
     "baby_setting": "Baby Setting",
     "gardening": "Gardening",
     "hand_workers": "Hand Workers",
-    "brand_name": "ForNowSolution",
+    "brand_name": "mahtaaj",
     "all_services": "All our services",
     "multi_services": "Search for worker"
   },
   "home": {
-    "title": "ForNowSolution",
+    "title": "mahtaaj",
     "subtitle": "Your trusted partner for all your cleaning needs.",
     "hero": {
       "title": "Professional Cleaning",
@@ -127,7 +127,7 @@
     "back_to_roles": "← Back to roles",
     "available_agents": "Available agents",
     "chef_de_securite": "Security Manager",
-    "agent_de_surete": "Specialized Security Agent", 
+    "agent_de_surete": "Specialized Security Agent",
     "agent_de_securite": "General Security Agent",
     "superviseur_securite": "Security Team Supervisor",
     "name_not_available": "Name not available",
@@ -384,7 +384,7 @@
     "about": {
       "title": "About us",
       "tagline": "German quality at a Moroccan price",
-      "description": "ForNowSolution is a passionate and versatile team specializing in multiple services: housekeeping, cooking, security, gardening, childcare, handwork, and a curated product shop.\n\nWe operate with professionalism, using eco-friendly products and a keen eye for detail to ensure your comfort and the quality of our work.\n\nOur goal is to provide you with reliable, timely, and top-quality service that meets all your everyday needs.",
+      "description": "mahtaaj is a passionate and versatile team specializing in multiple services: housekeeping, cooking, security, gardening, childcare, handwork, and a curated product shop.\n\nWe operate with professionalism, using eco-friendly products and a keen eye for detail to ensure your comfort and the quality of our work.\n\nOur goal is to provide you with reliable, timely, and top-quality service that meets all your everyday needs.",
       "highlights": {
         "guaranteed_quality": {
           "title": "Guaranteed Quality",
@@ -403,7 +403,7 @@
     "process": {
       "eyebrow": "Your Trust, Our Commitment",
       "title": "All your essential services at your fingertips",
-      "intro": "From housekeeping and cooking to security, gardening, childcare, and handwork — ForNowSolution brings all your essential services to your fingertips.\n\nWith hundreds of satisfied clients, our team has become a trusted name in professional home and lifestyle services.\n\nOur dedication to quality, reliability, and customer satisfaction is what sets us apart.",
+      "intro": "From housekeeping and cooking to security, gardening, childcare, and handwork — mahtaaj brings all your essential services to your fingertips.\n\nWith hundreds of satisfied clients, our team has become a trusted name in professional home and lifestyle services.\n\nOur dedication to quality, reliability, and customer satisfaction is what sets us apart.",
       "steps": {
         "step1": "An online reservation",
         "step2": "A call with our agency for more information",
@@ -412,7 +412,7 @@
     },
     "expertise": {
       "title": "Our Expertise – Your Eco-Friendly Experience",
-      "description": "At ForNowSolution, we bring together professional expertise and ecological responsibility across all our services — from housekeeping, cooking, and security to gardening, childcare, and handwork.\n\nWe use only eco-friendly, biodegradable, and safe products — gentle solutions specially formulated for the health of your family and the well-being of your pets.\n\nBecause taking care of your home also means taking care of the planet.",
+      "description": "At mahtaaj, we bring together professional expertise and ecological responsibility across all our services — from housekeeping, cooking, and security to gardening, childcare, and handwork.\n\nWe use only eco-friendly, biodegradable, and safe products — gentle solutions specially formulated for the health of your family and the well-being of your pets.\n\nBecause taking care of your home also means taking care of the planet.",
       "image_alt": "Ecological cleaning products"
     },
     "gallery_section": {
@@ -528,27 +528,47 @@
       "menage": {
         "name": "menage",
         "description": "Home cleaning service adapted to your daily needs.",
-        "features": ["Dust and floors", "Bathrooms", "Living areas"]
+        "features": [
+          "Dust and floors",
+          "Bathrooms",
+          "Living areas"
+        ]
       },
       "cussin": {
         "name": "cussin",
         "description": "Targeted cleaning for kitchen, work surfaces and appliances.",
-        "features": ["Work surfaces", "Sink and plates", "Appliances (exterior)"]
+        "features": [
+          "Work surfaces",
+          "Sink and plates",
+          "Appliances (exterior)"
+        ]
       },
       "standard": {
         "name": "Standard",
         "description": "Essential service covering common needs, ideal for regular maintenance.",
-        "features": ["Main areas", "Adapted products", "Optimized duration"]
+        "features": [
+          "Main areas",
+          "Adapted products",
+          "Optimized duration"
+        ]
       },
       "premium": {
         "name": "Premium",
         "description": "Extended coverage with careful finishes and increased attention to detail.",
-        "features": ["Extended areas", "Dedicated equipment", "Quality control"]
+        "features": [
+          "Extended areas",
+          "Dedicated equipment",
+          "Quality control"
+        ]
       },
       "deluxe": {
         "name": "Deluxe",
         "description": "Complete experience with deep treatment and personalized options.",
-        "features": ["Deep cleaning", "Specific treatments", "Personalization"]
+        "features": [
+          "Deep cleaning",
+          "Specific treatments",
+          "Personalization"
+        ]
       }
     },
     "menage_cuisine": {
@@ -567,7 +587,7 @@
     "back_to_roles": "← Back to roles",
     "available_agents": "Available agents",
     "chef_de_securite": "Security Manager",
-    "agent_de_surete": "Specialized Security Agent", 
+    "agent_de_surete": "Specialized Security Agent",
     "agent_de_securite": "General Security Agent",
     "superviseur_securite": "Security Team Supervisor",
     "name_not_available": "Name not available",
@@ -629,7 +649,7 @@
     "role_not_selected": "Role not selected"
   },
   "shop_page": {
-    "title": "ForNowSolution Shop",
+    "title": "mahtaaj Shop",
     "subtitle": "Discover our quality professional products and equipment for all your cleaning needs.",
     "loading": "Loading products...",
     "error": "Loading error",

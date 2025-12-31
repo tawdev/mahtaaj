@@ -21,12 +21,12 @@
     "gardening": "Jardinage",
     "hand_workers": "Travaux Manuels",
     "driver": "Chauffeur",
-    "brand_name": "SolutionPourMaintenant",
+    "brand_name": "mahtaaj",
     "all_services": "Tous nos services",
     "multi_services": "Recherche d'employé"
   },
   "home": {
-    "title": "SolutionPourMaintenant",
+    "title": "mahtaaj",
     "subtitle": "Votre partenaire de confiance pour tous vos besoins de nettoyage.",
     "hero": {
       "title": "Nettoyage Professionnel",
@@ -387,7 +387,7 @@
     "about": {
       "title": "À propos de nous",
       "tagline": "Qualité allemande et prix marocain",
-      "description": "ForNowSolution est une équipe passionnée et polyvalente, experte dans plusieurs domaines : ménage, cuisine, sécurité, jardinage, garde d’enfants, travaux manuels et boutique de produits.\n\nNous intervenons avec professionnalisme, en utilisant des produits écologiques et en accordant une attention particulière aux détails pour assurer votre confort et la qualité de nos services.\n\nNotre objectif : vous offrir un service fiable, ponctuel et d’excellente qualité pour répondre à tous vos besoins quotidiens.",
+      "description": "mahtaaj est une équipe passionnée et polyvalente, experte dans plusieurs domaines : ménage, cuisine, sécurité, jardinage, garde d’enfants, travaux manuels et boutique de produits.\n\nNous intervenons avec professionnalisme, en utilisant des produits écologiques et en accordant une attention particulière aux détails pour assurer votre confort et la qualité de nos services.\n\nNotre objectif : vous offrir un service fiable, ponctuel et d’excellente qualité pour répondre à tous vos besoins quotidiens.",
       "highlights": {
         "guaranteed_quality": {
           "title": "Qualité garantie",
@@ -406,7 +406,7 @@
     "process": {
       "eyebrow": "Votre confiance, notre engagement",
       "title": "Tous vos services essentiels à portée de main",
-      "intro": "Du ménage et de la cuisine à la sécurité, au jardinage, à la garde d’enfants et aux travaux manuels — ForNowSolution vous propose tous les services essentiels à portée de main.\n\nAvec des centaines de clients satisfaits, notre équipe est devenue une référence en matière de services domestiques et de bien-être.\n\nNotre engagement envers la qualité, la fiabilité et la satisfaction de nos clients fait toute la différence.",
+      "intro": "Du ménage et de la cuisine à la sécurité, au jardinage, à la garde d’enfants et aux travaux manuels — mahtaaj vous propose tous les services essentiels à portée de main.\n\nAvec des centaines de clients satisfaits, notre équipe est devenue une référence en matière de services domestiques et de bien-être.\n\nNotre engagement envers la qualité, la fiabilité et la satisfaction de nos clients fait toute la différence.",
       "steps": {
         "step1": "Une réservation en ligne",
         "step2": "Un appel avec notre agence pour plus d'informations",
@@ -415,7 +415,7 @@
     },
     "expertise": {
       "title": "Notre savoir-faire – Votre expérience écologique",
-      "description": "Chez ForNowSolution, nous allions professionnalisme et responsabilité écologique dans tous nos services : ménage, cuisine, sécurité, jardinage, garde d’enfants et travaux manuels.\n\nNous utilisons exclusivement des produits respectueux de l’environnement, biodégradables et sûrs — des solutions douces spécialement conçues pour la santé de votre famille et le bien-être de vos animaux de compagnie.\n\nParce que prendre soin de votre maison, c’est aussi prendre soin de la planète.",
+      "description": "Chez mahtaaj, nous allions professionnalisme et responsabilité écologique dans tous nos services : ménage, cuisine, sécurité, jardinage, garde d’enfants et travaux manuels.\n\nNous utilisons exclusivement des produits respectueux de l’environnement, biodégradables et sûrs — des solutions douces spécialement conçues pour la santé de votre famille et le bien-être de vos animaux de compagnie.\n\nParce que prendre soin de votre maison, c’est aussi prendre soin de la planète.",
       "image_alt": "Produits de nettoyage écologiques"
     },
     "gallery_section": {
@@ -632,7 +632,7 @@
     "role_not_selected": "Rôle non sélectionné"
   },
   "shop_page": {
-    "title": "Boutique ForNowSolution",
+    "title": "Boutique mahtaaj",
     "subtitle": "Découvrez nos produits et équipements professionnels de qualité pour tous vos besoins de nettoyage.",
     "loading": "Chargement des produits...",
     "error": "Erreur de chargement",

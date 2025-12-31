@@ -17,10 +17,10 @@ export default function Navbar1() {
       event.preventDefault();
       event.stopPropagation();
     }
-    
+
     // Close dropdown immediately when language is selected
     setIsLangOpen(false);
-    
+
     // Change language after closing dropdown
     try {
       i18n.changeLanguage(lng);
@@ -106,15 +106,15 @@ export default function Navbar1() {
       if (isOpen) {
         const navbar = document.querySelector('.navbar1');
         const drawer = document.querySelector('.navbar1__drawer');
-        
+
         // Check if click is outside navbar and drawer
-        if (navbar && drawer && 
-            !navbar.contains(event.target) && 
-            !drawer.contains(event.target)) {
+        if (navbar && drawer &&
+          !navbar.contains(event.target) &&
+          !drawer.contains(event.target)) {
           closeMenu();
         }
       }
-      
+
       // Close language dropdown when clicking outside (for both mobile and desktop)
       if (isLangOpen) {
         const mobileLangBtn = document.querySelector('.navbar1__mobile-lang-btn');
@@ -122,15 +122,15 @@ export default function Navbar1() {
         const desktopLangBtn = document.querySelector('.lang-btn');
         const desktopLangDropdown = document.querySelector('.navbar1__links .language-switcher-item > div[style*="position"]');
         const desktopLangItem = document.querySelector('.language-switcher-item');
-        
+
         // Check if click is inside any language-related element
-        const clickedInsideMobile = mobileLangBtn?.contains(event.target) || 
-                                   mobileLangDropdown?.contains(event.target);
-        
-        const clickedInsideDesktop = desktopLangBtn?.contains(event.target) || 
-                                    desktopLangDropdown?.contains(event.target) ||
-                                    desktopLangItem?.contains(event.target);
-        
+        const clickedInsideMobile = mobileLangBtn?.contains(event.target) ||
+          mobileLangDropdown?.contains(event.target);
+
+        const clickedInsideDesktop = desktopLangBtn?.contains(event.target) ||
+          desktopLangDropdown?.contains(event.target) ||
+          desktopLangItem?.contains(event.target);
+
         // Close if click is outside both mobile and desktop language elements
         if (!clickedInsideMobile && !clickedInsideDesktop) {
           setIsLangOpen(false);
@@ -141,7 +141,7 @@ export default function Navbar1() {
       if (isLoginDropdownOpen) {
         const loginBtn = event.target.closest('.login-btn');
         const loginDropdown = event.target.closest('.login-dropdown');
-        
+
         if (!loginBtn && !loginDropdown) {
           setIsLoginDropdownOpen(false);
         }
@@ -201,10 +201,10 @@ export default function Navbar1() {
     const lang = i18n.language || 'fr';
     const langCode = lang.split(/[-_]/)[0].toLowerCase();
     const isRTL = langCode === 'ar';
-    
+
     // Set HTML lang attribute
     document.documentElement.setAttribute('lang', langCode);
-    
+
     // Set direction
     document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
     document.documentElement.style.direction = isRTL ? 'rtl' : 'ltr';
@@ -251,19 +251,19 @@ export default function Navbar1() {
           aria-controls="navbar1-drawer"
           onClick={toggleMenu}
         >
-          <span className="bar bar-1"/>
-          <span className="bar bar-2"/>
-          <span className="bar bar-3"/>
+          <span className="bar bar-1" />
+          <span className="bar bar-2" />
+          <span className="bar bar-3" />
         </button>
 
         {/* Logo - first in RTL layout */}
-        <Link 
-          to="/" 
-          className={`navbar1__brand ${isRTL ? 'rtl-brand' : ''}`} 
-          aria-label="SolutionPourMaintenant - Accueil" 
+        <Link
+          to="/"
+          className={`navbar1__brand ${isRTL ? 'rtl-brand' : ''}`}
+          aria-label="mahtaaj - Accueil"
           onClick={closeMenu}
         >
-          <span className="navbar1__title">ForNowSolution</span>
+          <span className="navbar1__title">mahtaaj</span>
         </Link>
 
         {/* Mobile Language Switcher Button - appears only on mobile */}
@@ -276,15 +276,15 @@ export default function Navbar1() {
             aria-expanded={isLangOpen}
             onClick={handleLanguageClick}
           >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="18" 
-              height="18" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
               strokeLinejoin="round"
               className="mobile-lang-globe-icon"
             >
@@ -293,15 +293,15 @@ export default function Navbar1() {
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
             <span className="mobile-lang-code">{getCurrentLangCode()}</span>
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="14" 
-              height="14" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
               strokeLinejoin="round"
               className={`mobile-lang-chevron ${isLangOpen ? 'open' : ''}`}
             >
@@ -326,7 +326,7 @@ export default function Navbar1() {
                   <span className="mobile-lang-option-code">{codeLabel}</span>
                   {i18n.language.startsWith(code) && (
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 6 9 17l-5-5"/>
+                      <path d="M20 6 9 17l-5-5" />
                     </svg>
                   )}
                 </button>
@@ -345,15 +345,15 @@ export default function Navbar1() {
                 {/* Navigation links in normal order */}
                 <li><Link to="/" onClick={closeMenu}>{t('nav.home')}</Link></li>
                 <li><Link to="/tous-les-services" onClick={closeMenu}>{t('nav.all_services')}</Link></li>
-               
+
                 <li><Link to="/shop" onClick={closeMenu}>{t('nav.shop')}</Link></li>
                 <li><Link to="/support" onClick={closeMenu}>الدعم</Link></li>
                 {isLoggedIn && (
                   <li><Link to="/profile" onClick={closeMenu}>{t('nav.profile')}</Link></li>
                 )}
-                
+
                 {/* Icons at the end */}
-                <li className="language-switcher-item" style={{ position:'relative', marginLeft: 'auto', marginRight: '0' }}>
+                <li className="language-switcher-item" style={{ position: 'relative', marginLeft: 'auto', marginRight: '0' }}>
                   <button
                     type="button"
                     className="icon-btn lang-btn"
@@ -362,15 +362,15 @@ export default function Navbar1() {
                     aria-expanded={isLangOpen}
                     onClick={handleLanguageClick}
                   >
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      width="20" 
-                      height="20" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
                       strokeLinejoin="round"
                       className="desktop-lang-globe-icon"
                     >
@@ -380,37 +380,37 @@ export default function Navbar1() {
                     </svg>
                   </button>
                   {isLangOpen && (
-                    <div style={{ 
-                      position:'absolute', 
-                      top:'110%', 
-                      right: 'auto', 
-                      left: 0, 
-                      zIndex:100000,
-                      background:'#fff',
-                      border:'1px solid #e5e7eb',
-                      borderRadius:12,
-                      padding:8,
-                      boxShadow:'0 10px 25px rgba(0,0,0,0.12)'
+                    <div style={{
+                      position: 'absolute',
+                      top: '110%',
+                      right: 'auto',
+                      left: 0,
+                      zIndex: 100000,
+                      background: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: 12,
+                      padding: 8,
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.12)'
                     }}>
-                      <div style={{display:'flex', flexDirection:'column', minWidth:180}}>
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 180 }}>
                         {[
-                          { code:'ar', label:'العربية SA' },
-                          { code:'fr', label:'Français FR' },
-                          { code:'en', label:'English EN' },
-                        ].map(({code,label}) => (
+                          { code: 'ar', label: 'العربية SA' },
+                          { code: 'fr', label: 'Français FR' },
+                          { code: 'en', label: 'English EN' },
+                        ].map(({ code, label }) => (
                           <button key={code}
                             type="button"
                             onClick={(e) => handleChangeLanguage(code, e)}
                             className={`lang-option ${i18n.language.startsWith(code) ? 'active' : ''}`}
                             style={{
-                              display:'flex', alignItems:'center', justifyContent:'space-between',
-                              gap:8, padding:'8px 10px', border:'none', background:'transparent',
-                              cursor:'pointer', borderRadius:8, color:'#0f172a'
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              gap: 8, padding: '8px 10px', border: 'none', background: 'transparent',
+                              cursor: 'pointer', borderRadius: 8, color: '#0f172a'
                             }}
                           >
                             <span>{label}</span>
                             {i18n.language.startsWith(code) && (
-                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                             )}
                           </button>
                         ))}
@@ -431,7 +431,7 @@ export default function Navbar1() {
                       <span className="login-text">{t('nav.login', 'Login')}</span>
                     </button>
                     {isLoginDropdownOpen && (
-                      <div className="login-dropdown" style={{ 
+                      <div className="login-dropdown" style={{
                         position: 'absolute',
                         top: '110%',
                         right: 0,
@@ -486,136 +486,136 @@ export default function Navbar1() {
                 {isLoggedIn && (
                   <li><Link to="/profile" onClick={closeMenu}>{t('nav.profile')}</Link></li>
                 )}
-                
+
                 {/* Language switcher - right side in LTR */}
-                <li className="language-switcher-item" style={{ position:'relative', marginLeft: 'auto', marginRight: '0' }}>
-              <button
-                type="button"
-                className="icon-btn lang-btn"
-                title={t('nav.languages', 'Languages')}
-                aria-label={t('nav.languages', 'Languages')}
-                aria-expanded={isLangOpen}
-                onClick={handleLanguageClick}
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                  className="desktop-lang-globe-icon"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M2 12h20" />
-                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                </svg>
-              </button>
-              {isLangOpen && (
-                <div style={{ 
-                  position:'absolute', 
-                  top:'110%', 
-                  right: isRTL ? 'auto' : 0, 
-                  left: isRTL ? 0 : 'auto', 
-                  zIndex:100000,
-                  background:'#fff',
-                  border:'1px solid #e5e7eb',
-                  borderRadius:12,
-                  padding:8,
-                  boxShadow:'0 10px 25px rgba(0,0,0,0.12)'
-                }}>
-                  <div style={{display:'flex', flexDirection:'column', minWidth:180}}>
-                    {[
-                      { code:'ar', label:'العربية SA' },
-                      { code:'fr', label:'Français FR' },
-                      { code:'en', label:'English EN' },
-                    ].map(({code,label}) => (
-                      <button key={code}
-                        type="button"
-                        onClick={() => handleChangeLanguage(code)}
-                        className={`lang-option ${i18n.language.startsWith(code) ? 'active' : ''}`}
-                        style={{
-                          display:'flex', alignItems:'center', justifyContent:'space-between',
-                          gap:8, padding:'8px 10px', border:'none', background:'transparent',
-                          cursor:'pointer', borderRadius:8, color:'#0f172a'
-                        }}
-                      >
-                        <span>{label}</span>
-                        {i18n.language.startsWith(code) && (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </li>
-            {/* Login/Logout buttons - always on the right side (left in RTL) */}
-            {!isLoggedIn && (
-              <li style={{ marginLeft: isRTL ? '0' : 'auto', marginRight: isRTL ? '8px' : '0', position: 'relative' }}>
-                <button
-                  type="button"
-                  className="icon-btn login-btn login-btn-with-text"
-                  title={t('nav.login')}
-                  aria-label={t('nav.login')}
-                  aria-expanded={isLoginDropdownOpen}
-                  onClick={handleLoginClick}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-in">
-                    <path d="m10 17 5-5-5-5" />
-                    <path d="M15 12H3" />
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                  </svg>
-                  <span className="login-text">{t('nav.login', 'Login')}</span>
-                </button>
-                {isLoginDropdownOpen && (
-                  <div className="login-dropdown" style={{ 
-                    position: 'absolute',
-                    top: '110%',
-                    right: isRTL ? 'auto' : 0,
-                    left: isRTL ? 0 : 'auto',
-                    zIndex: 100000,
-                    background: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: 12,
-                    padding: 8,
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
-                    minWidth: 200
-                  }}>
+                <li className="language-switcher-item" style={{ position: 'relative', marginLeft: 'auto', marginRight: '0' }}>
+                  <button
+                    type="button"
+                    className="icon-btn lang-btn"
+                    title={t('nav.languages', 'Languages')}
+                    aria-label={t('nav.languages', 'Languages')}
+                    aria-expanded={isLangOpen}
+                    onClick={handleLanguageClick}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="desktop-lang-globe-icon"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M2 12h20" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  </button>
+                  {isLangOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '110%',
+                      right: isRTL ? 'auto' : 0,
+                      left: isRTL ? 0 : 'auto',
+                      zIndex: 100000,
+                      background: '#fff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: 12,
+                      padding: 8,
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.12)'
+                    }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 180 }}>
+                        {[
+                          { code: 'ar', label: 'العربية SA' },
+                          { code: 'fr', label: 'Français FR' },
+                          { code: 'en', label: 'English EN' },
+                        ].map(({ code, label }) => (
+                          <button key={code}
+                            type="button"
+                            onClick={() => handleChangeLanguage(code)}
+                            className={`lang-option ${i18n.language.startsWith(code) ? 'active' : ''}`}
+                            style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              gap: 8, padding: '8px 10px', border: 'none', background: 'transparent',
+                              cursor: 'pointer', borderRadius: 8, color: '#0f172a'
+                            }}
+                          >
+                            <span>{label}</span>
+                            {i18n.language.startsWith(code) && (
+                              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </li>
+                {/* Login/Logout buttons - always on the right side (left in RTL) */}
+                {!isLoggedIn && (
+                  <li style={{ marginLeft: isRTL ? '0' : 'auto', marginRight: isRTL ? '8px' : '0', position: 'relative' }}>
                     <button
                       type="button"
-                      onClick={handleLoginAsClient}
-                      className="login-dropdown-option"
+                      className="icon-btn login-btn login-btn-with-text"
+                      title={t('nav.login')}
+                      aria-label={t('nav.login')}
+                      aria-expanded={isLoginDropdownOpen}
+                      onClick={handleLoginClick}
                     >
-                      <span>Login as Client</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-in">
+                        <path d="m10 17 5-5-5-5" />
+                        <path d="M15 12H3" />
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                      </svg>
+                      <span className="login-text">{t('nav.login', 'Login')}</span>
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleLoginForJob}
-                      className="login-dropdown-option"
-                    >
-                      <span>Login for Job</span>
-                    </button>
-                  </div>
+                    {isLoginDropdownOpen && (
+                      <div className="login-dropdown" style={{
+                        position: 'absolute',
+                        top: '110%',
+                        right: isRTL ? 'auto' : 0,
+                        left: isRTL ? 0 : 'auto',
+                        zIndex: 100000,
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 12,
+                        padding: 8,
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                        minWidth: 200
+                      }}>
+                        <button
+                          type="button"
+                          onClick={handleLoginAsClient}
+                          className="login-dropdown-option"
+                        >
+                          <span>Login as Client</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleLoginForJob}
+                          className="login-dropdown-option"
+                        >
+                          <span>Login for Job</span>
+                        </button>
+                      </div>
+                    )}
+                  </li>
                 )}
-              </li>
-            )}
-            {isLoggedIn && (
-              <li style={{ marginLeft: isRTL ? '0' : 'auto', marginRight: isRTL ? '8px' : '0' }}>
-                <button
-                  type="button"
-                  className="icon-btn logout-btn logout-btn-with-text"
-                  title={t('nav.logout')}
-                  aria-label={t('nav.logout')}
-                  onClick={handleLogout}
-                >
-                  <span className="logout-text">{t('nav.logout', 'Logout')}</span>
-                </button>
-              </li>
-            )}
+                {isLoggedIn && (
+                  <li style={{ marginLeft: isRTL ? '0' : 'auto', marginRight: isRTL ? '8px' : '0' }}>
+                    <button
+                      type="button"
+                      className="icon-btn logout-btn logout-btn-with-text"
+                      title={t('nav.logout')}
+                      aria-label={t('nav.logout')}
+                      onClick={handleLogout}
+                    >
+                      <span className="logout-text">{t('nav.logout', 'Logout')}</span>
+                    </button>
+                  </li>
+                )}
               </>
             )}
           </ul>
@@ -629,8 +629,8 @@ export default function Navbar1() {
         aria-modal="true"
       >
         <div className="navbar1__drawer-inner">
-          <div className="navbar1__drawer-header" style={{ 
-            flexDirection: isRTL ? 'row-reverse' : 'row' 
+          <div className="navbar1__drawer-header" style={{
+            flexDirection: isRTL ? 'row-reverse' : 'row'
           }}>
             <h2>{t('nav.menu', 'Menu')}</h2>
             <button
@@ -672,7 +672,7 @@ export default function Navbar1() {
                   <span className="login-text">{t('nav.login', 'Login')}</span>
                 </button>
                 {isLoginDropdownOpen && (
-                  <div className="login-dropdown" style={{ 
+                  <div className="login-dropdown" style={{
                     position: 'absolute',
                     top: '110%',
                     right: isRTL ? 'auto' : 0,
@@ -719,7 +719,7 @@ export default function Navbar1() {
             )}
           </ul>
         </div>
-        <button className="navbar1__backdrop" aria-label="Fermer le menu" onClick={closeMenu}/>
+        <button className="navbar1__backdrop" aria-label="Fermer le menu" onClick={closeMenu} />
       </div>
     </header>
   );
