@@ -17,6 +17,7 @@ export default function Profile() {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedReservation, setSelectedReservation] = useState(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [orderFilter, setOrderFilter] = useState('all');
   const [showPassword, setShowPassword] = useState(false);
@@ -39,10 +40,10 @@ export default function Profile() {
     const loadProfileData = async () => {
       try {
         setIsLoading(true);
-        
+
         // Check Supabase Auth session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
+
         if (sessionError || !session) {
           console.log('[Profile] No session, redirecting to login');
           navigate('/login');
@@ -58,7 +59,7 @@ export default function Profile() {
           name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || '',
           email: session.user.email || ''
         };
-        
+
         setUser(userData);
         setFormData({
           name: userData.name || '',
@@ -74,7 +75,7 @@ export default function Profile() {
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
-        
+
         if (ordersError) {
           console.error('[Profile] Error loading orders:', ordersError);
         } else {
@@ -89,7 +90,7 @@ export default function Profile() {
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
-        
+
         if (reservationsError) {
           console.error('[Profile] Error loading reservations:', reservationsError);
         } else {
@@ -104,7 +105,7 @@ export default function Profile() {
           .select('*')
           .eq('user_id', userId)
           .order('created_at', { ascending: false });
-        
+
         if (securityReservationsError) {
           console.error('[Profile] Error loading security reservations:', securityReservationsError);
         } else {
@@ -121,6 +122,12 @@ export default function Profile() {
 
     loadProfileData();
   }, [navigate, t]);
+
+  // Logout handler
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -166,7 +173,7 @@ export default function Profile() {
     try {
       // Check Supabase Auth session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError || !session) {
         showToast(t('profile.personal_info.messages.connection_error'), 'error');
         navigate('/login');
@@ -210,18 +217,18 @@ export default function Profile() {
       setUser(updatedUser);
       showToast(t('profile.personal_info.messages.profile_updated'), 'success');
       setIsEditing(false);
-      
+
       // Reset password fields
       setFormData(prev => ({
         ...prev,
         password: '',
         password_confirmation: ''
       }));
-      
+
       // Reset password visibility
       setShowPassword(false);
       setShowPasswordConfirmation(false);
-      
+
       console.log('[Profile] Profile updated successfully');
     } catch (error) {
       console.error('[Profile] Exception updating profile:', error);
@@ -239,14 +246,12 @@ export default function Profile() {
 
   // Show reservation details
   const showReservationDetails = (reservation) => {
-    setSelectedOrder(reservation); // Reuse the same modal for reservations
-    setShowOrderModal(true);
+    setSelectedReservation(reservation);
   };
 
   // Show security reservation details
   const showSecurityReservationDetails = (securityReservation) => {
-    setSelectedOrder(securityReservation); // Reuse the same modal for security reservations
-    setShowOrderModal(true);
+    setSelectedReservation(securityReservation);
   };
 
   // Filter orders by status
@@ -291,164 +296,134 @@ export default function Profile() {
   return (
     <div className="profile-page">
       <div className="profile-layout">
-        {/* Sidebar - User Card */}
-        <div className="profile-sidebar">
-          <div className="user-card">
-            <div className="user-avatar">
+        {/* Sidebar - Identity Card */}
+        <aside className="profile-sidebar">
+          <div className="user-card" data-aos="fade-right">
+            <div className="avatar-placeholder">
               {user?.name ? (
-                <div className="avatar-placeholder">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
+                user.name.charAt(0).toUpperCase()
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="avatar-icon">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
               )}
             </div>
             <div className="user-info">
               <h2 className="user-name">{user?.name || t('profile.user.anonymous')}</h2>
               <p className="user-email">{user?.email || ''}</p>
             </div>
+            <div className="sidebar-actions" style={{ marginTop: '24px' }}>
+              <button onClick={handleLogout} className="details-button" style={{ width: '100%', justifyContent: 'center', border: 'none', background: '#fef2f2', color: '#ef4444' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></svg>
+                Déconnexion
+              </button>
+            </div>
           </div>
-        </div>
+        </aside>
 
-        {/* Main Content */}
-        <div className="profile-main">
-          {/* Header */}
-          <div className="profile-header">
+        {/* Main Content Area */}
+        <main className="profile-main">
+          {/* Dashboard Header & Stats */}
+          <header className="dashboard-header" data-aos="fade-down">
             <h1 className="profile-title">{t('profile.title')}</h1>
+
+            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginTop: '24px' }}>
+              <div className="stat-card" style={{ background: 'white', padding: '16px', borderRadius: '12px', boxShadow: 'var(--dash-shadow)', border: '1px solid var(--dash-border)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--dash-text-muted)', textTransform: 'uppercase' }}>Commandes</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: '800', marginTop: '4px' }}>{orders.length}</div>
+              </div>
+              <div className="stat-card" style={{ background: 'white', padding: '16px', borderRadius: '12px', boxShadow: 'var(--dash-shadow)', border: '1px solid var(--dash-border)' }}>
+                <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--dash-text-muted)', textTransform: 'uppercase' }}>Réservations</span>
+                <div style={{ fontSize: '1.5rem', fontWeight: '800', marginTop: '4px' }}>{reservations.length + securityReservations.length}</div>
+              </div>
+            </div>
+          </header>
+
+          {/* Navigation Tabs */}
+          <nav className="profile-tabs" data-aos="fade-up">
+            <button
+              className={`tab-button ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              <span>{t('profile.tabs.personal_info')}</span>
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
+              onClick={() => setActiveTab('orders')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3.5 13 1.5 8h14l1.5-8" /><path d="M3 3h1.5L7 13h10l2.5-10H21" /></svg>
+              <span>{t('profile.tabs.orders')}</span>
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'reservations' ? 'active' : ''}`}
+              onClick={() => setActiveTab('reservations')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+              <span>{t('profile.tabs.reservations')}</span>
+            </button>
+            <button
+              className={`tab-button ${activeTab === 'security-reservations' ? 'active' : ''}`}
+              onClick={() => setActiveTab('security-reservations')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+              <span>Sécurité</span>
+            </button>
+          </nav>
+
+          {/* Success/Error Notifications */}
+          <div className="notifications-container">
+            {successMessage && (
+              <div className="success-message" style={{ marginBottom: '16px' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                {successMessage}
+              </div>
+            )}
+            {errorMessage && (
+              <div className="error-message" style={{ marginBottom: '16px' }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
+                {errorMessage}
+              </div>
+            )}
           </div>
 
-          {/* Tab Navigation */}
-          <div className="profile-tabs">
-          <button 
-            className={`tab-button ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user">
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {t('profile.tabs.personal_info')}
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'orders' ? 'active' : ''}`}
-            onClick={() => setActiveTab('orders')}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/>
-            </svg>
-            {t('profile.tabs.orders')} ({orders.length})
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'reservations' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reservations')}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
-            </svg>
-            {t('profile.tabs.reservations')} ({(reservations && Array.isArray(reservations) ? reservations.length : 0)})
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'security-reservations' ? 'active' : ''}`}
-            onClick={() => setActiveTab('security-reservations')}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              <path d="M9 12l2 2 4-4"/>
-            </svg>
-            {t('profile.tabs.security_reservations')} ({(securityReservations && Array.isArray(securityReservations) ? securityReservations.length : 0)})
-          </button>
-        </div>
-
-          {/* Success/Error Messages */}
-          {successMessage && (
-            <div className="success-message">
-              <span className="success-icon">✅</span>
-              {successMessage}
-            </div>
-          )}
-
-          {errorMessage && (
-            <div className="error-message">
-              <span className="error-icon">⚠️</span>
-              {errorMessage}
-            </div>
-          )}
-
-          {/* Profile Tab */}
-          {activeTab === 'profile' && (
-            <div className="tab-content-card">
-              <div className="tab-card-header">
-                <h2 className="tab-card-title">🧍‍♂️ {t('profile.personal_info.title')}</h2>
-                <button 
-                  type="button"
-                  className={`edit-button ${isEditing ? 'cancel' : 'edit'}`}
-                  onClick={() => {
-                    setIsEditing(!isEditing);
-                    setErrorMessage('');
-                    setSuccessMessage('');
-                    // Reset password fields when canceling
-                    if (isEditing) {
-                      setFormData(prev => ({
-                        ...prev,
-                        password: '',
-                        password_confirmation: ''
-                      }));
-                    }
-                  }}
-                >
-                  {/* Icône + libellé pour rendre le bouton toujours bien visible */}
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
+          {/* Tab Content Cards */}
+          <section className="dashboard-content" data-aos="fade-up">
+            {/* Profile Tab */}
+            {activeTab === 'profile' && (
+              <div className="tab-content-card">
+                <div className="tab-card-header">
+                  <h2 className="tab-card-title">{t('profile.personal_info.title')}</h2>
+                  <button
+                    type="button"
+                    className={`edit-button ${isEditing ? 'cancel' : ''}`}
+                    onClick={() => {
+                      setIsEditing(!isEditing);
+                      setErrorMessage('');
+                      setSuccessMessage('');
+                      if (isEditing) setFormData(prev => ({ ...prev, password: '', password_confirmation: '' }));
+                    }}
                   >
-                    <path
-                      d="M12 20h9"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M16.5 3.5a2.121 2.121 0 0 1 3 3L9 17l-4 1 1-4 10.5-10.5Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <span>
-                    {isEditing ? t('profile.personal_info.cancel') : t('profile.personal_info.edit')}
-                  </span>
-                </button>
-              </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                    <span>{isEditing ? t('profile.personal_info.cancel') : t('profile.personal_info.edit')}</span>
+                  </button>
+                </div>
 
-              <div className="profile-info">
-                {/* Form Fields */}
                 <div className="form-fields">
                   <div className="form-group">
-                    <label htmlFor="name">{t('profile.personal_info.fields.full_name')}</label>
+                    <label>{t('profile.personal_info.fields.full_name')}</label>
                     <input
                       type="text"
-                      id="name"
                       name="name"
                       value={formData.name || ''}
                       onChange={handleInputChange}
                       disabled={!isEditing}
                       className="form-input"
+                      placeholder="Ex: Jean Dupont"
                     />
                   </div>
-
                   <div className="form-group">
-                    <label htmlFor="email">{t('profile.personal_info.fields.email')}</label>
+                    <label>{t('profile.personal_info.fields.email')}</label>
                     <input
                       type="email"
-                      id="email"
                       name="email"
                       value={formData.email || ''}
                       onChange={handleInputChange}
@@ -456,442 +431,218 @@ export default function Profile() {
                       className="form-input"
                     />
                   </div>
-
-                  <div className="form-group">
-                    <label htmlFor="password">{t('profile.personal_info.fields.new_password')}</label>
-                    <div className="password-input-container">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        id="password"
-                        name="password"
-                        value={formData.password || ''}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className="form-input password-input"
-                        placeholder={t('profile.personal_info.fields.password_placeholder')}
-                      />
-                      <button 
-                        type="button" 
-                        className="password-toggle-btn" 
-                        onClick={togglePasswordVisibility} 
-                        tabIndex="-1" 
-                        aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-                        disabled={!isEditing}
-                      >
-                        {showPassword ? (
-                          <svg className="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                          </svg>
-                        ) : (
-                          <svg className="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.05"/>
-                            <path d="M1 1l22 22"/>
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="password_confirmation">{t('profile.personal_info.fields.confirm_password')}</label>
-                    <div className="password-input-container">
-                      <input
-                        type={showPasswordConfirmation ? "text" : "password"}
-                        id="password_confirmation"
-                        name="password_confirmation"
-                        value={formData.password_confirmation || ''}
-                        onChange={handleInputChange}
-                        disabled={!isEditing}
-                        className="form-input password-input"
-                        placeholder={t('profile.personal_info.fields.confirm_password_placeholder')}
-                      />
-                      <button 
-                        type="button" 
-                        className="password-toggle-btn" 
-                        onClick={togglePasswordConfirmationVisibility} 
-                        tabIndex="-1" 
-                        aria-label={showPasswordConfirmation ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-                        disabled={!isEditing}
-                      >
-                        {showPasswordConfirmation ? (
-                          <svg className="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                          </svg>
-                        ) : (
-                          <svg className="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                            <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.05"/>
-                            <path d="M1 1l22 22"/>
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  </div>
                 </div>
 
-                {/* Save Button */}
                 {isEditing && (
-                  <div className="save-section">
-                    <button 
-                      className="save-button"
-                      onClick={handleSaveProfile}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? (
-                        <>
-                          <div className="loading-spinner-small"></div>
-                          {t('profile.personal_info.saving')}
-                        </>
-                      ) : (
-                        <>
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                            <polyline points="17,21 17,13 7,13 7,21"/>
-                            <polyline points="7,3 7,8 15,8"/>
-                          </svg>
-                          {t('profile.personal_info.save')}
-                        </>
-                      )}
+                  <div className="form-fields" style={{ marginTop: '24px' }}>
+                    <div className="form-group">
+                      <label>{t('profile.personal_info.fields.new_password')}</label>
+                      <div className="password-input-container">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          className="form-input"
+                          style={{ width: '100%' }}
+                        />
+                        <button type="button" className="password-toggle-btn" onClick={togglePasswordVisibility}>
+                          {showPassword ? 'Masquer' : 'Afficher'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {isEditing && (
+                  <div className="save-section" style={{ marginTop: '32px', textAlign: 'right' }}>
+                    <button className="save-button" onClick={handleSaveProfile} disabled={isSaving}>
+                      {isSaving ? 'Enregistrement...' : t('profile.personal_info.save')}
                     </button>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Orders Tab */}
-          {activeTab === 'orders' && (
-            <div className="tab-content-card">
-              <div className="tab-card-header">
-                <h2 className="tab-card-title">🧾 {t('profile.orders.title')}</h2>
-                <div className="order-filters">
-                  <select 
-                    value={orderFilter} 
+            {/* Orders Tab */}
+            {activeTab === 'orders' && (
+              <div className="tab-content-card">
+                <div className="tab-card-header">
+                  <h2 className="tab-card-title">{t('profile.orders.title')}</h2>
+                  <select
+                    value={orderFilter}
                     onChange={(e) => setOrderFilter(e.target.value)}
-                    className="filter-select"
+                    className="form-input"
+                    style={{ padding: '8px 12px', fontSize: '0.85rem' }}
                   >
-                    <option value="all">{t('profile.orders.filters.all')}</option>
-                    <option value="pending">{t('profile.orders.filters.pending')}</option>
-                    <option value="processing">{t('profile.orders.filters.processing')}</option>
-                    <option value="shipped">{t('profile.orders.filters.shipped')}</option>
-                    <option value="delivered">{t('profile.orders.filters.delivered')}</option>
-                    <option value="cancelled">{t('profile.orders.filters.cancelled')}</option>
+                    <option value="all">Tous les statuts</option>
+                    <option value="pending">En attente</option>
+                    <option value="delivered">Livré</option>
                   </select>
                 </div>
-              </div>
 
-            {filteredOrders.length === 0 ? (
-              <div className="empty-orders">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                  <path d="M16 11V7a4 4 0 0 0-8 0v4M5 9h14l1 12H4L5 9z"/>
-                </svg>
-                <h3>{t('profile.orders.empty.title')}</h3>
-                <p>{t('profile.orders.empty.message')}</p>
-                <button 
-                  className="shop-button"
-                  onClick={() => navigate('/shop')}
-                >
-                  {t('profile.orders.empty.button')}
-                </button>
-              </div>
-            ) : (
-              <div className="orders-list">
-                {filteredOrders.map((order) => (
-                  <div key={order.id} className="order-card">
-                    <div className="order-header">
-                      <div className="order-info">
-                        <h3>{t('profile.orders.details.order_number')}{order.id}</h3>
-                        <p className="order-date">
-                          {new Date(order.created_at).toLocaleDateString('fr-FR')}
-                        </p>
-                      </div>
-                      <div className="order-status">
-                        <span 
-                          className="status-badge"
-                          style={{ backgroundColor: getStatusColor(order.status) }}
-                        >
-                          {getStatusText(order.status)}
-                        </span>
-                      </div>
+                {filteredOrders.length === 0 ? (
+                  <div className="empty-orders">
+                    <div className="empty-icon-wrapper">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
                     </div>
-                    
-                    <div className="order-details">
-                      <div className="order-items">
-                        <p>{order.items ? order.items.length : 0} produit(s)</p>
-                      </div>
-                      <div className="order-total">
-                        <span className="total-label">{t('profile.orders.details.total')}</span>
-                        <span className="total-amount">{order.total} DH</span>
-                      </div>
-                    </div>
-                    
-                    <div className="order-actions">
-                      <button 
-                        className="details-button"
-                        onClick={() => showOrderDetails(order)}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        {t('profile.orders.details.view_details')}
-                      </button>
-                    </div>
+                    <h3>Pas encore de commande</h3>
+                    <p>Découvrez nos produits pour commencer.</p>
+                    <button className="shop-button" onClick={() => navigate('/shop')}>Boutique</button>
                   </div>
-                ))}
-              </div>
-            )}
-            </div>
-          )}
-
-          {/* Reservations Tab */}
-          {activeTab === 'reservations' && (
-            <div className="tab-content-card">
-              <div className="tab-card-header">
-                <h2 className="tab-card-title">📅 {t('profile.tabs.reservations')}</h2>
-              </div>
-              <p className="reservations-subtitle" style={{ marginTop: '-20px', marginBottom: '24px', color: '#64748b' }}>Services que vous avez réservés</p>
-
-            {reservations.length === 0 ? (
-              <div className="empty-reservations">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                  <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/>
-                </svg>
-                <h3>Aucune réservation</h3>
-                <p>Vous n'avez pas encore fait de réservation</p>
-                <button 
-                  className="services-button"
-                  onClick={() => navigate('/services')}
-                >
-                  Découvrir nos services
-                </button>
-              </div>
-            ) : (
-              <div className="reservations-list">
-                {reservations.map((reservation) => (
-                  <div key={reservation.id} className="reservation-card">
-                    <div className="reservation-header">
-                      <div className="reservation-info">
-                        <h3>Réservation #{reservation.id}</h3>
-                        <p className="reservation-date">
-                          {new Date(reservation.created_at).toLocaleDateString('fr-FR')}
-                        </p>
-                      </div>
-                      <div className="reservation-status">
-                        <span 
-                          className="status-badge"
-                          style={{ backgroundColor: getStatusColor(reservation.status) }}
-                        >
-                          {getStatusText(reservation.status)}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="reservation-details">
-                      <div className="reservation-service">
-                        <p><strong>Service:</strong> {reservation.service || 'Service de nettoyage'}</p>
-                        <p><strong>Type:</strong> {reservation.type || 'Standard'}</p>
-                        {reservation.size && (
-                          <p><strong>Surface:</strong> {reservation.size} m²</p>
-                        )}
-                        {reservation.location && (
-                          <p><strong>Lieu:</strong> {reservation.location}</p>
-                        )}
-                      </div>
-                      <div className="reservation-total">
-                        <span className="total-label">Prix estimé:</span>
-                        <span className="total-amount">{reservation.total_price || 'À calculer'} DH</span>
-                      </div>
-                    </div>
-                    
-                    <div className="reservation-actions">
-                      <button 
-                        className="details-button"
-                        onClick={() => showReservationDetails(reservation)}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        Voir les détails
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            </div>
-          )}
-
-          {/* Security Reservations Tab */}
-          {activeTab === 'security-reservations' && (
-            <div className="tab-content-card">
-              <div className="tab-card-header">
-                <h2 className="tab-card-title">🛡️ {t('profile.tabs.security_reservations')}</h2>
-              </div>
-              <p className="security-reservations-subtitle" style={{ marginTop: '-20px', marginBottom: '24px', color: '#64748b' }}>Services de sécurité que vous avez réservés</p>
-
-            {securityReservations.length === 0 ? (
-              <div className="empty-security-reservations">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  <path d="M9 12l2 2 4-4"/>
-                </svg>
-                <h3>Aucune réservation sécurité</h3>
-                <p>Vous n'avez pas encore fait de réservation pour les services de sécurité</p>
-                <button 
-                  className="security-button"
-                  onClick={() => navigate('/security')}
-                >
-                  Découvrir nos services sécurité
-                </button>
-              </div>
-            ) : (
-              <div className="security-reservations-list">
-                {securityReservations.map((securityReservation) => (
-                  <div key={securityReservation.id} className="security-reservation-card">
-                    <div className="security-reservation-header">
-                      <div className="security-reservation-info">
-                        <h3>Réservation sécurité #{securityReservation.id}</h3>
-                        <p className="security-reservation-date">
-                          {new Date(securityReservation.created_at).toLocaleDateString('fr-FR')}
-                        </p>
-                      </div>
-                      <div className="security-reservation-status">
-                        <span 
-                          className="status-badge"
-                          style={{ backgroundColor: getStatusColor(securityReservation.status) }}
-                        >
-                          {getStatusText(securityReservation.status)}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="security-reservation-details">
-                      <div className="security-reservation-service">
-                        <p><strong>Nom:</strong> {securityReservation.firstname || 'Non spécifié'}</p>
-                        <p><strong>Téléphone:</strong> {securityReservation.phone || 'Non spécifié'}</p>
-                        <p><strong>Lieu:</strong> {securityReservation.location || 'Non spécifié'}</p>
-                        {securityReservation.preferred_date && (
-                          <p><strong>Date préférée:</strong> {new Date(securityReservation.preferred_date).toLocaleDateString('fr-FR')}</p>
-                        )}
-                      </div>
-                      <div className="security-reservation-total">
-                        <span className="total-label">Prix estimé:</span>
-                        <span className="total-amount">{securityReservation.total_price || 'À calculer'} DH</span>
-                      </div>
-                    </div>
-                    
-                    <div className="security-reservation-actions">
-                      <button 
-                        className="details-button"
-                        onClick={() => showSecurityReservationDetails(securityReservation)}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        Voir les détails
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Order Details Modal */}
-      {showOrderModal && selectedOrder && (
-        <div className="modal-overlay" onClick={() => setShowOrderModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{t('profile.modal.order_details')}{selectedOrder.id}</h3>
-              <button 
-                className="modal-close"
-                onClick={() => setShowOrderModal(false)}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            
-            <div className="modal-body">
-              <div className="order-info-grid">
-                <div className="info-item">
-                  <label>{t('profile.orders.details.date')}</label>
-                  <span>{new Date(selectedOrder.created_at).toLocaleDateString('fr-FR')}</span>
-                </div>
-                <div className="info-item">
-                  <label>{t('profile.orders.details.status')}</label>
-                  <span 
-                    className="status-text"
-                    style={{ color: getStatusColor(selectedOrder.status) }}
-                  >
-                    {getStatusText(selectedOrder.status)}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <label>{t('profile.orders.details.total')}</label>
-                  <span className="total-text">{selectedOrder.total} DH</span>
-                </div>
-              </div>
-              
-              {selectedOrder.items && selectedOrder.items.length > 0 && (
-                <div className="order-items-section">
-                  <h4>{t('profile.orders.details.products')}</h4>
-                  <div className="items-list">
-                    {selectedOrder.items.map((item, index) => (
-                      <div key={index} className="item-row">
-                        <div className="item-info">
-                          <span className="item-name">{item.name}</span>
-                          <span className="item-quantity">{t('profile.orders.details.quantity')} {item.quantity}</span>
+                ) : (
+                  <div className="orders-list">
+                    {filteredOrders.map(order => (
+                      <div key={order.id} className="order-card">
+                        <div className="order-header">
+                          <div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--dash-text-muted)' }}>#{order.id}</span>
+                            <div style={{ fontSize: '1rem', fontWeight: '700' }}>{new Date(order.created_at).toLocaleDateString()}</div>
+                          </div>
+                          <span className="status-badge" style={{ backgroundColor: getStatusColor(order.status), color: 'white' }}>
+                            {getStatusText(order.status)}
+                          </span>
                         </div>
-                        <div className="item-price">{item.price} </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontWeight: '600' }}>{order.total} DH</span>
+                          <button onClick={() => showOrderDetails(order)} className="details-button">Détails</button>
+                        </div>
                       </div>
                     ))}
                   </div>
+                )}
+              </div>
+            )}
+
+            {/* Reservations Tab */}
+            {activeTab === 'reservations' && (
+              <div className="tab-content-card">
+                <div className="tab-card-header">
+                  <h2 className="tab-card-title">Mes Réservations</h2>
                 </div>
-              )}
+                {reservations.length === 0 ? (
+                  <div className="empty-orders">
+                    <div className="empty-icon-wrapper">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
+                    </div>
+                    <h3>Aucune réservation</h3>
+                    <p>Réservez un service professionnel dès maintenant.</p>
+                    <button className="shop-button" onClick={() => navigate('/services')}>Voir les services</button>
+                  </div>
+                ) : (
+                  <div className="reservations-list">
+                    {reservations.map(res => (
+                      <div key={res.id} className="reservation-card" onClick={() => showReservationDetails(res)} style={{ cursor: 'pointer' }}>
+                        {/* Simplified reservation card for V2 */}
+                        <div className="order-header">
+                          <div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--dash-text-muted)' }}>#{res.id}</span>
+                            <div style={{ fontSize: '1rem', fontWeight: '700' }}>{res.service || 'Nettoyage'}</div>
+                          </div>
+                          <span className="status-badge" style={{ backgroundColor: getStatusColor(res.status), color: 'white' }}>
+                            {getStatusText(res.status)}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--dash-text-muted)' }}>{new Date(res.created_at).toLocaleDateString()}</span>
+                          <span style={{ fontWeight: '600' }}>{res.total_price} DH</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Security Tab */}
+            {activeTab === 'security-reservations' && (
+              <div className="tab-content-card">
+                <div className="tab-card-header">
+                  <h2 className="tab-card-title">Services Sécurité</h2>
+                </div>
+                {securityReservations.length === 0 ? (
+                  <div className="empty-orders">
+                    <div className="empty-icon-wrapper">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                    </div>
+                    <h3>Aucun service sécurité</h3>
+                    <p>Assurez votre sécurité avec nos experts.</p>
+                    <button className="shop-button" onClick={() => navigate('/security')}>Services Sécurité</button>
+                  </div>
+                ) : (
+                  <div className="security-list">
+                    {securityReservations.map(res => (
+                      <div key={res.id} className="security-reservation-card" onClick={() => showSecurityReservationDetails(res)} style={{ cursor: 'pointer' }}>
+                        <div className="order-header">
+                          <div>
+                            <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--dash-text-muted)' }}>#{res.id}</span>
+                            <div style={{ fontSize: '1rem', fontWeight: '700' }}>{res.service_name || 'Agent Sécurité'}</div>
+                          </div>
+                          <span className="status-badge" style={{ backgroundColor: getStatusColor(res.status), color: 'white' }}>
+                            {getStatusText(res.status)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        </main>
+      </div>
+
+      {/* Details Modal */}
+      {selectedOrder && (
+        <div className="modal-overlay" onClick={() => setSelectedOrder(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ borderRadius: '24px', maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h3>Détails de la commande</h3>
+              <button className="modal-close" onClick={() => setSelectedOrder(null)}>×</button>
+            </div>
+            <div className="modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--dash-text-muted)' }}>ID:</span>
+                  <span style={{ fontWeight: '600' }}>#{selectedOrder.id}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--dash-text-muted)' }}>Total:</span>
+                  <span style={{ fontWeight: '600' }}>{selectedOrder.total} DH</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--dash-text-muted)' }}>Statut:</span>
+                  <span style={{ fontWeight: '600' }}>{getStatusText(selectedOrder.status)}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className={`toast-notification ${toastType}`}>
-          <div className="toast-content">
-            <div className="toast-icon">
-              {toastType === 'success' ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22,4 12,14.01 9,11.01"/>
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="15" y1="9" x2="9" y2="15"/>
-                  <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-              )}
+      {selectedReservation && (
+        <div className="modal-overlay" onClick={() => setSelectedReservation(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ borderRadius: '24px', maxWidth: '500px' }}>
+            <div className="modal-header">
+              <h3>Détails de la réservation</h3>
+              <button className="modal-close" onClick={() => setSelectedReservation(null)}>×</button>
             </div>
-            <span className="toast-message">{toastMessage}</span>
-            <button 
-              className="toast-close"
-              onClick={() => setToastMessage('')}
-              aria-label={t('profile.toast.close')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
+            <div className="modal-body">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--dash-text-muted)' }}>ID:</span>
+                  <span style={{ fontWeight: '600' }}>#{selectedReservation.id}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--dash-text-muted)' }}>Service:</span>
+                  <span style={{ fontWeight: '600' }}>{selectedReservation.service || 'Nettoyage'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--dash-text-muted)' }}>Prix:</span>
+                  <span style={{ fontWeight: '600' }}>{selectedReservation.total_price} DH</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

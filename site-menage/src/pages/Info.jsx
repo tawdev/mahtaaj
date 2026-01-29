@@ -1,111 +1,129 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LuBuilding, LuTarget, LuSparkles, LuUsers, LuLeaf, LuPhone, LuMail, LuClock } from 'react-icons/lu';
 import './Info.css';
 
 export default function Info() {
   const { t } = useTranslation();
-  
+
+  const sections = [
+    {
+      id: 'history',
+      icon: LuBuilding,
+      title: t('info.sections.history.title', 'Notre Histoire'),
+      content: t('info.sections.history.content', 'Fondée avec passion, Mahtaaj est devenue une référence en services à domicile.'),
+      image: '/info-history.png',
+      imageAlt: 'Histoire de Mahtaaj'
+    },
+    {
+      id: 'mission',
+      icon: LuTarget,
+      title: t('info.sections.mission.title', 'Notre Mission'),
+      content: t('info.sections.mission.content', 'Fournir des services exceptionnels qui améliorent votre qualité de vie.'),
+      image: '/info-mission.png',
+      imageAlt: 'Mission de Mahtaaj'
+    },
+    {
+      id: 'values',
+      icon: LuSparkles,
+      title: t('info.sections.values.title', 'Nos Valeurs'),
+      content: (
+        <ul className="values-list">
+          <li><strong>{t('info.sections.values.quality', 'Qualité')}:</strong> {t('info.sections.values.quality_desc', 'Service irréprochable')}</li>
+          <li><strong>{t('info.sections.values.reliability', 'Fiabilité')}:</strong> {t('info.sections.values.reliability_desc', 'Équipe de confiance')}</li>
+          <li><strong>{t('info.sections.values.ecology', 'Écologie')}:</strong> {t('info.sections.values.ecology_desc', 'Respect de l\'environnement')}</li>
+          <li><strong>{t('info.sections.values.innovation', 'Innovation')}:</strong> {t('info.sections.values.innovation_desc', 'Meilleures pratiques')}</li>
+        </ul>
+      ),
+      image: '/info-values.png',
+      imageAlt: 'Valeurs de Mahtaaj'
+    },
+    {
+      id: 'team',
+      icon: LuUsers,
+      title: t('info.sections.team.title', 'Notre Équipe'),
+      content: t('info.sections.team.content', 'Professionnels qualifiés et passionnés par le service.'),
+      image: '/info-team.png',
+      imageAlt: 'Équipe Mahtaaj'
+    },
+    {
+      id: 'ecology',
+      icon: LuLeaf,
+      title: t('info.sections.ecology.title', 'Engagement Écologique'),
+      content: t('info.sections.ecology.content', 'Produits éco-responsables et pratiques durables.'),
+      image: '/info-ecology.png',
+      imageAlt: 'Engagement écologique'
+    },
+    {
+      id: 'contact',
+      icon: LuPhone,
+      title: t('info.sections.contact.title', 'Contact'),
+      content: (
+        <div className="contact-info-grid">
+          <div className="contact-info-item">
+            <LuPhone className="contact-icon-small" />
+            <a href="tel:+212524308038">+212 524 30 80 38</a>
+          </div>
+          <div className="contact-info-item">
+            <LuMail className="contact-icon-small" />
+            <a href="mailto:contact@mahtaaj.com">contact@mahtaaj.com</a>
+          </div>
+          <div className="contact-info-item">
+            <LuClock className="contact-icon-small" />
+            <span>Lun-Sam: 09:00 - 18:00</span>
+          </div>
+        </div>
+      ),
+      image: '/galerie/p1.jpg',
+      imageAlt: 'Contactez-nous'
+    }
+  ];
+
   return (
-    <div className="info-page">
-      <div className="info-container">
-        <header className="info-header">
-          <h1 className="info-title" data-aos="fade-up" data-aos-delay="100">{t('info.title')}</h1>
-          <p className="info-subtitle" data-aos="fade-up" data-aos-delay="200">
-            {t('info.subtitle')}
+    <div className="info-page-alt">
+      <div className="info-container-alt">
+        <header className="info-header-alt" data-aos="fade-up">
+          <h1 className="info-title-alt">{t('info.title', 'À Propos de Nous')}</h1>
+          <p className="info-subtitle-alt">
+            {t('info.subtitle', 'Découvrez notre histoire, mission et valeurs')}
           </p>
         </header>
 
-        <main className="info-content">
-          <section className="info-section" data-aos="fade-up" data-aos-delay="300">
-            <div className="info-card">
-              <div className="info-card-header">
-                <div className="info-icon">🏢</div>
-                <h2>{t('info.sections.history.title')}</h2>
-              </div>
-              <div className="info-card-content">
-                <p>
-                  {t('info.sections.history.content')}
-                </p>
-              </div>
-            </div>
-          </section>
+        <main className="info-sections-alt">
+          {sections.map((section, index) => {
+            const Icon = section.icon;
+            const isReversed = index % 2 !== 0;
 
-          <section className="info-section" data-aos="fade-up" data-aos-delay="400">
-            <div className="info-card">
-              <div className="info-card-header">
-                <div className="info-icon">🎯</div>
-                <h2>{t('info.sections.mission.title')}</h2>
-              </div>
-              <div className="info-card-content">
-                <p>
-                  {t('info.sections.mission.content')}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="info-section" data-aos="fade-up" data-aos-delay="500">
-            <div className="info-card">
-              <div className="info-card-header">
-                <div className="info-icon">✨</div>
-                <h2>{t('info.sections.values.title')}</h2>
-              </div>
-              <div className="info-card-content">
-                <ul className="values-list">
-                  <li><strong>{t('info.sections.values.quality')}:</strong> {t('info.sections.values.quality_desc')}</li>
-                  <li><strong>{t('info.sections.values.reliability')}:</strong> {t('info.sections.values.reliability_desc')}</li>
-                  <li><strong>{t('info.sections.values.ecology')}:</strong> {t('info.sections.values.ecology_desc')}</li>
-                  <li><strong>{t('info.sections.values.innovation')}:</strong> {t('info.sections.values.innovation_desc')}</li>
-                  <li><strong>{t('info.sections.values.customer_service')}:</strong> {t('info.sections.values.customer_service_desc')}</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          <section className="info-section" data-aos="fade-up" data-aos-delay="600">
-            <div className="info-card">
-              <div className="info-card-header">
-                <div className="info-icon">👥</div>
-                <h2>{t('info.sections.team.title')}</h2>
-              </div>
-              <div className="info-card-content">
-                <p>
-                  {t('info.sections.team.content')}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="info-section" data-aos="fade-up" data-aos-delay="700">
-            <div className="info-card">
-              <div className="info-card-header">
-                <div className="info-icon">🌱</div>
-                <h2>{t('info.sections.ecology.title')}</h2>
-              </div>
-              <div className="info-card-content">
-                <p>
-                  {t('info.sections.ecology.content')}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="info-section" data-aos="fade-up" data-aos-delay="800">
-            <div className="info-card">
-              <div className="info-card-header">
-                <div className="info-icon">📞</div>
-                <h2>{t('info.sections.contact.title')}</h2>
-              </div>
-              <div className="info-card-content">
-                <div className="contact-info">
-                  <p><strong>{t('info.sections.contact.phone')}:</strong> <a href="tel:+33666262106">06 66 26 21 06</a></p>
-                  <p><strong>{t('info.sections.contact.email')}:</strong> <a href="mailto:contact@proservices-menage.com">contact@proservices-menage.com</a></p>
-                  <p><strong>{t('info.sections.contact.hours')}:</strong> {t('info.sections.contact.hours_value')}</p>
-                  <p><strong>{t('info.sections.contact.zone')}:</strong> {t('info.sections.contact.zone_value')}</p>
+            return (
+              <section
+                key={section.id}
+                className={`info-row ${isReversed ? 'info-row-reversed' : ''}`}
+                data-aos="fade-up"
+                data-aos-delay={100 * (index + 1)}
+              >
+                <div className="info-card-alt">
+                  <div className="info-card-header-alt">
+                    <div className="info-icon-alt">
+                      <Icon />
+                    </div>
+                    <h2>{section.title}</h2>
+                  </div>
+                  <div className="info-card-content-alt">
+                    {typeof section.content === 'string' ? <p>{section.content}</p> : section.content}
+                  </div>
                 </div>
-              </div>
-            </div>
-          </section>
+
+                <div className="info-image-container">
+                  <img
+                    src={section.image}
+                    alt={section.imageAlt}
+                    className="info-section-image"
+                    loading="lazy"
+                  />
+                </div>
+              </section>
+            );
+          })}
         </main>
       </div>
     </div>

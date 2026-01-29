@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AdminHandWorkerCategoriesCrud.css';
 import LanguageFields from '../../components/LanguageFields';
 import { supabase } from '../../lib/supabase';
-import { getSupabaseAdmin } from '../../lib/supabaseAdmin';
+
 
 export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
   // Resolve preferred UI language (used only for a few labels)
@@ -10,7 +10,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
     try {
       const saved = localStorage.getItem('currentLang') || localStorage.getItem('i18nextLng');
       if (saved) return String(saved).split(/[-_]/)[0].toLowerCase();
-    } catch {}
+    } catch { }
     return 'fr';
   };
   const uiLang = getUiLang();
@@ -40,7 +40,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
   const [imageFile, setImageFile] = useState(null);
 
   // Get admin client for write operations (bypasses RLS)
-  const supabaseAdmin = getSupabaseAdmin();
+
 
   useEffect(() => {
     loadCategories();
@@ -49,12 +49,12 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    
+
     // If it's already a Supabase URL, return it
     if (imagePath.includes('supabase.co/storage')) {
       return imagePath;
     }
-    
+
     // If it's an old Laravel path, extract filename and try to get from Supabase
     if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/') || imagePath.startsWith('/images/') || imagePath.startsWith('/uploads/')) {
       const filename = imagePath.split('/').pop();
@@ -66,7 +66,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       }
       return null;
     }
-    
+
     // If it's just a filename, try to get from Supabase Storage
     if (!imagePath.includes('/') && !imagePath.includes('http')) {
       const { data: { publicUrl } } = supabase.storage
@@ -74,12 +74,12 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         .getPublicUrl(imagePath);
       return publicUrl;
     }
-    
+
     // Return as-is if it's a valid URL
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
+
     return null;
   };
 
@@ -106,15 +106,15 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         alert('Veuillez sélectionner un fichier image valide');
         return;
       }
-      
+
       // Check file size (3MB)
       if (file.size > 3 * 1024 * 1024) {
         alert('La taille du fichier ne doit pas dépasser 3MB');
         return;
       }
-      
+
       setImageFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -141,20 +141,20 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[AdminHandWorkerCategories] Loading categories from Supabase');
-      
+
       const { data, error } = await supabase
         .from('hand_worker_categories')
         .select('*')
         .order('order', { ascending: true });
-      
+
       if (error) {
         console.error('[AdminHandWorkerCategories] Error loading categories:', error);
         setError('Erreur lors du chargement des catégories: ' + error.message);
         return;
       }
-      
+
       console.log('[AdminHandWorkerCategories] Loaded categories:', data?.length || 0);
       setCategories(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -167,26 +167,26 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setError('');
-      
+
       // Ensure base name/description mirror the active language when provided
       // Create payload without id to avoid duplicate key errors
       // Explicitly exclude id from formData
       const { id: formId, ...formDataWithoutId } = formData;
       const payload = { ...formDataWithoutId };
-      
+
       // Double-check: ensure payload doesn't have id
       if ('id' in payload) {
         delete payload.id;
         console.warn('[AdminHandWorkerCategories] Removed id from payload:', formId);
       }
-      
+
       // Remove any auto-generated fields
       delete payload.created_at;
       delete payload.updated_at;
-      
+
       const activeLang = (localStorage.getItem('currentLang') || localStorage.getItem('i18nextLng') || 'fr').split(/[-_]/)[0].toLowerCase();
       if (!payload.name) {
         if (activeLang === 'ar' && payload.name_ar) payload.name = payload.name_ar;
@@ -198,7 +198,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         if (activeLang === 'fr' && payload.description_fr) payload.description = payload.description_fr;
         if (activeLang === 'en' && payload.description_en) payload.description = payload.description_en;
       }
-      
+
       // Convert price_per_day to number (handle empty strings)
       if (payload.price_per_day !== '' && payload.price_per_day !== null && payload.price_per_day !== undefined) {
         payload.price_per_day = parseFloat(payload.price_per_day);
@@ -212,7 +212,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         alert('❌ Le prix par jour est requis');
         return;
       }
-      
+
       // Convert minimum_jours to number (handle empty strings)
       if (payload.minimum_jours !== '' && payload.minimum_jours !== null && payload.minimum_jours !== undefined) {
         payload.minimum_jours = parseInt(payload.minimum_jours);
@@ -226,32 +226,32 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         alert('❌ Le nombre minimum de jours est requis');
         return;
       }
-      
+
       // Ensure order is a number
       if (payload.order !== undefined && payload.order !== null && payload.order !== '') {
         payload.order = parseInt(payload.order) || 0;
       } else {
         payload.order = 0;
       }
-      
+
       // Handle image upload to Supabase Storage if imageFile exists
       let imageUrl = formData.image || '';
-      
+
       if (imageFile) {
         // Check if admin is logged in (adminToken exists)
         const adminToken = localStorage.getItem('adminToken');
         const adminData = localStorage.getItem('adminData');
-        
+
         // Check Supabase Auth session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
+
         // Try to upload image regardless of Supabase Auth session
         // We have a public upload policy that allows uploads without Supabase Auth
         console.log('[AdminHandWorkerCategories] Attempting to upload image to Supabase Storage');
         if (!session) {
           console.log('[AdminHandWorkerCategories] No Supabase Auth session, but trying upload anyway (public policy should allow it)');
         }
-        
+
         // Clean filename: remove special characters and spaces
         const cleanFileName = imageFile.name
           .replace(/[^a-zA-Z0-9.-]/g, '_')
@@ -259,17 +259,17 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
           .toLowerCase();
         const fileName = `hand_worker_category_${Date.now()}_${cleanFileName}`;
         const filePath = fileName;
-        
+
         // Upload to Supabase Storage (employees bucket)
         // Use admin client for upload to bypass RLS
-        const storageClient = supabaseAdmin?.storage || supabase.storage;
+        const storageClient = supabase;
         const { data: uploadData, error: uploadError } = await storageClient
           .from('employees')
           .upload(filePath, imageFile, {
             cacheControl: '3600',
             upsert: false
           });
-        
+
         if (uploadError) {
           console.error('[AdminHandWorkerCategories] Error uploading image:', uploadError);
           // If upload fails, try to use base64 if available
@@ -297,10 +297,10 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
           console.log('[AdminHandWorkerCategories] Image uploaded successfully:', imageUrl);
         }
       }
-      
+
       // Update payload with image URL (can be empty string)
       payload.image = imageUrl || null;
-      
+
       // Clean empty strings to null for optional fields
       if (payload.icon === '') payload.icon = null;
       if (payload.name_ar === '') payload.name_ar = null;
@@ -309,23 +309,23 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       if (payload.description_ar === '') payload.description_ar = null;
       if (payload.description_fr === '') payload.description_fr = null;
       if (payload.description_en === '') payload.description_en = null;
-      
+
       // Ensure is_active is boolean
       payload.is_active = payload.is_active !== undefined ? Boolean(payload.is_active) : true;
-      
-      console.log('[AdminHandWorkerCategories] Submitting category:', { 
-        editing: !!editingCategory, 
-        editingId: editingCategory?.id, 
+
+      console.log('[AdminHandWorkerCategories] Submitting category:', {
+        editing: !!editingCategory,
+        editingId: editingCategory?.id,
         formDataId: formId,
         payloadKeys: Object.keys(payload),
         payloadHasId: 'id' in payload,
-        payload 
+        payload
       });
-      
+
       let data, error;
       // Use admin client for write operations to bypass RLS
-      const writeClient = supabaseAdmin || supabase;
-      
+      const writeClient = supabase;
+
       if (editingCategory && editingCategory.id) {
         // Update existing category (use editingCategory.id, not formData.id)
         console.log('[AdminHandWorkerCategories] Updating category with ID:', editingCategory.id);
@@ -355,9 +355,9 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
           is_active: payload.is_active !== undefined ? payload.is_active : true,
           order: payload.order || 0
         };
-        
+
         console.log('[AdminHandWorkerCategories] Inserting with clean payload:', cleanPayload);
-        
+
         const { data: insertData, error: insertError } = await writeClient
           .from('hand_worker_categories')
           .insert(cleanPayload)
@@ -365,7 +365,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         data = insertData;
         error = insertError;
       }
-      
+
       if (error) {
         console.error('[AdminHandWorkerCategories] Error saving category:', error);
         const errorMessage = error.message || 'Erreur inconnue';
@@ -373,14 +373,14 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         alert(`❌ Échec de la sauvegarde: ${errorMessage}`);
         return;
       }
-      
+
       if (!data || (Array.isArray(data) && data.length === 0)) {
         console.error('[AdminHandWorkerCategories] No data returned after save');
         setError('Aucune donnée retournée après la sauvegarde');
         alert('❌ Aucune donnée retournée après la sauvegarde');
         return;
       }
-      
+
       console.log('[AdminHandWorkerCategories] Category saved successfully:', data);
       await loadCategories();
       resetForm();
@@ -401,14 +401,14 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       alert('❌ Erreur: Catégorie invalide');
       return;
     }
-    
+
     console.log('[AdminHandWorkerCategories] Editing category:', category);
     setEditingCategory(category);
     setError('');
-    
+
     const imagePath = category.image || '';
     const imageUrl = imagePath ? getImageUrl(imagePath) : '';
-    
+
     setFormData({
       name: category.name || '',
       name_ar: category.name_ar || '',
@@ -425,7 +425,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       is_active: category.is_active !== undefined ? category.is_active : true,
       order: category.order || 0
     });
-    
+
     setImagePreview(imageUrl || imagePath || null);
     setImageFile(null);
     setShowForm(true);
@@ -445,29 +445,29 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
     try {
       setError('');
       console.log('[AdminHandWorkerCategories] Deleting category:', id);
-      
+
       // First check if category exists
       const { data: categoryData, error: checkError } = await supabase
         .from('hand_worker_categories')
         .select('id, name')
         .eq('id', id)
         .single();
-      
+
       if (checkError || !categoryData) {
         console.error('[AdminHandWorkerCategories] Category not found:', checkError);
         setError('Catégorie non trouvée');
         alert('❌ Catégorie non trouvée');
         return;
       }
-      
+
       // Delete the category
       // Use admin client for delete operation to bypass RLS
-      const writeClient = supabaseAdmin || supabase;
+      const writeClient = supabase;
       const { error } = await writeClient
         .from('hand_worker_categories')
         .delete()
         .eq('id', id);
-      
+
       if (error) {
         console.error('[AdminHandWorkerCategories] Error deleting category:', error);
         const errorMessage = error.message || 'Erreur inconnue';
@@ -475,7 +475,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         alert('❌ Erreur lors de la suppression: ' + errorMessage);
         return;
       }
-      
+
       console.log('[AdminHandWorkerCategories] Category deleted successfully');
       await loadCategories();
       alert('✔️ Catégorie supprimée avec succès');
@@ -522,7 +522,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
     <div className="admin-hand-worker-categories-crud">
       <div className="admin-header">
         <h2>Gestion des Catégories Travaux Manuels</h2>
-        <button 
+        <button
           className="add-button"
           onClick={() => {
             resetForm();
@@ -533,45 +533,7 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
         </button>
       </div>
 
-      {!supabaseAdmin && (
-        <div className="warning-message" style={{
-          backgroundColor: '#fff3cd',
-          border: '1px solid #ffc107',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px',
-          color: '#856404',
-          lineHeight: '1.6'
-        }}>
-          <strong>⚠️ تحذير: Service Role Key غير معرّف</strong>
-          <br />
-          <p style={{ margin: '10px 0' }}>
-            عمليات الحفظ والتعديل قد تفشل بسبب RLS (Row Level Security).
-          </p>
-          <div style={{ marginTop: '10px', fontSize: '14px' }}>
-            <strong>الحل:</strong>
-            <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
-              <li>افتح Supabase Dashboard</li>
-              <li>اذهب إلى <code>Settings → API</code></li>
-              <li>انسخ <code>service_role</code> key</li>
-              <li>أنشئ ملف <code>.env</code> في مجلد <code>site-menage</code></li>
-              <li>أضف السطر التالي:
-                <pre style={{ 
-                  backgroundColor: '#f8f9fa', 
-                  padding: '8px', 
-                  borderRadius: '4px', 
-                  marginTop: '5px',
-                  fontSize: '12px',
-                  overflow: 'auto'
-                }}>
-REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
-                </pre>
-              </li>
-              <li>أعد تشغيل التطبيق (<code>npm start</code>)</li>
-            </ol>
-          </div>
-        </div>
-      )}
+
 
       {showForm && (
         <div className="form-overlay">
@@ -601,7 +563,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                 <input
                   type="text"
                   value={formData.icon}
-                  onChange={(e) => setFormData({...formData, icon: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                   placeholder="fas fa-hammer"
                 />
               </div>
@@ -613,7 +575,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                     <input
                       type="text"
                       value={formData.image}
-                      onChange={(e) => setFormData({...formData, image: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                       placeholder="URL de l'image ou téléchargez un fichier"
                       className="image-url-input"
                     />
@@ -667,7 +629,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                     step="0.01"
                     min="0"
                     value={formData.price_per_day}
-                    onChange={(e) => setFormData({...formData, price_per_day: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, price_per_day: e.target.value })}
                     required
                   />
                 </div>
@@ -678,7 +640,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                     type="number"
                     min="1"
                     value={formData.minimum_jours}
-                    onChange={(e) => setFormData({...formData, minimum_jours: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, minimum_jours: e.target.value })}
                     required
                   />
                 </div>
@@ -689,7 +651,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                   <input
                     type="checkbox"
                     checked={formData.is_active}
-                    onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                   />
                   Actif
                 </label>
@@ -724,13 +686,13 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                     )}
                   </div>
                   <div className="category-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <button 
+                    <button
                       className="edit-button"
                       onClick={() => handleEdit(category)}
                       title="Modifier cette catégorie"
-                      style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: '6px',
                         background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                         color: 'white',
@@ -745,13 +707,13 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                       <span className="button-icon">✏️</span>
                       <span className="button-text">Modifier</span>
                     </button>
-                    <button 
+                    <button
                       className="delete-button"
                       onClick={() => handleDelete(category.id)}
                       title="Supprimer cette catégorie"
-                      style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: '6px',
                         background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                         color: 'white',
@@ -772,7 +734,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                 <div className="category-content">
                   <h3>{category.name}</h3>
                   <p>{category.description}</p>
-                  
+
                   <div className="category-details">
                     <div className="detail-item">
                       <span className="label">Prix/jour:</span>

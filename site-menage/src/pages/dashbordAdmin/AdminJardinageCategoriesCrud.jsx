@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AdminJardinageCategoriesCrud.css';
 import LanguageFields from '../../components/LanguageFields';
 import { supabase } from '../../lib/supabase';
-import { supabaseAdmin } from '../../lib/supabaseAdmin';
+
 
 const AdminJardinageCategoriesCrud = () => {
   const [categories, setCategories] = useState([]);
@@ -37,26 +37,26 @@ const AdminJardinageCategoriesCrud = () => {
   // Memoized to avoid recalculating on every render
   const getImageUrl = React.useCallback((imagePath) => {
     if (!imagePath) return null;
-    
+
     // If it's already a Supabase URL, return it as-is
     if (imagePath.includes('supabase.co/storage')) {
       return imagePath;
     }
-    
+
     // If it's a full HTTP/HTTPS URL, return it
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
+
     // If it's a data URL (base64), return it
     if (imagePath.startsWith('data:')) {
       return imagePath;
     }
-    
+
     // Handle old Laravel paths or relative paths
-    if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || 
-        imagePath.startsWith('/storage/') || imagePath.startsWith('/images/') || 
-        imagePath.startsWith('/uploads/')) {
+    if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') ||
+      imagePath.startsWith('/storage/') || imagePath.startsWith('/images/') ||
+      imagePath.startsWith('/uploads/')) {
       // Extract filename from path
       const filename = imagePath.split('/').pop();
       if (filename) {
@@ -68,7 +68,7 @@ const AdminJardinageCategoriesCrud = () => {
       }
       return null;
     }
-    
+
     // If it's just a filename (no path, no http), try to get from Supabase Storage
     if (!imagePath.includes('/') && !imagePath.includes('http')) {
       const { data: { publicUrl } } = supabase.storage
@@ -76,7 +76,7 @@ const AdminJardinageCategoriesCrud = () => {
         .getPublicUrl(imagePath);
       return publicUrl;
     }
-    
+
     // If it contains a path but no http, try to extract and use filename
     if (imagePath.includes('/') && !imagePath.startsWith('http')) {
       const filename = imagePath.split('/').pop();
@@ -87,7 +87,7 @@ const AdminJardinageCategoriesCrud = () => {
         return publicUrl;
       }
     }
-    
+
     return null;
   }, []);
 
@@ -109,20 +109,20 @@ const AdminJardinageCategoriesCrud = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[AdminJardinageCategories] Loading categories from Supabase');
-      
+
       const { data, error } = await supabase
         .from('jardinage_categories')
         .select('*')
         .order('order', { ascending: true });
-      
+
       if (error) {
         console.error('[AdminJardinageCategories] Error loading categories:', error);
         setError('Erreur lors du chargement des catégories: ' + error.message);
         return;
       }
-      
+
       console.log('[AdminJardinageCategories] Loaded categories:', data?.length || 0);
       setCategories(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -149,15 +149,15 @@ const AdminJardinageCategoriesCrud = () => {
         setError('Veuillez sélectionner un fichier image valide');
         return;
       }
-      
+
       // Check file size (3MB)
       if (file.size > 3 * 1024 * 1024) {
         setError('La taille du fichier ne doit pas dépasser 3MB');
         return;
       }
-      
+
       setImageFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -181,10 +181,6 @@ const AdminJardinageCategoriesCrud = () => {
   };
 
   const getWriteClient = () => {
-    if (supabaseAdmin) {
-      return supabaseAdmin;
-    }
-    console.warn('[AdminJardinageCategories] Using public client - RLS may block writes. Set REACT_APP_SUPABASE_SERVICE_ROLE_KEY in .env');
     return supabase;
   };
 
@@ -192,10 +188,10 @@ const AdminJardinageCategoriesCrud = () => {
     e.preventDefault();
     try {
       setError('');
-      
+
       // Handle image upload to Supabase Storage if imageFile exists
       let imageUrl = formData.image || '';
-      
+
       if (imageFile) {
         console.log('[AdminJardinageCategories] Uploading image to Supabase Storage');
         // Clean filename: remove special characters and spaces
@@ -205,7 +201,7 @@ const AdminJardinageCategoriesCrud = () => {
           .toLowerCase();
         const fileName = `jardinage_category_${Date.now()}_${cleanFileName}`;
         const filePath = fileName;
-        
+
         // Upload to Supabase Storage (employees bucket)
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('employees')
@@ -213,7 +209,7 @@ const AdminJardinageCategoriesCrud = () => {
             cacheControl: '3600',
             upsert: false
           });
-        
+
         if (uploadError) {
           console.error('[AdminJardinageCategories] Error uploading image:', uploadError);
           // If upload fails, try to use base64 if available
@@ -233,7 +229,7 @@ const AdminJardinageCategoriesCrud = () => {
           console.log('[AdminJardinageCategories] Image uploaded successfully:', imageUrl);
         }
       }
-      
+
       const payload = {
         name: formData.name || formData.name_fr || formData.name_ar || formData.name_en || '',
         name_ar: formData.name_ar || '',
@@ -248,9 +244,9 @@ const AdminJardinageCategoriesCrud = () => {
         is_active: formData.is_active || true,
         order: formData.order || 0
       };
-      
+
       console.log('[AdminJardinageCategories] Submitting category:', { editing: !!editingCategory, id: editingCategory?.id, payload });
-      
+
       const db = getWriteClient();
       let data, error;
       if (editingCategory) {
@@ -269,18 +265,18 @@ const AdminJardinageCategoriesCrud = () => {
         data = insertData;
         error = insertError;
       }
-      
+
       if (error) {
         console.error('[AdminJardinageCategories] Error saving category:', error);
         setError('Erreur lors de la sauvegarde: ' + error.message);
         return;
       }
-      
+
       console.log('[AdminJardinageCategories] Category saved successfully:', data);
       await loadCategories();
       setShowForm(false);
       setEditingCategory(null);
-      setFormData({ name: '', name_ar:'', name_fr:'', name_en:'', description: '', description_ar:'', description_fr:'', description_en:'', icon: '', image: '', is_active: true, order: 0 });
+      setFormData({ name: '', name_ar: '', name_fr: '', name_en: '', description: '', description_ar: '', description_fr: '', description_en: '', icon: '', image: '', is_active: true, order: 0 });
       setImagePreview(null);
       setImageFile(null);
     } catch (err) {
@@ -316,19 +312,19 @@ const AdminJardinageCategoriesCrud = () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
       try {
         console.log('[AdminJardinageCategories] Deleting category:', id);
-        
+
         const db = getWriteClient();
         const { error } = await db
           .from('jardinage_categories')
           .delete()
           .eq('id', id);
-        
+
         if (error) {
           console.error('[AdminJardinageCategories] Error deleting category:', error);
           setError('Erreur lors de la suppression: ' + error.message);
           return;
         }
-        
+
         console.log('[AdminJardinageCategories] Category deleted successfully');
         await loadCategories();
       } catch (err) {
@@ -341,7 +337,7 @@ const AdminJardinageCategoriesCrud = () => {
   const handleCancel = () => {
     setShowForm(false);
     setEditingCategory(null);
-    setFormData({ name: '', name_ar:'', name_fr:'', name_en:'', description: '', description_ar:'', description_fr:'', description_en:'', image: '', is_active: true, order: 0 });
+    setFormData({ name: '', name_ar: '', name_fr: '', name_en: '', description: '', description_ar: '', description_fr: '', description_en: '', image: '', is_active: true, order: 0 });
     setImagePreview(null);
     setImageFile(null);
     setError('');
@@ -351,10 +347,10 @@ const AdminJardinageCategoriesCrud = () => {
     const categoryName = category.name || '';
     const categoryDescription = category.description || '';
     const matchesSearch = categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         categoryDescription.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || 
-                         (filterStatus === 'active' && category.is_active) ||
-                         (filterStatus === 'inactive' && !category.is_active);
+      categoryDescription.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' ||
+      (filterStatus === 'active' && category.is_active) ||
+      (filterStatus === 'inactive' && !category.is_active);
     return matchesSearch && matchesStatus;
   });
 
@@ -370,7 +366,7 @@ const AdminJardinageCategoriesCrud = () => {
     <div className="admin-jardinage-categories">
       <div className="admin-header">
         <h2>🌿 Gestion des Catégories Jardinage</h2>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => setShowForm(true)}
         >
@@ -384,25 +380,7 @@ const AdminJardinageCategoriesCrud = () => {
         </div>
       )}
 
-      {!supabaseAdmin && (
-        <div className="warning-message" style={{
-          backgroundColor: '#fff3cd',
-          border: '1px solid #ffc107',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px',
-          color: '#856404',
-          lineHeight: '1.6'
-        }}>
-          <strong>⚠️ Note sur les images</strong>
-          <br />
-          <p style={{ margin: '10px 0', fontSize: '14px' }}>
-            Si les images ne s'affichent pas, cela signifie que les fichiers n'existent pas encore dans le bucket Supabase Storage.
-            <br />
-            <strong>Solution:</strong> Utilisez le formulaire d'édition pour uploader les images. Les images seront automatiquement sauvegardées dans le bucket "employees".
-          </p>
-        </div>
-      )}
+
 
       <div className="filters-section">
         <div className="search-box">
@@ -415,7 +393,7 @@ const AdminJardinageCategoriesCrud = () => {
           />
           <span className="search-icon">🔍</span>
         </div>
-        
+
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
@@ -434,7 +412,7 @@ const AdminJardinageCategoriesCrud = () => {
               <h3>{editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
               <button className="close-btn" onClick={handleCancel}>✕</button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="category-form">
               <div className="form-group">
                 <label htmlFor="name">Nom de la catégorie *</label>
@@ -462,7 +440,7 @@ const AdminJardinageCategoriesCrud = () => {
                 includeDescription={true}
                 required={false}
               />
-              
+
               <div className="form-group">
                 <label htmlFor="icon">Icône</label>
                 <input
@@ -520,7 +498,7 @@ const AdminJardinageCategoriesCrud = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="form-group checkbox-group">
                 <label className="checkbox-label">
                   <input
@@ -533,7 +511,7 @@ const AdminJardinageCategoriesCrud = () => {
                   Catégorie active
                 </label>
               </div>
-              
+
               <div className="form-actions">
                 <button type="button" onClick={handleCancel} className="btn btn-secondary">
                   Annuler
@@ -573,8 +551,8 @@ const AdminJardinageCategoriesCrud = () => {
                 const imagePath = category.image;
                 const imageUrl = imagePath ? getImageUrl(imagePath) : null;
                 return (
-                <tr key={category.id}>
-                  <td>{category.id}</td>
+                  <tr key={category.id}>
+                    <td>{category.id}</td>
                     <td className="category-image-cell">
                       {imageUrl ? (
                         <img
@@ -591,38 +569,38 @@ const AdminJardinageCategoriesCrud = () => {
                           }}
                         />
                       ) : null}
-                      <div className="category-img-placeholder" style={{display: imageUrl ? 'none' : 'block'}}>
+                      <div className="category-img-placeholder" style={{ display: imageUrl ? 'none' : 'block' }}>
                         🌱
                       </div>
                     </td>
-                  <td className="category-name">{category.name}</td>
-                  <td className="category-description">
-                    {category.description || 'Aucune description'}
-                  </td>
-                  <td className="category-icon">{category.icon || '🌱'}</td>
-                  <td>
-                    <span className={`status ${category.is_active ? 'active' : 'inactive'}`}>
-                      {category.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td>{new Date(category.created_at).toLocaleDateString('fr-FR')}</td>
-                  <td className="actions">
-                    <button
-                      className="btn btn-sm btn-edit"
-                      onClick={() => handleEdit(category)}
-                      title="Modifier"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      className="btn btn-sm btn-delete"
-                      onClick={() => handleDelete(category.id)}
-                      title="Supprimer"
-                    >
-                      🗑️
-                    </button>
-                  </td>
-                </tr>
+                    <td className="category-name">{category.name}</td>
+                    <td className="category-description">
+                      {category.description || 'Aucune description'}
+                    </td>
+                    <td className="category-icon">{category.icon || '🌱'}</td>
+                    <td>
+                      <span className={`status ${category.is_active ? 'active' : 'inactive'}`}>
+                        {category.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td>{new Date(category.created_at).toLocaleDateString('fr-FR')}</td>
+                    <td className="actions">
+                      <button
+                        className="btn btn-sm btn-edit"
+                        onClick={() => handleEdit(category)}
+                        title="Modifier"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="btn btn-sm btn-delete"
+                        onClick={() => handleDelete(category.id)}
+                        title="Supprimer"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
                 );
               })
             )}
@@ -638,7 +616,7 @@ const AdminJardinageCategoriesCrud = () => {
             <div className="stat-label">Total des catégories</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">✅</div>
           <div className="stat-content">
@@ -646,7 +624,7 @@ const AdminJardinageCategoriesCrud = () => {
             <div className="stat-label">Catégories actives</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">❌</div>
           <div className="stat-content">

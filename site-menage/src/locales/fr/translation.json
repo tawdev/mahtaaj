@@ -1,4 +1,28 @@
 {
+  "footer": {
+    "about_title": "À propos de mahtaaj",
+    "about_text": "Votre partenaire de confiance pour un environnement propre, sûr et harmonieux. Qualité allemande, prix marocain.",
+    "links_title": "Liens Rapides",
+    "services_title": "Nos Services",
+    "contact_title": "Contact",
+    "address_label": "Adresse",
+    "address_value": "Rabat, Maroc",
+    "phone_label": "Téléphone",
+    "email_label": "Email",
+    "follow_us": "Suivez-nous",
+    "rights": "© {{year}} C-Digital — Tous droits réservés"
+  },
+  "blog": {
+    "header_title": "Notre Blog",
+    "header_subtitle": "Conseils d'experts, actualités de mahtaaj et astuces pour un environnement sain.",
+    "read_more": "Lire la suite",
+    "read": "Lire",
+    "back_to_blog": "Retour au blog",
+    "related_posts": "Articles recommandés",
+    "share": "Partager :",
+    "not_found": "Article non trouvé",
+    "read_time_suffix": "min"
+  },
   "nav": {
     "home": "Accueil",
     "services": "Services",
@@ -14,6 +38,7 @@
     "gallery": "Galerie",
     "info": "Info",
     "testimonials": "Témoignages",
+    "blog": "Blog",
     "profile": "Mon Profil",
     "menu": "Menu",
     "close": "Fermer",
@@ -128,7 +153,7 @@
     "back_to_roles": "← Retour aux rôles",
     "available_agents": "Agents disponibles",
     "chef_de_securite": "Chef de sécurité",
-    "agent_de_surete": "Agent de sûreté", 
+    "agent_de_surete": "Agent de sûreté",
     "agent_de_securite": "Agent de sécurité",
     "superviseur_securite": "Superviseur sécurité",
     "name_not_available": "Nom non disponible",
@@ -531,27 +556,47 @@
       "menage": {
         "name": "menage",
         "description": "Prestation de ménage à domicile adaptée à vos besoins quotidiens.",
-        "features": ["Poussière et sols", "Sanitaires", "Pièces de vie"]
+        "features": [
+          "Poussière et sols",
+          "Sanitaires",
+          "Pièces de vie"
+        ]
       },
       "cussin": {
         "name": "cussin",
         "description": "Nettoyage ciblé pour la cuisine, plans de travail et électroménagers.",
-        "features": ["Plans de travail", "Évier et plaques", "Électroménager (extérieur)"]
+        "features": [
+          "Plans de travail",
+          "Évier et plaques",
+          "Électroménager (extérieur)"
+        ]
       },
       "standard": {
         "name": "Standard",
         "description": "Prestation essentielle couvrant les besoins courants, idéale pour un entretien régulier.",
-        "features": ["Zones principales", "Produits adaptés", "Durée optimisée"]
+        "features": [
+          "Zones principales",
+          "Produits adaptés",
+          "Durée optimisée"
+        ]
       },
       "premium": {
         "name": "Premium",
         "description": "Couverture étendue avec finitions soignées et attention accrue aux détails.",
-        "features": ["Zones élargies", "Matériel dédié", "Contrôle qualité"]
+        "features": [
+          "Zones élargies",
+          "Matériel dédié",
+          "Contrôle qualité"
+        ]
       },
       "deluxe": {
         "name": "Deluxe",
         "description": "Expérience complète avec traitement en profondeur et options personnalisées.",
-        "features": ["Nettoyage en profondeur", "Traitements spécifiques", "Personnalisation"]
+        "features": [
+          "Nettoyage en profondeur",
+          "Traitements spécifiques",
+          "Personnalisation"
+        ]
       }
     },
     "menage_cuisine": {
@@ -570,7 +615,7 @@
     "back_to_roles": "← Retour aux rôles",
     "available_agents": "Agents disponibles",
     "chef_de_securite": "Chef de sécurité",
-    "agent_de_surete": "Agent de sûreté", 
+    "agent_de_surete": "Agent de sûreté",
     "agent_de_securite": "Agent de sécurité",
     "superviseur_securite": "Superviseur sécurité",
     "name_not_available": "Nom non disponible",
@@ -634,6 +679,10 @@
   "shop_page": {
     "title": "Boutique mahtaaj",
     "subtitle": "Découvrez nos produits et équipements professionnels de qualité pour tous vos besoins de nettoyage.",
+    "added_to_cart": "Ajouté au panier",
+    "cart_updated": "Panier mis à jour",
+    "view_cart": "Voir le panier",
+    "loading_cart": "Ajout...",
     "loading": "Chargement des produits...",
     "error": "Erreur de chargement",
     "retry": "Réessayer",
@@ -1017,6 +1066,7 @@
     "title": "Jardinage",
     "subtitle": "Transformez votre espace extérieur avec nos services de jardinage professionnels",
     "back_to_home": "Retour à l'accueil",
+    "back_to_categories": "Retour aux catégories",
     "category_not_available": "Catégorie non disponible",
     "description_not_available": "Description non disponible",
     "plantation": "Plantation",
@@ -1129,7 +1179,7 @@
         "hours": "Horaires",
         "hours_value": "Lun-Ven : 8h-18h | Sam : 8h-16h",
         "zone": "Zone d'intervention",
-        "zone_value": "Rabat et environs"
+        "zone_value": "Marrakech et environs"
       }
     }
   },
@@ -1455,6 +1505,7 @@
     }
   },
   "support": {
+    "tag": "Centre d'Aide",
     "title": "Support et Assistance",
     "intro": "Si vous rencontrez un problème lors de l'utilisation de la plateforme ou si vous avez une question, vous pouvez nous contacter via les numéros ou l'email suivants.",
     "message": "Notre équipe de support est disponible à tout moment pour vous aider. N'hésitez pas à nous contacter.",

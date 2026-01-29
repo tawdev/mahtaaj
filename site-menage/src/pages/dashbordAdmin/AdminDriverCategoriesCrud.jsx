@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  getDriverCategories, 
-  createDriverCategory, 
-  updateDriverCategory, 
+import {
+  getDriverCategories,
+  createDriverCategory,
+  updateDriverCategory,
   deleteDriverCategory
 } from '../../api-supabase';
 import LanguageFields from '../../components/LanguageFields';
 import { supabase } from '../../lib/supabase';
-import { supabaseAdmin } from '../../lib/supabaseAdmin';
+
 import './AdminCrud.css';
 
 export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
@@ -20,8 +20,8 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  
-  const [formData, setFormData] = useState({ 
+
+  const [formData, setFormData] = useState({
     category_name: '', // Legacy field
     name_ar: '',
     name_fr: '',
@@ -37,10 +37,6 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
 
   // Get the appropriate Supabase client for uploads (prefer admin client)
   const getUploadClient = () => {
-    if (supabaseAdmin) {
-      return supabaseAdmin;
-    }
-    console.warn('[AdminDriverCategories] Using public client for upload - RLS may block writes. Set REACT_APP_SUPABASE_SERVICE_ROLE_KEY in .env');
     return supabase;
   };
 
@@ -70,12 +66,12 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    
+
     // If it's already a Supabase URL, return it
     if (imagePath.includes('supabase.co/storage')) {
       return imagePath;
     }
-    
+
     // If it's just a filename, try to get from Supabase Storage
     if (!imagePath.includes('/') && !imagePath.includes('http')) {
       const { data: { publicUrl } } = supabase.storage
@@ -83,12 +79,12 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
         .getPublicUrl(imagePath);
       return publicUrl;
     }
-    
+
     // Return as-is if it's a valid URL
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
+
     return null;
   };
 
@@ -114,15 +110,15 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
         setError('Veuillez sélectionner un fichier image valide');
         return;
       }
-      
+
       // Check file size (3MB)
       if (file.size > 3 * 1024 * 1024) {
         setError('La taille du fichier ne doit pas dépasser 3MB');
         return;
       }
-      
+
       setImageFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -164,31 +160,29 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
     try {
       setError('');
       setSuccess('');
-      
+
       // Validate that at least one name is provided
       const hasAnyName = formData.name_ar || formData.name_fr || formData.name_en || formData.category_name;
       if (!hasAnyName) {
         setError('Veuillez renseigner au moins un nom (FR/AR/EN).');
         return;
       }
-      
+
       // Handle image upload to Supabase Storage if imageFile exists
       let imageUrl = formData.image || '';
-      
+
       if (imageFile) {
         console.log('[AdminDriverCategories] Uploading image to Supabase Storage');
-        
+
         // Get the appropriate client for upload
         const uploadClient = getUploadClient();
-        
+
         // Check if user has a session (for public client)
-        if (!supabaseAdmin) {
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          if (!session) {
-            console.warn('[AdminDriverCategories] No Supabase Auth session, but trying upload anyway');
-          }
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (!session) {
+          console.warn('[AdminDriverCategories] No Supabase Auth session, but trying upload anyway');
         }
-        
+
         // Clean filename: remove special characters and spaces
         const cleanFileName = imageFile.name
           .replace(/[^a-zA-Z0-9.-]/g, '_')
@@ -196,7 +190,7 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
           .toLowerCase();
         const fileName = `driver_category_${Date.now()}_${cleanFileName}`;
         const filePath = fileName;
-        
+
         // Upload to Supabase Storage (employees bucket)
         const { data: uploadData, error: uploadError } = await uploadClient.storage
           .from('employees')
@@ -204,25 +198,25 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
             cacheControl: '3600',
             upsert: false
           });
-        
+
         if (uploadError) {
           console.error('[AdminDriverCategories] Upload error details:', {
             message: uploadError.message,
             statusCode: uploadError.statusCode,
             error: uploadError
           });
-          
+
           // Handle specific error cases
           if (uploadError.message?.includes('Bucket not found') || uploadError.statusCode === 404) {
             setError('Bucket "employees" غير موجود. يرجى إنشاء bucket "employees" في Supabase Storage أولاً.');
             return;
           }
-          
+
           if (uploadError.statusCode === 401 || uploadError.statusCode === 403) {
             setError('خطأ في الصلاحيات (401/403). تأكد من:\n1. أن bucket "employees" موجود و public\n2. أن RLS policies موجودة للـ INSERT\n3. أن REACT_APP_SUPABASE_SERVICE_ROLE_KEY مضبوط في .env');
             return;
           }
-          
+
           // If upload fails, try to use base64 if available
           if (formData.image && formData.image.startsWith('data:')) {
             imageUrl = formData.image;
@@ -240,7 +234,7 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
           console.log('[AdminDriverCategories] Image uploaded successfully:', publicUrl);
         }
       }
-      
+
       // Prepare payload with multilingual fields
       const payload = {
         name_ar: formData.name_ar || null,
@@ -251,22 +245,22 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
         description_en: formData.description_en || null,
         image: imageUrl || null
       };
-      
+
       // Set legacy fields for backward compatibility
       // category_name: use first available multilingual name or empty string
-      payload.category_name = formData.category_name || 
-                              formData.name_fr || 
-                              formData.name_ar || 
-                              formData.name_en || 
-                              '';
-      
+      payload.category_name = formData.category_name ||
+        formData.name_fr ||
+        formData.name_ar ||
+        formData.name_en ||
+        '';
+
       // description: use first available multilingual description or empty string
-      payload.description = formData.description || 
-                            formData.description_fr || 
-                            formData.description_ar || 
-                            formData.description_en || 
-                            '';
-      
+      payload.description = formData.description ||
+        formData.description_fr ||
+        formData.description_ar ||
+        formData.description_en ||
+        '';
+
       if (editingCategory) {
         await updateDriverCategory(editingCategory.id, payload);
         showNotification('Catégorie modifiée avec succès');
@@ -274,19 +268,19 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
         await createDriverCategory(payload);
         showNotification('Catégorie créée avec succès');
       }
-      
+
       setShowForm(false);
       setEditingCategory(null);
-      setFormData({ 
-        category_name: '', 
+      setFormData({
+        category_name: '',
         name_ar: '',
         name_fr: '',
         name_en: '',
-        description: '', 
+        description: '',
         description_ar: '',
         description_fr: '',
         description_en: '',
-        image: '' 
+        image: ''
       });
       setImageFile(null);
       setImagePreview(null);
@@ -301,7 +295,7 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
     setEditingCategory(category);
     const imagePath = category.image || '';
     const imageUrl = imagePath ? getImageUrl(imagePath) : '';
-    setFormData({ 
+    setFormData({
       category_name: category.category_name || '',
       name_ar: category.name_ar || '',
       name_fr: category.name_fr || '',
@@ -335,16 +329,16 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
   const handleCancel = () => {
     setShowForm(false);
     setEditingCategory(null);
-    setFormData({ 
-      category_name: '', 
+    setFormData({
+      category_name: '',
       name_ar: '',
       name_fr: '',
       name_en: '',
-      description: '', 
+      description: '',
       description_ar: '',
       description_fr: '',
       description_en: '',
-      image: '' 
+      image: ''
     });
     setImageFile(null);
     setImagePreview(null);
@@ -389,21 +383,21 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
     <div className="admin-crud">
       <div className="admin-crud-header">
         <h2>Gestion des Catégories Chauffeurs</h2>
-        <button 
-          onClick={() => { 
-            setShowForm(true); 
-            setEditingCategory(null); 
-            setFormData({ 
-              category_name: '', 
+        <button
+          onClick={() => {
+            setShowForm(true);
+            setEditingCategory(null);
+            setFormData({
+              category_name: '',
               name_ar: '',
               name_fr: '',
               name_en: '',
-              description: '', 
+              description: '',
               description_ar: '',
               description_fr: '',
               description_en: '',
-              image: '' 
-            }); 
+              image: ''
+            });
             setImageFile(null);
             setImagePreview(null);
           }}
@@ -426,7 +420,7 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
               <h3>{editingCategory ? 'Modifier' : 'Créer'} une Catégorie</h3>
               <button type="button" className="admin-crud-close-button" onClick={handleCancel} aria-label="Fermer">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
@@ -434,7 +428,7 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
               <div className="admin-crud-field">
                 <LanguageFields
                   value={formData}
-                  onChange={(updated) => setFormData({...formData, ...updated})}
+                  onChange={(updated) => setFormData({ ...formData, ...updated })}
                   includeDescription={true}
                   required={true}
                 />
@@ -451,16 +445,16 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
                   />
                   {imagePreview && (
                     <div style={{ position: 'relative', display: 'inline-block' }}>
-                      <img 
-                        src={imagePreview} 
-                        alt="Preview" 
-                        style={{ 
-                          maxWidth: '200px', 
-                          maxHeight: '200px', 
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        style={{
+                          maxWidth: '200px',
+                          maxHeight: '200px',
                           objectFit: 'cover',
                           borderRadius: '8px',
                           border: '1px solid #ddd'
-                        }} 
+                        }}
                       />
                       <button
                         type="button"
@@ -559,13 +553,13 @@ export default function AdminDriverCategoriesCrud({ token, onAuthError }) {
                     </td>
                     <td>{category.created_at ? new Date(category.created_at).toLocaleDateString() : '-'}</td>
                     <td>
-                      <button 
+                      <button
                         onClick={() => handleEdit(category)}
                         className="admin-crud-edit-button"
                       >
                         Modifier
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDelete(category.id)}
                         className="admin-crud-delete-button"
                       >

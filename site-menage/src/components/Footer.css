@@ -1,36 +1,218 @@
 .site-footer {
-  text-align: center;
-  padding: 32px 16px;
-  color: #64748b;
-  border-top: 1px solid #e2e8f0;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  padding: 80px 0 40px;
   width: 100%;
+  color: #1e293b;
+  position: relative;
+  overflow: hidden;
 }
 
-.site-footer p {
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+  gap: 60px;
+}
+
+/* RTL Support */
+.site-footer.rtl {
+  direction: rtl;
+}
+
+.site-footer.rtl .footer-column {
+  text-align: right;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.footer-logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.footer-logo:hover {
+  transform: translateY(-3px);
+}
+
+.footer-about {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 320px;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 16px;
+}
+
+.social-link {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
+}
+
+.social-link:hover {
+  transform: translateY(-5px);
+  color: #2563eb;
+  background: #f8faff;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+  border-color: #dbeafe;
+}
+
+.footer-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+.footer-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: #2563eb;
+  border-radius: 2px;
+}
+
+.site-footer.rtl .footer-title::after {
+  left: auto;
+  right: 0;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.footer-links li a {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.footer-links li a:hover {
+  color: #2563eb;
+  transform: translateX(5px);
+}
+
+.site-footer.rtl .footer-links li a:hover {
+  transform: translateX(-5px);
+}
+
+.footer-contact-info {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.footer-contact-info li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  color: #64748b;
+  font-size: 15px;
+}
+
+.footer-contact-info li svg {
+  color: #2563eb;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.footer-contact-info li a {
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-contact-info li a:hover {
+  color: #2563eb;
+}
+
+.footer-bottom {
+  margin-top: 80px;
+  padding: 32px 40px 0;
+  border-top: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.footer-bottom p {
+  color: #94a3b8;
   font-size: 14px;
-  line-height: 1.6;
+  margin: 0;
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 640px) {
   .site-footer {
-    padding: 24px 16px;
+    padding: 60px 0 30px;
   }
-  
-  .site-footer p {
-    font-size: 13px;
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    padding: 0 24px;
+    gap: 48px;
+  }
+
+  .footer-column {
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-title::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .footer-about {
+    max-width: 100%;
+  }
+
+  .footer-contact-info li {
+    justify-content: center;
+  }
+
+  .footer-bottom {
+    margin-top: 48px;
+    padding: 24px 20px 0;
   }
 }
-
-@media (max-width: 480px) {
-  .site-footer {
-    padding: 20px 12px;
-  }
-  
-  .site-footer p {
-    font-size: 12px;
-  }
-}
-

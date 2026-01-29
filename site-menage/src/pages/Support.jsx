@@ -1,12 +1,15 @@
 import React from 'react';
-import './Support.css';
 import { useTranslation } from 'react-i18next';
+import { LuPhone, LuMail, LuClock, LuMessageCircle } from 'react-icons/lu';
+import SEO from '../components/SEO';
+import './Support.css';
 
 export default function Support() {
-  const phoneNumber = '+212600000000';
-  const email = 'support@houseklean.ma';
   const { t, i18n } = useTranslation();
-  const isRTL = (i18n.language || 'fr').toString().split(/[-_]/)[0].toLowerCase() === 'ar';
+  const isRTL = i18n.language === 'ar';
+
+  const phoneNumber = '+212 524308038';
+  const email = 'support@mahtaaj.ma';
 
   const handleCall = () => {
     window.location.href = `tel:${phoneNumber}`;
@@ -17,56 +20,82 @@ export default function Support() {
   };
 
   return (
-    <main className="support-hero" id="support" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="support-card">
-        <div className="support-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"
-              fill="currentColor"
-            />
-          </svg>
-        </div>
-        <h1 className="support-title">{t('support.title', 'Support & Assistance')}</h1>
-        <p className="support-description">{t('support.intro')}</p>
-        <p className="support-subtitle">{t('support.message')}</p>
+    <main className={`support-page ${isRTL ? 'rtl' : ''}`}>
+      <SEO
+        title={t('nav.support') || 'Support'}
+        description="Contactez le support mahtaaj pour toute assistance ou information complémentaire sur nos services."
+      />
 
-        <div className="support-info">
-          <div className="info-item">
-            
-            <div className="info-content">
-              <h3>{t('support.phone_label')}</h3>
-              <p className="info-value">
-                <a href={`tel:${phoneNumber}`}>{phoneNumber}</a>
-              </p>
+      <div className="support-wrapper">
+        <div className="support-grid">
+          {/* Left Side: Visual/Hero */}
+          <div className="support-visual">
+            <div className="support-image-container">
+              <img
+                src="https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&q=80&w=1200"
+                alt="Customer Support mahtaaj"
+                className="support-main-img"
+              />
+              <div className="support-overlay">
+                <div className="floating-badge">
+                  <LuMessageCircle size={24} />
+                  <span>24/7 Available</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="info-item">
-            
-            <div className="info-content">
-              <h3>{t('support.email_label')}</h3>
-              <p className="info-value">
-                <a href={`mailto:${email}`}>{email}</a>
+          {/* Right Side: Content & Actions */}
+          <div className="support-content-area">
+            <div className="support-header">
+              <span className="support-tag">{t('support.tag', 'Help Center')}</span>
+              <h1 className="support-title">{t('support.title', 'Support & Assistance')}</h1>
+              <p className="support-subtitle">
+                {t('support.intro', 'We are here to help you. Reach out to us via any of the channels below.')}
               </p>
             </div>
+
+            <div className="support-cards-container">
+              <div className="contact-premium-card" onClick={handleCall}>
+                <div className="card-icon-box phone">
+                  <LuPhone size={24} />
+                </div>
+                <div className="card-text">
+                  <h3>{t('support.phone_label', 'Call Us')}</h3>
+                  <p>{phoneNumber}</p>
+                </div>
+                <div className="card-arrow">
+                  <LuClock size={16} />
+                </div>
+              </div>
+
+              <div className="contact-premium-card" onClick={handleEmail}>
+                <div className="card-icon-box email">
+                  <LuMail size={24} />
+                </div>
+                <div className="card-text">
+                  <h3>{t('support.email_label', 'Email Us')}</h3>
+                  <p>{email}</p>
+                </div>
+                <div className="card-arrow">
+                  <LuMessageCircle size={16} />
+                </div>
+              </div>
+
+
+            </div>
+
+            <div className="support-cta-group">
+              <button onClick={handleCall} className="btn-primary support-btn">
+                <LuPhone /> {t('support.call_now', 'Call Now')}
+              </button>
+              <button onClick={handleEmail} className="btn-secondary support-btn">
+                <LuMail /> {t('support.send_message', 'Send Message')}
+              </button>
+            </div>
           </div>
-
-          
-        </div>
-
-        <div className="support-actions">
-          <button onClick={handleCall} className="support-button support-button--call">
-            <span className="button-icon">📞</span>
-            <span>{t('support.call_now')}</span>
-          </button>
-          <button onClick={handleEmail} className="support-button support-button--email">
-            <span className="button-icon">✉️</span>
-            <span>{t('support.send_message')}</span>
-          </button>
         </div>
       </div>
     </main>
   );
 }
-

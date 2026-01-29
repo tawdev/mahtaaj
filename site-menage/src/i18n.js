@@ -33,25 +33,35 @@ i18n
       checkWhitelist: true,
     },
     // تعطيل Suspense لضمان عرض الترجمات مباشرة بدون انتظار
+    // React config
     react: {
       useSuspense: false,
+      bindI18n: 'languageChanged loaded',
+      bindI18nStore: 'added removed',
+      nsMode: 'default'
     },
-    // إعدادات الترجمة التلقائية
+    // Missing keys handling
     saveMissing: true,
     missingKeyHandler: (lng, ns, key, fallbackValue) => {
-      console.warn(`Missing translation key: ${key} for language: ${lng}`);
-      // يمكن إضافة منطق لإرسال المفاتيح المفقودة للخادم
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[i18n] Missing key: "${key}" in ${lng}`);
+      }
     },
+    parseMissingKeyHandler: (key) => {
+      // Return key as fallback if translation missing
+      return key.split('.').pop();
+    }
   });
 
 // Function to change language and update document direction
 i18n.on('languageChanged', (lng) => {
   // تطبيع اللغة (إزالة أي suffixes مثل -US أو _FR)
   const normalizedLng = lng ? lng.split(/[-_]/)[0].toLowerCase() : 'fr';
-  
+
   // تحديث اللغة في خدمة الترجمة
   translationService.setLanguage(normalizedLng);
-  
+
   if (typeof document !== 'undefined') {
     document.documentElement.setAttribute('lang', normalizedLng);
     if (normalizedLng === 'ar') {
@@ -72,7 +82,7 @@ if (typeof document !== 'undefined') {
     // Get language from i18n (already detected by LanguageDetector) or fallback
     const initialLng = i18n.language || localStorage.getItem('i18nextLng') || 'fr';
     const normalizedLng = initialLng ? initialLng.split(/[-_]/)[0].toLowerCase() : 'fr';
-    
+
     // Normalize and set language if needed
     if (i18n.language !== normalizedLng) {
       // Use changeLanguage to trigger languageChanged event
@@ -95,10 +105,10 @@ if (typeof document !== 'undefined') {
       }
     }
   };
-  
+
   // Set immediately - i18n should be initialized synchronously
   setInitialLanguage();
-  
+
   // Also set after a microtask to ensure it runs after any async operations
   Promise.resolve().then(setInitialLanguage);
 }

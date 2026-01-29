@@ -31,35 +31,35 @@ export default function CartPage() {
       console.log('[CartPage] getProductImageUrl: No product provided');
       return null;
     }
-    
+
     const imagePath = String(product.image || '').trim();
-    
+
     console.log('[CartPage] getProductImageUrl called:', {
       productId: product.id,
       productName: product.name,
       imagePath: imagePath,
       imagePathLength: imagePath.length
     });
-    
+
     // Empty or invalid URL
     if (!imagePath || imagePath === 'null' || imagePath === 'undefined' || imagePath === '' || imagePath === 'NULL') {
       console.log('[CartPage] getProductImageUrl: Empty or invalid image path');
       return null;
     }
-    
+
     // Old Laravel storage path - extract filename and try to load from Supabase
-    if (imagePath.includes('/storage/images/products/') || 
-        imagePath.includes('127.0.0.1:8000') || 
-        imagePath.includes('localhost:8000') ||
-        imagePath.startsWith('/storage/')) {
+    if (imagePath.includes('/storage/images/products/') ||
+      imagePath.includes('127.0.0.1:8000') ||
+      imagePath.includes('localhost:8000') ||
+      imagePath.startsWith('/storage/')) {
       console.log('[CartPage] Detected Laravel path, extracting filename:', imagePath);
-      
+
       // Extract filename from Laravel path
       // Examples:
       // http://127.0.0.1:8000/storage/images/products/filename.jpg
       // /storage/images/products/filename.jpg
       let filename = '';
-      
+
       if (imagePath.includes('/storage/images/products/')) {
         const parts = imagePath.split('/storage/images/products/');
         filename = parts[parts.length - 1];
@@ -71,34 +71,34 @@ export default function CartPage() {
         const parts = imagePath.split('/');
         filename = parts[parts.length - 1];
       }
-      
+
       // Remove query parameters if any
       if (filename.includes('?')) {
         filename = filename.split('?')[0];
       }
-      
+
       if (filename) {
         // Check cache first
         if (imageUrlCache[filename]) {
           console.log('[CartPage] Using cached image URL for:', filename);
           return imageUrlCache[filename];
         }
-        
+
         // Try both paths: root and products/ folder
         // Note: We can't verify file existence without async, so we'll try both and cache the working one
         const pathsToTry = [
           { path: filename, description: 'root' },
           { path: `products/${filename}`, description: 'products/ folder' },
         ];
-        
+
         for (const { path: storagePath, description } of pathsToTry) {
           console.log('[CartPage] Trying path:', storagePath, `(${description})`);
-          
+
           try {
             const { data: { publicUrl } } = supabase.storage
               .from('products')
               .getPublicUrl(storagePath);
-            
+
             if (publicUrl) {
               // Check if URL is valid (doesn't contain double 'products/')
               let finalUrl = publicUrl;
@@ -107,7 +107,7 @@ export default function CartPage() {
                 finalUrl = publicUrl.replace('/products/products/', '/products/');
                 console.log('[CartPage] Fixed URL:', finalUrl);
               }
-              
+
               // Cache the URL for future use
               setImageUrlCache(prev => ({ ...prev, [filename]: finalUrl }));
               console.log('[CartPage] ✅ Generated URL:', finalUrl, `(${description})`);
@@ -118,15 +118,15 @@ export default function CartPage() {
             continue;
           }
         }
-        
+
         console.error('[CartPage] ❌ All paths failed for filename:', filename);
       }
-      
+
       // If we can't load from Supabase, return null (will show placeholder)
       console.warn('[CartPage] Could not extract or load image from Laravel path');
       return null;
     }
-    
+
     // If it's already an absolute URL (Supabase Storage URLs or external URLs)
     if (/^https?:\/\//i.test(imagePath)) {
       // Supabase Storage URLs
@@ -136,23 +136,23 @@ export default function CartPage() {
       // Other external URLs - return as is
       return imagePath;
     }
-    
+
     // Supabase Storage path format: "products/filename.jpg" or just "filename.jpg"
     // Try to get public URL from Supabase Storage
     let storagePath = imagePath;
-    
+
     console.log('[CartPage] Processing image path:', {
       originalPath: imagePath,
       startsWithSlash: imagePath.startsWith('/'),
       includesProducts: imagePath.includes('products/')
     });
-    
+
     // Remove leading slash if present
     if (storagePath.startsWith('/')) {
       storagePath = storagePath.substring(1);
       console.log('[CartPage] Removed leading slash, new path:', storagePath);
     }
-    
+
     // If path doesn't start with "products/", add it
     if (!storagePath.startsWith('products/')) {
       // If it's just a filename (no slashes), add "products/" prefix
@@ -169,12 +169,12 @@ export default function CartPage() {
     } else {
       console.log('[CartPage] Path already starts with products/, using as is:', storagePath);
     }
-    
+
     try {
       const { data: { publicUrl } } = supabase.storage
         .from('products')
         .getPublicUrl(storagePath);
-      
+
       if (publicUrl) {
         console.log('[CartPage] ✅ Generated Supabase URL:', {
           originalPath: imagePath,
@@ -192,12 +192,12 @@ export default function CartPage() {
         errorMessage: err.message
       });
     }
-    
+
     // If it's a relative path starting with /, try to use it (for local images)
     if (imagePath.startsWith('/') && !imagePath.startsWith('/storage/')) {
       return imagePath;
     }
-    
+
     return null;
   };
 
@@ -214,7 +214,7 @@ export default function CartPage() {
         .select('*')
         .eq('id', parseInt(productId))
         .single();
-      
+
       if (!error && data) {
         setProductsCache(prev => ({ ...prev, [productId]: data }));
         return data;
@@ -222,7 +222,7 @@ export default function CartPage() {
     } catch (error) {
       console.error('Error fetching product details:', error);
     }
-    
+
     return null;
   };
 
@@ -230,10 +230,10 @@ export default function CartPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session?.user) {
         // Utilisateur connecté: charger depuis Supabase
         const { data, error } = await supabase
@@ -243,11 +243,11 @@ export default function CartPage() {
             products (*)
           `)
           .eq('user_id', session.user.id);
-        
+
         if (error) {
           throw error;
         }
-        
+
         // Transform Supabase data to match expected format
         const cartItems = (data || []).map(cartItem => {
           const product = cartItem.products ? {
@@ -261,7 +261,7 @@ export default function CartPage() {
             description: '',
             image: null
           };
-          
+
           // Debug: log product image path
           if (product.image) {
             console.log('[CartPage] Product image from DB:', {
@@ -276,7 +276,7 @@ export default function CartPage() {
               productName: product.name
             });
           }
-          
+
           return {
             id: cartItem.id,
             product_id: cartItem.product_id,
@@ -285,13 +285,10 @@ export default function CartPage() {
             product: product
           };
         });
-        
-        // Filter out deleted products (products that don't exist or have no price)
-        const validItems = cartItems.filter(item => 
-          item.product && 
-          item.product.name !== t('cart_page.product_deleted') && 
-          toNumber(item.price) > 0
-        );
+
+        // Filter out deleted products - RELAXED filtering to debug mismatch
+        // We now show all items so user can delete them if they are invalid
+        const validItems = cartItems;
         setItems(validItems);
       } else {
         // Utilisateur non connecté: charger depuis localStorage
@@ -311,7 +308,7 @@ export default function CartPage() {
     try {
       const cartKey = 'guest_cart';
       const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-      
+
       if (cart.length === 0) {
         setItems([]);
         return;
@@ -321,7 +318,7 @@ export default function CartPage() {
       const itemsWithDetails = await Promise.all(
         cart.map(async (item) => {
           const product = await fetchProductDetails(item.product_id);
-          
+
           return {
             id: `guest_${item.product_id}_${item.added_at}`, // ID unique pour les éléments guest
             product_id: item.product_id,
@@ -342,15 +339,11 @@ export default function CartPage() {
         })
       );
 
-      // Filter out deleted products (products that don't exist or have no price)
-      const validItems = itemsWithDetails.filter(item => 
-        item.product && 
-        item.product.name !== t('cart_page.product_deleted') && 
-        item.price > 0
-      );
-      
+      // Filter out deleted products - RELAXED filtering to debug mismatch
+      const validItems = itemsWithDetails;
+
       setItems(validItems);
-      
+
       // Update localStorage to remove deleted products
       if (validItems.length !== itemsWithDetails.length) {
         const cartKey = 'guest_cart';
@@ -367,16 +360,16 @@ export default function CartPage() {
     }
   };
 
-  useEffect(() => { 
+  useEffect(() => {
     load();
-    
+
     // Écouter les événements de mise à jour du panier
     const handleCartUpdate = () => {
       load();
     };
-    
+
     window.addEventListener('cartUpdated', handleCartUpdate);
-    
+
     return () => {
       window.removeEventListener('cartUpdated', handleCartUpdate);
     };
@@ -384,11 +377,11 @@ export default function CartPage() {
 
   const updateQuantity = async (cartItemId, quantity) => {
     if (quantity <= 0) return removeItem(cartItemId);
-    
+
     try {
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session?.user) {
         // Utilisateur connecté: utiliser Supabase
         const { error } = await supabase
@@ -396,22 +389,22 @@ export default function CartPage() {
           .update({ quantity })
           .eq('id', cartItemId)
           .eq('user_id', session.user.id);
-        
+
         if (error) {
           throw error;
         }
-        
+
         await load();
         showNotification(t('cart_page.update_success'));
       } else {
         // Utilisateur non connecté: utiliser localStorage
         const cartKey = 'guest_cart';
         const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-        
+
         // Trouver l'élément par product_id (car cartItemId pour guest est une string comme "guest_1_timestamp")
         const cartItemIdStr = String(cartItemId);
         let productId;
-        
+
         if (cartItemIdStr.startsWith('guest_')) {
           // Format: guest_productId_timestamp
           const parts = cartItemIdStr.split('_');
@@ -420,9 +413,9 @@ export default function CartPage() {
           // Si ce n'est pas un ID guest, utiliser directement
           productId = parseInt(cartItemId);
         }
-        
+
         const itemIndex = cart.findIndex(item => item.product_id === productId);
-        
+
         if (itemIndex >= 0) {
           cart[itemIndex].quantity = quantity;
           localStorage.setItem(cartKey, JSON.stringify(cart));
@@ -440,7 +433,7 @@ export default function CartPage() {
     try {
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session?.user) {
         // Utilisateur connecté: utiliser Supabase
         const { error } = await supabase
@@ -448,22 +441,22 @@ export default function CartPage() {
           .delete()
           .eq('id', cartItemId)
           .eq('user_id', session.user.id);
-        
+
         if (error) {
           throw error;
         }
-        
+
         await load();
         showNotification(t('cart_page.remove_success'));
       } else {
         // Utilisateur non connecté: utiliser localStorage
         const cartKey = 'guest_cart';
         const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-        
+
         // Trouver l'élément par product_id (car cartItemId pour guest est une string comme "guest_1_timestamp")
         const cartItemIdStr = String(cartItemId);
         let productId;
-        
+
         if (cartItemIdStr.startsWith('guest_')) {
           // Format: guest_productId_timestamp
           const parts = cartItemIdStr.split('_');
@@ -472,9 +465,9 @@ export default function CartPage() {
           // Si ce n'est pas un ID guest, utiliser directement
           productId = parseInt(cartItemId);
         }
-        
+
         const filteredCart = cart.filter(item => item.product_id !== productId);
-        
+
         localStorage.setItem(cartKey, JSON.stringify(filteredCart));
         window.dispatchEvent(new CustomEvent('cartUpdated'));
         await load();
@@ -485,14 +478,9 @@ export default function CartPage() {
     }
   };
 
-  // Filter out items with deleted products or zero price
-  const validItems = (items || []).filter(item => 
-    item && 
-    item.product && 
-    item.product.name !== t('cart_page.product_deleted') && 
-    toNumber(item.price) > 0
-  );
-  
+  // Filter out items with deleted products or zero price - RELAXED
+  const validItems = (items || []);
+
   const total = validItems.reduce((t, it) => t + toNumber(it.quantity) * toNumber(it.price), 0);
   const count = validItems.reduce((c, it) => c + toNumber(it.quantity), 0);
   // Livraison gratuite à partir de 50DH, ou si le total est 0
@@ -549,8 +537,8 @@ export default function CartPage() {
             <div className="empty-icon">🛒</div>
             <h3>{t('cart_page.empty')}</h3>
             <p>{t('cart_page.empty_description')}</p>
-            <button 
-              className="shop-button" 
+            <button
+              className="shop-button"
               onClick={() => window.location.href = '/shop'}
             >
               🛍️ {t('cart_page.discover_shop')}
@@ -563,7 +551,7 @@ export default function CartPage() {
                 <h2>{t('cart_page.articles_in_cart')}</h2>
                 <span className="items-count">{count} {t('cart_page.article')}{count > 1 ? 's' : ''}</span>
               </div>
-              
+
               <div className="cart-items-list">
                 {validItems.map((item, index) => (
                   <div key={item.id} className="cart-item-card" data-aos="fade-up" data-aos-delay={`${100 + index * 50}`}>
@@ -576,11 +564,11 @@ export default function CartPage() {
                           imageUrl: imageUrl,
                           hasImage: !!imageUrl
                         });
-                        
+
                         if (imageUrl) {
                           return (
-                            <img 
-                              src={imageUrl} 
+                            <img
+                              src={imageUrl}
                               alt={item.product?.name || 'Produit'}
                               style={{ maxWidth: '100%', height: 'auto' }}
                               onError={(e) => {
@@ -594,7 +582,7 @@ export default function CartPage() {
                                   errorType: e.type,
                                   errorTarget: e.target?.tagName
                                 });
-                                
+
                                 // Try to fetch the image to see the actual error
                                 fetch(imageUrl, { method: 'HEAD' })
                                   .then(response => {
@@ -607,7 +595,7 @@ export default function CartPage() {
                                   .catch(fetchError => {
                                     console.error('[CartPage] Image fetch error:', fetchError);
                                   });
-                                
+
                                 img.style.display = 'none';
                                 const placeholder = img.nextElementSibling;
                                 if (placeholder) {
@@ -630,51 +618,51 @@ export default function CartPage() {
                             originalImage: item.product?.image
                           });
                           return (
-                            <div className="product-placeholder" style={{display: 'flex'}}>
+                            <div className="product-placeholder" style={{ display: 'flex' }}>
                               <span className="placeholder-icon">📦</span>
                             </div>
                           );
                         }
                       })()}
-                      <div className="product-placeholder" style={{display: 'none'}}>
+                      <div className="product-placeholder" style={{ display: 'none' }}>
                         <span className="placeholder-icon">📦</span>
                       </div>
                     </div>
-                    
+
                     <div className="cart-item-details">
                       <h3 className="product-name">{item.product?.name || t('cart_page.product_deleted')}</h3>
                       <p className="product-description">{item.product?.description || t('cart_page.description_unavailable')}</p>
                       <div className="product-price">{t('cart_page.unit_price')}: {formatPrice(item.price)} DH</div>
                     </div>
-                    
+
                     <div className="cart-item-quantity">
                       <label>{t('cart_page.quantity')}</label>
                       <div className="quantity-controls">
-                        <button 
-                          className="quantity-btn decrease" 
+                        <button
+                          className="quantity-btn decrease"
                           onClick={() => updateQuantity(item.id, toNumber(item.quantity) - 1)}
                           disabled={toNumber(item.quantity) <= 1}
                         >
                           −
                         </button>
                         <span className="quantity-display">{toNumber(item.quantity)}</span>
-                        <button 
-                          className="quantity-btn increase" 
+                        <button
+                          className="quantity-btn increase"
                           onClick={() => updateQuantity(item.id, toNumber(item.quantity) + 1)}
                         >
                           +
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className="cart-item-total">
                       <div className="total-label">{t('cart_page.total')}</div>
                       <div className="total-amount">{(toNumber(item.quantity) * toNumber(item.price)).toFixed(2)} DH</div>
                     </div>
-                    
+
                     <div className="cart-item-actions">
-                      <button 
-                        className="remove-btn" 
+                      <button
+                        className="remove-btn"
                         onClick={() => removeItem(item.id)}
                         title={t('cart_page.remove_from_cart')}
                       >
@@ -685,17 +673,17 @@ export default function CartPage() {
                 ))}
               </div>
             </div>
-            
+
             <div className="cart-summary-section">
               <div className="cart-summary-card">
                 <h3>{t('cart_page.order_summary')}</h3>
-                
+
                 <div className="summary-details">
                   <div className="summary-row">
                     <span>{t('cart_page.subtotal')} ({count} {t('cart_page.article')}{count > 1 ? 's' : ''})</span>
                     <span>{total.toFixed(2)} DH</span>
                   </div>
-                  
+
                   <div className="summary-row shipping">
                     <span>
                       {t('cart_page.delivery')}
@@ -705,7 +693,7 @@ export default function CartPage() {
                       {shippingCost === 0 ? t('cart_page.free') : `${shippingCost.toFixed(2)} DH`}
                     </span>
                   </div>
-                  
+
                   {shippingCost > 0 && (
                     <div className="shipping-info">
                       <span className="shipping-note">
@@ -713,29 +701,29 @@ export default function CartPage() {
                       </span>
                     </div>
                   )}
-                  
+
                   <div className="summary-total">
                     <span>{t('cart_page.total')}</span>
                     <span>{finalTotal.toFixed(2)} DH</span>
                   </div>
                 </div>
-                
+
                 <div className="summary-actions">
-                  <button 
+                  <button
                     className="checkout-btn"
                     onClick={() => window.location.href = '/order-summary'}
                   >
                     💳 {t('cart_page.view_summary')}
                   </button>
-                  
-                  <button 
+
+                  <button
                     className="continue-shopping-btn"
                     onClick={() => window.location.href = '/shop'}
                   >
                     🛍️ {t('cart_page.continue_shopping')}
                   </button>
                 </div>
-                
+
                 <div className="summary-benefits">
                   <div className="benefit-item">
                     <span className="benefit-icon">🚚</span>

@@ -4,14 +4,15 @@
  */
 
 import { supabase } from './lib/supabase';
-import { supabaseAdmin } from './lib/supabaseAdmin';
+// supabaseAdmin removed - usage replaced with RLS-secured standard client
+
 
 // Resolve current language from i18next/localStorage with fallback
 const getCurrentLocale = () => {
   try {
     const lng = localStorage.getItem('i18nextLng');
-    if (lng && ['fr','ar','en'].includes(lng)) return lng;
-  } catch (_) {}
+    if (lng && ['fr', 'ar', 'en'].includes(lng)) return lng;
+  } catch (_) { }
   return 'fr';
 };
 
@@ -30,19 +31,19 @@ const handleApiError = (error) => {
   console.error('Error message:', error?.message);
   console.error('Error details:', error?.details);
   console.error('Error hint:', error?.hint);
-  
+
   if (error?.message?.includes('JWT') || error?.code === 'PGRST301') {
     // Clear tokens and redirect to login
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminData');
     window.dispatchEvent(new CustomEvent('adminAuthError'));
   }
-  
+
   // Provide more helpful error messages for common issues
   if (error?.code === '42703' || error?.message?.includes('column') || error?.message?.includes('does not exist')) {
     console.error('⚠️ Database schema mismatch detected. Please run update-driver-reservation-table.sql in Supabase SQL Editor.');
   }
-  
+
   throw error;
 };
 
@@ -55,8 +56,8 @@ const handleApiError = (error) => {
  */
 export async function adminLogin(email, password) {
   try {
-    // Note: For admin auth, you might want to use a custom auth table
-    // or use Supabase Auth with custom claims. This is a simplified version.
+    // Note: Admin should use Supabase Auth (signInWithPassword) using the 'admins' table via RLS or standard auth
+    // For now, replacing admin-specific query with standard client (assuming RLS allows public read or specific access)
     const { data, error } = await supabase
       .from('admins')
       .select('*')
@@ -74,7 +75,7 @@ export async function adminLogin(email, password) {
 
     // Create a session token (in production, use Supabase Auth)
     const token = btoa(JSON.stringify({ id: data.id, email: data.email }));
-    
+
     return {
       message: 'Login successful',
       admin: {
@@ -435,7 +436,7 @@ export async function deleteServiceAdmin(token, id) {
 
     // Check if we have a valid Supabase session
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session && !token) {
       console.warn('No Supabase session or token found');
       // Try to use token if provided
@@ -465,11 +466,11 @@ export async function deleteServiceAdmin(token, id) {
       console.error('Error code:', deleteError.code);
       console.error('Error message:', deleteError.message);
       console.error('Error details:', deleteError);
-      
+
       // Check for 406 Not Acceptable (usually means no session or RLS issue)
       if (deleteError.code === 'PGRST301' || deleteError.message?.includes('406') || deleteError.message?.includes('Not Acceptable')) {
         console.log('406 error detected - likely RLS or session issue, attempting soft delete...');
-        
+
         // Try soft delete: set is_active to false
         const { data: softDeleteData, error: softDeleteError } = await supabase
           .from('services')
@@ -485,19 +486,19 @@ export async function deleteServiceAdmin(token, id) {
 
         if (softDeleteData) {
           console.log('Service soft deleted (is_active = false)');
-          return { 
-            message: 'Service désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète', 
-            deleted: true, 
+          return {
+            message: 'Service désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète',
+            deleted: true,
             softDeleted: true,
-            data: softDeleteData 
+            data: softDeleteData
           };
         }
       }
-      
+
       // If RLS error, try soft delete as fallback
       if (deleteError.code === '42501' || deleteError.message?.includes('permission') || deleteError.message?.includes('policy') || deleteError.message?.includes('row-level security')) {
         console.log('RLS permission error detected, attempting soft delete...');
-        
+
         // Try soft delete: set is_active to false
         const { data: softDeleteData, error: softDeleteError } = await supabase
           .from('services')
@@ -513,15 +514,15 @@ export async function deleteServiceAdmin(token, id) {
 
         if (softDeleteData) {
           console.log('Service soft deleted (is_active = false)');
-          return { 
-            message: 'Service désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète', 
-            deleted: true, 
+          return {
+            message: 'Service désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète',
+            deleted: true,
             softDeleted: true,
-            data: softDeleteData 
+            data: softDeleteData
           };
         }
       }
-      
+
       // For other errors, throw the original error
       throw new Error(deleteError.message || 'Erreur lors de la suppression du service');
     }
@@ -552,13 +553,13 @@ export async function deleteServiceAdmin(token, id) {
         .single();
 
       if (!softDeleteError && softDeleteData) {
-        return { 
-          message: 'Service désactivé (soft delete) - La suppression complète nécessite des permissions RLS', 
-          deleted: true, 
-          softDeleted: true 
+        return {
+          message: 'Service désactivé (soft delete) - La suppression complète nécessite des permissions RLS',
+          deleted: true,
+          softDeleted: true
         };
       }
-      
+
       throw new Error('La suppression a échoué. Le service existe toujours. Vérifiez les permissions RLS.');
     }
 
@@ -691,7 +692,7 @@ export async function deleteTypeAdmin(token, id) {
 
     // Check if we have a valid Supabase session
     const { data: { session } } = await supabase.auth.getSession();
-    
+
     if (!session && !token) {
       console.warn('[deleteTypeAdmin] No Supabase session or token found');
       throw new Error('Session expirée. Veuillez vous reconnecter.');
@@ -727,16 +728,16 @@ export async function deleteTypeAdmin(token, id) {
     // If there's an error, check if it's RLS-related
     if (deleteError) {
       console.error('[deleteTypeAdmin] Error deleting type:', deleteError);
-      
+
       // Check if it's a permission/RLS error
-      if (deleteError.code === '42501' || 
-          deleteError.code === 'PGRST301' ||
-          deleteError.message?.includes('permission') || 
-          deleteError.message?.includes('policy') || 
-          deleteError.message?.includes('row-level security') ||
-          deleteError.message?.includes('RLS')) {
+      if (deleteError.code === '42501' ||
+        deleteError.code === 'PGRST301' ||
+        deleteError.message?.includes('permission') ||
+        deleteError.message?.includes('policy') ||
+        deleteError.message?.includes('row-level security') ||
+        deleteError.message?.includes('RLS')) {
         console.log('[deleteTypeAdmin] RLS permission error detected, attempting soft delete...');
-        
+
         // Try soft delete: set is_active to false
         const { data: softDeleteData, error: softDeleteError } = await supabase
           .from('types')
@@ -749,25 +750,25 @@ export async function deleteTypeAdmin(token, id) {
           console.error('[deleteTypeAdmin] Soft delete also failed:', softDeleteError);
           const errorMsg = softDeleteError.message || String(softDeleteError);
           const errorCode = softDeleteError.code || softDeleteError.status || '';
-          
+
           if (errorCode === 406 || errorMsg.includes('406') || errorMsg.includes('Not Acceptable')) {
             throw new Error('❌ Les politiques RLS bloquent à la fois la suppression (DELETE) et la mise à jour (UPDATE). Veuillez configurer les permissions dans Supabase pour la table "types".');
           }
-          
+
           throw new Error('❌ Impossible de supprimer ou désactiver le type. Erreur: ' + errorMsg + ' (Code: ' + errorCode + '). Vérifiez les politiques RLS dans Supabase.');
         }
 
         if (softDeleteData) {
           console.log('[deleteTypeAdmin] Type soft deleted (is_active = false)');
-          return { 
-            message: 'Type désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète', 
-            deleted: true, 
+          return {
+            message: 'Type désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète',
+            deleted: true,
             softDeleted: true,
-            data: softDeleteData 
+            data: softDeleteData
           };
         }
       }
-      
+
       // For other errors, throw the original error
       throw new Error(deleteError.message || 'Erreur lors de la suppression du type');
     }
@@ -797,26 +798,26 @@ export async function deleteTypeAdmin(token, id) {
         .single();
 
       if (!softDeleteError && softDeleteData) {
-        return { 
-          message: 'Type désactivé (soft delete) - La suppression complète nécessite des permissions RLS', 
-          deleted: true, 
-          softDeleted: true 
+        return {
+          message: 'Type désactivé (soft delete) - La suppression complète nécessite des permissions RLS',
+          deleted: true,
+          softDeleted: true
         };
       }
-      
+
       // If soft delete also failed, provide detailed error
       if (softDeleteError) {
         console.error('[deleteTypeAdmin] Soft delete failed:', softDeleteError);
         const errorMsg = softDeleteError.message || String(softDeleteError);
         const errorCode = softDeleteError.code || softDeleteError.status || '';
-        
+
         if (errorCode === 406 || errorMsg.includes('406') || errorMsg.includes('Not Acceptable')) {
           throw new Error('❌ Les politiques RLS bloquent à la fois la suppression et la mise à jour. Veuillez configurer les permissions dans Supabase pour la table "types" (DELETE et UPDATE).');
         }
-        
+
         throw new Error('❌ Impossible de supprimer ou désactiver le type. Erreur: ' + errorMsg + ' (Code: ' + errorCode + '). Vérifiez les politiques RLS dans Supabase.');
       }
-      
+
       throw new Error('❌ La suppression a échoué. Le type existe toujours. Les politiques RLS bloquent probablement l\'opération. Vérifiez les permissions dans Supabase.');
     }
 
@@ -866,7 +867,7 @@ export async function getTypeOptions(typeId, locale = getCurrentLocale()) {
 export async function createReservation(reservationData) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     const { data, error } = await supabase
       .from('reservations')
       .insert([{
@@ -981,7 +982,7 @@ function calculateRatingStats(ratings) {
   const totalRatings = ratings.length;
   const sum = ratings.reduce((acc, r) => acc + (r.rating || 0), 0);
   const averageRating = totalRatings > 0 ? sum / totalRatings : 0;
-  
+
   // Get recent comments (ratings with comments, sorted by date)
   const recentComments = ratings
     .filter(r => r.comment && r.comment.trim())
@@ -1010,7 +1011,7 @@ export async function getRatings() {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    
+
     // Calculate stats and return in expected format
     const stats = calculateRatingStats(data);
     return {
@@ -1047,7 +1048,7 @@ export async function getAllRatings() {
 export async function hasUserRatedSite() {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       return { hasRated: false, rating: null };
     }
@@ -1076,7 +1077,7 @@ export async function hasUserRatedSite() {
 export async function submitRating(ratingData) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     // Check if user has already rated the site (for site ratings, product_id should be null)
     if (user && !ratingData.product_id) {
       const { data: existingRating, error: checkError } = await supabase
@@ -1097,7 +1098,7 @@ export async function submitRating(ratingData) {
         };
       }
     }
-    
+
     // Get user IP (non-blocking, with timeout)
     let userIp = 'unknown';
     try {
@@ -1649,11 +1650,11 @@ export async function getDriverReservations() {
 
 export async function createDriverReservation(reservationData) {
   try {
-    const db = getWriteClient();
-    
+    const db = supabase;
+
     // Log the data being sent for debugging
     console.log('[createDriverReservation] Inserting data:', reservationData);
-    
+
     const { data, error } = await db
       .from('driver_reservation')
       .insert([reservationData])
@@ -1668,7 +1669,7 @@ export async function createDriverReservation(reservationData) {
       }
       throw error;
     }
-    
+
     console.log('[createDriverReservation] Success:', data);
     return data;
   } catch (error) {
@@ -1679,7 +1680,7 @@ export async function createDriverReservation(reservationData) {
 
 export async function updateDriverReservation(id, reservationData) {
   try {
-    const db = getWriteClient();
+    const db = supabase;
     const { data, error } = await db
       .from('driver_reservation')
       .update(reservationData)
@@ -1729,18 +1730,12 @@ export async function getDriverCategories() {
   }
 }
 
-// Get the appropriate Supabase client for writes (prefer admin client to bypass RLS)
-const getWriteClient = () => {
-  if (supabaseAdmin) {
-    return supabaseAdmin;
-  }
-  console.warn('[api-supabase] Using public client for writes - RLS may block. Set REACT_APP_SUPABASE_SERVICE_ROLE_KEY in .env');
-  return supabase;
-};
+// getWriteClient removed - usage replaced with standard client
+
 
 export async function createDriverCategory(categoryData) {
   try {
-    const db = getWriteClient();
+    const db = supabase;
     const { data, error } = await db
       .from('driver_categorier')
       .insert([categoryData])
@@ -1757,7 +1752,7 @@ export async function createDriverCategory(categoryData) {
 
 export async function updateDriverCategory(id, categoryData) {
   try {
-    const db = getWriteClient();
+    const db = supabase;
     const { data, error } = await db
       .from('driver_categorier')
       .update(categoryData)
@@ -1775,7 +1770,7 @@ export async function updateDriverCategory(id, categoryData) {
 
 export async function deleteDriverCategory(id) {
   try {
-    const db = getWriteClient();
+    const db = supabase;
     const { error } = await db
       .from('driver_categorier')
       .delete()

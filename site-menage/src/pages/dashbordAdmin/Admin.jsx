@@ -69,51 +69,51 @@ export default function Admin() {
     // Check if admin is already logged in
     const token = localStorage.getItem('adminToken');
     const storedAdminData = localStorage.getItem('adminData');
-    
+
     if (token && storedAdminData) {
       // Validate token by making a test API call
       adminProfile(token).then(() => {
-      setIsAuthenticated(true);
-      const parsed = JSON.parse(storedAdminData);
-      setAdminData(parsed);
-      // If adminSecurity, ensure we are on /admin/security
-      if (parsed?.role === 'adminSecurity') {
-        const path = window.location.pathname;
-        const allowed = ['/admin/security', '/admin/security/agents', '/admin/security/reservations', '/admin/security/roles', '/admin/security/employees', '/admin/security/employees-valid', '/admin/adminBebe/employees'];
-        if (!allowed.includes(path)) {
-          navigate('/admin/security', { replace: true });
+        setIsAuthenticated(true);
+        const parsed = JSON.parse(storedAdminData);
+        setAdminData(parsed);
+        // If adminSecurity, ensure we are on /admin/security
+        if (parsed?.role === 'adminSecurity') {
+          const path = window.location.pathname;
+          const allowed = ['/admin/security', '/admin/security/agents', '/admin/security/reservations', '/admin/security/roles', '/admin/security/employees', '/admin/security/employees-valid', '/admin/adminBebe/employees'];
+          if (!allowed.includes(path)) {
+            navigate('/admin/security', { replace: true });
+          }
+        } else if (parsed?.role === 'adminHandWorker') {
+          const path = window.location.pathname;
+          const allowedHW = ['/admin/handworker', '/admin/handworker/categories', '/admin/handworker/employees', '/admin/handworker/reservations', '/admin/handworker/validated'];
+          if (!allowedHW.includes(path)) {
+            navigate('/admin/handworker', { replace: true });
+          }
+        } else if (parsed?.role === 'adminHouseKeeping') {
+          const path = window.location.pathname;
+          const allowedHK = ['/admin/housekeeping', '/admin/housekeeping/services', '/admin/housekeeping/employees', '/admin/housekeeping/confirmed-employees', '/admin/housekeeping/categories', '/admin/housekeeping/reservations', '/admin/housekeeping/types', '/admin/housekeeping/categories-house'];
+          if (!allowedHK.includes(path)) {
+            navigate('/admin/housekeeping', { replace: true });
+          }
+        } else if (parsed?.role === 'adminBebe') {
+          const path = window.location.pathname;
+          const allowedB = ['/admin/adminBebe', '/admin/adminBebe/categories', '/admin/adminBebe/services', '/admin/adminBebe/reservations', '/admin/adminBebe/ratings', '/admin/adminBebe/employees'];
+          if (!allowedB.includes(path)) {
+            navigate('/admin/adminBebe', { replace: true });
+          }
+        } else if (parsed?.role === 'adminJardinaje') {
+          const path = window.location.pathname;
+          const allowedJ = ['/admin/adminJardinaje', '/admin/adminJardinaje/categories', '/admin/adminJardinaje/services', '/admin/adminJardinaje/reservations', '/admin/adminJardinaje/ratings', '/admin/adminJardinaje/employees-manage', '/admin/adminJardinaje/employees-valid'];
+          if (!allowedJ.includes(path)) {
+            navigate('/admin/adminJardinaje', { replace: true });
+          }
+        } else if (parsed?.role === 'adminDriver' || parsed?.role === 'driver') {
+          const path = window.location.pathname;
+          const allowedD = ['/admin/driver', '/admin/driver/employees', '/admin/driver/employees-valid', '/admin/driver/reservations', '/admin/driver/categories'];
+          if (!allowedD.includes(path)) {
+            navigate('/admin/driver', { replace: true });
+          }
         }
-      } else if (parsed?.role === 'adminHandWorker') {
-        const path = window.location.pathname;
-        const allowedHW = ['/admin/handworker', '/admin/handworker/categories', '/admin/handworker/employees', '/admin/handworker/reservations', '/admin/handworker/validated'];
-        if (!allowedHW.includes(path)) {
-          navigate('/admin/handworker', { replace: true });
-        }
-      } else if (parsed?.role === 'adminHouseKeeping') {
-        const path = window.location.pathname;
-        const allowedHK = ['/admin/housekeeping', '/admin/housekeeping/services', '/admin/housekeeping/employees', '/admin/housekeeping/confirmed-employees', '/admin/housekeeping/categories', '/admin/housekeeping/reservations', '/admin/housekeeping/types', '/admin/housekeeping/categories-house'];
-        if (!allowedHK.includes(path)) {
-          navigate('/admin/housekeeping', { replace: true });
-        }
-      } else if (parsed?.role === 'adminBebe') {
-        const path = window.location.pathname;
-        const allowedB = ['/admin/adminBebe', '/admin/adminBebe/categories', '/admin/adminBebe/services', '/admin/adminBebe/reservations', '/admin/adminBebe/ratings', '/admin/adminBebe/employees'];
-        if (!allowedB.includes(path)) {
-          navigate('/admin/adminBebe', { replace: true });
-        }
-      } else if (parsed?.role === 'adminJardinaje') {
-        const path = window.location.pathname;
-        const allowedJ = ['/admin/adminJardinaje', '/admin/adminJardinaje/categories', '/admin/adminJardinaje/services', '/admin/adminJardinaje/reservations', '/admin/adminJardinaje/ratings', '/admin/adminJardinaje/employees-manage', '/admin/adminJardinaje/employees-valid'];
-        if (!allowedJ.includes(path)) {
-          navigate('/admin/adminJardinaje', { replace: true });
-        }
-      } else if (parsed?.role === 'adminDriver' || parsed?.role === 'driver') {
-        const path = window.location.pathname;
-        const allowedD = ['/admin/driver', '/admin/driver/employees', '/admin/driver/employees-valid', '/admin/driver/reservations', '/admin/driver/categories'];
-        if (!allowedD.includes(path)) {
-          navigate('/admin/driver', { replace: true });
-        }
-      }
       }).catch(() => {
         // Token is invalid, clear it
         localStorage.removeItem('adminToken');
@@ -226,7 +226,7 @@ export default function Admin() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    
+
     let isMounted = true;
     (async () => {
       try {
@@ -278,7 +278,7 @@ export default function Admin() {
 
   const handleLogout = async () => {
     // Optimistic UI: clear session immediately
-      const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('adminToken');
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminData');
     setIsAuthenticated(false);
@@ -320,7 +320,7 @@ export default function Admin() {
   const navigateToDashboard = () => {
     setActiveTab('dashboard');
     const role = adminData?.role;
-    
+
     if (role === 'adminSecurity') {
       navigate('/admin/security');
     } else if (role === 'adminHandWorker') {
@@ -479,17 +479,20 @@ export default function Admin() {
     return <AdminLogin onLogin={handleLogin} />;
   }
 
-  if (loading) return <main className="admin-page" style={{justifyContent:'center', alignItems:'center'}}><p>Chargement…</p></main>;
-  if (error) return <main className="admin-page"><p style={{color:'#b91c1c'}}>{error}</p></main>;
+  if (loading) return <main className="admin-page" style={{ justifyContent: 'center', alignItems: 'center' }}><p>Chargement…</p></main>;
+  if (error) return <main className="admin-page"><p style={{ color: '#b91c1c' }}>{error}</p></main>;
 
   return (
     <main className="admin-page">
       <header className="admin-header">
-        <div>
-          <h1 className="admin-title">Tableau de bord</h1>
-          <p className="admin-subtitle">
-            {adminData?.name || 'Admin'} ({adminData?.role || 'admin'}) - {adminData?.email}
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj" style={{ height: '50px', width: 'auto' }} />
+          <div>
+            <h1 className="admin-title">Tableau de bord</h1>
+            <p className="admin-subtitle">
+              {adminData?.name || 'Admin'} ({adminData?.role || 'admin'}) - {adminData?.email}
+            </p>
+          </div>
         </div>
         <div className="admin-kpis">
           <button onClick={handleLogout} className="admin-logout-button">
@@ -498,11 +501,11 @@ export default function Admin() {
         </div>
       </header>
 
-      
+
 
       {activeTab === 'dashboard' && !location.pathname.startsWith('/admin/housekeeping') && (
-        <DashboardStats 
-          token={localStorage.getItem('adminToken')} 
+        <DashboardStats
+          token={localStorage.getItem('adminToken')}
           onAuthError={handleAuthError}
           onCardClick={handleCardClick}
           role={adminData?.role}
@@ -513,20 +516,20 @@ export default function Admin() {
         <>
           <div className="admin-contacts-toolbar">
             <div className="admin-contacts-view-toggle">
-              <button 
+              <button
                 className={`admin-view-button ${contactsView === 'list' ? 'active' : ''}`}
                 onClick={() => setContactsView('list')}
               >
                 Liste
               </button>
-              <button 
+              <button
                 className={`admin-view-button ${contactsView === 'crud' ? 'active' : ''}`}
                 onClick={() => setContactsView('crud')}
               >
                 Gestion
               </button>
             </div>
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -544,7 +547,7 @@ export default function Admin() {
                   className="admin-search"
                 />
               </div>
-              <div style={{overflow:'auto'}}>
+              <div style={{ overflow: 'auto' }}>
                 <table className="admin-table">
                   <thead className="admin-thead">
                     <tr>
@@ -586,7 +589,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -714,7 +717,7 @@ export default function Admin() {
       {activeTab === 'services' && hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/services' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -728,7 +731,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/employees' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
@@ -742,7 +745,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/confirmed-employees' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
@@ -756,7 +759,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/categories' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
@@ -770,7 +773,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
@@ -784,7 +787,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/types' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
@@ -798,7 +801,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/categories-house' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
@@ -812,7 +815,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/menage' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
@@ -826,7 +829,7 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/types-menage' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
@@ -841,18 +844,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/tapis-canapes' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="tapis_canapes_reservations"
             title="Réservations Tapis & Canapés"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -860,18 +863,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/piscine' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="piscine_reservations"
             title="Réservations Piscine"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -879,18 +882,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/menage-cuisine' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="menage_cuisine_reservations"
             title="Réservations Ménage & Cuisine"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -898,18 +901,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/menage-complet' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="menage_complet_reservations"
             title="Réservations Ménage Complet"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -917,18 +920,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/lavage-repassage' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="lavage_ropassage_reservations"
             title="Réservations Lavage & Repassage"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -936,18 +939,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/cuisine' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="cuisine_reservations"
             title="Réservations Cuisine"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -955,18 +958,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/chaussures' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="chaussures_reservations"
             title="Réservations Chaussures"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -974,18 +977,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/bureaux-usine' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="bureaux_usin_reservations"
             title="Réservations Bureaux & Usine"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -993,18 +996,18 @@ export default function Admin() {
       {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/airbnb' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/housekeeping')}
             >
               📊 Statistiques du Site
             </button>
           </div>
-          <AdminHousekeepingReservations 
+          <AdminHousekeepingReservations
             tableName="airbnb_reservations"
             title="Réservations Airbnb"
-            token={localStorage.getItem('adminToken')} 
-            onAuthError={handleAuthError} 
+            token={localStorage.getItem('adminToken')}
+            onAuthError={handleAuthError}
           />
         </>
       )}
@@ -1012,7 +1015,7 @@ export default function Admin() {
       {activeTab === 'reservations' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1026,7 +1029,7 @@ export default function Admin() {
       {activeTab === 'ratings' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1040,7 +1043,7 @@ export default function Admin() {
       {activeTab === 'products' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1054,7 +1057,7 @@ export default function Admin() {
       {activeTab === 'product-types' && hasRole('admin') && location.pathname === '/admin/product-types' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => {
                 setActiveTab('dashboard');
@@ -1071,7 +1074,7 @@ export default function Admin() {
       {activeTab === 'product_stats' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1085,7 +1088,7 @@ export default function Admin() {
       {activeTab === 'employees' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1099,7 +1102,7 @@ export default function Admin() {
       {activeTab === 'promotions' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1113,7 +1116,7 @@ export default function Admin() {
       {activeTab === 'confirmed_employees' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1127,7 +1130,7 @@ export default function Admin() {
       {location.pathname === '/admin/security' && hasAnyRole('adminSecurity') && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1142,7 +1145,7 @@ export default function Admin() {
               <div className="stat-card securities-card clickable" onClick={() => navigate('/admin/security/agents')}>
                 <div className="stat-icon securities-icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
                 <div className="stat-content">
@@ -1162,9 +1165,9 @@ export default function Admin() {
               <div className="stat-card security-reservations-card clickable" onClick={() => navigate('/admin/security/reservations')}>
                 <div className="stat-icon security-reservations-icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2"/>
-                    <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2"/>
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" />
+                    <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" />
                   </svg>
                 </div>
                 <div className="stat-content">
@@ -1202,7 +1205,7 @@ export default function Admin() {
       {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/agents' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1216,7 +1219,7 @@ export default function Admin() {
       {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/employees' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1230,7 +1233,7 @@ export default function Admin() {
       {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/employees-valid' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1244,7 +1247,7 @@ export default function Admin() {
       {activeTab === 'security-roles' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/roles' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1258,7 +1261,7 @@ export default function Admin() {
       {hasAnyRole('adminSecurity') && location.pathname === '/admin/security/reservations' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1272,7 +1275,7 @@ export default function Admin() {
       {activeTab === 'orders' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1286,7 +1289,7 @@ export default function Admin() {
       {activeTab === 'admins' && hasRole('admin') && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1301,7 +1304,7 @@ export default function Admin() {
       {hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1357,7 +1360,7 @@ export default function Admin() {
       {activeTab === 'bebe-categories' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/categories' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1371,7 +1374,7 @@ export default function Admin() {
       {activeTab === 'bebe-services' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/services' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1385,7 +1388,7 @@ export default function Admin() {
       {activeTab === 'bebe-reservations' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/reservations' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1399,7 +1402,7 @@ export default function Admin() {
       {activeTab === 'bebe-ratings' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/ratings' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1413,7 +1416,7 @@ export default function Admin() {
       {activeTab === 'bebe-employees' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/employees' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1427,7 +1430,7 @@ export default function Admin() {
       {activeTab === 'bebe-employees-valid' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/employees-valid' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1442,7 +1445,7 @@ export default function Admin() {
       {hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1498,7 +1501,7 @@ export default function Admin() {
       {activeTab === 'jardinage-categories' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/categories' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1512,7 +1515,7 @@ export default function Admin() {
       {activeTab === 'jardinage-services' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/services' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1526,7 +1529,7 @@ export default function Admin() {
       {activeTab === 'jardinage-reservations' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/reservations' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1540,7 +1543,7 @@ export default function Admin() {
       {activeTab === 'jardinage-ratings' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/ratings' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1554,7 +1557,7 @@ export default function Admin() {
       {activeTab === 'jardinage-employees' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/employees-manage' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1568,7 +1571,7 @@ export default function Admin() {
       {activeTab === 'jardinage-employees-valid' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/employees-valid' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1583,7 +1586,7 @@ export default function Admin() {
       {hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1627,7 +1630,7 @@ export default function Admin() {
       {activeTab === 'hand-worker-categories' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/categories' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1641,7 +1644,7 @@ export default function Admin() {
       {activeTab === 'hand-workers' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/employees' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1655,7 +1658,7 @@ export default function Admin() {
       {activeTab === 'hand-worker-reservations' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/reservations' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1669,7 +1672,7 @@ export default function Admin() {
       {activeTab === 'hand-worker-registrations' && hasAnyRole('adminHandWorker') && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1683,7 +1686,7 @@ export default function Admin() {
       {activeTab === 'valide-hand-worker-reservations' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/validated' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1698,7 +1701,7 @@ export default function Admin() {
       {hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1742,7 +1745,7 @@ export default function Admin() {
       {activeTab === 'driver-employees' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/employees' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/driver')}
             >
@@ -1756,7 +1759,7 @@ export default function Admin() {
       {activeTab === 'driver-employees-valid' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/employees-valid' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/driver')}
             >
@@ -1770,7 +1773,7 @@ export default function Admin() {
       {activeTab === 'driver-reservations' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/reservations' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/driver')}
             >
@@ -1784,7 +1787,7 @@ export default function Admin() {
       {activeTab === 'driver-categories' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/categories' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={() => navigate('/admin/driver')}
             >
@@ -1799,7 +1802,7 @@ export default function Admin() {
       {activeTab === 'gallery-types' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1813,7 +1816,7 @@ export default function Admin() {
       {activeTab === 'gallery-categories' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >
@@ -1827,7 +1830,7 @@ export default function Admin() {
       {activeTab === 'gallery' && (
         <>
           <div className="admin-page-header">
-            <button 
+            <button
               className="admin-back-to-dashboard"
               onClick={navigateToDashboard}
             >

@@ -1,0 +1,288 @@
+/* Scoped styles for ProductDetailModal (pdm prefix) */
+
+.product-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+    animation: pdmFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-modal-content {
+    background: #ffffff;
+    width: 100%;
+    max-width: 950px;
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: pdmSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #e2e8f0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    font-size: 1.25rem;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.product-modal-close:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    transform: rotate(90deg);
+}
+
+/* Grid Layout */
+.pdm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 550px;
+}
+
+/* Image Section */
+.pdm-image-container {
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+}
+
+.pdm-image-container img {
+    max-width: 100%;
+    max-height: 450px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s ease;
+}
+
+.pdm-image-container img:hover {
+    transform: scale(1.05);
+}
+
+/* Details Section */
+.pdm-details {
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+}
+
+/* Header */
+.pdm-header {
+    margin-bottom: 24px;
+}
+
+.pdm-category-badge {
+    display: inline-block;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 6px 12px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+}
+
+.pdm-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.1;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.02em;
+}
+
+.pdm-rating {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pdm-stars {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #fffbeb;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.pdm-rating-val {
+    font-weight: 700;
+    color: #b45309;
+    font-size: 0.9rem;
+}
+
+.pdm-review-count {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* Price Section */
+.pdm-price-section {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.pdm-price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.pdm-price small {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-left: 4px;
+}
+
+.pdm-old-price {
+    text-decoration: line-through;
+    color: #94a3b8;
+    font-size: 1.125rem;
+}
+
+/* Description */
+.pdm-description {
+    color: #475569;
+    line-height: 1.7;
+    font-size: 1.05rem;
+    margin-bottom: 32px;
+    flex-grow: 1;
+}
+
+/* Features */
+.pdm-features {
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pdm-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.pdm-feature-icon {
+    color: #10b981;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    background: #ecfdf5;
+    padding: 4px;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+}
+
+/* Actions */
+.pdm-actions {
+    margin-top: auto;
+}
+
+.pdm-full-width-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 16px !important;
+    font-size: 1.1rem !important;
+    border-radius: 12px !important;
+    background: #0f172a !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+.pdm-full-width-btn:hover {
+    background: #1e293b !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+}
+
+/* Animations */
+@keyframes pdmFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pdmSlideUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .pdm-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pdm-image-container {
+        padding: 30px;
+        height: 300px;
+        min-height: auto;
+    }
+
+    .pdm-image-container img {
+        max-height: 240px;
+    }
+
+    .pdm-details {
+        padding: 24px;
+    }
+
+    .pdm-title {
+        font-size: 1.75rem;
+    }
+
+    .product-modal-content {
+        max-width: 100%;
+        margin: 10px;
+        border-radius: 16px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}

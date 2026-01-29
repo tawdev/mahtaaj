@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import AuthService from '../lib/authService';
 import './LoginRegister.css';
 
 export default function LoginRegister() {
@@ -24,6 +25,15 @@ export default function LoginRegister() {
 
   // Récupérer l'URL de retour depuis les paramètres
   const returnUrl = location.state?.returnUrl || '/';
+
+  // Store returnUrl in localStorage for the global auth listener (App.jsx)
+  // This ensures redirect works even after page refreshes or from email confirmations
+  useEffect(() => {
+    localStorage.setItem('auth_return_url', returnUrl);
+    return () => {
+      // Optional: don't clean up here as App.jsx will clean it up on redirect
+    };
+  }, [returnUrl]);
 
   // Auto-login and autofill logic
   useEffect(() => {
@@ -50,23 +60,21 @@ export default function LoginRegister() {
             name: user.user_metadata?.name || user.email,
             email: user.email
           }));
-              localStorage.setItem('user', JSON.stringify({ 
-            id: user.id, 
-            name: user.user_metadata?.name || user.email, 
-            email: user.email 
-              }));
-              
-              setSuccess('تسجيل دخول تلقائي ناجح!');
-              setTimeout(() => {
-                navigate(returnUrl);
-              }, 1000);
-              return;
-          }
-          
+          localStorage.setItem('user', JSON.stringify({
+            id: user.id,
+            name: user.user_metadata?.name || user.email,
+            email: user.email
+          }));
+
+          // We disable auto-redirect so the user can see they are on the login page
+          // navigate(returnUrl);
+          // return;
+        }
+
         // No valid session, clean up old Laravel tokens if any
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user_data');
-          localStorage.removeItem('user');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user');
       } catch (error) {
         console.log('Auto-login failed:', error);
         // Clean up invalid tokens
@@ -104,49 +112,49 @@ export default function LoginRegister() {
   const isValidEmail = (email) => {
     // Regex plus strict pour valider l'email
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    
+
     // Vérifier le format de base
     if (!emailRegex.test(email)) {
       return false;
     }
-    
+
     // Vérifier que le domaine a au moins 2 caractères après le point
     const parts = email.split('@');
     if (parts.length !== 2) {
       return false;
     }
-    
+
     const domain = parts[1];
     const domainParts = domain.split('.');
     if (domainParts.length < 2) {
       return false;
     }
-    
+
     // Vérifier que le TLD (top-level domain) a au moins 2 caractères
     const tld = domainParts[domainParts.length - 1];
     if (tld.length < 2) {
       return false;
     }
-    
+
     // Vérifier qu'il n'y a pas de caractères invalides
     if (email.includes('..') || email.includes('@@')) {
       return false;
     }
-    
+
     // Vérifier que le domaine n'est pas vide ou trop court
     const domainName = domainParts[0];
     if (!domainName || domainName.length < 2) {
       return false;
     }
-    
+
     // Liste des TLDs communs (optionnel, pour validation supplémentaire)
     const commonTlds = ['com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'uk', 'fr', 'de', 'es', 'it', 'nl', 'be', 'ch', 'at', 'se', 'no', 'dk', 'fi', 'pl', 'cz', 'gr', 'pt', 'ie', 'au', 'ca', 'nz', 'jp', 'cn', 'in', 'br', 'mx', 'ar', 'za', 'ae', 'sa', 'eg', 'ma', 'dz', 'tn', 'ly', 'sd', 'ye', 'iq', 'jo', 'lb', 'sy', 'ps', 'kw', 'qa', 'bh', 'om'];
-    
+
     // Vérifier que le TLD est valide (au moins 2 caractères et alphabétique)
     if (!/^[a-zA-Z]{2,}$/.test(tld)) {
       return false;
     }
-    
+
     return true;
   };
 
@@ -164,11 +172,11 @@ export default function LoginRegister() {
       }
 
       const trimmedEmail = formData.email.trim().toLowerCase();
-      
+
       // Validation de l'email
       const emailIsValid = isValidEmail(trimmedEmail);
       console.log('Email validation:', { email: trimmedEmail, isValid: emailIsValid });
-      
+
       if (!emailIsValid) {
         setError('Adresse email invalide. Veuillez vérifier votre email.\nExemples valides: nom@gmail.com, nom@yahoo.com, nom@example.com');
         setIsLoading(false);
@@ -179,7 +187,7 @@ export default function LoginRegister() {
         // Connexion avec Supabase
         const { data, error } = await supabase.auth.signInWithPassword({
           email: trimmedEmail,
-            password: formData.password
+          password: formData.password
         });
 
         if (error) {
@@ -188,11 +196,19 @@ export default function LoginRegister() {
         }
 
         if (data.user) {
+          // Check if email is verified
+          if (!data.user.email_confirmed_at) {
+            await supabase.auth.signOut();
+            setError('❌ Votre email n\'est pas encore confirmé. Veuillez vérifier votre boîte de réception.');
+            setIsLoading(false);
+            return;
+          }
+
           // Clean up old Laravel tokens
           try {
             localStorage.removeItem('auth_token');
             sessionStorage.removeItem('auth_token');
-          } catch (_) {}
+          } catch (_) { }
 
           // Save user data
           const userData = {
@@ -200,17 +216,17 @@ export default function LoginRegister() {
             name: data.user.user_metadata?.name || data.user.email,
             email: data.user.email
           };
-          
+
           localStorage.setItem('user_data', JSON.stringify(userData));
           localStorage.setItem('user', JSON.stringify(userData));
-          
+
           // Save email for "Remember Me" functionality
           if (rememberMe) {
             localStorage.setItem('remembered_email', trimmedEmail);
           } else {
             localStorage.removeItem('remembered_email');
           }
-          
+
           // Update last_login in users table
           try {
             await supabase
@@ -221,11 +237,9 @@ export default function LoginRegister() {
             console.error('Error updating last_login:', loginUpdateErr);
             // Don't fail login if this fails
           }
-          
+
           setSuccess('Connexion réussie !');
-          setTimeout(() => {
-            navigate(returnUrl);
-          }, 1500);
+          // No manual navigate here - App.jsx handles the redirect when session is detected
         }
       } else {
         // Inscription avec Supabase
@@ -278,7 +292,7 @@ export default function LoginRegister() {
             status: error.status,
             email: trimmedEmail
           });
-          
+
           // Traduire les messages d'erreur courants
           let errorMessage = error.message;
           if (error.message?.includes('already registered') || error.message?.includes('already exists') || error.message?.includes('User already registered')) {
@@ -304,17 +318,17 @@ export default function LoginRegister() {
             name: formData.name.trim(),
             email: data.user.email
           };
-          
+
           localStorage.setItem('user_data', JSON.stringify(userData));
           localStorage.setItem('user', JSON.stringify(userData));
-            
+
           // Save email for "Remember Me" functionality
           if (rememberMe) {
             localStorage.setItem('remembered_email', trimmedEmail);
           } else {
             localStorage.removeItem('remembered_email');
           }
-          
+
           // Save user data in the users table
           try {
             const { error: userTableError } = await supabase
@@ -340,20 +354,18 @@ export default function LoginRegister() {
             console.error('Exception saving user to users table:', userTableErr);
             // Continue with registration even if this fails
           }
-            
+
           // Vérifier si l'email confirmation est requise
           if (data.session) {
             // L'utilisateur est connecté directement
             setSuccess('Inscription réussie ! Vous êtes maintenant connecté.');
-            setTimeout(() => {
-              navigate(returnUrl);
-            }, 1500);
+            // No manual navigate here - App.jsx handles the redirect when session is detected
           } else {
             // Email confirmation requise
             setSuccess('Inscription réussie ! Veuillez vérifier votre email pour confirmer votre compte.');
             setIsLogin(true);
           }
-          
+
           setFormData({
             name: '',
             email: '',
@@ -389,7 +401,7 @@ export default function LoginRegister() {
     try {
       // Sign out from Supabase
       await supabase.auth.signOut();
-      
+
       // Remove authentication data
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
@@ -397,10 +409,10 @@ export default function LoginRegister() {
       sessionStorage.removeItem('auth_token');
       sessionStorage.removeItem('user_data');
       sessionStorage.removeItem('user');
-      
+
       // Keep remembered_email for easy re-login
       // localStorage.removeItem('remembered_email'); // Commented out to keep email
-      
+
       setSuccess('تم تسجيل الخروج بنجاح');
       setTimeout(() => {
         navigate('/');
@@ -410,194 +422,228 @@ export default function LoginRegister() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      await AuthService.signInWithGoogle();
+      // The user will be redirected to Google, so we don't need much logic here
+    } catch (error) {
+      setError('Erreur d\'authentification avec Google');
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="login-register-page">
-      <div className="login-register-container">
-        <div className="form-header">
-          <h1 className="form-title">
-            {isLogin ? '🔐 Connexion' : '📝 Inscription'}
-          </h1>
-          
+      {/* Illustration Side */}
+      <div className="auth-illustration-side">
+        <img src="/galerie/b__A_wide-angle,_high-.png" alt="Auth Illustration" />
+        <div className="illustration-overlay">
+          <h2>{isLogin ? "Bon retour parmi nous !" : "Rejoignez l'excellence"}</h2>
+          <p>
+            {isLogin
+              ? "Connectez-vous pour accéder à vos services de ménage et de sécurité en toute simplicité."
+              : "Créez votre compte pour bénéficier de nos services professionnels sur mesure."}
+          </p>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          {!isLogin && (
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">Nom complet</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="form-input"
-                required={!isLogin}
-                placeholder="Votre nom complet"
-              />
-            </div>
-          )}
-
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className="form-input"
-              required
-              placeholder="votre@email.com"
-            />
+      {/* Form Side */}
+      <div className="auth-form-side">
+        <div className="login-register-container">
+          <div className="form-header">
+            <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj Logo" className="auth-logo" />
+            <h1 className="form-title">
+              {isLogin ? "Connexion" : "Inscription"}
+            </h1>
+            <p className="form-subtitle">
+              {isLogin ? "Entrez vos informations pour continuer" : "Remplissez le formulaire pour commencer"}
+            </p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">Mot de passe</label>
-            <div className="password-input-container">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                className="form-input password-input"
-                required
-                placeholder="Votre mot de passe"
-                minLength="6"
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={togglePasswordVisibility}
-                tabIndex="-1"
-                aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
-              >
-                {showPassword ? (
-                  // Eye (open)
-                  <svg className="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                  </svg>
-                ) : (
-                  // Eye (closed)
-                  <svg className="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.05"/>
-                    <path d="M1 1l22 22"/>
-                  </svg>
-                )}
-              </button>
-            </div>
-          </div>
+          <form onSubmit={handleSubmit} className="auth-form">
+            {!isLogin && (
+              <div className="form-group">
+                <label htmlFor="name" className="form-label">Nom complet</label>
+                <div className="form-input-wrapper">
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    required={!isLogin}
+                    placeholder="Votre nom complet"
+                  />
+                </div>
+              </div>
+            )}
 
-          {!isLogin && (
             <div className="form-group">
-              <label htmlFor="password_confirmation" className="form-label">Confirmer le mot de passe</label>
+              <label htmlFor="email" className="form-label">Email</label>
+              <div className="form-input-wrapper">
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="form-input"
+                  required
+                  placeholder="votre@email.com"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">Mot de passe</label>
               <div className="password-input-container">
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  id="password_confirmation"
-                  name="password_confirmation"
-                  value={formData.password_confirmation}
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
                   onChange={handleInputChange}
-                  className="form-input password-input"
-                  required={!isLogin}
-                  placeholder="Confirmez votre mot de passe"
+                  className="form-input"
+                  required
+                  placeholder="Votre mot de passe"
                   minLength="6"
                 />
                 <button
                   type="button"
                   className="password-toggle-btn"
-                  onClick={toggleConfirmPasswordVisibility}
+                  onClick={togglePasswordVisibility}
                   tabIndex="-1"
-                  aria-label={showConfirmPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+                  aria-label={showPassword ? 'Masquer' : 'Afficher'}
                 >
-                  {showConfirmPassword ? (
-                    // Eye (open)
-                    <svg className="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                      <circle cx="12" cy="12" r="3"/>
+                  {showPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
                     </svg>
                   ) : (
-                    // Eye (closed)
-                    <svg className="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.05"/>
-                      <path d="M1 1l22 22"/>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.05" />
+                      <path d="M1 1l22 22" />
                     </svg>
                   )}
                 </button>
               </div>
             </div>
-          )}
 
-          {error && (
-            <div className="error-message">
-              <span className="error-icon">⚠️</span>
-              {error}
+            {!isLogin && (
+              <div className="form-group">
+                <label htmlFor="password_confirmation" className="form-label">Confirmer le mot de passe</label>
+                <div className="password-input-container">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="password_confirmation"
+                    name="password_confirmation"
+                    value={formData.password_confirmation}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    required={!isLogin}
+                    placeholder="Confirmez votre mot de passe"
+                    minLength="6"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={toggleConfirmPasswordVisibility}
+                    tabIndex="-1"
+                  >
+                    {showConfirmPassword ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.77 21.77 0 0 1 5.06-6.05" />
+                        <path d="M1 1l22 22" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {isLogin && (
+              <div className="remember-row">
+                <label className="remember-label" htmlFor="rememberMe">
+                  <input
+                    id="rememberMe"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                  <span>Se souvenir de moi</span>
+                </label>
+              </div>
+            )}
+
+            <button type="submit" className="submit-button" disabled={isLoading}>
+              {isLoading ? <div className="loading-spinner"></div> : (isLogin ? 'Se connecter' : 'S\'inscrire')}
+            </button>
+
+            <div className="oauth-divider">
+              <span className="divider-text">ou avec</span>
             </div>
-          )}
 
-          {success && (
-            <div className="success-message">
-              <span className="success-icon">✅</span>
-              {success}
-            </div>
-          )}
+            <button type="button" className="google-login-button" onClick={handleGoogleLogin} disabled={isLoading}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="20" height="20">
+                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
+                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
+                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
+                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+              </svg>
+              <span>Continuer avec Google</span>
+            </button>
+          </form>
 
-          <div className="remember-row">
-            <label className="remember-label" htmlFor="rememberMe">
-              <input
-                id="rememberMe"
-                type="checkbox"
-                className="remember-checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              <span className="remember-text">تذكرني</span>
-            </label>
+          <div className="form-footer">
+            <p className="toggle-text">
+              {isLogin ? "Vous n'avez pas de compte ?" : "Déjà l'un des nôtres ?"}
+            </p>
+            <button type="button" onClick={toggleMode} className="toggle-button">
+              {isLogin ? "Créer un compte" : "Se connecter"}
+            </button>
           </div>
 
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="loading-spinner"></div>
-            ) : (
-              isLogin ? 'Se connecter' : 'S\'inscrire'
-            )}
-          </button>
-
-        </form>
-
-        <div className="form-footer">
-          <p className="toggle-text">
-            {isLogin ? 'Pas encore de compte ?' : 'Déjà un compte ?'}
-          </p>
-          <button
-            type="button"
-            onClick={toggleMode}
-            className="toggle-button"
-          >
-            {isLogin ? 'Créer un compte' : 'Se connecter'}
-          </button>
+          <div className="back-to-shop">
+            <button type="button" onClick={() => navigate('/')} className="back-button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19L5 12L12 5" />
+              </svg>
+              Retour à l'accueil
+            </button>
+          </div>
         </div>
-
-        <div className="back-to-shop">
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="back-button"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5M12 19L5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            🏠 Retour à l'accueil
-          </button>
-        </div>
-
-        
       </div>
+
+      {success && (
+        <div className="success-toast">
+          <div className="success-icon">✓</div>
+          <div className="success-content">
+            <h4 style={{ margin: 0, fontSize: '0.9rem' }}>Succès</h4>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>{success}</p>
+          </div>
+          <button className="toast-close" onClick={() => setSuccess('')}>×</button>
+        </div>
+      )}
+
+      {error && (
+        <div className="error-toast">
+          <div className="error-icon-toast">⚠️</div>
+          <div className="success-content">
+            <h4 style={{ margin: 0, fontSize: '0.9rem' }}>Erreur</h4>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>{error}</p>
+          </div>
+          <button className="toast-close" onClick={() => setError('')}>×</button>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './AdminBebeCategoriesCrud.css';
 import LanguageFields from '../../components/LanguageFields';
 import { supabase } from '../../lib/supabase';
-import { supabaseAdmin } from '../../lib/supabaseAdmin';
+
 
 const AdminBebeCategoriesCrud = () => {
   const [categories, setCategories] = useState([]);
@@ -36,12 +36,12 @@ const AdminBebeCategoriesCrud = () => {
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    
+
     // If it's already a Supabase URL, return it
     if (imagePath.includes('supabase.co/storage')) {
       return imagePath;
     }
-    
+
     // If it's an old Laravel path, extract filename and try to get from Supabase
     if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/') || imagePath.startsWith('/images/')) {
       const filename = imagePath.split('/').pop();
@@ -53,7 +53,7 @@ const AdminBebeCategoriesCrud = () => {
       }
       return null;
     }
-    
+
     // If it's just a filename, try to get from Supabase Storage
     if (!imagePath.includes('/') && !imagePath.includes('http')) {
       const { data: { publicUrl } } = supabase.storage
@@ -61,12 +61,12 @@ const AdminBebeCategoriesCrud = () => {
         .getPublicUrl(imagePath);
       return publicUrl;
     }
-    
+
     // Return as-is if it's a valid URL
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
+
     return null;
   };
 
@@ -88,9 +88,9 @@ const AdminBebeCategoriesCrud = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[AdminBebeCategories] Loading categories from Supabase');
-      
+
       const { data, error } = await supabase
         .from('bebe_categories')
         .select('*')
@@ -128,15 +128,15 @@ const AdminBebeCategoriesCrud = () => {
         setError('Veuillez sélectionner un fichier image valide');
         return;
       }
-      
+
       // Check file size (3MB)
       if (file.size > 3 * 1024 * 1024) {
         setError('La taille du fichier ne doit pas dépasser 3MB');
         return;
       }
-      
+
       setImageFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -160,17 +160,13 @@ const AdminBebeCategoriesCrud = () => {
   };
 
   const getWriteClient = () => {
-    if (supabaseAdmin) {
-      return supabaseAdmin;
-    }
-    console.warn('[AdminBebeCategories] Using public client - RLS may block writes. Set REACT_APP_SUPABASE_SERVICE_ROLE_KEY in .env');
     return supabase;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setError(''); setToast({ type:'', message:'' });
+      setError(''); setToast({ type: '', message: '' });
       // basic required validation
       const hasAnyName = (formData.name || formData.name_fr || formData.name_ar || formData.name_en);
       if (!hasAnyName) {
@@ -179,18 +175,18 @@ const AdminBebeCategoriesCrud = () => {
       }
       // Avoid submitting when no changes while editing
       if (editingCategory) {
-        const fields = ['name','name_ar','name_fr','name_en','description','description_ar','description_fr','description_en','image','is_active','order'];
-        const before = JSON.stringify(fields.reduce((o,k)=>({ ...o, [k]: editingCategory[k] ?? (k.startsWith('description')? '' : (k==='order'?0: (k==='is_active'?false:''))) }),{}));
-        const after = JSON.stringify(fields.reduce((o,k)=>({ ...o, [k]: formData[k] }),{}));
+        const fields = ['name', 'name_ar', 'name_fr', 'name_en', 'description', 'description_ar', 'description_fr', 'description_en', 'image', 'is_active', 'order'];
+        const before = JSON.stringify(fields.reduce((o, k) => ({ ...o, [k]: editingCategory[k] ?? (k.startsWith('description') ? '' : (k === 'order' ? 0 : (k === 'is_active' ? false : ''))) }), {}));
+        const after = JSON.stringify(fields.reduce((o, k) => ({ ...o, [k]: formData[k] }), {}));
         if (before === after) {
-          setToast({ type:'info', message:'لم يتم حفظ التعديلات' });
+          setToast({ type: 'info', message: 'لم يتم حفظ التعديلات' });
           return;
         }
       }
 
       // Handle image upload to Supabase Storage if imageFile exists
       let imageUrl = formData.image || '';
-      
+
       if (imageFile) {
         console.log('[AdminBebeCategories] Uploading image to Supabase Storage');
         // Clean filename: remove special characters and spaces
@@ -200,7 +196,7 @@ const AdminBebeCategoriesCrud = () => {
           .toLowerCase();
         const fileName = `bebe_category_${Date.now()}_${cleanFileName}`;
         const filePath = fileName;
-        
+
         // Upload to Supabase Storage (employees bucket)
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('employees')
@@ -208,7 +204,7 @@ const AdminBebeCategoriesCrud = () => {
             cacheControl: '3600',
             upsert: false
           });
-        
+
         if (uploadError) {
           console.error('[AdminBebeCategories] Error uploading image:', uploadError);
           // If upload fails, try to use base64 if available
@@ -231,7 +227,7 @@ const AdminBebeCategoriesCrud = () => {
 
       // Build payload
       const sanitize = (data) => {
-        const fields = ['name','name_ar','name_fr','name_en','description','description_ar','description_fr','description_en','image','is_active','order'];
+        const fields = ['name', 'name_ar', 'name_fr', 'name_en', 'description', 'description_ar', 'description_fr', 'description_en', 'image', 'is_active', 'order'];
         const out = {};
         fields.forEach((k) => {
           let v = data[k];
@@ -253,9 +249,7 @@ const AdminBebeCategoriesCrud = () => {
       console.log('[AdminBebeCategories] Submitting category:', { editing: !!editingCategory, id: editingCategory?.id, payload });
 
       const db = getWriteClient();
-      if (!supabaseAdmin) {
-        console.warn('[AdminBebeCategories] Service role key not configured, falling back to public client (writes may fail).');
-      }
+
 
       let data, error;
       if (editingCategory) {
@@ -280,7 +274,7 @@ const AdminBebeCategoriesCrud = () => {
       if (error) {
         console.error('[AdminBebeCategories] Error saving category:', error);
         setError('Erreur lors de la sauvegarde: ' + error.message);
-        setToast({ type:'error', message: 'Erreur lors de la sauvegarde: ' + error.message });
+        setToast({ type: 'error', message: 'Erreur lors de la sauvegarde: ' + error.message });
         return;
       }
 
@@ -288,14 +282,14 @@ const AdminBebeCategoriesCrud = () => {
       await loadCategories();
       setShowForm(false);
       setEditingCategory(null);
-      setFormData({ name: '', name_ar:'', name_fr:'', name_en:'', description: '', description_ar:'', description_fr:'', description_en:'', image: '', is_active: true, order: 0 });
+      setFormData({ name: '', name_ar: '', name_fr: '', name_en: '', description: '', description_ar: '', description_fr: '', description_en: '', image: '', is_active: true, order: 0 });
       setImagePreview(null);
       setImageFile(null);
-      setToast({ type:'success', message: 'تم حفظ التعديلات بنجاح' });
+      setToast({ type: 'success', message: 'تم حفظ التعديلات بنجاح' });
     } catch (err) {
       console.error('Erreur lors de la modification:', err);
       setError('لم يتم حفظ التعديلات، تحقق من console لمعرفة السبب');
-      setToast({ type:'error', message:'لم يتم حفظ التعديلات، تحقق من console لمعرفة السبب' });
+      setToast({ type: 'error', message: 'لم يتم حفظ التعديلات، تحقق من console لمعرفة السبب' });
     }
   };
 
@@ -325,11 +319,9 @@ const AdminBebeCategoriesCrud = () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
       try {
         console.log('[AdminBebeCategories] Deleting category:', id);
-        
+
         const db = getWriteClient();
-        if (!supabaseAdmin) {
-          console.warn('[AdminBebeCategories] Service role key not configured, falling back to public client (writes may fail).');
-        }
+
 
         // Delete with select to verify deletion
         const { data, error } = await db
@@ -341,40 +333,26 @@ const AdminBebeCategoriesCrud = () => {
         if (error) {
           console.error('[AdminBebeCategories] Error deleting category:', error);
           setError('Erreur lors de la suppression: ' + error.message);
-          setToast({ type:'error', message: 'Erreur lors de la suppression: ' + error.message });
+          setToast({ type: 'error', message: 'Erreur lors de la suppression: ' + error.message });
           return;
         }
 
         // Verify deletion was successful
         if (!data || data.length === 0) {
-          let errorMsg = '';
-          if (supabaseAdmin) {
-            errorMsg = 'La catégorie n\'a pas pu être supprimée. Elle n\'existe peut-être pas.';
-          } else {
-            errorMsg = '❌ فشل الحذف: RLS يمنع العملية.\n\n' +
-              'الحل:\n' +
-              '1. افتح Supabase Dashboard\n' +
-              '2. اذهب إلى Settings > API\n' +
-              '3. انسخ service_role key\n' +
-              '4. أضف في ملف .env:\n' +
-              '   REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_key_here\n' +
-              '5. أعد تشغيل التطبيق';
-          }
           console.warn('[AdminBebeCategories] No rows deleted - category may not exist or RLS blocked deletion');
-          console.error('[AdminBebeCategories] Deletion failed. If using public client, RLS is blocking. Add REACT_APP_SUPABASE_SERVICE_ROLE_KEY to .env file.');
-          setError(errorMsg);
-          setToast({ type:'error', message: 'فشل الحذف - راجع رسالة الخطأ' });
+          setError('La catégorie n\'a pas pu être supprimée. Elle n\'existe peut-être pas ou vous n\'avez pas les permissions (RLS).');
+          setToast({ type: 'error', message: 'فشل الحذف - راجع رسالة الخطأ' });
           return;
         }
 
         console.log('[AdminBebeCategories] Category deleted successfully:', data);
         await loadCategories();
-        setToast({ type:'success', message: 'تم حذف الفئة بنجاح' });
+        setToast({ type: 'success', message: 'تم حذف الفئة بنجاح' });
         setError(''); // Clear any previous errors
       } catch (err) {
         console.error('[AdminBebeCategories] Exception deleting category:', err);
         setError('Erreur de connexion: ' + err.message);
-        setToast({ type:'error', message: 'Erreur de connexion: ' + err.message });
+        setToast({ type: 'error', message: 'Erreur de connexion: ' + err.message });
       }
     }
   };
@@ -382,7 +360,7 @@ const AdminBebeCategoriesCrud = () => {
   const handleCancel = () => {
     setShowForm(false);
     setEditingCategory(null);
-    setFormData({ name: '', name_ar:'', name_fr:'', name_en:'', description: '', description_ar:'', description_fr:'', description_en:'', image: '', is_active: true, order: 0 });
+    setFormData({ name: '', name_ar: '', name_fr: '', name_en: '', description: '', description_ar: '', description_fr: '', description_en: '', image: '', is_active: true, order: 0 });
     setImagePreview(null);
     setImageFile(null);
     setError('');
@@ -392,10 +370,10 @@ const AdminBebeCategoriesCrud = () => {
     const categoryName = category.name || '';
     const categoryDescription = category.description || '';
     const matchesSearch = categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         categoryDescription.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'all' || 
-                         (filterStatus === 'active' && category.is_active) ||
-                         (filterStatus === 'inactive' && !category.is_active);
+      categoryDescription.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' ||
+      (filterStatus === 'active' && category.is_active) ||
+      (filterStatus === 'inactive' && !category.is_active);
     return matchesSearch && matchesStatus;
   });
 
@@ -411,7 +389,7 @@ const AdminBebeCategoriesCrud = () => {
     <div className="admin-bebe-categories">
       <div className="admin-header">
         <h2>🍼 Gestion des Catégories Bébé Setting</h2>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => setShowForm(true)}
         >
@@ -419,45 +397,7 @@ const AdminBebeCategoriesCrud = () => {
         </button>
       </div>
 
-      {!supabaseAdmin && (
-        <div className="warning-message" style={{
-          backgroundColor: '#fff3cd',
-          border: '1px solid #ffc107',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px',
-          color: '#856404',
-          lineHeight: '1.6'
-        }}>
-          <strong>⚠️ تحذير: Service Role Key غير معرّف</strong>
-          <br />
-          <p style={{ margin: '10px 0' }}>
-            عمليات الحذف والتعديل قد تفشل بسبب RLS (Row Level Security).
-          </p>
-          <div style={{ marginTop: '10px', fontSize: '14px' }}>
-            <strong>الحل:</strong>
-            <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
-              <li>افتح Supabase Dashboard</li>
-              <li>اذهب إلى <code>Settings → API</code></li>
-              <li>انسخ <code>service_role</code> key</li>
-              <li>أنشئ ملف <code>.env</code> في مجلد <code>site-menage</code></li>
-              <li>أضف السطر التالي:
-                <pre style={{ 
-                  backgroundColor: '#f8f9fa', 
-                  padding: '8px', 
-                  borderRadius: '4px', 
-                  marginTop: '5px',
-                  fontSize: '12px',
-                  overflow: 'auto'
-                }}>
-REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
-                </pre>
-              </li>
-              <li>أعد تشغيل التطبيق (<code>npm start</code>)</li>
-            </ol>
-          </div>
-        </div>
-      )}
+
 
       {error && (
         <div className="error-message" style={{
@@ -484,7 +424,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
           />
           <span className="search-icon">🔍</span>
         </div>
-        
+
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
@@ -503,7 +443,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
               <h3>{editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h3>
               <button className="close-btn" onClick={handleCancel}>✕</button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="category-form">
               <div className="form-group">
                 <label htmlFor="name">Nom de la catégorie *</label>
@@ -570,7 +510,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                   )}
                 </div>
               </div>
-              
+
               <div className="form-group checkbox-group">
                 <label className="checkbox-label">
                   <input
@@ -583,7 +523,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                   Catégorie active
                 </label>
               </div>
-              
+
               <div className="form-actions">
                 <button type="button" onClick={handleCancel} className="btn btn-secondary">
                   Annuler
@@ -639,7 +579,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
                           }}
                         />
                       ) : null}
-                      <div className="category-img-placeholder" style={{display: imageUrl ? 'none' : 'block'}}>
+                      <div className="category-img-placeholder" style={{ display: imageUrl ? 'none' : 'block' }}>
                         👶
                       </div>
                     </td>
@@ -685,7 +625,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
             <div className="stat-label">Total des catégories</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">✅</div>
           <div className="stat-content">
@@ -693,7 +633,7 @@ REACT_APP_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
             <div className="stat-label">Catégories actives</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">❌</div>
           <div className="stat-content">

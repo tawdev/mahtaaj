@@ -22,10 +22,10 @@ const Cart = ({ isOpen, onClose, token }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session?.user) {
         // Load cart from Supabase
         const { data, error } = await supabase
@@ -35,11 +35,11 @@ const Cart = ({ isOpen, onClose, token }) => {
             products (*)
           `)
           .eq('user_id', session.user.id);
-        
+
         if (error) {
           throw error;
         }
-        
+
         // Transform Supabase data to match expected format
         const items = (data || []).map(cartItem => ({
           id: cartItem.id,
@@ -58,20 +58,46 @@ const Cart = ({ isOpen, onClose, token }) => {
             image: null
           }
         }));
-        
-        // Filter out deleted products
-        const validItems = items.filter(item => 
-          item.product && 
-          item.product.name !== t('cart_page.product_deleted') && 
-          item.price > 0
-        );
-        
+
+        // Filter out deleted products - RELAXED filtering to debug mismatch
+        // We now show all items so user can delete them if they are invalid
+        const validItems = items;
+
         setCartItems(validItems);
       } else {
         // Guest cart from localStorage
         const cartKey = 'guest_cart';
         const cart = JSON.parse(localStorage.getItem(cartKey) || '[]');
-        setCartItems([]); // For now, guest cart is empty in this component
+
+        // Fetch product details for guest items from Supabase to ensure accurate price/image
+        if (cart.length > 0) {
+          const productIds = cart.map(item => item.product_id);
+          const { data: products } = await supabase
+            .from('products')
+            .select('*')
+            .in('id', productIds);
+
+          const productMap = (products || []).reduce((acc, p) => ({ ...acc, [p.id]: p }), {});
+
+          const fullItems = cart.map(item => {
+            const product = productMap[item.product_id];
+            return {
+              id: item.product_id, // Use product_id as cart item id for guest
+              product_id: item.product_id,
+              quantity: item.quantity,
+              price: product ? product.price : 0,
+              product: product ? {
+                id: product.id,
+                name: product.name || product.name_fr || product.name_en || product.name_ar,
+                description: product.description || product.description_fr || product.description_en || product.description_ar,
+                image: product.image
+              } : null
+            };
+          });
+          setCartItems(fullItems);
+        } else {
+          setCartItems([]);
+        }
       }
     } catch (err) {
       setError(err.message || t('cart_page.error'));
@@ -96,18 +122,18 @@ const Cart = ({ isOpen, onClose, token }) => {
     try {
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session?.user) {
         const { error } = await supabase
           .from('carts')
           .update({ quantity: newQuantity })
           .eq('id', cartItemId)
           .eq('user_id', session.user.id);
-        
+
         if (error) {
           throw error;
         }
-        
+
         await loadCartItems();
         window.dispatchEvent(new CustomEvent('cartUpdated'));
       } else {
@@ -130,18 +156,18 @@ const Cart = ({ isOpen, onClose, token }) => {
     try {
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session?.user) {
         const { error } = await supabase
           .from('carts')
           .delete()
           .eq('id', cartItemId)
           .eq('user_id', session.user.id);
-        
+
         if (error) {
           throw error;
         }
-        
+
         await loadCartItems();
         window.dispatchEvent(new CustomEvent('cartUpdated'));
       } else {
@@ -193,7 +219,7 @@ const Cart = ({ isOpen, onClose, token }) => {
           <h2>{t('cart_page.my_cart')}</h2>
           <button className="cart-close-button" onClick={onClose}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         </div>
@@ -208,8 +234,8 @@ const Cart = ({ isOpen, onClose, token }) => {
             <div className="cart-error">
               <div className="error-icon">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M15 9L9 15M9 9L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                  <path d="M15 9L9 15M9 9L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <h3>{t('cart_page.error')}</h3>
@@ -222,7 +248,7 @@ const Cart = ({ isOpen, onClose, token }) => {
             <div className="cart-empty">
               <div className="empty-icon">
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17C17 18.1 16.1 19 15 19H9C7.9 19 7 18.1 7 17V13M17 13H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.7 15.3C4.3 15.7 4.6 16.5 5.1 16.5H17M17 13V17C17 18.1 16.1 19 15 19H9C7.9 19 7 18.1 7 17V13M17 13H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <h3>{t('cart_page.empty')}</h3>
@@ -241,24 +267,23 @@ const Cart = ({ isOpen, onClose, token }) => {
                         const imagePath = item.product?.image;
                         if (!imagePath || imagePath === 'null' || imagePath === 'undefined' || imagePath === '') {
                           return (
-                            <div className="no-image" style={{display: 'flex'}}>
+                            <div className="no-image" style={{ display: 'flex' }}>
                               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20 7L9 18L4 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M20 7L9 18L4 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
                             </div>
                           );
                         }
-                        
+
                         // Initialize imageUrl
                         let imageUrl = imagePath;
-                        
+
                         // Old Laravel storage path - extract filename and try to load from Supabase
-                        if (imagePath.includes('/storage/images/products/') || 
-                            imagePath.includes('127.0.0.1') || 
-                            imagePath.includes('localhost:8000') || 
-                            imagePath.startsWith('/storage/')) {
-                          console.log('[Cart] Detected Laravel path, extracting filename:', imagePath);
-                          
+                        if (imagePath.includes('/storage/images/products/') ||
+                          imagePath.includes('127.0.0.1') ||
+                          imagePath.includes('localhost:8000') ||
+                          imagePath.startsWith('/storage/')) {
+
                           // Extract filename from Laravel path
                           let filename = '';
                           if (imagePath.includes('/storage/images/products/')) {
@@ -271,45 +296,36 @@ const Cart = ({ isOpen, onClose, token }) => {
                             const parts = imagePath.split('/');
                             filename = parts[parts.length - 1];
                           }
-                          
+
                           // Remove query parameters if any
                           if (filename.includes('?')) {
                             filename = filename.split('?')[0];
                           }
-                          
+
                           if (filename) {
-                            // Use filename only - getPublicUrl will construct the correct path
-                            console.log('[Cart] Trying to load from Supabase Storage:', filename);
-                            
                             try {
                               const { data: { publicUrl } } = supabase.storage
                                 .from('products')
                                 .getPublicUrl(filename);
-                              
+
                               if (publicUrl) {
                                 // Check if URL is valid (doesn't contain double 'products/')
                                 if (publicUrl.includes('products/products/')) {
-                                  console.warn('[Cart] ⚠️ Double products/ in URL, fixing:', publicUrl);
-                                  // Fix by removing one 'products/'
                                   imageUrl = publicUrl.replace('/products/products/', '/products/');
-                                  console.log('[Cart] Using fixed URL:', imageUrl);
                                 } else {
                                   imageUrl = publicUrl;
-                                  console.log('[Cart] ✅ Found image in Supabase Storage:', imageUrl);
                                 }
                               } else {
-                                console.warn('[Cart] ⚠️ No public URL for:', filename);
                                 imageUrl = null;
                               }
                             } catch (err) {
-                              console.error('[Cart] ❌ Error loading from Supabase:', err);
                               imageUrl = null;
                             }
                           } else {
                             imageUrl = null;
                           }
                         }
-                        
+
                         // If it's already a full URL (Supabase or external) and not Laravel, use it directly
                         if (imageUrl && /^https?:\/\//i.test(imagePath) && !imagePath.includes('127.0.0.1') && !imagePath.includes('localhost:8000')) {
                           // Already a full URL (Supabase or external)
@@ -317,12 +333,12 @@ const Cart = ({ isOpen, onClose, token }) => {
                         } else if (!imageUrl || imageUrl === imagePath) {
                           // Try to get public URL from Supabase Storage for relative paths
                           let storagePath = imagePath;
-                          
+
                           // Remove leading slash if present
                           if (storagePath.startsWith('/')) {
                             storagePath = storagePath.substring(1);
                           }
-                          
+
                           // If path doesn't start with "products/", add it
                           if (!storagePath.startsWith('products/')) {
                             // If it's just a filename (no slashes), add "products/" prefix
@@ -335,103 +351,96 @@ const Cart = ({ isOpen, onClose, token }) => {
                               storagePath = `products/${filename}`;
                             }
                           }
-                          
+
                           try {
                             const { data: { publicUrl } } = supabase.storage
                               .from('products')
                               .getPublicUrl(storagePath);
                             if (publicUrl) {
                               imageUrl = publicUrl;
-                              console.log('[Cart] Generated Supabase URL:', publicUrl, 'from path:', imagePath);
                             } else {
                               imageUrl = null;
                             }
                           } catch (err) {
-                            console.warn('[Cart] Error getting public URL:', err);
                             imageUrl = null;
                           }
                         }
-                        
+
                         // If no valid image URL, show placeholder
                         if (!imageUrl) {
                           return (
-                            <div className="no-image" style={{display: 'flex'}}>
+                            <div className="no-image" style={{ display: 'flex' }}>
                               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20 7L9 18L4 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M20 7L9 18L4 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
                             </div>
                           );
                         }
-                        
+
                         return (
                           <>
-                            <img 
-                              src={imageUrl} 
-                              alt={item.product.name} 
+                            <img
+                              src={imageUrl}
+                              alt={item.product?.name || ''}
                               onError={(e) => {
-                                console.warn('[Cart] Image load error:', imageUrl);
                                 e.target.style.display = 'none';
                                 if (e.target.nextElementSibling) {
                                   e.target.nextElementSibling.style.display = 'flex';
                                 }
                               }}
-                              onLoad={() => {
-                                console.log('[Cart] Image loaded:', imageUrl);
-                              }}
                             />
-                            <div className="no-image" style={{display: 'none'}}>
+                            <div className="no-image" style={{ display: 'none' }}>
                               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M20 7L9 18L4 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                <path d="M20 7L9 18L4 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                               </svg>
                             </div>
                           </>
                         );
                       })()}
                     </div>
-                    
+
                     <div className="cart-item-info">
                       <h4 className="cart-item-name">{item.product?.name || t('cart_page.product_deleted')}</h4>
-                      <p className="cart-item-price">{formatPrice(item.price)} DH</p>
+                      <div className="cart-item-meta">
+                        <span className="cart-item-price">{formatPrice(item.price)} DH</span>
+                      </div>
                     </div>
-                    
+
                     <div className="cart-item-controls">
                       <div className="quantity-controls">
-                        <button 
+                        <button
                           className="quantity-button"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </button>
                         <span className="quantity-value">{item.quantity}</span>
-                        <button 
+                        <button
                           className="quantity-button"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                         </button>
                       </div>
-                      
-                      <button 
+
+                      <button
                         className="remove-item-button"
                         onClick={() => removeItem(item.id)}
+                        aria-label="Remove item"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 6H5H21M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <path d="M3 6H5H21M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </button>
-                    </div>
-                    
-                    <div className="cart-item-total">
-                      {(toNumber(item.quantity) * toNumber(item.price)).toFixed(2)} DH
                     </div>
                   </div>
                 ))}
               </div>
-              
+
               <div className="cart-summary">
                 <div className="cart-summary-row">
                   <span>{t('cart_page.articles')} ({calculateItemsCount()})</span>
@@ -446,7 +455,7 @@ const Cart = ({ isOpen, onClose, token }) => {
                   <span>{calculateTotal().toFixed(2)} DH</span>
                 </div>
               </div>
-              
+
               <div className="cart-actions">
                 <button className="clear-cart-button" onClick={clearCart}>
                   {t('cart_page.clear_cart')}

@@ -8,7 +8,7 @@ import './JardinageDetail.css';
 export default function JardinageDetail() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
-  
+
   const [category, setCategory] = useState(null);
   const [jardins, setJardins] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,17 +28,17 @@ export default function JardinageDetail() {
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = React.useCallback((imagePath) => {
     if (!imagePath) return null;
-    
+
     if (imagePath.includes('supabase.co/storage')) {
       return imagePath;
     }
-    
+
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
-    if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || 
-        imagePath.startsWith('/storage/') || imagePath.startsWith('/images/')) {
+
+    if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') ||
+      imagePath.startsWith('/storage/') || imagePath.startsWith('/images/')) {
       const filename = imagePath.split('/').pop();
       if (filename) {
         const { data: { publicUrl } } = supabase.storage
@@ -48,14 +48,14 @@ export default function JardinageDetail() {
       }
       return null;
     }
-    
+
     if (!imagePath.includes('/') && !imagePath.includes('http')) {
       const { data: { publicUrl } } = supabase.storage
         .from('employees')
         .getPublicUrl(imagePath);
       return publicUrl;
     }
-    
+
     return null;
   }, []);
 
@@ -63,24 +63,24 @@ export default function JardinageDetail() {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[JardinageDetail] Loading category ID:', id);
-      
+
       const { data, error } = await supabase
         .from('jardinage_categories')
         .select('*')
         .eq('id', id)
         .single();
-      
+
       if (error) {
         console.error('[JardinageDetail] Error loading category:', error);
         setError(t('jardinage.errors.category_not_found', 'Catégorie non trouvée'));
         return;
       }
-      
+
       console.log('[JardinageDetail] Loaded category:', data);
       setCategory(data);
-      
+
       // Load services for this category
       await loadServices(data.id);
     } catch (err) {
@@ -94,19 +94,19 @@ export default function JardinageDetail() {
   const loadServices = async (categoryId) => {
     try {
       setLoadingServices(true);
-      
+
       const { data, error } = await supabase
         .from('jardins')
         .select('*')
         .eq('jardinage_category_id', categoryId)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         console.error('[JardinageDetail] Error loading services:', error);
         return;
       }
-      
+
       console.log('[JardinageDetail] Loaded services:', data?.length || 0);
       setJardins(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -159,8 +159,8 @@ export default function JardinageDetail() {
     <div className="jardinage-detail-page">
       {/* Back Button - Top Left */}
       <div className="back-button-top-container">
-        <Link 
-          to="/jardinage" 
+        <Link
+          to="/jardinage"
           className="back-button-top"
         >
           <span className="back-icon">←</span>
@@ -185,21 +185,21 @@ export default function JardinageDetail() {
               }}
             />
           ) : null}
-          <div 
-            className="hero-placeholder" 
-            style={{display: imageUrl ? 'none' : 'flex'}}
+          <div
+            className="hero-placeholder"
+            style={{ display: imageUrl ? 'none' : 'flex' }}
           >
             🌱
           </div>
           <div className="hero-overlay"></div>
         </div>
-        
+
         <div className="hero-content">
           <div className="container mx-auto px-4">
             <h1 className="hero-title">
               {category.name || t('jardinage.category_not_available', 'Catégorie non disponible')}
             </h1>
-            
+
             <p className="hero-subtitle">
               {category.description || t('jardinage.description_not_available', 'Description non disponible')}
             </p>
@@ -210,18 +210,12 @@ export default function JardinageDetail() {
       {/* Main Content Section */}
       <section className="jardinage-detail-content">
         <div className="container mx-auto px-4 py-12">
-          
+
 
           {/* Reservation Button Section */}
           <div className="reservation-section">
             <div className="reservation-card">
-              <h3 className="reservation-title">
-                {t('jardinage.reservation.title', 'Prêt à réserver ?')}
-              </h3>
-              <p className="reservation-text">
-                {t('jardinage.reservation.description', 'Réservez ce service de catégorie maintenant')}
-              </p>
-              <button 
+              <button
                 className="btn-reserve-large"
                 onClick={() => {
                   setSelectedService(null);

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { supabase } from './lib/supabase';
 import './App.css';
 import './i18n'; // Initialize i18n
 import './styles/rtl.css'; // RTL Support
@@ -97,6 +98,8 @@ import Hotel from './pages/menage complite/Hotel';
 import MaisonDhote from './pages/menage complite/MaisonDhote';
 import Villa from './pages/menage complite/villa';
 import ReservationMenageComplite from './pages/menage complite/ReservationMenageComplite';
+import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import MénageEtCuisine from './pages/MénageetCuisine/MénageEtCuisine';
 import Cuisin from './pages/MénageetCuisine/Cuisin';
 import MénageCuisine from './pages/MénageetCuisine/MénageCuisine';
@@ -107,24 +110,55 @@ import SecurityRegister from './pages/employees/SecurityRegister';
 import BebeSettingRegister from './pages/employees/BebeSettingRegister';
 import JardinageRegister from './pages/employees/JardinageRegister';
 import DriverRegister from './pages/employees/DriverRegister';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import LocationDemo from './pages/LocationDemo';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-
 export default function App() {
   const location = useLocation();
-  
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Initialize AOS animations - enabled on all devices including mobile
+    // Initialize AOS animations
     AOS.init({
       duration: 800,
       easing: 'ease-in-out-cubic',
       once: true,
-      offset: 50, // Reduced offset for mobile to trigger animations earlier
-      delay: 50, // Reduced delay for mobile performance
-      disable: false, // Enable animations on all devices
-      mobile: true, // Explicitly enable on mobile
-      tablet: true // Enable on tablets too
+      offset: 50,
+      disable: false,
+      mobile: true,
+      tablet: true
+    });
+
+    // Listen for Supabase Auth state changes
+    // This is CRITICAL for handling redirects from Google OAuth or Email Confirmation in production
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Supabase Auth Event:', event);
+
+      if (session) {
+        // Synchronize session with localStorage for backward compatibility
+        const userData = {
+          id: session.user.id,
+          name: session.user.user_metadata?.name || session.user.email,
+          email: session.user.email
+        };
+        localStorage.setItem('user_data', JSON.stringify(userData));
+        localStorage.setItem('user', JSON.stringify(userData));
+
+        // Handle automatic redirects on successful login/session recovery
+        // Use window.location.pathname instead of location.pathname from hooks to avoid stale closures in useEffect
+        const currentPath = window.location.pathname;
+        if (currentPath === '/login-register' && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+          console.log('User session detected on login page, redirecting...');
+          const returnUrl = localStorage.getItem('auth_return_url') || '/';
+          localStorage.removeItem('auth_return_url'); // Clean up
+          navigate(returnUrl);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('user_data');
+        localStorage.removeItem('user');
+        localStorage.removeItem('auth_token');
+      }
     });
 
     // Scroll to element if hash present on route changes
@@ -139,9 +173,10 @@ export default function App() {
     };
     handleHash();
     window.addEventListener('hashchange', handleHash);
-    
+
     return () => {
       window.removeEventListener('hashchange', handleHash);
+      subscription.unsubscribe();
       AOS.refresh();
     };
   }, []);
@@ -151,16 +186,16 @@ export default function App() {
     AOS.refresh();
   }, [location]);
 
-  // Check if current route is a dashboard route (admin or employee dashboard)
-  // Note: /employees routes should show navbar, only /employee/dashboard routes should hide it
-  const isDashboard = location.pathname.startsWith('/admin') || 
-                      location.pathname.startsWith('/employee/');
+  // Check if current route is a dashboard route or login page to hide navbar/footer
+  const isDashboard = location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/employee/') ||
+    location.pathname === '/login-register';
 
   return (
     <div className="App">
       <ToastContainer />
       {!isDashboard && <Navbar1 />}
-      <div className="page-transition">
+      <div className={`page-transition ${isDashboard ? 'no-padding' : ''}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />
@@ -176,6 +211,7 @@ export default function App() {
           <Route path="/service/:id" element={<ServiceDetails />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/info" element={<Info />} />
+          <Route path="/location-demo" element={<LocationDemo />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/order-summary" element={<OrderSummary />} />
@@ -227,6 +263,8 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/support" element={<Support />} />
           <Route path="/security" element={<Security />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/security/role/:id" element={<SecurityRoleDetails />} />
           <Route path="/employees/register" element={<RegisterEmployee1 />} />
           {/* Section-specific pages */}
@@ -261,7 +299,7 @@ export default function App() {
             path="/admin/dashboard"
             element={
               <PrivateRoute
-                allowedRoles={['admin','adminBebe','adminJardinaje','adminHouseKeeping','adminSecurity','adminHandWorker','adminDriver','driver']}
+                allowedRoles={['admin', 'adminBebe', 'adminJardinaje', 'adminHouseKeeping', 'adminSecurity', 'adminHandWorker', 'adminDriver', 'driver']}
                 element={<Admin />}
               />
             }
@@ -272,143 +310,143 @@ export default function App() {
           />
           <Route
             path="/admin/bebe"
-            element={<PrivateRoute allowedRoles={['admin','adminBebe']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminBebe']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminBebe"
-            element={<PrivateRoute allowedRoles={['admin','adminBebe']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminBebe']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminBebe/categories"
-            element={<PrivateRoute allowedRoles={['admin','adminBebe']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminBebe']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminBebe/services"
-            element={<PrivateRoute allowedRoles={['admin','adminBebe']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminBebe']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminBebe/reservations"
-            element={<PrivateRoute allowedRoles={['admin','adminBebe']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminBebe']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminBebe/ratings"
-            element={<PrivateRoute allowedRoles={['admin','adminBebe']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminBebe']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminBebe/employees"
-            element={<PrivateRoute allowedRoles={['admin','adminBebe','adminSecurity']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminBebe', 'adminSecurity']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminBebe/employees-valid"
-            element={<PrivateRoute allowedRoles={['admin','adminBebe']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminBebe']} element={<Admin />} />}
           />
           <Route
             path="/admin/jardinaje"
-            element={<PrivateRoute allowedRoles={['admin','adminJardinaje']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminJardinaje']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminJardinaje"
-            element={<PrivateRoute allowedRoles={['admin','adminJardinaje']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminJardinaje']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminJardinaje/categories"
-            element={<PrivateRoute allowedRoles={['admin','adminJardinaje']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminJardinaje']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminJardinaje/services"
-            element={<PrivateRoute allowedRoles={['admin','adminJardinaje']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminJardinaje']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminJardinaje/employees-manage"
-            element={<PrivateRoute allowedRoles={['admin','adminJardinaje']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminJardinaje']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminJardinaje/employees-valid"
-            element={<PrivateRoute allowedRoles={['admin','adminJardinaje']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminJardinaje']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminJardinaje/reservations"
-            element={<PrivateRoute allowedRoles={['admin','adminJardinaje']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminJardinaje']} element={<Admin />} />}
           />
           <Route
             path="/admin/adminJardinaje/ratings"
-            element={<PrivateRoute allowedRoles={['admin','adminJardinaje']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminJardinaje']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/services"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/employees"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/confirmed-employees"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/categories"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/types"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/categories-house"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/menage"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/types-menage"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/tapis-canapes"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/piscine"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/menage-cuisine"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/menage-complet"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/lavage-repassage"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/cuisine"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/chaussures"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/bureaux-usine"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/housekeeping/reservations/airbnb"
-            element={<PrivateRoute allowedRoles={['admin','adminHouseKeeping']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHouseKeeping']} element={<Admin />} />}
           />
           <Route
             path="/admin/product-types"
@@ -416,67 +454,67 @@ export default function App() {
           />
           <Route
             path="/admin/security"
-            element={<PrivateRoute allowedRoles={['admin','adminSecurity']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminSecurity']} element={<Admin />} />}
           />
           <Route
             path="/admin/security/agents"
-            element={<PrivateRoute allowedRoles={['admin','adminSecurity']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminSecurity']} element={<Admin />} />}
           />
           <Route
             path="/admin/security/reservations"
-            element={<PrivateRoute allowedRoles={['admin','adminSecurity']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminSecurity']} element={<Admin />} />}
           />
           <Route
             path="/admin/security/roles"
-            element={<PrivateRoute allowedRoles={['admin','adminSecurity']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminSecurity']} element={<Admin />} />}
           />
           <Route
             path="/admin/security/employees-valid"
-            element={<PrivateRoute allowedRoles={['admin','adminSecurity']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminSecurity']} element={<Admin />} />}
           />
           <Route
             path="/admin/security/employees"
-            element={<PrivateRoute allowedRoles={['admin','adminSecurity']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminSecurity']} element={<Admin />} />}
           />
           <Route
             path="/admin/handworker"
-            element={<PrivateRoute allowedRoles={['admin','adminHandWorker']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHandWorker']} element={<Admin />} />}
           />
           <Route
             path="/admin/handworker/categories"
-            element={<PrivateRoute allowedRoles={['admin','adminHandWorker']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHandWorker']} element={<Admin />} />}
           />
           <Route
             path="/admin/handworker/employees"
-            element={<PrivateRoute allowedRoles={['admin','adminHandWorker']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHandWorker']} element={<Admin />} />}
           />
           <Route
             path="/admin/handworker/reservations"
-            element={<PrivateRoute allowedRoles={['admin','adminHandWorker']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHandWorker']} element={<Admin />} />}
           />
           <Route
             path="/admin/handworker/validated"
-            element={<PrivateRoute allowedRoles={['admin','adminHandWorker']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminHandWorker']} element={<Admin />} />}
           />
           <Route
             path="/admin/driver"
-            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminDriver', 'driver']} element={<Admin />} />}
           />
           <Route
             path="/admin/driver/employees"
-            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminDriver', 'driver']} element={<Admin />} />}
           />
           <Route
             path="/admin/driver/employees-valid"
-            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminDriver', 'driver']} element={<Admin />} />}
           />
           <Route
             path="/admin/driver/reservations"
-            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminDriver', 'driver']} element={<Admin />} />}
           />
           <Route
             path="/admin/driver/categories"
-            element={<PrivateRoute allowedRoles={['admin','adminDriver','driver']} element={<Admin />} />}
+            element={<PrivateRoute allowedRoles={['admin', 'adminDriver', 'driver']} element={<Admin />} />}
           />
           <Route path="/admin/403" element={<AdminForbidden />} />
 

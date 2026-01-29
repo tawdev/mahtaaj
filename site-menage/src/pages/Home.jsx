@@ -6,53 +6,54 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import TousLesServices from './TousLesServices';
+import GoogleOneTap from '../components/GoogleOneTap';
 
 
 export default function Home() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  
+
   // Dynamic gallery data
   const [categories, setCategories] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [currentImage, setCurrentImage] = useState(null);
-  const [categoryImages, setCategoryImages] = useState([]); // All images for selected category
+
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // Index for hero slider
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
-  
+
   // Gallery slider state
   const [, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  
+
   // Scroll-to-top button state
   const [showScrollTop, setShowScrollTop] = useState(false);
-  
+
   // Ensure component is mounted before rendering dynamic content
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
   // Helper function to format category name for Hero section
   const formatCategoryName = (categoryName) => {
     if (!categoryName) return categoryName;
     const locale = i18n.language || 'fr';
     const trimmedName = categoryName.trim();
-    
+
     // Change 'Ménage' to 'Ménage + Cuisine' in Hero section (French)
     if (locale === 'fr' && (categoryName === 'Ménage' || trimmedName === 'Ménage')) {
       return 'Ménage + Cuisine';
     }
-    
+
     // Change Arabic cleaning category names to 'التنظيف + الطبخ' in Hero section
     if (locale === 'ar') {
-      if (trimmedName.includes('التنظيف') || trimmedName.includes('خدمات التنظيف') || 
-          trimmedName.includes('منزل') || trimmedName === 'تنظيف') {
+      if (trimmedName.includes('التنظيف') || trimmedName.includes('خدمات التنظيف') ||
+        trimmedName.includes('منزل') || trimmedName === 'تنظيف') {
         return 'التنظيف + الطبخ';
       }
     }
-    
+
     return categoryName;
   };
 
@@ -75,7 +76,7 @@ export default function Home() {
     const getCategoryOrder = (category) => {
       // Use slug first (most reliable, language-independent)
       const slug = (category.slug || '').toLowerCase().trim();
-      
+
       // Check slug first (most reliable, language-independent)
       if (slug.includes('menage') || slug.includes('menage-cuisine') || slug.includes('house') || slug.includes('cleaning')) {
         return 1; // Ménage et cuisine
@@ -95,40 +96,40 @@ export default function Home() {
       if (slug.includes('chauffeur') || slug.includes('driver')) {
         return 6; // Chauffeur
       }
-      
+
       // Fallback to database name fields (not localized name)
       // Use original database fields to avoid language-dependent sorting
       const nameFr = ((category.name_fr || '') + '').toLowerCase().trim();
       const nameEn = ((category.name_en || '') + '').toLowerCase().trim();
       const nameAr = ((category.name_ar || '') + '').toLowerCase().trim();
       const allNames = [nameFr, nameEn, nameAr].join(' ');
-      
+
       if (allNames.includes('menage') || allNames.includes('house') || allNames.includes('cleaning') ||
-          allNames.includes('تنظيف') || allNames.includes('منزل')) {
+        allNames.includes('تنظيف') || allNames.includes('منزل')) {
         return 1; // Ménage et cuisine
       }
-      if (allNames.includes('sécurité') || allNames.includes('security') || 
-          allNames.includes('أمن') || allNames.includes('الأمن')) {
+      if (allNames.includes('sécurité') || allNames.includes('security') ||
+        allNames.includes('أمن') || allNames.includes('الأمن')) {
         return 2; // Sécurité
       }
       if (allNames.includes('bébé') || allNames.includes('bebe') || allNames.includes('baby') ||
-          allNames.includes('طفل') || allNames.includes('رعاية') || allNames.includes('أطفال')) {
+        allNames.includes('طفل') || allNames.includes('رعاية') || allNames.includes('أطفال')) {
         return 3; // Bébé Setting
       }
       if (allNames.includes('jardinage') || allNames.includes('gardening') ||
-          allNames.includes('تنسيق') || allNames.includes('الحدائق')) {
+        allNames.includes('تنسيق') || allNames.includes('الحدائق')) {
         return 4; // Jardinage
       }
-      if (allNames.includes('travaux') || allNames.includes('manuels') || 
-          allNames.includes('hand') || allNames.includes('worker') ||
-          allNames.includes('أعمال') || allNames.includes('يدوية')) {
+      if (allNames.includes('travaux') || allNames.includes('manuels') ||
+        allNames.includes('hand') || allNames.includes('worker') ||
+        allNames.includes('أعمال') || allNames.includes('يدوية')) {
         return 5; // Travaux Manuels
       }
       if (allNames.includes('chauffeur') || allNames.includes('driver') ||
-          allNames.includes('سائق') || allNames.includes('السائق')) {
+        allNames.includes('سائق') || allNames.includes('السائق')) {
         return 6; // Chauffeur
       }
-      
+
       // Use order field from database if available, otherwise default to end
       return category.order !== undefined && category.order !== null ? category.order + 100 : 999;
     };
@@ -136,7 +137,7 @@ export default function Home() {
     return [...categories].sort((a, b) => {
       const orderA = getCategoryOrder(a);
       const orderB = getCategoryOrder(b);
-      
+
       // If same order, use database order field or maintain original order
       if (orderA === orderB) {
         if (a.order !== undefined && b.order !== undefined) {
@@ -145,7 +146,7 @@ export default function Home() {
         // If no order field, maintain original order by ID
         return (a.id || 0) - (b.id || 0);
       }
-      
+
       return orderA - orderB;
     });
   };
@@ -153,46 +154,46 @@ export default function Home() {
   // Helper function to get category path based on category name
   const getCategoryPath = (categoryName) => {
     if (!categoryName) return '/';
-    
+
     const nameLower = categoryName.toLowerCase().trim();
     const nameOriginal = categoryName.trim();
-    
+
     // Map category names to their corresponding routes
     // Ménage / Cleaning / التنظيف
-    if (nameLower.includes('ménage') || nameLower.includes('menage') || 
-        nameLower.includes('house') || nameOriginal.includes('تنظيف') || 
-        nameOriginal.includes('منزل')) {
+    if (nameLower.includes('ménage') || nameLower.includes('menage') ||
+      nameLower.includes('house') || nameOriginal.includes('تنظيف') ||
+      nameOriginal.includes('منزل')) {
       return '/services/menage';
     }
     // Sécurité / Security / الأمن
-    if (nameLower.includes('sécurité') || nameLower.includes('security') || 
-        nameOriginal.includes('أمن') || nameOriginal.includes('الأمن')) {
+    if (nameLower.includes('sécurité') || nameLower.includes('security') ||
+      nameOriginal.includes('أمن') || nameOriginal.includes('الأمن')) {
       return '/security';
     }
     // Bébé / Baby / رعاية الأطفال
-    if (nameLower.includes('bébé') || nameLower.includes('bebe') || 
-        nameLower.includes('child') || nameOriginal.includes('طفل') || 
-        nameOriginal.includes('رعاية') || nameOriginal.includes('أطفال')) {
+    if (nameLower.includes('bébé') || nameLower.includes('bebe') ||
+      nameLower.includes('child') || nameOriginal.includes('طفل') ||
+      nameOriginal.includes('رعاية') || nameOriginal.includes('أطفال')) {
       return '/bebe-setting';
     }
     // Jardinage / Gardening / البستنة
-    if (nameLower.includes('jardinage') || nameLower.includes('gardening') || 
-        nameOriginal.includes('تنسيق') || nameOriginal.includes('الحدائق')) {
+    if (nameLower.includes('jardinage') || nameLower.includes('gardening') ||
+      nameOriginal.includes('تنسيق') || nameOriginal.includes('الحدائق')) {
       return '/jardinage';
     }
     // Travaux manuels / Hand workers / الأعمال اليدوية
-    if (nameLower.includes('travaux') || nameLower.includes('manuels') || 
-        nameLower.includes('main') || nameLower.includes('hand') || 
-        nameLower.includes('worker') || nameOriginal.includes('أعمال') || 
-        nameOriginal.includes('يدوية') || nameOriginal.includes('الأعمال اليدوية')) {
+    if (nameLower.includes('travaux') || nameLower.includes('manuels') ||
+      nameLower.includes('main') || nameLower.includes('hand') ||
+      nameLower.includes('worker') || nameOriginal.includes('أعمال') ||
+      nameOriginal.includes('يدوية') || nameOriginal.includes('الأعمال اليدوية')) {
       return '/hand-workers';
     }
     // Chauffeur / Driver / سائق
-    if (nameLower.includes('chauffeur') || nameLower.includes('driver') || 
-        nameOriginal.includes('سائق') || nameOriginal.includes('السائق')) {
+    if (nameLower.includes('chauffeur') || nameLower.includes('driver') ||
+      nameOriginal.includes('سائق') || nameOriginal.includes('السائق')) {
       return '/driver';
     }
-    
+
     // Default fallback
     return '/';
   };
@@ -203,44 +204,44 @@ export default function Home() {
       console.warn('[Home] No image path provided');
       return null;
     }
-    
+
     console.log('[Home] Processing image path:', imagePath);
-    
+
     // If it's already a full URL (Supabase Storage)
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       console.log('[Home] Already a full URL:', imagePath);
       return imagePath;
     }
-    
+
     // If it's a Supabase Storage path
     if (imagePath.includes('supabase.co/storage') || imagePath.includes('supabase.in/storage')) {
       console.log('[Home] Supabase Storage URL:', imagePath);
       return imagePath;
     }
-    
+
     // If it's a relative path, try to get from Supabase Storage
     // Remove leading slash if present
     let cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
-    
+
     // Path in database is like "gallery/filename.jpg"
     // We need to use just "filename.jpg" for getPublicUrl
     // Because the bucket name is already "gallery"
     if (cleanPath.startsWith('gallery/')) {
       cleanPath = cleanPath.replace('gallery/', '');
     }
-    
+
     console.log('[Home] Cleaned path for Supabase Storage:', cleanPath);
-    
+
     try {
       const { data: { publicUrl }, error } = supabase.storage
         .from('gallery')
         .getPublicUrl(cleanPath);
-      
+
       if (error) {
         console.error('[Home] Error getting public URL:', error);
         return null;
       }
-      
+
       console.log('[Home] ✅ Generated Supabase URL:', publicUrl, 'from path:', imagePath);
       return publicUrl;
     } catch (err) {
@@ -248,62 +249,62 @@ export default function Home() {
       return null;
     }
   }, []);
-  
+
   // Load categories and gallery images from Supabase
   useEffect(() => {
     let isMounted = true;
-    
+
     const loadData = async () => {
       try {
         setLoading(true);
         const locale = i18n.language || 'fr';
-        
+
         // Load categories from Supabase
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('category_gallery')
           .select('*')
           .eq('is_active', true)
           .order('created_at', { ascending: true });
-        
+
         if (!isMounted) return;
-        
+
         if (categoriesError) {
           console.error('Error loading categories:', categoriesError);
         } else if (categoriesData && categoriesData.length > 0) {
           // First, sort categories by their stable identifiers (slug/order) BEFORE mapping names
           // This ensures the order remains consistent regardless of language
           const preSortedCategories = sortCategoriesByOrder(categoriesData);
-          
+
           // Then map categories with localized names (order is already fixed)
           const mappedCategories = preSortedCategories.map(cat => {
             let categoryName = cat[`name_${locale}`] || cat.name || cat.name_fr || '';
             categoryName = fixArabicCategoryName(categoryName, locale);
-            
+
             return {
               ...cat,
               name: categoryName,
               description: cat[`description_${locale}`] || cat.description || cat.description_fr || ''
             };
           });
-          
+
           // Categories are already sorted, just set them
           setCategories(mappedCategories);
-          
+
           // Select first category by default
           if (mappedCategories.length > 0 && !selectedCategory) {
             setSelectedCategory(mappedCategories[0]);
           }
         }
-        
+
         // Load all active gallery images from Supabase for slider
         const { data: imagesData, error: imagesError } = await supabase
           .from('gallery')
           .select('*')
           .eq('is_active', true)
           .order('created_at', { ascending: false });
-        
+
         if (!isMounted) return;
-        
+
         if (imagesError) {
           console.error('Error loading gallery images:', imagesError);
         } else if (imagesData) {
@@ -323,9 +324,9 @@ export default function Home() {
         }
       }
     };
-    
+
     loadData();
-    
+
     return () => {
       isMounted = false;
     };
@@ -334,22 +335,22 @@ export default function Home() {
   // Update selectedCategory when language changes to reflect localized names
   useEffect(() => {
     if (!selectedCategory || categories.length === 0) return;
-    
+
     // Find the updated category with the same ID in the new categories array
     const updatedCategory = categories.find(cat => cat.id === selectedCategory.id);
-    
+
     if (updatedCategory) {
       // Check if name or description changed (language change)
       const nameChanged = updatedCategory.name !== selectedCategory.name;
       const descriptionChanged = updatedCategory.description !== selectedCategory.description;
-      
+
       if (nameChanged || descriptionChanged) {
         // Update selectedCategory with new localized name/description while preserving other properties
         // Use functional update to avoid unnecessary re-renders
         setSelectedCategory(prevCategory => {
           // Only update if there's an actual change to avoid infinite loops
-          if (prevCategory.name === updatedCategory.name && 
-              prevCategory.description === updatedCategory.description) {
+          if (prevCategory.name === updatedCategory.name &&
+            prevCategory.description === updatedCategory.description) {
             return prevCategory;
           }
           return {
@@ -362,230 +363,73 @@ export default function Home() {
     }
   }, [i18n.language, categories, selectedCategory, selectedCategory?.id]);
 
-  // Load images for selected category
-  useEffect(() => {
-    const loadCategoryImages = async () => {
-      if (!selectedCategory) {
-        console.log('[Home] No selected category');
-        setCategoryImages([]);
-        setCurrentImage(null);
-        setCurrentImageIndex(0);
-        return;
-      }
-      
-      console.log('[Home] Loading images for category:', selectedCategory.id, selectedCategory.name);
-      
-      try {
-        const { data: imagesData, error } = await supabase
-          .from('gallery')
-          .select('*')
-          .eq('category_gallery_id', selectedCategory.id)
-          .eq('is_active', true)
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('[Home] Error loading category images:', error);
-          setCategoryImages([]);
-          setCurrentImage(null);
-          setCurrentImageIndex(0);
-          return;
-        }
-        
-        console.log('[Home] Loaded images:', imagesData?.length || 0);
-        
-        if (imagesData && imagesData.length > 0) {
-          // Map images with proper URLs
-          const mappedImages = imagesData.map(img => {
-            const imageUrl = getImageUrl(img.image_path || img.image_url);
-            console.log('[Home] Image mapping:', {
-              id: img.id,
-              originalPath: img.image_path || img.image_url,
-              generatedUrl: imageUrl
-            });
-            return {
-              ...img,
-              image_url: imageUrl
-            };
-          }).filter(img => img.image_url); // Filter out images without valid URLs
-          
-          console.log('[Home] Mapped images with valid URLs:', mappedImages.length);
-          
-          if (mappedImages.length > 0) {
-            // Store all images for the category
-            setCategoryImages(mappedImages);
-            // The slider will handle setting images from all gallery images
-            // Only set current image if galleryImages is empty (initial load)
-            // Otherwise, let the slider manage the current image
-          } else {
-            console.warn('[Home] No images with valid URLs found');
-            setCategoryImages([]);
-            setCurrentImage(null);
-            setCurrentImageIndex(0);
-          }
-        } else {
-          console.warn('[Home] No images found for category');
-          setCategoryImages([]);
-          setCurrentImage(null);
-          setCurrentImageIndex(0);
-        }
-      } catch (error) {
-        console.error('[Home] Exception loading category images:', error);
-        setCategoryImages([]);
-        setCurrentImage(null);
-        setCurrentImageIndex(0);
-      }
-    };
-    
-    loadCategoryImages();
-  }, [selectedCategory, i18n.language, getImageUrl]);
 
-  // Auto-slide through all active gallery images in Hero section (every 3 seconds)
-  // Use all gallery images organized by category order
-  useEffect(() => {
-    // Use galleryImages (all active images) instead of categoryImages
-    const imagesToSlide = galleryImages.filter(img => img.image_url);
-    
-    if (imagesToSlide.length === 0) {
-      console.log('[Home] Slider: No images available');
-      return;
-    }
-    
-    if (imagesToSlide.length === 1) {
-      console.log('[Home] Slider: Only one image, showing it without sliding');
-      // If only one image globally, show it but don't slide
-      if (!currentImage || currentImage.id !== imagesToSlide[0].id) {
-        setCurrentImage(imagesToSlide[0]);
-        setCurrentImageIndex(0);
-      }
-      return;
-    }
-    
-    // Organize images by category order to match the sorted categories
+
+  // --- SAFE SLIDER LOGIC ---
+
+  // Track if the user is hovering/interacting to pause slider
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Combine images into a single stable list for the slider
+  const sliderImages = React.useMemo(() => {
+    if (!galleryImages.length) return [];
+
+    // Sort categories to get stable order
     const sortedCategories = sortCategoriesByOrder(categories);
     const organizedImages = [];
-    
-    // For each category in order, add its images
+
+    // Add images by category order
     sortedCategories.forEach(category => {
-      const categoryImgs = imagesToSlide.filter(img => 
-        img.category_gallery_id === category.id
+      const categoryImgs = galleryImages.filter(img =>
+        img.category_gallery_id === category.id && img.image_url
       );
       organizedImages.push(...categoryImgs);
     });
-    
-    // Add any remaining images that don't match categories
-    const remainingImages = imagesToSlide.filter(img => 
-      !organizedImages.find(orgImg => orgImg.id === img.id)
+
+    // Add remaining images
+    const remainingImages = galleryImages.filter(img =>
+      !organizedImages.some(org => org.id === img.id) && img.image_url
     );
-    organizedImages.push(...remainingImages);
-    
-    const finalImagesToSlide = organizedImages.length > 0 ? organizedImages : imagesToSlide;
-    
-    console.log('[Home] Slider: Starting auto-slide with', finalImagesToSlide.length, 'images organized by category order');
-    
-    // Initialize: If current image is not in the slider images, find its index or set first one
-    if (!currentImage || !finalImagesToSlide.find(img => img.id === currentImage.id)) {
-      const initialIndex = finalImagesToSlide.findIndex(img => 
-        categoryImages.length > 0 && categoryImages[0] && img.id === categoryImages[0].id
-      );
-      const startIndex = initialIndex >= 0 ? initialIndex : 0;
-      const initialImage = finalImagesToSlide[startIndex];
-      setCurrentImage(initialImage);
-      setCurrentImageIndex(startIndex);
-      
-      // Update selected category based on the initial image's category
-      if (initialImage && initialImage.category_gallery_id) {
-        const imageCategory = categories.find(cat => cat.id === initialImage.category_gallery_id);
-        if (imageCategory) {
-          setSelectedCategory(imageCategory);
-        }
-      }
-      
-      console.log('[Home] Slider: Initialized with image at index', startIndex);
-    } else {
-      // Update index to match current image
-      const currentIndex = finalImagesToSlide.findIndex(img => img.id === currentImage.id);
-      if (currentIndex >= 0 && currentIndex !== currentImageIndex) {
-        setCurrentImageIndex(currentIndex);
-        
-        // Update selected category based on current image's category
-        if (currentImage && currentImage.category_gallery_id) {
-          const imageCategory = categories.find(cat => cat.id === currentImage.category_gallery_id);
-          if (imageCategory) {
-            setSelectedCategory(imageCategory);
-          }
-        }
-      }
-    }
-    
-    // Use a ref to track if we're transitioning to avoid rapid changes
-    let isTransitioningRef = false;
-    
+
+    return [...organizedImages, ...remainingImages];
+  }, [galleryImages, categories]);
+
+  // Derive current image from index - Source of Truth
+  // If index is out of bounds, fallback to 0
+  const activeImage = sliderImages[currentImageIndex] || sliderImages[0];
+
+  // Auto-slide effect
+  useEffect(() => {
+    // Don't slide if paused, not mounted, or not enough images
+    if (isPaused || !mounted || sliderImages.length <= 1) return;
+
+    console.log('[Home] Slider: Interval started');
     const interval = setInterval(() => {
-      if (isTransitioningRef) {
-        console.log('[Home] Slider: Skipping transition, already in progress');
-        return;
-      }
-      
-      setCurrentImageIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % finalImagesToSlide.length;
-        console.log('[Home] Slider: Moving from index', prevIndex, 'to', nextIndex);
-        
-        // Change image directly - CSS will handle the transition
-        if (finalImagesToSlide[nextIndex] && finalImagesToSlide[nextIndex].image_url) {
-          console.log('[Home] Slider: Setting new image:', finalImagesToSlide[nextIndex].id);
-          const nextImage = finalImagesToSlide[nextIndex];
-          
-          isTransitioningRef = true;
-          setCurrentImage(nextImage);
-          
-          // Update selected category based on the image's category
-          if (nextImage.category_gallery_id) {
-            const imageCategory = categories.find(cat => cat.id === nextImage.category_gallery_id);
-            if (imageCategory) {
-              console.log('[Home] Slider: Updating category to:', imageCategory.name);
-              setSelectedCategory(imageCategory);
-            }
-          }
-          
-          // Reset transition flag after a short delay
-          setTimeout(() => {
-            isTransitioningRef = false;
-          }, 500);
-        } else {
-          console.warn('[Home] Slider: Next image is invalid at index', nextIndex);
-        }
-        
-        return nextIndex;
+      setCurrentImageIndex(prev => {
+        const next = (prev + 1) % sliderImages.length;
+        console.log('[Home] Slider: Tick ->', next);
+        return next;
       });
-    }, 3000); // Change every 3 seconds (3000ms)
-
-    return () => {
-      console.log('[Home] Slider: Cleaning up interval');
-      clearInterval(interval);
-    };
-  }, [galleryImages, categoryImages, categories, currentImage, currentImageIndex]);
-
-  // Update selected category when current image changes
-  useEffect(() => {
-    if (currentImage && currentImage.category_gallery_id && categories.length > 0) {
-      const imageCategory = categories.find(cat => cat.id === currentImage.category_gallery_id);
-      if (imageCategory && (!selectedCategory || selectedCategory.id !== imageCategory.id)) {
-        console.log('[Home] Updating selected category to match current image:', imageCategory.name);
-        setSelectedCategory(imageCategory);
-      }
-    }
-  }, [currentImage, categories, selectedCategory]);
-
-  // Auto-slide functionality (for gallery slider section)
-  useEffect(() => {
-    if (!isPlaying || galleryImages.length === 0) return;
-    
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % galleryImages.length);
-    }, 3000); // Change slide every 3 seconds (3000ms)
+    }, 4000); // 4 seconds for better readability
 
     return () => clearInterval(interval);
-  }, [isPlaying, galleryImages.length]);
+  }, [sliderImages.length, isPaused, mounted]);
+
+  // Sync Selected Category with Active Image
+  // This is a "reaction" to the slide change, separate from the tick
+  useEffect(() => {
+    if (!activeImage || !categories.length || !activeImage.category_gallery_id) return;
+
+    // Only update if strictly different to prevent loops
+    if (selectedCategory?.id !== activeImage.category_gallery_id) {
+      const matchedCat = categories.find(c => c.id === activeImage.category_gallery_id);
+      if (matchedCat) {
+        setSelectedCategory(matchedCat);
+      }
+    }
+  }, [activeImage, categories, selectedCategory?.id]);
+
+
 
   // Scroll-to-top functionality
   useEffect(() => {
@@ -595,7 +439,7 @@ export default function Home() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Check initial state
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -620,11 +464,12 @@ export default function Home() {
   //   return () => clearInterval(interval);
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [categories.length, selectedCategory?.id, isPlaying, isTransitioning]);
-  
+
   // Don't render dynamic content until mounted to prevent hydration mismatch
   if (!mounted) {
     return (
       <div className="Home">
+        <GoogleOneTap />
         <header className="home-hero">
           <div className="hero-background">
             <div className="background-image" style={{ background: '#1e293b' }} />
@@ -640,7 +485,7 @@ export default function Home() {
               <Link to="/tous-les-services" className="home-primary-button" aria-label={t('home_page.buttons.book_now')}>
                 <span className="icon" aria-hidden="true">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
                 {t('home_page.buttons.book_now')}
@@ -654,32 +499,30 @@ export default function Home() {
           </section>
         </main>
       </div>
-    ); 
+    );
   }
-  
+
   return (
     <div className="Home">
+      <GoogleOneTap />
       <header className="home-hero">
         {/* Animated Background */}
-        {loading ? (
-          <div className="hero-background">
+        {/* Animated Background - Stable Structure */}
+        <div className="hero-background">
+          {loading ? (
             <div className="background-image" style={{ background: '#1e293b' }} />
-          </div>
-        ) : currentImage && currentImage.image_url ? (
-          <div className="hero-background">
-            <div 
-              key={`hero-img-${currentImage.id || currentImageIndex}-${currentImageIndex}`}
+          ) : activeImage && activeImage.image_url ? (
+            <div
+              key={currentImageIndex} /* Unstable keys on the parent can cause crashes, keep it simple */
               className="background-image fade-in"
               style={{
-                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${currentImage.image_url})`
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(${activeImage.image_url})`
               }}
             />
-          </div>
-        ) : (
-          <div className="hero-background">
+          ) : (
             <div className="background-image" style={{ background: '#1e293b' }} />
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Category Selection Buttons */}
         {loading ? (
@@ -695,10 +538,10 @@ export default function Home() {
             {categories.map((category) => {
               const displayName = formatCategoryName(category.name);
               const categoryPath = getCategoryPath(category.name);
-              const isChauffeur = category.name?.toLowerCase().includes('chauffeur') || 
-                                 category.name?.toLowerCase().includes('driver') ||
-                                 category.name?.includes('سائق');
-              
+              const isChauffeur = category.name?.toLowerCase().includes('chauffeur') ||
+                category.name?.toLowerCase().includes('driver') ||
+                category.name?.includes('سائق');
+
               // For Chauffeur button, use onClick to navigate to /driver
               if (isChauffeur) {
                 return (
@@ -713,7 +556,7 @@ export default function Home() {
                   </button>
                 );
               }
-              
+
               // For other categories, use Link
               return (
                 <Link
@@ -739,17 +582,17 @@ export default function Home() {
               <div className="home-primary-button skeleton-button" style={{ width: '180px', height: '48px' }} aria-hidden="true"></div>
             </div>
           </div>
-        ) : selectedCategory && currentImage ? (
+        ) : selectedCategory && activeImage ? (
           <div className="home-hero-content">
             <h1 key={`title-${selectedCategory.id}`} className="hero-title fade-in">
               {formatCategoryName(selectedCategory.name)}
             </h1>
-            
+
             <div className="button-container">
               <Link to="/tous-les-services" className="home-primary-button" aria-label={t('home_page.buttons.book_now')}>
                 <span className="icon" aria-hidden="true">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
                 {t('home_page.buttons.book_now')}
@@ -768,7 +611,7 @@ export default function Home() {
               <Link to="/tous-les-services" className="home-primary-button" aria-label={t('home_page.buttons.book_now')}>
                 <span className="icon" aria-hidden="true">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
                 {t('home_page.buttons.book_now')}
@@ -779,7 +622,7 @@ export default function Home() {
       </header>
       <main>
         <section className="home-services" id="nos-services">
-          
+
           <TousLesServices />
         </section>
         <section className="about-us" id="about">
@@ -794,7 +637,7 @@ export default function Home() {
                 {t('home_page.about.description')}
               </div>
             </div>
-            
+
             <div className="about-highlights">
               <div className="about-card">
                 <div className="icon">✅</div>
@@ -814,7 +657,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
+
         <section className="process">
           {/* Removed AOS animations here to éviter les micro-blocages de scroll sur certaines machines */}
           <p className="process-eyebrow">{t('home_page.process.eyebrow')}</p>
@@ -855,10 +698,10 @@ export default function Home() {
             <p className="expertise-intro" data-aos="fade-right" data-aos-delay="200">
               {t('home_page.expertise.description')}
             </p>
-           
+
             <div className="expertise-image" data-aos="fade-left" data-aos-delay="300">
-              <img 
-                src={`${(process.env.PUBLIC_URL || '') + '/galerie/' + encodeURIComponent('خبرتي – نهجنا البيئي.jpeg')}`} 
+              <img
+                src={`${(process.env.PUBLIC_URL || '') + '/galerie/' + encodeURIComponent('خبرتي – نهجنا البيئي.jpeg')}`}
                 alt={t('home_page.expertise.image_alt')}
                 loading="lazy"
                 decoding="async"
@@ -874,7 +717,7 @@ export default function Home() {
           <Contact />
         </section>
       </main>
-      
+
       {/* Floating scroll-to-top button */}
       {showScrollTop && (
         <button
@@ -884,7 +727,7 @@ export default function Home() {
           onClick={handleScrollToTop}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 19V5M12 5l-6 6M12 5l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 19V5M12 5l-6 6M12 5l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       )}

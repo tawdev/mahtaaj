@@ -139,19 +139,19 @@ export default function Services() {
   const handleSelectService = (service) => {
     // Strict matching for specific service names to redirect to /services/menage/1
     const serviceName = (service.name || service.title || '').trim();
-    
+
     // Exact match required (no includes, no case-insensitive partial matching)
     const exactMatches = [
       'التنظيف',  // Arabic
       'Ménage',            // French
       'House Cleaning'     // English
     ];
-    
+
     if (exactMatches.includes(serviceName)) {
       navigate('/services/menage/1');
       return;
     }
-    
+
     // For all other services, use normal navigation
     const slug = getServiceSlug(service);
     navigate(`/services/${slug}`);
@@ -210,9 +210,9 @@ export default function Services() {
 
   const handleReserveFromDetails = () => {
     if (!selectedService) return;
-    
+
     let prefill = {};
-    
+
     if (selectedService.id === 1 && selectedSubcategory) {
       // Existing logic for menage/cuisine
       prefill = {
@@ -264,11 +264,11 @@ export default function Services() {
         totalPrice: detailPrice || 0,
       };
     }
-    
+
     try {
       console.log('Setting prefill data:', prefill);
       localStorage.setItem('booking_prefill', JSON.stringify(prefill));
-    } catch {}
+    } catch { }
     navigate('/booking');
   };
 
@@ -277,6 +277,7 @@ export default function Services() {
 
   return (
     <main className="services-page">
+      <h1>mehdi</h1>
       {/* Enhanced modern styles for services page */}
       <style>{`
         /* Modern Grid Layout */
@@ -1545,24 +1546,24 @@ export default function Services() {
             </Link>
           </div>
         </div>
-        
+
       </div>
 
       <div className="services-display-section">
         {!selectedService && (
-        <div className="services-grid">
+          <div className="services-grid">
             {services.map((service, index) => (
-              <button 
-                key={service.id} 
+              <button
+                key={service.id}
                 className="service-card-link"
                 onClick={() => handleSelectService(service)}
-                data-aos="fade-up" 
+                data-aos="fade-up"
                 data-aos-delay={`${400 + index * 100}`}
-                style={{textAlign:'left'}}
+                style={{ textAlign: 'left' }}
               >
                 <div className="pcard pcard-tilt">
-                  <ServiceCard 
-                    title={service.name || service.title} 
+                  <ServiceCard
+                    title={service.name || service.title}
                     description={service.description}
                     image={service.image}
                     isActive={service.is_active}
@@ -1579,8 +1580,8 @@ export default function Services() {
             <div className="fade-slide">
               {!selectedMainCategory ? (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{t('services_page.main_categories')}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{t('services_page.main_categories')}</h2>
                     <button className="mode-button" onClick={handleBackToServices} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
                   <div className="grid-2-responsive">
@@ -1594,29 +1595,29 @@ export default function Services() {
                 </div>
               ) : (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>
                       {selectedMainCategory === 'menage' ? `${t('services_page.subcategories')} – ${t('services_page.categories.menage')}` : `${t('services_page.subcategories')} – ${t('services_page.categories.cuisine')}`}
                     </h2>
                     <button className="mode-button" onClick={() => setSelectedMainCategory(null)} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
                   <div className="grid-2-responsive">
                     {(selectedMainCategory === 'menage' ? [
-                      { id:'villa', title: t('services_page.subcategories_menage.villa') },
-                      { id:'riad', title: t('services_page.subcategories_menage.riad') },
-                      { id:'maison', title: t('services_page.subcategories_menage.maison') },
-                      { id:'appartement', title: t('services_page.subcategories_menage.appartement') },
-                      { id:'hotel', title: t('services_page.subcategories_menage.hotel') },
-                      { id:'resort-hotel', title: t('services_page.subcategories_menage.resort_hotel') },
+                      { id: 'villa', title: t('services_page.subcategories_menage.villa') },
+                      { id: 'riad', title: t('services_page.subcategories_menage.riad') },
+                      { id: 'maison', title: t('services_page.subcategories_menage.maison') },
+                      { id: 'appartement', title: t('services_page.subcategories_menage.appartement') },
+                      { id: 'hotel', title: t('services_page.subcategories_menage.hotel') },
+                      { id: 'resort-hotel', title: t('services_page.subcategories_menage.resort_hotel') },
                     ] : [
-                      { id:'italienne', title: t('services_page.subcategories_cuisine.italienne') },
-                      { id:'marocaine', title: t('services_page.subcategories_cuisine.marocaine') },
-                      { id:'francaise', title: t('services_page.subcategories_cuisine.francaise') },
-                      { id:'golfe', title: t('services_page.subcategories_cuisine.golfe') },
+                      { id: 'italienne', title: t('services_page.subcategories_cuisine.italienne') },
+                      { id: 'marocaine', title: t('services_page.subcategories_cuisine.marocaine') },
+                      { id: 'francaise', title: t('services_page.subcategories_cuisine.francaise') },
+                      { id: 'golfe', title: t('services_page.subcategories_cuisine.golfe') },
                     ]).map((sc, i) => (
                       <Link key={sc.id} className="card-tile" to={`/services/details/${selectedMainCategory}/${sc.id}`}>
                         <h3 className="card-title">{sc.title}</h3>
-              </Link>
+                      </Link>
                     ))}
                   </div>
                   {/* Details now handled on dedicated page */}
@@ -1627,8 +1628,8 @@ export default function Services() {
             <div className="fade-slide">
               {!selectedMainCategory ? (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{t('services_page.main_categories')}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{t('services_page.main_categories')}</h2>
                     <button className="mode-button" onClick={handleBackToServices} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
                   <div className="grid-2-responsive">
@@ -1642,47 +1643,47 @@ export default function Services() {
                 </div>
               ) : (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>
                       {selectedMainCategory === 'bureaux' ? `${t('services_page.details')} – ${t('services_page.categories.bureaux')}` : `${t('services_page.details')} – ${t('services_page.categories.usine')}`}
                     </h2>
                     <button className="mode-button" onClick={() => setSelectedMainCategory(null)} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
-                  
-                  <div className="service-card" style={{padding:20}}>
-                    <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
-                      <h3 style={{margin:0}}>{selectedMainCategory === 'bureaux' ? t('services_page.service_details.office_cleaning') : t('services_page.service_details.industrial_cleaning')}</h3>
+
+                  <div className="service-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                      <h3 style={{ margin: 0 }}>{selectedMainCategory === 'bureaux' ? t('services_page.service_details.office_cleaning') : t('services_page.service_details.industrial_cleaning')}</h3>
                     </div>
-                    
-                    <p style={{color:'#64748b',lineHeight:'1.6',margin:'12px 0'}}>
-                      {selectedMainCategory === 'bureaux' 
+
+                    <p style={{ color: '#64748b', lineHeight: '1.6', margin: '12px 0' }}>
+                      {selectedMainCategory === 'bureaux'
                         ? t('services_page.service_details.office_description')
                         : t('services_page.service_details.industrial_description')
                       }
                     </p>
 
-                    <div style={{marginTop:16}}>
+                    <div style={{ marginTop: 16 }}>
                       <label className="form-label">{t('services_page.forms.estimated_surface')}</label>
                       <div className="size-input-group">
-                        <input 
-                          type="number" 
-                          min="1" 
-                          step="0.5" 
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.5"
                           className="form-input"
                           placeholder={t('services_page.forms.surface_placeholder')}
                           value={detailSize}
-                          onChange={(e)=>setDetailSize(e.target.value)}
+                          onChange={(e) => setDetailSize(e.target.value)}
                         />
                         <span className="size-unit">m²</span>
                       </div>
                     </div>
 
-                    <div className="price-display" style={{display:'flex', alignItems:'center', gap:8, marginTop:12}}>
+                    <div className="price-display" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
                       <span className="price-label">{t('services_page.forms.estimated_price')}</span>
                       <strong className="price-value">{detailPrice.toFixed(2)} DH</strong>
                     </div>
 
-                    <div style={{display:'flex', gap:10, marginTop:16, flexWrap:'wrap'}}>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
                       <button className="booking-button" onClick={handleReserveFromDetails}>{t('services_page.forms.reserve')}</button>
                       <button className="mode-button" onClick={() => setSelectedMainCategory(null)}>{t('services_page.back_to_services')}</button>
                     </div>
@@ -1694,8 +1695,8 @@ export default function Services() {
             <div className="fade-slide">
               {!selectedMainCategory ? (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{t('services_page.choose_interior_exterior')}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{t('services_page.choose_interior_exterior')}</h2>
                     <button className="mode-button" onClick={handleBackToServices} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
                   <div className="grid-2-responsive">
@@ -1709,31 +1710,31 @@ export default function Services() {
                 </div>
               ) : (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{selectedMainCategory === 'interieur' ? `${t('services_page.details')} – ${t('services_page.categories.interieur')}` : `${t('services_page.details')} – ${t('services_page.categories.exterieur')}`}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{selectedMainCategory === 'interieur' ? `${t('services_page.details')} – ${t('services_page.categories.interieur')}` : `${t('services_page.details')} – ${t('services_page.categories.exterieur')}`}</h2>
                     <button className="mode-button" onClick={() => setSelectedMainCategory(null)} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
-                  <div className="service-card" style={{padding:20}}>
-                    <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
-                      <h3 style={{margin:0}}>{selectedMainCategory === 'interieur' ? t('services_page.service_details.window_interior') : t('services_page.service_details.window_exterior')}</h3>
+                  <div className="service-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                      <h3 style={{ margin: 0 }}>{selectedMainCategory === 'interieur' ? t('services_page.service_details.window_interior') : t('services_page.service_details.window_exterior')}</h3>
                     </div>
-                    <p style={{color:'#64748b',lineHeight:'1.6',margin:'12px 0'}}>
-                      {selectedMainCategory === 'interieur' 
+                    <p style={{ color: '#64748b', lineHeight: '1.6', margin: '12px 0' }}>
+                      {selectedMainCategory === 'interieur'
                         ? t('services_page.service_details.window_interior_description')
                         : t('services_page.service_details.window_exterior_description')}
                     </p>
-                    <div style={{marginTop:16}}>
+                    <div style={{ marginTop: 16 }}>
                       <label className="form-label">{t('services_page.forms.estimated_surface')}</label>
                       <div className="size-input-group">
-                        <input type="number" min="1" step="0.5" className="form-input" placeholder={t('services_page.forms.surface_placeholder')} value={detailSize} onChange={(e)=>setDetailSize(e.target.value)} />
+                        <input type="number" min="1" step="0.5" className="form-input" placeholder={t('services_page.forms.surface_placeholder')} value={detailSize} onChange={(e) => setDetailSize(e.target.value)} />
                         <span className="size-unit">m²</span>
                       </div>
                     </div>
-                    <div className="price-display" style={{display:'flex', alignItems:'center', gap:8, marginTop:12}}>
+                    <div className="price-display" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
                       <span className="price-label">{t('services_page.forms.estimated_price')}</span>
                       <strong className="price-value">{detailPrice.toFixed(2)} DH</strong>
                     </div>
-                    <div style={{display:'flex', gap:10, marginTop:16, flexWrap:'wrap'}}>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
                       <button className="booking-button" onClick={handleReserveFromDetails}>{t('services_page.forms.reserve')}</button>
                       <button className="mode-button" onClick={() => setSelectedMainCategory(null)}>{t('services_page.back_to_services')}</button>
                     </div>
@@ -1745,8 +1746,8 @@ export default function Services() {
             <div className="fade-slide">
               {!selectedMainCategory ? (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{t('services_page.choose_laundry_ironing')}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{t('services_page.choose_laundry_ironing')}</h2>
                     <button className="mode-button" onClick={handleBackToServices} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
                   <div className="grid-2-responsive">
@@ -1760,31 +1761,31 @@ export default function Services() {
                 </div>
               ) : (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{selectedMainCategory === 'lavage' ? `${t('services_page.details')} – ${t('services_page.categories.lavage')}` : `${t('services_page.details')} – ${t('services_page.categories.repassage')}`}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{selectedMainCategory === 'lavage' ? `${t('services_page.details')} – ${t('services_page.categories.lavage')}` : `${t('services_page.details')} – ${t('services_page.categories.repassage')}`}</h2>
                     <button className="mode-button" onClick={() => setSelectedMainCategory(null)} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
-                  <div className="service-card" style={{padding:20}}>
-                    <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
-                      <h3 style={{margin:0}}>{selectedMainCategory === 'lavage' ? t('services_page.service_details.laundry_washing') : t('services_page.service_details.laundry_ironing')}</h3>
+                  <div className="service-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                      <h3 style={{ margin: 0 }}>{selectedMainCategory === 'lavage' ? t('services_page.service_details.laundry_washing') : t('services_page.service_details.laundry_ironing')}</h3>
                     </div>
-                    <p style={{color:'#64748b',lineHeight:'1.6',margin:'12px 0'}}>
-                      {selectedMainCategory === 'lavage' 
+                    <p style={{ color: '#64748b', lineHeight: '1.6', margin: '12px 0' }}>
+                      {selectedMainCategory === 'lavage'
                         ? t('services_page.service_details.laundry_washing_description')
                         : t('services_page.service_details.laundry_ironing_description')}
                     </p>
-                    <div style={{marginTop:16}}>
+                    <div style={{ marginTop: 16 }}>
                       <label className="form-label">{t('services_page.forms.estimated_surface')}</label>
                       <div className="size-input-group">
-                        <input type="number" min="1" step="0.5" className="form-input" placeholder={t('services_page.forms.surface_placeholder')} value={detailSize} onChange={(e)=>setDetailSize(e.target.value)} />
+                        <input type="number" min="1" step="0.5" className="form-input" placeholder={t('services_page.forms.surface_placeholder')} value={detailSize} onChange={(e) => setDetailSize(e.target.value)} />
                         <span className="size-unit">m²</span>
                       </div>
                     </div>
-                    <div className="price-display" style={{display:'flex', alignItems:'center', gap:8, marginTop:12}}>
+                    <div className="price-display" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
                       <span className="price-label">{t('services_page.forms.estimated_price')}</span>
                       <strong className="price-value">{detailPrice.toFixed(2)} DH</strong>
                     </div>
-                    <div style={{display:'flex', gap:10, marginTop:16, flexWrap:'wrap'}}>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
                       <button className="booking-button" onClick={handleReserveFromDetails}>{t('services_page.forms.reserve')}</button>
                       <button className="mode-button" onClick={() => setSelectedMainCategory(null)}>{t('services_page.back_to_services')}</button>
                     </div>
@@ -1796,8 +1797,8 @@ export default function Services() {
             <div className="fade-slide">
               {!selectedMainCategory ? (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{t('services_page.choose_checkin_checkout')}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{t('services_page.choose_checkin_checkout')}</h2>
                     <button className="mode-button" onClick={handleBackToServices} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
                   <div className="grid-2-responsive">
@@ -1811,31 +1812,31 @@ export default function Services() {
                 </div>
               ) : (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{selectedMainCategory === 'check-in' ? `${t('services_page.details')} – ${t('services_page.categories.check_in')}` : `${t('services_page.details')} – ${t('services_page.categories.check_out')}`}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{selectedMainCategory === 'check-in' ? `${t('services_page.details')} – ${t('services_page.categories.check_in')}` : `${t('services_page.details')} – ${t('services_page.categories.check_out')}`}</h2>
                     <button className="mode-button" onClick={() => setSelectedMainCategory(null)} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
-                  <div className="service-card" style={{padding:20}}>
-                    <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
-                      <h3 style={{margin:0}}>{selectedMainCategory === 'check-in' ? t('services_page.service_details.airbnb_checkin') : t('services_page.service_details.airbnb_checkout')}</h3>
+                  <div className="service-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                      <h3 style={{ margin: 0 }}>{selectedMainCategory === 'check-in' ? t('services_page.service_details.airbnb_checkin') : t('services_page.service_details.airbnb_checkout')}</h3>
                     </div>
-                    <p style={{color:'#64748b',lineHeight:'1.6',margin:'12px 0'}}>
-                      {selectedMainCategory === 'check-in' 
+                    <p style={{ color: '#64748b', lineHeight: '1.6', margin: '12px 0' }}>
+                      {selectedMainCategory === 'check-in'
                         ? t('services_page.service_details.airbnb_checkin_description')
                         : t('services_page.service_details.airbnb_checkout_description')}
                     </p>
-                    <div style={{marginTop:16}}>
+                    <div style={{ marginTop: 16 }}>
                       <label className="form-label">{t('services_page.forms.estimated_surface')}</label>
                       <div className="size-input-group">
-                        <input type="number" min="1" step="0.5" className="form-input" placeholder={t('services_page.forms.surface_placeholder')} value={detailSize} onChange={(e)=>setDetailSize(e.target.value)} />
+                        <input type="number" min="1" step="0.5" className="form-input" placeholder={t('services_page.forms.surface_placeholder')} value={detailSize} onChange={(e) => setDetailSize(e.target.value)} />
                         <span className="size-unit">m²</span>
                       </div>
                     </div>
-                    <div className="price-display" style={{display:'flex', alignItems:'center', gap:8, marginTop:12}}>
+                    <div className="price-display" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
                       <span className="price-label">{t('services_page.forms.estimated_price')}</span>
                       <strong className="price-value">{detailPrice.toFixed(2)} DH</strong>
                     </div>
-                    <div style={{display:'flex', gap:10, marginTop:16, flexWrap:'wrap'}}>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
                       <button className="booking-button" onClick={handleReserveFromDetails}>{t('services_page.forms.reserve')}</button>
                       <button className="mode-button" onClick={() => setSelectedMainCategory(null)}>{t('services_page.back_to_services')}</button>
                     </div>
@@ -1847,8 +1848,8 @@ export default function Services() {
             <div className="fade-slide">
               {!selectedMainCategory ? (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{t('services_page.choose_standard_deep')}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{t('services_page.choose_standard_deep')}</h2>
                     <button className="mode-button" onClick={handleBackToServices} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
                   <div className="grid-2-responsive">
@@ -1862,31 +1863,31 @@ export default function Services() {
                 </div>
               ) : (
                 <div>
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                    <h2 style={{margin:0}}>{selectedMainCategory === 'standard' ? `${t('services_page.details')} – ${t('services_page.categories.standard')}` : `${t('services_page.details')} – ${t('services_page.categories.profond')}`}</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <h2 style={{ margin: 0 }}>{selectedMainCategory === 'standard' ? `${t('services_page.details')} – ${t('services_page.categories.standard')}` : `${t('services_page.details')} – ${t('services_page.categories.profond')}`}</h2>
                     <button className="mode-button" onClick={() => setSelectedMainCategory(null)} title={t('services_page.back')}>{t('services_page.back')}</button>
                   </div>
-                  <div className="service-card" style={{padding:20}}>
-                    <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
-                      <h3 style={{margin:0}}>{selectedMainCategory === 'standard' ? t('services_page.service_details.pool_standard') : t('services_page.service_details.pool_deep')}</h3>
+                  <div className="service-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                      <h3 style={{ margin: 0 }}>{selectedMainCategory === 'standard' ? t('services_page.service_details.pool_standard') : t('services_page.service_details.pool_deep')}</h3>
                     </div>
-                    <p style={{color:'#64748b',lineHeight:'1.6',margin:'12px 0'}}>
-                      {selectedMainCategory === 'standard' 
+                    <p style={{ color: '#64748b', lineHeight: '1.6', margin: '12px 0' }}>
+                      {selectedMainCategory === 'standard'
                         ? t('services_page.service_details.pool_standard_description')
                         : t('services_page.service_details.pool_deep_description')}
                     </p>
-                    <div style={{marginTop:16}}>
+                    <div style={{ marginTop: 16 }}>
                       <label className="form-label">{t('services_page.forms.estimated_surface')}</label>
                       <div className="size-input-group">
-                        <input type="number" min="1" step="0.5" className="form-input" placeholder={t('services_page.forms.surface_placeholder')} value={detailSize} onChange={(e)=>setDetailSize(e.target.value)} />
+                        <input type="number" min="1" step="0.5" className="form-input" placeholder={t('services_page.forms.surface_placeholder')} value={detailSize} onChange={(e) => setDetailSize(e.target.value)} />
                         <span className="size-unit">m²</span>
                       </div>
                     </div>
-                    <div className="price-display" style={{display:'flex', alignItems:'center', gap:8, marginTop:12}}>
+                    <div className="price-display" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
                       <span className="price-label">{t('services_page.forms.estimated_price')}</span>
                       <strong className="price-value">{detailPrice.toFixed(2)} DH</strong>
                     </div>
-                    <div style={{display:'flex', gap:10, marginTop:16, flexWrap:'wrap'}}>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
                       <button className="booking-button" onClick={handleReserveFromDetails}>{t('services_page.forms.reserve')}</button>
                       <button className="mode-button" onClick={() => setSelectedMainCategory(null)}>{t('services_page.back_to_services')}</button>
                     </div>
@@ -1896,19 +1897,19 @@ export default function Services() {
             </div>
           ) : (
             <div>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-                <h2 style={{margin:0}} data-aos="fade-up" data-aos-delay="350">Choisissez un type: {selectedService.name || selectedService.title}</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h2 style={{ margin: 0 }} data-aos="fade-up" data-aos-delay="350">Choisissez un type: {selectedService.name || selectedService.title}</h2>
                 <button className="mode-button" onClick={handleBackToServices} title="Retour">← Retour</button>
               </div>
               <div className="services-grid">
                 {serviceTypes.map((t, idx) => (
-                  <button 
+                  <button
                     key={t.id}
                     className="service-card-link"
                     onClick={() => setSelectedType(t)}
-                    data-aos="fade-up" 
+                    data-aos="fade-up"
                     data-aos-delay={`${400 + idx * 100}`}
-                    style={{textAlign:'left'}}
+                    style={{ textAlign: 'left' }}
                   >
                     <div className="service-card">
                       <h3 className="service-title">{t.name}</h3>
@@ -1923,27 +1924,27 @@ export default function Services() {
 
         {selectedService && selectedType && (
           <div className="service-details" data-aos="fade-up" data-aos-delay="350">
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-              <h2 style={{margin:0}}>{selectedService.title} – {selectedType.name}</h2>
-              <div style={{display:'flex',gap:8}}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h2 style={{ margin: 0 }}>{selectedService.title} – {selectedType.name}</h2>
+              <div style={{ display: 'flex', gap: 8 }}>
                 <button className="mode-button" onClick={handleBackToTypes} title="Retour aux types">← Types</button>
               </div>
             </div>
-            <div className="service-card" style={{padding:20}}>
-              <p className="service-description" style={{marginTop:0}}>{selectedType.description}</p>
+            <div className="service-card" style={{ padding: 20 }}>
+              <p className="service-description" style={{ marginTop: 0 }}>{selectedType.description}</p>
               {selectedType.features && selectedType.features.length > 0 && (
-                <ul style={{margin:'8px 0 0 18px'}}>
+                <ul style={{ margin: '8px 0 0 18px' }}>
                   {selectedType.features.map((f, i) => (
                     <li key={i}>{f}</li>
                   ))}
                 </ul>
               )}
-              <div style={{marginTop:16, display:'flex', gap:10, flexWrap:'wrap'}}>
+              <div style={{ marginTop: 16, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 <Link className="booking-button" to={`/service/${selectedService.id}`}>Voir la fiche service</Link>
                 <Link className="booking-button" to={`/booking`}>Réserver ce type</Link>
               </div>
             </div>
-        </div>
+          </div>
         )}
       </div>
     </main>

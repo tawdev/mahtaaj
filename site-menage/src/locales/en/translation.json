@@ -1,4 +1,28 @@
 {
+  "footer": {
+    "about_title": "About mahtaaj",
+    "about_text": "Your trusted partner for a clean, safe, and harmonious environment. German quality, Moroccan price.",
+    "links_title": "Quick Links",
+    "services_title": "Our Services",
+    "contact_title": "Contact",
+    "address_label": "Address",
+    "address_value": "Rabat, Morocco",
+    "phone_label": "Phone",
+    "email_label": "Email",
+    "follow_us": "Follow Us",
+    "rights": "© {{year}} C-Digital — All rights reserved"
+  },
+  "blog": {
+    "header_title": "Our Blog",
+    "header_subtitle": "Expert tips, mahtaaj news and tricks for a healthy environment.",
+    "read_more": "Read more",
+    "read": "Read",
+    "back_to_blog": "Back to blog",
+    "related_posts": "Recommended Articles",
+    "share": "Share:",
+    "not_found": "Article not found",
+    "read_time_suffix": "min"
+  },
   "nav": {
     "home": "Home",
     "services": "Services",
@@ -14,12 +38,14 @@
     "gallery": "Gallery",
     "info": "Info",
     "testimonials": "Testimonials",
+    "blog": "Blog",
     "profile": "My Profile",
     "menu": "Menu",
     "close": "Close",
     "baby_setting": "Baby Setting",
     "gardening": "Gardening",
     "hand_workers": "Hand Workers",
+    "driver": "Driver",
     "brand_name": "mahtaaj",
     "all_services": "All our services",
     "multi_services": "Search for worker"
@@ -651,6 +677,10 @@
   "shop_page": {
     "title": "mahtaaj Shop",
     "subtitle": "Discover our quality professional products and equipment for all your cleaning needs.",
+    "added_to_cart": "Added to cart",
+    "cart_updated": "Cart updated",
+    "view_cart": "View cart",
+    "loading_cart": "Adding...",
     "loading": "Loading products...",
     "error": "Loading error",
     "retry": "Retry",
@@ -1146,7 +1176,7 @@
         "hours": "Hours",
         "hours_value": "Mon-Fri: 8am-6pm | Sat: 8am-4pm",
         "zone": "Service area",
-        "zone_value": "Rabat and surroundings"
+        "zone_value": "Marrakech and surroundings"
       }
     }
   },
@@ -1472,6 +1502,7 @@
     }
   },
   "support": {
+    "tag": "Help Center",
     "title": "Support & Assistance",
     "intro": "If you encounter any issue while using the platform or have any questions, you can contact us via the following phone number or email.",
     "message": "Our support team is available at any time to assist you. Don't hesitate to reach out.",
