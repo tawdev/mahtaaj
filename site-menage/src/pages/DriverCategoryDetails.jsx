@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getDriverCategories } from '../api-supabase';
 import { supabase } from '../lib/supabase';
@@ -9,7 +9,8 @@ import './DriverCategoryDetails.css';
 export default function DriverCategoryDetails() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
-  
+  const navigate = useNavigate();
+
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -20,27 +21,42 @@ export default function DriverCategoryDetails() {
     if (id) {
       loadCategory();
     }
+
+    // Check for pending reservation context
+    const pending = sessionStorage.getItem('driver_pending_context');
+    if (pending) {
+      try {
+        const { pendingReservation, categoryId } = JSON.parse(pending);
+        if (pendingReservation && categoryId === id) {
+          console.log('[DriverCategoryDetails] Auto-triggering booking form for category:', categoryId);
+          sessionStorage.removeItem('driver_pending_context');
+          setShowBookingForm(true);
+        }
+      } catch (err) {
+        console.error('Error parsing pending context:', err);
+      }
+    }
   }, [id, i18n.language]);
 
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    
+
     if (imagePath.includes('supabase.co/storage')) {
       return imagePath;
     }
-    
+
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
+
     if (!imagePath.includes('/') && !imagePath.includes('http')) {
       const { data: { publicUrl } } = supabase.storage
         .from('employees')
         .getPublicUrl(imagePath);
       return publicUrl;
     }
-    
+
     return null;
   };
 
@@ -68,9 +84,9 @@ export default function DriverCategoryDetails() {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[DriverCategoryDetails] Loading category ID:', id);
-      
+
       const data = await getDriverCategories();
 
       if (!data || !Array.isArray(data)) {
@@ -80,12 +96,12 @@ export default function DriverCategoryDetails() {
       }
 
       const foundCategory = data.find(cat => cat.id === id);
-      
+
       if (!foundCategory) {
         setError(
-          i18n.language === 'ar' ? 'الفئة غير موجودة' : 
-          i18n.language === 'fr' ? 'Catégorie non trouvée' : 
-          'Category not found'
+          i18n.language === 'ar' ? 'الفئة غير موجودة' :
+            i18n.language === 'fr' ? 'Catégorie non trouvée' :
+              'Category not found'
         );
         return;
       }
@@ -95,16 +111,36 @@ export default function DriverCategoryDetails() {
     } catch (err) {
       console.error('[DriverCategoryDetails] Error loading category:', err);
       setError(
-        i18n.language === 'ar' ? 'خطأ في تحميل الفئة' : 
-        i18n.language === 'fr' ? 'Erreur lors du chargement de la catégorie' : 
-        'Error loading category'
+        i18n.language === 'ar' ? 'خطأ في تحميل الفئة' :
+          i18n.language === 'fr' ? 'Erreur lors du chargement de la catégorie' :
+            'Error loading category'
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const handleReserve = () => {
+  const handleReserve = async () => {
+    // Check authentication
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      // Set pending context to re-trigger after login
+      sessionStorage.setItem('driver_pending_context', JSON.stringify({
+        pendingReservation: true,
+        categoryId: id
+      }));
+
+      // Store returnUrl as the current page
+      localStorage.setItem('auth_return_url', `/driver/${id}`);
+
+      // Short delay for stability
+      setTimeout(() => {
+        navigate('/login-register');
+      }, 500);
+      return;
+    }
+
     setShowBookingForm(true);
   };
 
@@ -121,9 +157,9 @@ export default function DriverCategoryDetails() {
     return (
       <main className="driver-category-details-page">
         <div className="loading-state">
-          {i18n.language === 'ar' ? 'جاري التحميل...' : 
-           i18n.language === 'fr' ? 'Chargement...' : 
-           'Loading...'}
+          {i18n.language === 'ar' ? 'جاري التحميل...' :
+            i18n.language === 'fr' ? 'Chargement...' :
+              'Loading...'}
         </div>
       </main>
     );
@@ -133,14 +169,14 @@ export default function DriverCategoryDetails() {
     return (
       <main className="driver-category-details-page">
         <div className="error-state">
-          {error || (i18n.language === 'ar' ? 'الفئة غير موجودة' : 
-                     i18n.language === 'fr' ? 'Catégorie non trouvée' : 
-                     'Category not found')}
+          {error || (i18n.language === 'ar' ? 'الفئة غير موجودة' :
+            i18n.language === 'fr' ? 'Catégorie non trouvée' :
+              'Category not found')}
         </div>
         <Link to="/driver" className="back-button">
-          {i18n.language === 'ar' ? '← العودة' : 
-           i18n.language === 'fr' ? '← Retour' : 
-           '← Back'}
+          {i18n.language === 'ar' ? '← العودة' :
+            i18n.language === 'fr' ? '← Retour' :
+              '← Back'}
         </Link>
       </main>
     );
@@ -154,8 +190,8 @@ export default function DriverCategoryDetails() {
     <main className="driver-category-details-page">
       <div className="category-details-header">
         <Link to="/driver" className="back-button">
-          ← {i18n.language === 'ar' ? 'العودة' : 
-              i18n.language === 'fr' ? 'Retour' : 
+          ← {i18n.language === 'ar' ? 'العودة' :
+            i18n.language === 'fr' ? 'Retour' :
               'Back'}
         </Link>
         <h1>🚗 {categoryName}</h1>
@@ -164,8 +200,8 @@ export default function DriverCategoryDetails() {
       <div className="category-details-content">
         {imageUrl && (
           <div className="category-image-section">
-            <img 
-              src={imageUrl} 
+            <img
+              src={imageUrl}
               alt={categoryName}
               className="category-main-image"
             />
@@ -175,9 +211,9 @@ export default function DriverCategoryDetails() {
         {categoryDescription && (
           <div className="description-section">
             <h3>
-              {i18n.language === 'ar' ? '📝 الوصف' : 
-               i18n.language === 'fr' ? '📝 Description' : 
-               '📝 Description'}
+              {i18n.language === 'ar' ? '📝 الوصف' :
+                i18n.language === 'fr' ? '📝 Description' :
+                  '📝 Description'}
             </h3>
             <p>{categoryDescription}</p>
           </div>
@@ -185,14 +221,14 @@ export default function DriverCategoryDetails() {
 
         <div className="actions-section">
           <button onClick={handleReserve} className="reserve-button">
-            {i18n.language === 'ar' ? 'احجز الآن' : 
-             i18n.language === 'fr' ? 'Réserver' : 
-             'Reserve'}
+            {i18n.language === 'ar' ? 'احجز الآن' :
+              i18n.language === 'fr' ? 'Réserver' :
+                'Reserve'}
           </button>
           <Link to="/driver" className="back-services-button">
-            {i18n.language === 'ar' ? 'العودة إلى الخدمات' : 
-             i18n.language === 'fr' ? 'Retour aux services' : 
-             'Back to services'}
+            {i18n.language === 'ar' ? 'العودة إلى الخدمات' :
+              i18n.language === 'fr' ? 'Retour aux services' :
+                'Back to services'}
           </Link>
         </div>
       </div>

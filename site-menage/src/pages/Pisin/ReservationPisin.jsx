@@ -11,8 +11,9 @@ export default function ReservationPisin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  
-  // Get data from navigation state or localStorage
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Form data
   const [formData, setFormData] = useState({
     firstname: '',
     phone: '',
@@ -22,9 +23,31 @@ export default function ReservationPisin() {
     preferred_date: ''
   });
 
-  const reservationData = location.state?.type || null;
-  const serviceType = location.state?.serviceType || 'nettoyage_standard'; // 'nettoyage_profond' or 'nettoyage_standard'
-  
+  // Get data from navigation state or sessionStorage (to preserve across login)
+  const [initialData, setInitialData] = useState(() => {
+    // 1. Try navigation state
+    if (location.state?.type) {
+      return {
+        type: location.state.type,
+        serviceType: location.state.serviceType || 'nettoyage_standard'
+      };
+    }
+    // 2. Try sessionStorage
+    const saved = sessionStorage.getItem('piscine_pending_reservation_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing saved state:', e);
+      }
+    }
+    return null;
+  });
+
+  const reservationData = initialData?.type || null;
+  const serviceType = initialData?.serviceType || 'nettoyage_standard';
+
   // Determine back navigation based on serviceType
   const getBackRoute = () => {
     if (serviceType === 'nettoyage_profond') {
@@ -43,7 +66,7 @@ export default function ReservationPisin() {
     }
     return t('reservation_piscine.back', 'Retour');
   };
-  
+
   // Calculate final price for display
   const [displayFinalPrice, setDisplayFinalPrice] = useState(0);
   const [totalArea, setTotalArea] = useState(0);
@@ -65,7 +88,7 @@ export default function ReservationPisin() {
     } catch (err) {
       console.error('Error loading prefill:', err);
     }
-    
+
     // Calculate and display final price
     if (reservationData) {
       const len = parseFloat(reservationData.length) || 0;
@@ -73,13 +96,55 @@ export default function ReservationPisin() {
       const area = parseFloat(reservationData.totalMetre) || 0;
       const basePrice = parseFloat(reservationData.price) || 0;
       const calculatedPrice = reservationData.finalPrice ? parseFloat(reservationData.finalPrice) : (basePrice * area);
-      
+
       setLength(len);
       setWidth(wid);
       setTotalArea(area);
       setDisplayFinalPrice(calculatedPrice);
     }
   }, [reservationData, serviceType]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('[ReservationPisin] No session found, redirecting to login...');
+          // Save state to survive redirect
+          if (location.state) {
+            sessionStorage.setItem('piscine_pending_reservation_state', JSON.stringify(location.state));
+          }
+          localStorage.setItem('auth_return_url', location.pathname + location.search);
+          console.log('[ReservationPisin] Saved auth_return_url:', location.pathname + location.search);
+          navigate('/login-register', {
+            state: {
+              returnUrl: location.pathname + location.search
+            }
+          });
+          return;
+        }
+
+        // Session exists, check if we need to clean up sessionStorage
+        sessionStorage.removeItem('piscine_pending_reservation_state');
+
+        // Prefill user data if available
+        if (session.user) {
+          setFormData(prev => ({
+            ...prev,
+            firstname: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name || prev.firstname,
+            email: session.user.email || prev.email,
+            phone: session.user.user_metadata?.phone || prev.phone
+          }));
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -152,7 +217,7 @@ export default function ReservationPisin() {
 
       // Clear localStorage
       localStorage.removeItem('booking_prefill');
-      
+
       setSuccess(true);
       setTimeout(() => {
         navigate('/piscine');
@@ -164,6 +229,10 @@ export default function ReservationPisin() {
       setLoading(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return <main className="reservation-piscine-page"><div className="reservation-piscine-loading">Vérification de l'authentification...</div></main>;
+  }
 
   if (success) {
     return (
@@ -182,7 +251,7 @@ export default function ReservationPisin() {
     return (
       <main className="reservation-piscine-page">
         <div className="reservation-piscine-header">
-          <button 
+          <button
             onClick={() => navigate(getBackRoute())}
             className="reservation-piscine-back-btn"
             title={getBackButtonText()}
@@ -202,7 +271,7 @@ export default function ReservationPisin() {
   return (
     <main className="reservation-piscine-page">
       <div className="reservation-piscine-header">
-        <button 
+        <button
           className="reservation-piscine-back-btn"
           onClick={() => navigate(getBackRoute())}
           title={getBackButtonText()}
@@ -319,7 +388,7 @@ export default function ReservationPisin() {
               <div className="summary-item">
                 <span className="summary-label">{t('reservation_piscine.service_type', 'Type')}:</span>
                 <span className="summary-value">
-                  {serviceType === 'nettoyage_profond' 
+                  {serviceType === 'nettoyage_profond'
                     ? t('reservation_piscine.service_type_profond', 'Nettoyage Profond')
                     : t('reservation_piscine.service_type_standard', 'Nettoyage Standard')
                   }
@@ -363,8 +432,8 @@ export default function ReservationPisin() {
             className="reservation-piscine-submit-btn"
             disabled={loading}
           >
-            {loading 
-              ? t('reservation_piscine.submitting', 'Envoi...') 
+            {loading
+              ? t('reservation_piscine.submitting', 'Envoi...')
               : t('reservation_piscine.submit', 'Confirmer la réservation')
             }
           </button>

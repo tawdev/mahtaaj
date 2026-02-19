@@ -84,7 +84,6 @@ export default function Navbar1() {
       setIsLoggedIn(false);
     } finally {
       closeMenu();
-      navigate('/');
     }
   }
 

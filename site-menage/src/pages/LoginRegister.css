@@ -196,6 +196,75 @@
   color: var(--auth-text-main);
 }
 
+.password-input-container .form-input {
+  padding-right: 48px;
+}
+
+/* RTL Support */
+.rtl .form-header,
+.rtl .form-group,
+.rtl .remember-row,
+.rtl .toggle-text,
+.rtl .back-to-shop {
+  text-align: right;
+  direction: rtl;
+}
+
+.rtl .form-label {
+  text-align: right;
+}
+
+.rtl .password-toggle-btn {
+  right: auto;
+  left: 12px;
+}
+
+.rtl .password-input-container .form-input {
+  padding-right: 16px;
+  padding-left: 48px;
+  text-align: right;
+  direction: rtl;
+}
+
+.rtl .form-input {
+  text-align: right;
+  direction: rtl;
+}
+
+.rtl .remember-label {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.rtl .back-button {
+  flex-direction: row-reverse;
+}
+
+.rtl .back-button svg {
+  transform: rotate(180deg);
+}
+
+.rtl .success-toast,
+.rtl .error-toast {
+  right: auto;
+  left: 24px;
+  flex-direction: row-reverse;
+  text-align: right;
+  animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /* Actions */
 .remember-row {
   margin-top: -4px;

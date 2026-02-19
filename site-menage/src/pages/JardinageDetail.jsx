@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import ReservationForm from '../components/ReservationForm';
 import { supabase } from '../lib/supabase';
 import './JardinageDetail.css';
 
 export default function JardinageDetail() {
   const { id } = useParams();
   const { t, i18n } = useTranslation();
-
+  const navigate = useNavigate();
+  const location = useLocation();
   const [category, setCategory] = useState(null);
   const [jardins, setJardins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [loadingServices, setLoadingServices] = useState(false);
-  const [showReservationForm, setShowReservationForm] = useState(false);
-  const [selectedService, setSelectedService] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
@@ -23,7 +21,86 @@ export default function JardinageDetail() {
     if (id) {
       loadCategory();
     }
-  }, [id, i18n.language]);
+
+    // Check for success message from reservation page
+    if (location.state?.reservationSuccess) {
+      setSuccessMessage(t('jardinage.success.reservation', 'Réservation réussie'));
+      // Clear location state to prevent toast on refresh
+      window.history.replaceState({}, document.title);
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+    }
+
+    // Check for pending reservation context
+    const pending = sessionStorage.getItem('jardinage_pending_context');
+    if (pending) {
+      try {
+        const { pendingReservation, categoryId } = JSON.parse(pending);
+        if (pendingReservation && categoryId === id) {
+          console.log('[JardinageDetail] Auto-redirecting to reservation page for category:', categoryId);
+          sessionStorage.removeItem('jardinage_pending_context');
+          navigate(`/jardinage/reservation/${categoryId}`);
+        }
+      } catch (err) {
+        console.error('Error parsing pending context:', err);
+      }
+    }
+  }, [id, i18n.language, location.state, navigate]);
+
+  // Function to get translated category name
+  const getTranslatedCategoryName = (category) => {
+    if (!category) return t('jardinage.category_not_available');
+
+    const lang = i18n.language;
+    if (lang === 'ar' && category.name_ar) return category.name_ar;
+    if (lang === 'fr' && category.name_fr) return category.name_fr;
+    if (lang === 'en' && category.name_en) return category.name_en;
+
+    const categoryName = category.name;
+    if (!categoryName) return t('jardinage.category_not_available');
+
+    // Direct translations for common categories
+    const directTranslations = {
+      'Plantation': t('jardinage.plantation', 'الزراعة'),
+      'Entretien Jardin': t('jardinage.garden_maintenance', 'صيانة الحديقة'),
+      'Aménagement Paysager': t('jardinage.landscaping', 'تنسيق المناظر الطبيعية'),
+      'Tonte et Taille': t('jardinage.mowing_pruning', 'قص وتشذيب')
+    };
+
+    if (directTranslations[categoryName]) {
+      return directTranslations[categoryName];
+    }
+
+    return categoryName;
+  };
+
+  // Function to get translated category description
+  const getTranslatedCategoryDescription = (category) => {
+    if (!category) return t('jardinage.description_not_available');
+
+    const lang = i18n.language;
+    if (lang === 'ar' && category.description_ar) return category.description_ar;
+    if (lang === 'fr' && category.description_fr) return category.description_fr;
+    if (lang === 'en' && category.description_en) return category.description_en;
+
+    const categoryName = category.name;
+    if (!categoryName) return t('jardinage.description_not_available');
+
+    // Direct translations for common categories descriptions
+    const directTranslations = {
+      'Plantation': t('jardinage.plantation_desc', 'زراعة الأشجار والشجيرات والزهور'),
+      'Entretien Jardin': t('jardinage.garden_maintenance_desc', 'صيانة منتظمة لحديقتك'),
+      'Aménagement Paysager': t('jardinage.landscaping_desc', 'تنسيق وتطوير المساحات الخضراء'),
+      'Tonte et Taille': t('jardinage.mowing_pruning_desc', 'قص وتشذيب العشب والأشجار')
+    };
+
+    if (directTranslations[categoryName]) {
+      return directTranslations[categoryName];
+    }
+
+    return category.description || t('jardinage.description_not_available');
+  };
 
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = React.useCallback((imagePath) => {
@@ -116,16 +193,35 @@ export default function JardinageDetail() {
     }
   };
 
-  const handleReservationSuccess = (data) => {
+  const handleReserve = async (categoryId) => {
+    // Check authentication
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      // Set pending context to re-trigger after login
+      sessionStorage.setItem('jardinage_pending_context', JSON.stringify({
+        pendingReservation: true,
+        categoryId: categoryId
+      }));
+
+      // Store returnUrl as the current page (Jardinage detail)
+      localStorage.setItem('auth_return_url', `/jardinage/details/${categoryId}`);
+
+      // Short delay for stability
+      setTimeout(() => {
+        navigate('/login-register', { state: { returnUrl: `/jardinage/details/${categoryId}` } });
+      }, 500);
+      return;
+    }
+
+    navigate(`/jardinage/reservation/${categoryId}`);
+  };
+
+  const handleReservationSuccess = () => {
     setSuccessMessage(t('jardinage.success.reservation', 'Réservation réussie'));
-    setShowReservationForm(false);
     setTimeout(() => {
       setSuccessMessage('');
     }, 5000);
-  };
-
-  const handleReservationCancel = () => {
-    setShowReservationForm(false);
   };
 
   if (loading) {
@@ -168,66 +264,54 @@ export default function JardinageDetail() {
         </Link>
       </div>
 
-      {/* Hero Section with Large Image */}
-      <section className="jardinage-detail-hero">
-        <div className="hero-background">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={category.name}
-              className="hero-image"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                const placeholder = e.target.nextElementSibling;
-                if (placeholder) {
-                  placeholder.style.display = 'flex';
-                }
-              }}
-            />
-          ) : null}
-          <div
-            className="hero-placeholder"
-            style={{ display: imageUrl ? 'none' : 'flex' }}
-          >
-            🌱
+      {/* Centered Detail Card */}
+      <main className="jardinage-detail-container">
+        <div className="jardinage-detail-card">
+          {/* Card Image Header */}
+          <div className="card-image-header">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={getTranslatedCategoryName(category)}
+                className="category-card-image"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  const placeholder = e.target.nextElementSibling;
+                  if (placeholder) {
+                    placeholder.style.display = 'flex';
+                  }
+                }}
+              />
+            ) : null}
+            <div
+              className="card-image-placeholder"
+              style={{ display: imageUrl ? 'none' : 'flex' }}
+            >
+              🌱
+            </div>
           </div>
-          <div className="hero-overlay"></div>
-        </div>
 
-        <div className="hero-content">
-          <div className="container mx-auto px-4">
-            <h1 className="hero-title">
-              {category.name || t('jardinage.category_not_available', 'Catégorie non disponible')}
+          {/* Card Body */}
+          <div className="card-body">
+            <h1 className="category-title">
+              {getTranslatedCategoryName(category)}
             </h1>
 
-            <p className="hero-subtitle">
-              {category.description || t('jardinage.description_not_available', 'Description non disponible')}
+            <p className="category-description">
+              {getTranslatedCategoryDescription(category)}
             </p>
-          </div>
-        </div>
-      </section>
 
-      {/* Main Content Section */}
-      <section className="jardinage-detail-content">
-        <div className="container mx-auto px-4 py-12">
-
-
-          {/* Reservation Button Section */}
-          <div className="reservation-section">
-            <div className="reservation-card">
+            <div className="card-actions">
               <button
-                className="btn-reserve-large"
-                onClick={() => {
-                  setSelectedService(null);
-                  setShowReservationForm(true);
-                }}
+                className="btn-reserve-card"
+                onClick={() => handleReserve(id)}
               >
                 📅 {t('jardinage.services.reserve', 'Réserver')}
               </button>
             </div>
           </div>
         </div>
-      </section>
+      </main>
 
       {/* Success Message */}
       {successMessage && (
@@ -235,22 +319,6 @@ export default function JardinageDetail() {
           <div className="success-content">
             <span className="success-icon">✅</span>
             <span className="success-text">{successMessage}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Reservation Form Modal */}
-      {showReservationForm && (
-        <div className="reservation-modal">
-          <div className="modal-backdrop" onClick={handleReservationCancel}></div>
-          <div className="modal-content">
-            <ReservationForm
-              serviceId={selectedService?.id || null}
-              categoryId={category?.id || null}
-              serviceType="jardinage"
-              onSuccess={handleReservationSuccess}
-              onCancel={handleReservationCancel}
-            />
           </div>
         </div>
       )}

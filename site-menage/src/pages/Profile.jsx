@@ -45,8 +45,9 @@ export default function Profile() {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
         if (sessionError || !session) {
-          console.log('[Profile] No session, redirecting to login');
-          navigate('/login');
+          console.log('[Profile] No session found');
+          setUser(null);
+          setIsLoading(false);
           return;
         }
 
@@ -126,7 +127,6 @@ export default function Profile() {
   // Logout handler
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/login');
   };
 
   // Handle form input changes
@@ -176,7 +176,7 @@ export default function Profile() {
 
       if (sessionError || !session) {
         showToast(t('profile.personal_info.messages.connection_error'), 'error');
-        navigate('/login');
+        navigate('/login-register');
         return;
       }
 
@@ -289,6 +289,23 @@ export default function Profile() {
       <div className="profile-loading">
         <div className="loading-spinner"></div>
         <p>{t('profile.loading')}</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="profile-page" style={{ textAlign: 'center', padding: '100px 20px' }}>
+        <div className="empty-orders" data-aos="fade-up">
+          <div className="empty-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+          </div>
+          <h3>{t('profile.please_login', 'Veuillez vous connecter')}</h3>
+          <p>{t('profile.login_to_view', 'Connectez-vous pour voir votre profil, vos commandes et vos réservations.')}</p>
+          <button className="shop-button" onClick={() => navigate('/login-register')}>
+            {t('nav.login', 'Connexion')}
+          </button>
+        </div>
       </div>
     );
   }

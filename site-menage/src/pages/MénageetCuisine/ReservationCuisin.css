@@ -1,233 +1,242 @@
+/* Reservation Page Styles */
 .reservation-cuisin-page {
-  padding: 40px 16px;
-  max-width: 800px;
-  margin: 0 auto;
-  min-height: calc(100vh - 200px);
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 60px 20px;
+    display: flex;
+    justify-content: center;
 }
 
 .reservation-cuisin-container {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
 }
 
+/* Back Button */
 .reservation-cuisin-back-button {
-  background: transparent;
-  border: 1px solid #3b82f6;
-  border-radius: 8px;
-  color: #3b82f6;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 8px 16px;
-  margin-bottom: 24px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s ease;
-  text-decoration: none;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 30px;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border-radius: 12px;
 }
 
 .reservation-cuisin-back-button:hover {
-  color: #2563eb;
-  border-color: #2563eb;
-  background: rgba(37, 99, 235, 0.05);
-  transform: translateX(-4px);
+    background: #f1f5f9;
+    color: #0f172a;
+    transform: translateX(-4px);
 }
 
+/* Header */
 .reservation-cuisin-header {
-  margin-bottom: 32px;
-  text-align: center;
+    margin-bottom: 40px;
+    text-align: center;
 }
 
 .reservation-cuisin-header h1 {
-  font-size: 28px;
-  font-weight: 800;
-  color: #1e293b;
-  margin: 0 0 8px 0;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
 }
 
 .reservation-cuisin-header h2 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #64748b;
-  margin: 0;
+    font-size: 1.25rem;
+    color: #64748b;
+    font-weight: 500;
 }
 
+/* Summary Box */
 .selected-types-summary {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 24px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 40px;
 }
 
 .selected-types-summary h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0369a1;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .types-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .type-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: #ffffff;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(186, 230, 253, 0.5);
 }
 
 .type-name {
-  font-weight: 500;
-  color: #1e293b;
+    font-weight: 600;
+    color: #334155;
 }
 
 .type-price {
-  font-weight: 600;
-  color: #10b981;
+    font-weight: 700;
+    color: #10b981;
 }
 
 .total-price {
-  padding-top: 16px;
-  border-top: 2px solid #e2e8f0;
-  text-align: right;
-  font-size: 18px;
-  color: #1e293b;
+    margin-top: 16px;
+    text-align: right;
+    font-size: 1.25rem;
+    color: #0f172a;
 }
 
-.reservation-cuisin-error {
-  background: #fee2e2;
-  border: 1px solid #fca5a5;
-  color: #991b1b;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  font-size: 14px;
-}
-
+/* Form Styling */
 .reservation-cuisin-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+    display: grid;
+    gap: 24px;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.form-group .required {
-  color: #ef4444;
-}
-
-.form-group .optional {
-  color: #64748b;
-  font-weight: 400;
-  font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.95rem;
 }
 
 .form-group input,
 .form-group textarea {
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  font-family: inherit;
+    padding: 14px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
+    outline: none;
+    border-color: #10b981;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
 }
 
 .form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-@media (max-width: 640px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+.required {
+    color: #ef4444;
 }
 
+.optional {
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 0.85rem;
+}
+
+/* Submit Button */
 .reservation-cuisin-submit-button {
-  padding: 14px 32px;
-  background: #10b981;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 8px;
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
 }
 
 .reservation-cuisin-submit-button:hover:not(:disabled) {
-  background: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
 }
 
 .reservation-cuisin-submit-button:disabled {
-  background: #94a3b8;
-  cursor: not-allowed;
-  transform: none;
+    background: #cbd5e1;
+    box-shadow: none;
+    cursor: not-allowed;
 }
 
+/* Error Message */
+.reservation-cuisin-error {
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: #dc2626;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Success State */
 .reservation-cuisin-success {
-  text-align: center;
-  padding: 40px 20px;
+    text-align: center;
+    padding: 40px 0;
 }
 
 .success-icon {
-  font-size: 64px;
-  margin-bottom: 24px;
+    font-size: 5rem;
+    margin-bottom: 20px;
 }
 
 .reservation-cuisin-success h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #10b981;
-  margin: 0 0 16px 0;
-}
-
-.reservation-cuisin-success p {
-  font-size: 16px;
-  color: #64748b;
-  margin: 0 0 8px 0;
+    font-size: 2rem;
+    color: #059669;
+    margin-bottom: 16px;
 }
 
 .redirect-message {
-  font-size: 14px;
-  color: #94a3b8;
-  font-style: italic;
+    margin-top: 24px;
+    color: #64748b;
+    font-style: italic;
 }
 
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+    .reservation-cuisin-container {
+        padding: 24px;
+        border-radius: 20px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .reservation-cuisin-header h1 {
+        font-size: 1.75rem;
+    }
+}

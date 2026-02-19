@@ -181,7 +181,7 @@
   gap: 8px;
 }
 
-.category-description {
+.category-card .category-description {
   font-size: 1rem;
   color: #64748b;
   line-height: 1.6;
@@ -228,9 +228,12 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.1);
   }
@@ -440,14 +443,16 @@
   gap: 16px;
 }
 
-.price-info, .duration-info {
+.price-info,
+.duration-info {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
 }
 
-.price-label, .duration-label {
+.price-label,
+.duration-label {
   font-size: 0.85rem;
   color: #64748b;
   font-weight: 500;
@@ -518,7 +523,8 @@
 }
 
 /* New Button Styles */
-.details-button, .reserve-button {
+.details-button,
+.reserve-button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -555,7 +561,8 @@
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
-.details-icon, .reserve-icon {
+.details-icon,
+.reserve-icon {
   font-size: 14px;
 }
 
@@ -593,6 +600,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -600,7 +608,8 @@
 }
 
 /* Modal Styles */
-.service-details-modal, .reservation-modal {
+.service-details-modal,
+.reservation-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -640,6 +649,7 @@
     transform: scale(0.9) translateY(-20px);
     opacity: 0;
   }
+
   to {
     transform: scale(1) translateY(0);
     opacity: 1;
@@ -770,7 +780,8 @@
 }
 
 /* Loading States */
-.loading-container, .loading-details {
+.loading-container,
+.loading-details {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -789,8 +800,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error States */
@@ -845,6 +861,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -955,7 +972,8 @@
     font-size: 1.8rem;
   }
 
-  .category-content, .setting-content {
+  .category-content,
+  .setting-content {
     padding: 16px 18px 18px;
   }
 
@@ -985,7 +1003,8 @@
     flex-direction: column;
   }
 
-  .details-button, .reserve-button {
+  .details-button,
+  .reserve-button {
     width: 100%;
     justify-content: center;
   }
@@ -1160,6 +1179,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }

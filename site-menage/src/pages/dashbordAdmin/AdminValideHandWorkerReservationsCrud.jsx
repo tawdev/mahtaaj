@@ -19,15 +19,15 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[AdminValideHandWorkerReservations] Loading data from Supabase...');
-      
+
       // Load categories from Supabase
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('hand_worker_categories')
         .select('*')
         .order('order', { ascending: true });
-      
+
       if (categoriesError) {
         console.error('[AdminValideHandWorkerReservations] Error loading categories:', categoriesError);
       } else {
@@ -50,18 +50,18 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
           )
         `)
         .order('updated_at', { ascending: false });
-      
+
       // Filter validated workers: status = 'approved' OR (is_available = true AND status != 'pending')
       const workersData = Array.isArray(allWorkersData) ? allWorkersData.filter(worker => {
         return worker.status === 'approved' || (worker.is_available === true && worker.status !== 'pending');
       }) : [];
-      
+
       if (workersError) {
         console.error('[AdminValideHandWorkerReservations] Error loading workers:', workersError);
         setError(`Erreur lors du chargement: ${workersError.message}`);
       } else {
         console.log('[AdminValideHandWorkerReservations] Loaded validated workers:', workersData?.length || 0);
-        
+
         // Transform data to match expected format
         const transformedData = Array.isArray(workersData) ? workersData.map(worker => ({
           id: worker.id,
@@ -69,7 +69,7 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
           email: worker.email || 'N/A',
           phone: worker.phone || 'N/A',
           category_id: worker.category_id,
-          category_name: worker.category 
+          category_name: worker.category
             ? (worker.category.name || worker.category.name_fr || worker.category.name_ar || worker.category.name_en || 'N/A')
             : 'N/A',
           address: worker.address || '',
@@ -81,7 +81,7 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
           approved_at: worker.updated_at || worker.created_at,
           ...worker
         })) : [];
-        
+
         setRegistrations(transformedData);
       }
     } catch (e) {
@@ -99,18 +99,18 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
 
     try {
       console.log('[AdminValideHandWorkerReservations] Deleting worker:', registrationId);
-      
+
       const { error } = await supabase
         .from('hand_workers')
         .delete()
         .eq('id', registrationId);
-      
+
       if (error) {
         console.error('[AdminValideHandWorkerReservations] Error deleting worker:', error);
         setError(`Erreur lors de la suppression: ${error.message}`);
         return;
       }
-      
+
       console.log('[AdminValideHandWorkerReservations] Delete successful');
       setSuccess('Travailleur validé supprimé avec succès');
       setTimeout(() => setSuccess(''), 3000);
@@ -128,13 +128,13 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
   };
 
   const filteredRegistrations = registrations.filter(registration => {
-    const matchesSearch = 
+    const matchesSearch =
       registration.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       registration.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       registration.phone?.includes(searchTerm);
-    
+
     const matchesCategory = categoryFilter === 'all' || registration.category_id === parseInt(categoryFilter);
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -144,14 +144,14 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
   return (
     <div className="admin-hand-worker-registrations">
       <div className="admin-header">
-        <h2>العمّال المعتمدون - عمال الحرف</h2>
+        <h2>Employés Validés - Travaux Manuels</h2>
         <div className="stats-bar">
           <div className="stat">
-            <span className="stat-label">إجمالي</span>
+            <span className="stat-label">Total</span>
             <span className="stat-value">{registrations.length}</span>
           </div>
           <div className="stat">
-            <span className="stat-label">معتمدين</span>
+            <span className="stat-label">Validés</span>
             <span className="stat-value">{registrations.filter(r => r.status === 'approved').length}</span>
           </div>
         </div>
@@ -175,20 +175,20 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
         <div className="filter-group">
           <input
             type="text"
-            placeholder="بحث (الاسم، البريد، الهاتف)..."
+            placeholder="Rechercher (Nom, Email, Téléphone)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
         </div>
-        
+
         <div className="filter-group">
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="filter-select"
           >
-            <option value="all">جميع الأنواع</option>
+            <option value="all">Toutes les catégories</option>
             {categories.map(category => (
               <option key={category.id} value={category.id}>
                 {category.name}
@@ -202,23 +202,23 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
         <table className="registrations-table">
           <thead>
             <tr>
-              <th>الصورة</th>
-              <th>الاسم الكامل</th>
-              <th>البريد الإلكتروني</th>
-              <th>الهاتف</th>
-              <th>نوع العمل</th>
-              <th>المنطقة/العنوان</th>
-              <th>سنوات الخبرة</th>
-              <th>الحالة</th>
-              <th>تاريخ الاعتماد</th>
-              <th>الإجراءات</th>
+              <th>Photo</th>
+              <th>Nom Complet</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Catégorie</th>
+              <th>Ville / Adresse</th>
+              <th>Expérience</th>
+              <th>Statut</th>
+              <th>Date de Validation</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredRegistrations.length === 0 ? (
               <tr>
                 <td colSpan="10" className="no-data">
-                  لا توجد تسجيلات معتمدة
+                  Aucun employé validé trouvé
                 </td>
               </tr>
             ) : (
@@ -226,8 +226,8 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
                 <tr key={registration.id}>
                   <td className="photo-cell">
                     {registration.photo || registration.photo_url ? (
-                      <img 
-                        src={registration.photo_url || registration.photo} 
+                      <img
+                        src={registration.photo_url || registration.photo}
                         alt={registration.full_name}
                         className="registration-photo"
                         onError={(e) => {
@@ -250,23 +250,23 @@ export default function AdminValideHandWorkerReservationsCrud({ token, onAuthErr
                     {registration.address && `${registration.address}, `}
                     {registration.city}
                   </td>
-                  <td className="experience-cell">{registration.experience_years} سنة</td>
+                  <td className="experience-cell">{registration.experience_years} ans</td>
                   <td>
                     <span className={`status-badge status-approved`}>
-                      معتمدة
+                      Validé
                     </span>
                   </td>
                   <td>
-                    {registration.approved_at ? new Date(registration.approved_at).toLocaleDateString('ar-MA') : '-'}
+                    {registration.approved_at ? new Date(registration.approved_at).toLocaleDateString('fr-FR') : '-'}
                   </td>
                   <td className="actions-cell">
                     <button
                       className="btn btn-delete"
                       onClick={() => handleDelete(registration.id)}
-                      title="حذف"
+                      title="Supprimer"
                     >
                       <i className="fas fa-trash"></i>
-                      <span>حذف</span>
+                      <span>Supprimer</span>
                     </button>
                   </td>
                 </tr>

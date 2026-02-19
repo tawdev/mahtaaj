@@ -6,7 +6,7 @@ import './ProductDetailModal.css';
 import { supabase } from '../lib/supabase';
 
 const ProductDetailModal = ({ product, isOpen, onClose }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     if (!isOpen || !product) return null;
 
@@ -20,6 +20,12 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
         return publicUrl || '/produitNettoyage.jpg';
     };
 
+    const getLocalizedText = (obj, field) => {
+        if (!obj) return '';
+        const lang = i18n.language || 'fr';
+        return obj[`${field}_${lang}`] || obj[field] || obj[`${field}_fr`] || '';
+    };
+
     return (
         <div className="product-modal-overlay" onClick={onClose}>
             <div className="product-modal-content" onClick={e => e.stopPropagation()}>
@@ -29,21 +35,21 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
 
                 <div className="pdm-grid">
                     <div className="pdm-image-container">
-                        <img src={getImageUrl(product)} alt={product.name} />
+                        <img src={getImageUrl(product)} alt={getLocalizedText(product, 'name')} />
                     </div>
 
                     <div className="pdm-details">
                         <div className="pdm-header">
                             <span className="pdm-category-badge">
-                                {product.category_name || t('shop.category_cleaning', 'Nettoyage')}
+                                {getLocalizedText(product.category, 'name') || product.category_name || t('shop_page.category', 'Nettoyage')}
                             </span>
-                            <h2 className="pdm-title">{product.name}</h2>
+                            <h2 className="pdm-title">{getLocalizedText(product, 'name')}</h2>
                             <div className="pdm-rating">
                                 <div className="pdm-stars">
                                     <LuStar fill="#fbbf24" stroke="#fbbf24" size={18} />
                                     <span className="pdm-rating-val">{product.rating || '4.8'}</span>
                                 </div>
-                                <span className="pdm-review-count">(120 {t('shop.reviews', 'avis')})</span>
+                                <span className="pdm-review-count">(120 {t('shop_page.reviews', 'avis')})</span>
                             </div>
                         </div>
 
@@ -55,21 +61,21 @@ const ProductDetailModal = ({ product, isOpen, onClose }) => {
                         </div>
 
                         <p className="pdm-description">
-                            {product.description || t('shop.no_description', 'Aucune description disponible pour ce produit.')}
+                            {getLocalizedText(product, 'description') || t('shop_page.no_description', 'Aucune description disponible pour ce produit.')}
                         </p>
 
                         <div className="pdm-features">
                             <div className="pdm-feature-item">
                                 <LuCheck className="pdm-feature-icon" />
-                                <span>{t('shop.feature_quality', 'Qualité professionnelle')}</span>
+                                <span>{t('shop_page.feature_quality', 'Qualité professionnelle')}</span>
                             </div>
                             <div className="pdm-feature-item">
                                 <LuShieldCheck className="pdm-feature-icon" />
-                                <span>{t('shop.feature_warranty', 'Garantie satisfait ou remboursé')}</span>
+                                <span>{t('shop_page.feature_warranty', 'Garantie satisfait ou remboursé')}</span>
                             </div>
                             <div className="pdm-feature-item">
                                 <LuTruck className="pdm-feature-icon" />
-                                <span>{t('shop.feature_delivery', 'Livraison rapide partout au Maroc')}</span>
+                                <span>{t('shop_page.feature_delivery', 'Livraison rapide partout au Maroc')}</span>
                             </div>
                         </div>
 

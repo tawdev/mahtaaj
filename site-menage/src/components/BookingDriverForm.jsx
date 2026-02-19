@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createDriverReservation } from '../api-supabase';
+import { supabase } from '../lib/supabase';
 import './BookingDriverForm.css';
 
 export default function BookingDriverForm({ category, onSuccess, onCancel }) {
@@ -8,7 +9,7 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
@@ -19,6 +20,37 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
     number_of_seats: 1,
     message: ''
   });
+
+  useEffect(() => {
+    // Auto-fill user data if logged in
+    const fetchUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          console.log('[BookingDriverForm] User found, autofilling:', user);
+
+          let fullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+
+          // Re-construct full name if only split names are available
+          if (!fullName && user.user_metadata?.first_name) {
+            fullName = `${user.user_metadata.first_name} ${user.user_metadata.last_name || ''}`.trim();
+          }
+
+          setFormData(prev => ({
+            ...prev,
+            user_id: user.id, // Store user_id
+            full_name: fullName || prev.full_name,
+            phone: user.user_metadata?.phone || prev.phone,
+            email: user.email || prev.email,
+          }));
+        }
+      } catch (err) {
+        console.error('Error fetching user for autofill:', err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -38,9 +70,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
     // Validation
     if (!formData.full_name.trim()) {
       setError(
-        i18n.language === 'ar' ? 'الاسم مطلوب' : 
-        i18n.language === 'fr' ? 'Le nom est requis' : 
-        'Name is required'
+        i18n.language === 'ar' ? 'الاسم مطلوب' :
+          i18n.language === 'fr' ? 'Le nom est requis' :
+            'Name is required'
       );
       setLoading(false);
       return;
@@ -48,9 +80,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
 
     if (!formData.phone.trim()) {
       setError(
-        i18n.language === 'ar' ? 'رقم الهاتف مطلوب' : 
-        i18n.language === 'fr' ? 'Le téléphone est requis' : 
-        'Phone is required'
+        i18n.language === 'ar' ? 'رقم الهاتف مطلوب' :
+          i18n.language === 'fr' ? 'Le téléphone est requis' :
+            'Phone is required'
       );
       setLoading(false);
       return;
@@ -58,9 +90,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
 
     if (!formData.reservation_date) {
       setError(
-        i18n.language === 'ar' ? 'تاريخ الحجز مطلوب' : 
-        i18n.language === 'fr' ? 'La date de réservation est requise' : 
-        'Reservation date is required'
+        i18n.language === 'ar' ? 'تاريخ الحجز مطلوب' :
+          i18n.language === 'fr' ? 'La date de réservation est requise' :
+            'Reservation date is required'
       );
       setLoading(false);
       return;
@@ -81,12 +113,13 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
 
       // Prepare reservation data with all fields
       // Format time: input type="time" gives "HH:MM", PostgreSQL TIME accepts "HH:MM:SS"
-      const formattedTime = formData.reservation_time 
-        ? `${formData.reservation_time}:00` 
+      const formattedTime = formData.reservation_time
+        ? `${formData.reservation_time}:00`
         : null;
 
       const reservationData = {
         driver_id: category?.driver_id || null,
+        user_id: formData.user_id || null, // Add user_id to reservation
         reservation_date: formData.reservation_date,
         reservation_time: formattedTime,
         status: 'pending',
@@ -102,7 +135,7 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
 
       // Create reservation with all details
       await createDriverReservation(reservationData);
-      
+
       setSuccess(true);
       setTimeout(() => {
         if (onSuccess) onSuccess();
@@ -110,9 +143,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
     } catch (err) {
       console.error('Error creating driver reservation:', err);
       setError(
-        i18n.language === 'ar' ? 'خطأ في إرسال الحجز. يرجى المحاولة مرة أخرى.' : 
-        i18n.language === 'fr' ? 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.' : 
-        'Error submitting reservation. Please try again.'
+        i18n.language === 'ar' ? 'خطأ في إرسال الحجز. يرجى المحاولة مرة أخرى.' :
+          i18n.language === 'fr' ? 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.' :
+            'Error submitting reservation. Please try again.'
       );
     } finally {
       setLoading(false);
@@ -131,14 +164,14 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
         <div className="booking-driver-form success-message">
           <div className="success-icon">✓</div>
           <h3>
-            {i18n.language === 'ar' ? 'تم إرسال الحجز بنجاح!' : 
-             i18n.language === 'fr' ? 'Réservation envoyée avec succès!' : 
-             'Reservation sent successfully!'}
+            {i18n.language === 'ar' ? 'تم إرسال الحجز بنجاح!' :
+              i18n.language === 'fr' ? 'Réservation envoyée avec succès!' :
+                'Reservation sent successfully!'}
           </h3>
           <p>
-            {i18n.language === 'ar' ? 'سيتم التواصل معك قريباً' : 
-             i18n.language === 'fr' ? 'Nous vous contacterons bientôt' : 
-             'We will contact you soon'}
+            {i18n.language === 'ar' ? 'سيتم التواصل معك قريباً' :
+              i18n.language === 'fr' ? 'Nous vous contacterons bientôt' :
+                'We will contact you soon'}
           </p>
         </div>
       </div>
@@ -150,13 +183,13 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
       <div className="booking-driver-form" onClick={(e) => e.stopPropagation()}>
         <div className="booking-driver-form-header">
           <h2>
-            {i18n.language === 'ar' ? 'حجز سائق' : 
-             i18n.language === 'fr' ? 'Réservation Chauffeur' : 
-             'Driver Reservation'}
+            {i18n.language === 'ar' ? 'حجز سائق' :
+              i18n.language === 'fr' ? 'Réservation Chauffeur' :
+                'Driver Reservation'}
           </h2>
-          <button 
-            type="button" 
-            className="close-button" 
+          <button
+            type="button"
+            className="close-button"
             onClick={onCancel}
             aria-label="Close"
           >
@@ -173,9 +206,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
         <form onSubmit={handleSubmit} className="booking-driver-form-content">
           <div className="form-group">
             <label htmlFor="full_name">
-              {i18n.language === 'ar' ? 'الاسم الكامل' : 
-               i18n.language === 'fr' ? 'Nom complet' : 
-               'Full Name'} *
+              {i18n.language === 'ar' ? 'الاسم الكامل' :
+                i18n.language === 'fr' ? 'Nom complet' :
+                  'Full Name'} *
             </label>
             <input
               type="text"
@@ -185,18 +218,18 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
               onChange={handleInputChange}
               required
               placeholder={
-                i18n.language === 'ar' ? 'أدخل الاسم الكامل' : 
-                i18n.language === 'fr' ? 'Entrez votre nom complet' : 
-                'Enter your full name'
+                i18n.language === 'ar' ? 'أدخل الاسم الكامل' :
+                  i18n.language === 'fr' ? 'Entrez votre nom complet' :
+                    'Enter your full name'
               }
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="phone">
-              {i18n.language === 'ar' ? 'رقم الهاتف' : 
-               i18n.language === 'fr' ? 'Téléphone' : 
-               'Phone'} *
+              {i18n.language === 'ar' ? 'رقم الهاتف' :
+                i18n.language === 'fr' ? 'Téléphone' :
+                  'Phone'} *
             </label>
             <input
               type="tel"
@@ -206,18 +239,18 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
               onChange={handleInputChange}
               required
               placeholder={
-                i18n.language === 'ar' ? '+212 6 12 34 56 78' : 
-                i18n.language === 'fr' ? '+212 6 12 34 56 78' : 
-                '+212 6 12 34 56 78'
+                i18n.language === 'ar' ? '+212 6 12 34 56 78' :
+                  i18n.language === 'fr' ? '+212 6 12 34 56 78' :
+                    '+212 6 12 34 56 78'
               }
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="email">
-              {i18n.language === 'ar' ? 'البريد الإلكتروني' : 
-               i18n.language === 'fr' ? 'Email' : 
-               'Email'}
+              {i18n.language === 'ar' ? 'البريد الإلكتروني' :
+                i18n.language === 'fr' ? 'Email' :
+                  'Email'}
             </label>
             <input
               type="email"
@@ -226,18 +259,18 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
               value={formData.email}
               onChange={handleInputChange}
               placeholder={
-                i18n.language === 'ar' ? 'votre@email.com' : 
-                i18n.language === 'fr' ? 'votre@email.com' : 
-                'your@email.com'
+                i18n.language === 'ar' ? 'votre@email.com' :
+                  i18n.language === 'fr' ? 'votre@email.com' :
+                    'your@email.com'
               }
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="address">
-              {i18n.language === 'ar' ? 'العنوان' : 
-               i18n.language === 'fr' ? 'Adresse' : 
-               'Address'}
+              {i18n.language === 'ar' ? 'العنوان' :
+                i18n.language === 'fr' ? 'Adresse' :
+                  'Address'}
             </label>
             <input
               type="text"
@@ -246,9 +279,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
               value={formData.address}
               onChange={handleInputChange}
               placeholder={
-                i18n.language === 'ar' ? 'أدخل العنوان' : 
-                i18n.language === 'fr' ? 'Entrez votre adresse' : 
-                'Enter your address'
+                i18n.language === 'ar' ? 'أدخل العنوان' :
+                  i18n.language === 'fr' ? 'Entrez votre adresse' :
+                    'Enter your address'
               }
             />
           </div>
@@ -256,9 +289,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="reservation_date">
-                {i18n.language === 'ar' ? 'تاريخ الحجز' : 
-                 i18n.language === 'fr' ? 'Date de réservation' : 
-                 'Reservation Date'} *
+                {i18n.language === 'ar' ? 'تاريخ الحجز' :
+                  i18n.language === 'fr' ? 'Date de réservation' :
+                    'Reservation Date'} *
               </label>
               <input
                 type="date"
@@ -273,9 +306,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
 
             <div className="form-group">
               <label htmlFor="reservation_time">
-                {i18n.language === 'ar' ? 'الوقت' : 
-                 i18n.language === 'fr' ? 'Heure' : 
-                 'Time'}
+                {i18n.language === 'ar' ? 'الوقت' :
+                  i18n.language === 'fr' ? 'Heure' :
+                    'Time'}
               </label>
               <input
                 type="time"
@@ -289,9 +322,9 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
 
           <div className="form-group">
             <label htmlFor="number_of_seats">
-              {i18n.language === 'ar' ? 'عدد المقاعد' : 
-               i18n.language === 'fr' ? 'Nombre de places' : 
-               'Number of Seats'} *
+              {i18n.language === 'ar' ? 'عدد المقاعد' :
+                i18n.language === 'fr' ? 'Nombre de places' :
+                  'Number of Seats'} *
             </label>
             <input
               type="number"
@@ -304,18 +337,18 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
               max="50"
               step="1"
               placeholder={
-                i18n.language === 'ar' ? 'أدخل عدد المقاعد' : 
-                i18n.language === 'fr' ? 'Entrez le nombre de places' : 
-                'Enter number of seats'
+                i18n.language === 'ar' ? 'أدخل عدد المقاعد' :
+                  i18n.language === 'fr' ? 'Entrez le nombre de places' :
+                    'Enter number of seats'
               }
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="message">
-              {i18n.language === 'ar' ? 'رسالة إضافية' : 
-               i18n.language === 'fr' ? 'Message supplémentaire' : 
-               'Additional Message'}
+              {i18n.language === 'ar' ? 'رسالة إضافية' :
+                i18n.language === 'fr' ? 'Message supplémentaire' :
+                  'Additional Message'}
             </label>
             <textarea
               id="message"
@@ -324,38 +357,38 @@ export default function BookingDriverForm({ category, onSuccess, onCancel }) {
               onChange={handleInputChange}
               rows="4"
               placeholder={
-                i18n.language === 'ar' ? 'أدخل أي معلومات إضافية...' : 
-                i18n.language === 'fr' ? 'Entrez des informations supplémentaires...' : 
-                'Enter any additional information...'
+                i18n.language === 'ar' ? 'أدخل أي معلومات إضافية...' :
+                  i18n.language === 'fr' ? 'Entrez des informations supplémentaires...' :
+                    'Enter any additional information...'
               }
             />
           </div>
 
           <div className="form-actions">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-button"
               disabled={loading}
             >
               {loading ? (
-                i18n.language === 'ar' ? 'جاري الإرسال...' : 
-                i18n.language === 'fr' ? 'Envoi en cours...' : 
-                'Sending...'
+                i18n.language === 'ar' ? 'جاري الإرسال...' :
+                  i18n.language === 'fr' ? 'Envoi en cours...' :
+                    'Sending...'
               ) : (
-                i18n.language === 'ar' ? 'إرسال الحجز' : 
-                i18n.language === 'fr' ? 'Envoyer la réservation' : 
-                'Submit Reservation'
+                i18n.language === 'ar' ? 'إرسال الحجز' :
+                  i18n.language === 'fr' ? 'Envoyer la réservation' :
+                    'Submit Reservation'
               )}
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="cancel-button"
               onClick={onCancel}
               disabled={loading}
             >
-              {i18n.language === 'ar' ? 'إلغاء' : 
-               i18n.language === 'fr' ? 'Annuler' : 
-               'Cancel'}
+              {i18n.language === 'ar' ? 'إلغاء' :
+                i18n.language === 'fr' ? 'Annuler' :
+                  'Cancel'}
             </button>
           </div>
         </form>

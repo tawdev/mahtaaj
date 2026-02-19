@@ -12,15 +12,15 @@ import { supabase } from '../lib/supabase';
  */
 const GoogleOneTap = () => {
     useEffect(() => {
-        // Define handleGoogleCallback inside effect to avoid dependency issues
-        const handleGoogleCallback = async (response) => {
+        // Define handleGoogleCallback inside effect to access the computed nonce
+        const handleGoogleCallback = async (response, nonce) => {
             console.log('[GoogleOneTap] Credential received');
 
             try {
                 const { data, error } = await supabase.auth.signInWithIdToken({
                     provider: 'google',
                     token: response.credential,
-                    nonce: response.nonce,
+                    nonce: nonce, // Pass the same nonce to Supabase
                 });
 
                 if (error) {
@@ -30,7 +30,7 @@ const GoogleOneTap = () => {
 
                 if (data.session) {
                     console.log('[GoogleOneTap] Successfully authenticated');
-                    // App.jsx handles the session change
+                    // App.jsx handles the session change via onAuthStateChange
                 }
             } catch (err) {
                 console.error('[GoogleOneTap] Exception:', err);
@@ -40,7 +40,6 @@ const GoogleOneTap = () => {
         const initializeGoogleOneTap = () => {
             if (!window.google) return;
 
-            // You must add REACT_APP_GOOGLE_CLIENT_ID=your-client-id to your .env file
             const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
             if (!clientId) {
@@ -48,13 +47,20 @@ const GoogleOneTap = () => {
                 return;
             }
 
+            // Create a nonce for security and to match Supabase requirements
+            // This is a simple random string
+            const nonce = Array.from(window.crypto.getRandomValues(new Uint8Array(16)))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+
             try {
                 window.google.accounts.id.initialize({
                     client_id: clientId,
-                    callback: handleGoogleCallback,
+                    callback: (res) => handleGoogleCallback(res, nonce),
                     auto_select: false,
                     cancel_on_tap_outside: true,
                     context: 'signin',
+                    nonce: nonce, // Use the nonce here
                 });
 
                 window.google.accounts.id.prompt((notification) => {

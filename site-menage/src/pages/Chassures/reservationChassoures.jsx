@@ -11,8 +11,9 @@ export default function ReservationChassoures() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  
-  // Get data from navigation state or localStorage
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Form data
   const [formData, setFormData] = useState({
     firstname: '',
     phone: '',
@@ -22,9 +23,31 @@ export default function ReservationChassoures() {
     preferred_date: ''
   });
 
-  const reservationData = location.state?.type || null;
-  const serviceType = location.state?.serviceType || 'cirage_chaussures'; // 'cirage_chaussures' or 'nettoyage_chaussures'
-  
+  // Get data from navigation state or sessionStorage (to preserve across login)
+  const [initialData, setInitialData] = useState(() => {
+    // 1. Try navigation state
+    if (location.state?.type) {
+      return {
+        type: location.state.type,
+        serviceType: location.state.serviceType || 'cirage_chaussures'
+      };
+    }
+    // 2. Try sessionStorage
+    const saved = sessionStorage.getItem('chaussures_pending_reservation_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing saved state:', e);
+      }
+    }
+    return null;
+  });
+
+  const reservationData = initialData?.type || null;
+  const serviceType = initialData?.serviceType || 'cirage_chaussures';
+
   // Determine back navigation based on serviceType
   const getBackRoute = () => {
     if (serviceType === 'cirage_chaussures') {
@@ -43,7 +66,7 @@ export default function ReservationChassoures() {
     }
     return t('reservation_chaussures.back', 'Retour');
   };
-  
+
   // Calculate final price for display
   const [displayFinalPrice, setDisplayFinalPrice] = useState(0);
   const [shoeCount, setShoeCount] = useState(0);
@@ -63,17 +86,55 @@ export default function ReservationChassoures() {
     } catch (err) {
       console.error('Error loading prefill:', err);
     }
-    
+
     // Calculate and display final price
     if (reservationData) {
       const count = reservationData.shoeCount || 0;
       const basePrice = parseFloat(reservationData.price) || 0;
       const calculatedPrice = basePrice * count;
-      
+
       setShoeCount(count);
       setDisplayFinalPrice(calculatedPrice);
     }
   }, [reservationData, serviceType]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('[ReservationChassoures] No session found, redirecting to login...');
+          // Save state to survive redirect
+          if (location.state) {
+            sessionStorage.setItem('chaussures_pending_reservation_state', JSON.stringify(location.state));
+          }
+          localStorage.setItem('auth_return_url', location.pathname + location.search);
+          console.log('[ReservationChassoures] Saved auth_return_url:', location.pathname + location.search);
+          navigate('/login-register');
+          return;
+        }
+
+        // Session exists, check if we need to clean up sessionStorage
+        sessionStorage.removeItem('chaussures_pending_reservation_state');
+
+        // Prefill user data if available
+        if (session.user) {
+          setFormData(prev => ({
+            ...prev,
+            firstname: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name || prev.firstname,
+            email: session.user.email || prev.email,
+            phone: session.user.user_metadata?.phone || prev.phone
+          }));
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -139,7 +200,7 @@ export default function ReservationChassoures() {
 
       // Clear localStorage
       localStorage.removeItem('booking_prefill');
-      
+
       setSuccess(true);
       setTimeout(() => {
         navigate('/chaussures');
@@ -151,6 +212,10 @@ export default function ReservationChassoures() {
       setLoading(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return <main className="reservation-chaussures-page"><div className="reservation-chaussures-loading">Vérification de l'authentification...</div></main>;
+  }
 
   if (success) {
     return (
@@ -169,7 +234,7 @@ export default function ReservationChassoures() {
     return (
       <main className="reservation-chaussures-page">
         <div className="reservation-chaussures-header">
-          <button 
+          <button
             onClick={() => navigate(getBackRoute())}
             className="reservation-chaussures-back-btn"
             title={getBackButtonText()}
@@ -189,7 +254,7 @@ export default function ReservationChassoures() {
   return (
     <main className="reservation-chaussures-page">
       <div className="reservation-chaussures-header">
-        <button 
+        <button
           className="reservation-chaussures-back-btn"
           onClick={() => navigate(getBackRoute())}
           title={getBackButtonText()}
@@ -305,7 +370,7 @@ export default function ReservationChassoures() {
               <div className="summary-item">
                 <span className="summary-label">{t('reservation_chaussures.service_type', 'Type')}:</span>
                 <span className="summary-value">
-                  {serviceType === 'cirage_chaussures' 
+                  {serviceType === 'cirage_chaussures'
                     ? t('reservation_chaussures.service_type_cirage', 'Cirage des Chaussures')
                     : t('reservation_chaussures.service_type_nettoyage', 'Nettoyage des Chaussures')
                   }
@@ -337,8 +402,8 @@ export default function ReservationChassoures() {
             className="reservation-chaussures-submit-btn"
             disabled={loading}
           >
-            {loading 
-              ? t('reservation_chaussures.submitting', 'Envoi...') 
+            {loading
+              ? t('reservation_chaussures.submitting', 'Envoi...')
               : t('reservation_chaussures.submit', 'Confirmer la réservation')
             }
           </button>

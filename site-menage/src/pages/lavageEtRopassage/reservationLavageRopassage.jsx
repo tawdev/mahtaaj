@@ -13,9 +13,10 @@ export default function ReservationLavageRopassage() {
   const [success, setSuccess] = useState(false);
   const [locLoading, setLocLoading] = useState(false);
   const [locError, setLocError] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const locationRef = useRef(null);
-  
-  // Get data from navigation state
+
+  // Form data
   const [formData, setFormData] = useState({
     firstname: '',
     phone: '',
@@ -25,13 +26,39 @@ export default function ReservationLavageRopassage() {
     preferred_date: ''
   });
 
-  const reservationData = location.state?.type || null;
-  const serviceType = location.state?.serviceType || 'lavage'; // 'lavage' or 'ropassage'
-  const selectedOptions = location.state?.selectedOptions || [];
-  const vetementsDetails = location.state?.vetementsDetails || {};
-  const grandsTextilesDetails = location.state?.grandsTextilesDetails || {};
-  const finalPriceFromState = location.state?.finalPrice || 0;
-  
+  // Get data from navigation state or sessionStorage (to preserve across login)
+  const [initialData, setInitialData] = useState(() => {
+    // 1. Try navigation state
+    if (location.state?.type) {
+      return {
+        type: location.state.type,
+        serviceType: location.state.serviceType || 'lavage',
+        selectedOptions: location.state.selectedOptions || [],
+        vetementsDetails: location.state.vetementsDetails || {},
+        grandsTextilesDetails: location.state.grandsTextilesDetails || {},
+        finalPrice: location.state.finalPrice || 0
+      };
+    }
+    // 2. Try sessionStorage
+    const saved = sessionStorage.getItem('lavage_ropassage_pending_reservation_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing saved state:', e);
+      }
+    }
+    return null;
+  });
+
+  const reservationData = initialData?.type || null;
+  const serviceType = initialData?.serviceType || 'lavage';
+  const selectedOptions = initialData?.selectedOptions || [];
+  const vetementsDetails = initialData?.vetementsDetails || {};
+  const grandsTextilesDetails = initialData?.grandsTextilesDetails || {};
+  const finalPriceFromState = initialData?.finalPrice || 0;
+
   // Prices for Vêtements sub-options (same as in Lavage.jsx and Ropassage.jsx)
   const vetementsPrices = {
     option1: 5, // T-shirt, Sweatshirts, Short, Jeans
@@ -43,9 +70,9 @@ export default function ReservationLavageRopassage() {
   const calculateGrandsTextilesPiecePrice = (length, width) => {
     const len = parseFloat(length) || 0;
     const wid = parseFloat(width) || 0;
-    
+
     if (len === 0 || wid === 0) return 0;
-    
+
     // Price = (Longueur × Largeur) / 10,000 × 10 DH
     const areaM2 = (len * wid) / 10000;
     return areaM2 * 10;
@@ -69,10 +96,10 @@ export default function ReservationLavageRopassage() {
     } catch (err) {
       console.error('Error loading prefill:', err);
     }
-    
+
     // Calculate final price
     let calculatedPrice = 0;
-    
+
     // Use finalPrice from state if available
     if (finalPriceFromState > 0) {
       calculatedPrice = parseFloat(finalPriceFromState) || 0;
@@ -86,7 +113,7 @@ export default function ReservationLavageRopassage() {
           calculatedPrice += price * quantity;
         }
       });
-      
+
       // Calculate price for Grands textiles
       if (grandsTextilesDetails && grandsTextilesDetails.pieces) {
         grandsTextilesDetails.pieces.forEach(piece => {
@@ -95,9 +122,51 @@ export default function ReservationLavageRopassage() {
         });
       }
     }
-    
+
     setDisplayFinalPrice(calculatedPrice);
   }, [reservationData, serviceType, finalPriceFromState, vetementsDetails, grandsTextilesDetails]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('[ReservationLavageRopassage] No session found, redirecting to login...');
+          // Save state to survive redirect
+          if (location.state) {
+            sessionStorage.setItem('lavage_ropassage_pending_reservation_state', JSON.stringify(location.state));
+          }
+          localStorage.setItem('auth_return_url', location.pathname + location.search);
+          console.log('[ReservationLavageRopassage] Saved auth_return_url:', location.pathname + location.search);
+          navigate('/login-register', {
+            state: {
+              returnUrl: location.pathname + location.search
+            }
+          });
+          return;
+        }
+
+        // Session exists, check if we need to clean up sessionStorage
+        sessionStorage.removeItem('lavage_ropassage_pending_reservation_state');
+
+        // Prefill user data if available
+        if (session.user) {
+          setFormData(prev => ({
+            ...prev,
+            firstname: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name || prev.firstname,
+            email: session.user.email || prev.email,
+            phone: session.user.user_metadata?.phone || prev.phone
+          }));
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -130,7 +199,7 @@ export default function ReservationLavageRopassage() {
 
           if (!response.ok) throw new Error('Failed to get address');
           const data = await response.json();
-          
+
           if (data && data.display_name) {
             setFormData(prev => ({
               ...prev,
@@ -185,7 +254,7 @@ export default function ReservationLavageRopassage() {
     try {
       // Recalculate final price to ensure accuracy
       let calculatedFinalPrice = 0;
-      
+
       // Calculate price for Vêtements
       Object.keys(vetementsDetails).forEach(subOption => {
         if (vetementsDetails[subOption]?.selected && vetementsDetails[subOption]?.quantity > 0) {
@@ -194,7 +263,7 @@ export default function ReservationLavageRopassage() {
           calculatedFinalPrice += price * quantity;
         }
       });
-      
+
       // Calculate price for Grands textiles
       if (grandsTextilesDetails && grandsTextilesDetails.pieces) {
         grandsTextilesDetails.pieces.forEach(piece => {
@@ -202,10 +271,10 @@ export default function ReservationLavageRopassage() {
           calculatedFinalPrice += piecePrice;
         });
       }
-      
+
       // Use the calculated price or fallback to displayFinalPrice
       const finalPriceToSave = calculatedFinalPrice > 0 ? calculatedFinalPrice : displayFinalPrice;
-      
+
       // Prepare data for insertion
       const insertData = {
         firstname: formData.firstname.trim(),
@@ -239,7 +308,7 @@ export default function ReservationLavageRopassage() {
 
       setSuccess(true);
       setError('');
-      
+
       // Clear form after successful submission
       setFormData({
         firstname: '',
@@ -262,11 +331,15 @@ export default function ReservationLavageRopassage() {
     }
   };
 
+  if (isCheckingAuth) {
+    return <main className="reservation-lavage-ropassage-page"><div className="reservation-lavage-ropassage-loading">Vérification de l'authentification...</div></main>;
+  }
+
   if (!reservationData) {
     return (
       <main className="reservation-lavage-ropassage-page">
         <div className="reservation-lavage-ropassage-header">
-          <button 
+          <button
             className="reservation-lavage-ropassage-back-btn"
             onClick={() => navigate('/lavage-et-ropassage')}
           >
@@ -283,7 +356,7 @@ export default function ReservationLavageRopassage() {
   return (
     <main className="reservation-lavage-ropassage-page">
       <div className="reservation-lavage-ropassage-header">
-        <button 
+        <button
           className="reservation-lavage-ropassage-back-btn"
           onClick={() => navigate(-1)}
         >

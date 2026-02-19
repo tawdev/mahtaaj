@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+import { useTranslation } from 'react-i18next';
 import { LuMapPin, LuLoader, LuCircleAlert, LuCircleCheck } from 'react-icons/lu';
 import { useGeolocation } from './useGeolocation';
 import { reverseGeocode, isInMorocco } from '../../utils/geocoding';
@@ -40,6 +41,7 @@ export default function LocationPicker({
     initialLocation = null,
     defaultCenter = { lat: 31.7917, lng: -7.0926 } // Marrakech par défaut
 }) {
+    const { t } = useTranslation();
     const mapRef = useRef(null);
 
     // Position du marker
@@ -65,11 +67,11 @@ export default function LocationPicker({
             setAddress(addressData.formatted);
         } catch (err) {
             console.error('Erreur récupération adresse:', err);
-            setAddress('Adresse non disponible');
+            setAddress(t('location_picker.no_address', 'Adresse non disponible'));
         } finally {
             setAddressLoading(false);
         }
-    }, []);
+    }, [t]);
 
     /**
      * Gérer le changement de position (drag ou click)
@@ -94,7 +96,11 @@ export default function LocationPicker({
     const handleConfirm = () => {
         setIsConfirmed(true);
         if (onLocationSelect) {
-            onLocationSelect(position.lat, position.lng, address);
+            onLocationSelect({
+                lat: position.lat,
+                lng: position.lng,
+                address: address
+            });
         }
     };
 
@@ -135,8 +141,8 @@ export default function LocationPicker({
                     <LuMapPin />
                 </div>
                 <div className="header-content">
-                    <h3>Définissez votre zone d'intervention</h3>
-                    <p>Utilisez votre position actuelle ou placez le marqueur sur la carte</p>
+                    <h3>{t('location_picker.header_title', 'Définissez votre zone d\'intervention')}</h3>
+                    <p>{t('location_picker.header_subtitle', 'Utilisez votre position actuelle ou placez le marqueur sur la carte')}</p>
                 </div>
             </div>
 
@@ -151,12 +157,12 @@ export default function LocationPicker({
                     {geoLoading ? (
                         <>
                             <LuLoader className="spin" />
-                            <span>Localisation en cours...</span>
+                            <span>{t('location_picker.locating', 'Localisation en cours...')}</span>
                         </>
                     ) : (
                         <>
                             <LuMapPin />
-                            <span>📍 Utiliser ma position actuelle</span>
+                            <span>📍 {t('location_picker.use_current_location', 'Utiliser ma position actuelle')}</span>
                         </>
                     )}
                 </button>
@@ -201,20 +207,20 @@ export default function LocationPicker({
 
                 {/* Instructions sur la carte */}
                 <div className="map-instructions">
-                    <p>💡 Déplacez le marqueur ou cliquez sur la carte pour ajuster votre position</p>
+                    <p>💡 {t('location_picker.map_instructions', 'Déplacez le marqueur ou cliquez sur la carte pour ajuster votre position')}</p>
                 </div>
             </div>
 
             {/* Affichage de l'adresse */}
             <div className="location-info">
-                <div className="info-label">Adresse détectée :</div>
+                <div className="info-label">{t('location_picker.address_detected', 'Adresse détectée :')}</div>
                 <div className="info-value">
                     {addressLoading ? (
                         <span className="loading-text">
-                            <LuLoader className="spin" /> Chargement de l'adresse...
+                            <LuLoader className="spin" /> {t('location_picker.loading_address', 'Chargement de l\'adresse...')}
                         </span>
                     ) : (
-                        <span>{address || 'Aucune adresse disponible'}</span>
+                        <span>{address || t('location_picker.no_address', 'Aucune adresse disponible')}</span>
                     )}
                 </div>
 
@@ -229,7 +235,7 @@ export default function LocationPicker({
                 {!isInMorocco(position.lat, position.lng) && (
                     <div className="location-warning">
                         <LuCircleAlert />
-                        <span>Attention : Vous semblez être en dehors du Maroc</span>
+                        <span>{t('location_picker.warning_outside_morocco', 'Attention : Vous semblez être en dehors du Maroc')}</span>
                     </div>
                 )}
             </div>
@@ -245,12 +251,12 @@ export default function LocationPicker({
                     {isConfirmed ? (
                         <>
                             <LuCircleCheck />
-                            <span>Localisation confirmée ✓</span>
+                            <span>{t('location_picker.location_confirmed', 'Localisation confirmée')} ✓</span>
                         </>
                     ) : (
                         <>
                             <LuMapPin />
-                            <span>Confirmer cette localisation</span>
+                            <span>{t('location_picker.confirm_location', 'Confirmer cette localisation')}</span>
                         </>
                     )}
                 </button>

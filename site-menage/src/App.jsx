@@ -7,9 +7,6 @@ import Navbar1 from './components/Navbar1';
 import Footer from './components/Footer';
 import ToastContainer from './components/ToastContainer';
 import Home from './pages/Home';
-import Services from './pages/Services';
-import ServiceCategories from './pages/ServiceCategories';
-import CategoryHouseDetails from './pages/CategoryHouseDetails';
 import TypeDetails from './pages/TypeDetails';
 import ServiceDetails from './pages/ServiceDetails';
 import Booking from './pages/Booking';
@@ -24,6 +21,7 @@ import Checkout from './pages/Checkout';
 import LoginRegister from './pages/LoginRegister';
 import Profile from './pages/Profile';
 import Security from './pages/Security';
+import SecurityReservation from './pages/SecurityReservation';
 import SecurityRoleDetails from './pages/SecurityRoleDetails';
 import Admin from './pages/dashbordAdmin/Admin';
 import AdminForbidden from './pages/dashbordAdmin/AdminForbidden';
@@ -43,8 +41,10 @@ import { Navigate } from 'react-router-dom';
 import ServiceTypeDetails from './pages/ServiceTypeDetails';
 import EmployeeRegister from './pages/EmployeeRegister';
 import BebeSetting from './pages/BebeSetting';
+import BebeReservation from './pages/BebeReservation';
 import Jardinage from './pages/Jardinage';
 import JardinageDetail from './pages/JardinageDetail';
+import JardinageReservation from './pages/JardinageReservation';
 import HandWorkers from './pages/HandWorkers';
 import MultiServiceEmployees from './pages/MultiServiceEmployees';
 import MultiServiceMenageCuisine from './pages/MultiServiceMenageCuisine';
@@ -82,6 +82,7 @@ import Airbnb from './pages/Airbnb/Airbnb';
 import NettoyageRapide from './pages/Airbnb/NettoyageRapide';
 import NettoyageComplet from './pages/Airbnb/NettoyageComplet';
 import ReservationAirbnb from './pages/Airbnb/ReservationAirbnb';
+import ReservationSecurity from './pages/ReservationSecurity';
 import Pisin from './pages/Pisin/Pisin';
 import Profond from './pages/Pisin/Profond';
 import Standard from './pages/Pisin/Standard';
@@ -111,6 +112,7 @@ import BebeSettingRegister from './pages/employees/BebeSettingRegister';
 import JardinageRegister from './pages/employees/JardinageRegister';
 import DriverRegister from './pages/employees/DriverRegister';
 import LocationDemo from './pages/LocationDemo';
+import AuthCallback from './pages/AuthCallback';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
@@ -130,8 +132,16 @@ export default function App() {
       tablet: true
     });
 
+    // 1. Hash Sniffer for OAuth: If at root and has auth hash, redirect to /auth/callback
+    // This handles cases where Supabase redirects to root instead of callback
+    if (window.location.pathname === '/' && window.location.hash.includes('access_token=')) {
+      console.log('Auth hash detected at root, redirecting to /auth/callback');
+      navigate('/auth/callback' + window.location.hash, { replace: true });
+      return;
+    }
+
     // Listen for Supabase Auth state changes
-    // This is CRITICAL for handling redirects from Google OAuth or Email Confirmation in production
+    // This is CRITICAL for session synchronization across the app
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Supabase Auth Event:', event);
 
@@ -144,16 +154,6 @@ export default function App() {
         };
         localStorage.setItem('user_data', JSON.stringify(userData));
         localStorage.setItem('user', JSON.stringify(userData));
-
-        // Handle automatic redirects on successful login/session recovery
-        // Use window.location.pathname instead of location.pathname from hooks to avoid stale closures in useEffect
-        const currentPath = window.location.pathname;
-        if (currentPath === '/login-register' && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-          console.log('User session detected on login page, redirecting...');
-          const returnUrl = localStorage.getItem('auth_return_url') || '/';
-          localStorage.removeItem('auth_return_url'); // Clean up
-          navigate(returnUrl);
-        }
       } else if (event === 'SIGNED_OUT') {
         localStorage.removeItem('user_data');
         localStorage.removeItem('user');
@@ -198,10 +198,10 @@ export default function App() {
       <div className={`page-transition ${isDashboard ? 'no-padding' : ''}`}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/services/:serviceSlug" element={<ServiceCategories />} />
+          <Route path="/services" element={<TousLesServices />} />
+          <Route path="/services/:serviceSlug" element={<TousLesServices />} />
           <Route path="/services/:serviceSlug/:categorySlug/:typeSlug" element={<TypeDetails />} />
-          <Route path="/services/:serviceSlug/:categorySlug" element={<CategoryHouseDetails />} />
+          <Route path="/services/:serviceSlug/:categorySlug" element={<Menage />} />
           <Route path="/tous-les-services" element={<TousLesServices />} />
           <Route path="/menage-et-cuisine" element={<MénageEtCuisine />} />
           <Route path="/menage-cuisine" element={<MénageCuisine />} />
@@ -212,10 +212,12 @@ export default function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/info" element={<Info />} />
           <Route path="/location-demo" element={<LocationDemo />} />
+          <Route path="/LocationDemo" element={<LocationDemo />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/order-summary" element={<OrderSummary />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/login-register" element={<LoginRegister />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/booking" element={<Booking />} />
@@ -245,6 +247,7 @@ export default function App() {
           <Route path="/nettoyage-rapide" element={<NettoyageRapide />} />
           <Route path="/nettoyage-complet" element={<NettoyageComplet />} />
           <Route path="/reservation-airbnb" element={<ReservationAirbnb />} />
+          <Route path="/reservation-security/:id" element={<ReservationSecurity />} />
           <Route path="/piscine" element={<Pisin />} />
           <Route path="/nettoyage-profond" element={<Profond />} />
           <Route path="/nettoyage-standard" element={<Standard />} />
@@ -263,6 +266,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/support" element={<Support />} />
           <Route path="/security" element={<Security />} />
+          <Route path="/security/reservation/:id" element={<SecurityReservation />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/security/role/:id" element={<SecurityRoleDetails />} />
@@ -276,8 +280,10 @@ export default function App() {
           {/* Clean register page uses EmployeeRegister */}
           <Route path="/employees/register/clean" element={<EmployeeRegister />} />
           <Route path="/bebe-setting" element={<BebeSetting />} />
+          <Route path="/bebe-setting/reservation/:id" element={<BebeReservation />} />
           <Route path="/jardinage" element={<Jardinage />} />
           <Route path="/jardinage/details/:id" element={<JardinageDetail />} />
+          <Route path="/jardinage/reservation/:id" element={<JardinageReservation />} />
           <Route path="/hand-workers" element={<HandWorkers />} />
           <Route path="/hand-workers/category/:id" element={<HandWorkerCategoryDetails />} />
           <Route path="/hand-workers/booking" element={<HandWorkerBooking />} />
@@ -543,6 +549,14 @@ export default function App() {
             <Route path="offres" element={<Offres />} />
             <Route path="profile" element={<EmployeeProfile />} />
           </Route>
+          {/* Catch-all 404 Route */}
+          <Route path="*" element={
+            <div style={{ padding: '100px 20px', textAlign: 'center' }}>
+              <h1 style={{ fontSize: '3rem', color: '#1e293b' }}>404</h1>
+              <p style={{ fontSize: '1.25rem', color: '#64748b' }}>Page Non Trouvée</p>
+              <a href="/" style={{ color: '#3b82f6', textDecoration: 'underline' }}>Retour à l'accueil</a>
+            </div>
+          } />
         </Routes>
       </div>
       {!isDashboard && <Footer />}

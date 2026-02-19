@@ -13,9 +13,10 @@ export default function ReservationTapisCanapes() {
   const [success, setSuccess] = useState(false);
   const [locLoading, setLocLoading] = useState(false);
   const [locError, setLocError] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const locationRef = useRef(null);
-  
-  // Get data from navigation state or localStorage
+
+  // Form data
   const [formData, setFormData] = useState({
     firstname: '',
     phone: '',
@@ -25,9 +26,31 @@ export default function ReservationTapisCanapes() {
     preferred_date: ''
   });
 
-  const reservationData = location.state?.type || null;
-  const serviceType = location.state?.serviceType || 'tapis'; // 'tapis', 'canapes', or 'tapis_et_canapes'
-  
+  // Get data from navigation state or sessionStorage (to preserve across login)
+  const [initialData, setInitialData] = useState(() => {
+    // 1. Try navigation state
+    if (location.state?.type) {
+      return {
+        type: location.state.type,
+        serviceType: location.state.serviceType || 'tapis'
+      };
+    }
+    // 2. Try sessionStorage
+    const saved = sessionStorage.getItem('tapis_canapes_pending_reservation_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing saved state:', e);
+      }
+    }
+    return null;
+  });
+
+  const reservationData = initialData?.type || null;
+  const serviceType = initialData?.serviceType || 'tapis';
+
   // Calculate final price for display
   const [displayFinalPrice, setDisplayFinalPrice] = useState(0);
 
@@ -45,12 +68,12 @@ export default function ReservationTapisCanapes() {
     } catch (err) {
       console.error('Error loading prefill:', err);
     }
-    
+
     // Calculate and display final price
     if (reservationData) {
       let calculatedPrice = 0;
       let totalArea = 0;
-      
+
       // Use finalPrice from state if available
       if (reservationData.finalPrice) {
         calculatedPrice = parseFloat(reservationData.finalPrice) || 0;
@@ -82,10 +105,52 @@ export default function ReservationTapisCanapes() {
           calculatedPrice = parseFloat(reservationData.price) || 0;
         }
       }
-      
+
       setDisplayFinalPrice(calculatedPrice);
     }
   }, [reservationData, serviceType]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('[ReservationTapisCanapes] No session found, redirecting to login...');
+          // Save state to survive redirect
+          if (location.state) {
+            sessionStorage.setItem('tapis_canapes_pending_reservation_state', JSON.stringify(location.state));
+          }
+          localStorage.setItem('auth_return_url', location.pathname + location.search);
+          console.log('[ReservationTapisCanapes] Saved auth_return_url:', location.pathname + location.search);
+          navigate('/login-register', {
+            state: {
+              returnUrl: location.pathname + location.search
+            }
+          });
+          return;
+        }
+
+        // Session exists, check if we need to clean up sessionStorage
+        sessionStorage.removeItem('tapis_canapes_pending_reservation_state');
+
+        // Prefill user data if available
+        if (session.user) {
+          setFormData(prev => ({
+            ...prev,
+            firstname: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name || prev.firstname,
+            email: session.user.email || prev.email,
+            phone: session.user.user_metadata?.phone || prev.phone
+          }));
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -116,12 +181,12 @@ export default function ReservationTapisCanapes() {
         const country = a.country || '';
         const value = [road, city, pc, country].filter(Boolean).join(', ');
         const finalValue = value || city || `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
-        
+
         setFormData(prev => ({
           ...prev,
           location: finalValue
         }));
-        
+
         if (locationRef.current) {
           locationRef.current.value = finalValue;
         }
@@ -157,12 +222,12 @@ export default function ReservationTapisCanapes() {
         if (reservationData.finalPrice) {
           finalPrice = parseFloat(reservationData.finalPrice) || 0;
         }
-        
+
         // Use totalArea from state if available
         if (reservationData.totalArea) {
           totalArea = parseFloat(reservationData.totalArea) || 0;
         }
-        
+
         if (serviceType === 'tapis' && reservationData.carpetCount) {
           itemCount = reservationData.carpetCount;
           dimensions = reservationData.carpetDimensions || [];
@@ -239,9 +304,9 @@ export default function ReservationTapisCanapes() {
 
       // Clear localStorage
       localStorage.removeItem('booking_prefill');
-      
+
       setSuccess(true);
-      
+
       // Redirect after 2 seconds
       setTimeout(() => {
         navigate(serviceType === 'tapis' ? '/tapis' : serviceType === 'canapes' ? '/canapes' : '/tapis-canapes');
@@ -255,10 +320,14 @@ export default function ReservationTapisCanapes() {
     }
   };
 
+  if (isCheckingAuth) {
+    return <main className="reservation-tapis-canapes-page"><div className="reservation-tapis-canapes-loading">Vérification de l'authentification...</div></main>;
+  }
+
   return (
     <main className="reservation-tapis-canapes-page">
       <div className="reservation-tapis-canapes-header">
-        <button 
+        <button
           className="reservation-tapis-canapes-back-btn"
           onClick={() => navigate(-1)}
           title={t('reservation_tapis_canapes.back', 'Retour')}

@@ -5,17 +5,18 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { CITY_QUARTIERS } from '../../constants/cities';
+import LocationPicker from '../../components/LocationPicker/LocationPicker';
 import './bebeSettingRegister.css';
 
 export default function BebeSettingRegister() {
   const { t, i18n } = useTranslation();
-  
+
   // Define day keys for internal use
   const DAY_KEYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  
+
   // Get translated day names
   const DAYS = DAY_KEYS.map(key => t(`employee_register.days.${key}`));
-  
+
   const [form, setForm] = useState({
     first_name: '',
     last_name: '',
@@ -23,9 +24,9 @@ export default function BebeSettingRegister() {
     age: '',
     email: '',
     phone: '',
-    city: '',
-    quartier: '',
-    location: '',
+    latitude: null,
+    longitude: null,
+    location_address: '',
     expertise: '',
     photo: null,
     auto_entrepreneur: '',
@@ -67,26 +68,20 @@ export default function BebeSettingRegister() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.birth_date]);
 
-  // Keep quartiers list in sync with selected city
-  useEffect(() => {
-    if (form.city && CITY_QUARTIERS[form.city]) {
-      setAvailableQuartiers(CITY_QUARTIERS[form.city]);
-      if (!CITY_QUARTIERS[form.city].includes(form.quartier)) {
-        setForm((prev) => ({ ...prev, quartier: '' }));
-      }
-    } else {
-      setAvailableQuartiers([]);
-      if (form.quartier) {
-        setForm((prev) => ({ ...prev, quartier: '' }));
-      }
-    }
-  }, [form.city]);
+  const handleLocationSelect = ({ lat, lng, address }) => {
+    setForm(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+      location_address: address
+    }));
+  };
 
   const expertiseOptions = [
-    t('employees.bebe.expertise.newborn','رعاية طفل حديث الولادة'),
-    t('employees.bebe.expertise.home_nursery','حضانة منزلية'),
-    t('employees.bebe.expertise.nanny','مربية أطفال'),
-    t('employees.bebe.expertise.home_assistant','مساعدة منزلية للطفل'),
+    t('employees.bebe.expertise.newborn', 'رعاية طفل حديث الولادة'),
+    t('employees.bebe.expertise.home_nursery', 'حضانة منزلية'),
+    t('employees.bebe.expertise.nanny', 'مربية أطفال'),
+    t('employees.bebe.expertise.home_assistant', 'مساعدة منزلية للطفل'),
   ];
 
   const selectedDaysPayload = useMemo(() => {
@@ -130,7 +125,7 @@ export default function BebeSettingRegister() {
     if (startTime && endTime) {
       const start = new Date(`2000-01-01T${startTime}`);
       const end = new Date(`2000-01-01T${endTime}`);
-      
+
       if (end <= start) {
         setTimeErrors(prev => ({ ...prev, [day]: t('employee_register.validation.end_time_after_start') }));
         return false;
@@ -164,7 +159,7 @@ export default function BebeSettingRegister() {
   };
 
   const validate = () => {
-    if (!form.first_name || !form.last_name || !form.birth_date || !form.email || !form.city || !form.quartier) {
+    if (!form.first_name || !form.last_name || !form.birth_date || !form.email || !form.latitude || !form.longitude) {
       return t('employee_register.validation.all_fields_required');
     }
     // Only require days if preferred_work_time is not selected
@@ -179,7 +174,7 @@ export default function BebeSettingRegister() {
     if (v) { setError(v); return; }
     try {
       setSubmitting(true);
-      
+
       // Upload photo to Supabase Storage (if exists)
       let photoUrl = null;
       if (form.photo instanceof File) {
@@ -188,16 +183,16 @@ export default function BebeSettingRegister() {
           const fileName = `bebe_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
           // Path inside bucket (without bucket name)
           const filePath = `bebe/${fileName}`;
-          
+
           console.log('Uploading photo to:', filePath);
-          
+
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('employees')
             .upload(filePath, form.photo, {
               cacheControl: '3600',
               upsert: false
             });
-          
+
           if (uploadError) {
             console.warn('Photo upload error:', uploadError);
             // Don't stop the process if photo upload fails
@@ -214,28 +209,30 @@ export default function BebeSettingRegister() {
           // Don't stop the process if photo upload fails
         }
       }
-      
+
       // Prepare data for Supabase bebe_employees table
       // Only include columns that exist in the table schema:
       // - id: auto-generated (DO NOT include in insert)
       // - first_name, last_name, email, phone, address, location, expertise, photo (existing)
       // - photo_url, status, is_active (to be added via SQL script)
-      
+
       // Build employeeData with only existing columns
       // DO NOT include 'id' - it's auto-generated by Supabase
       const employeeData = {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
+        birth_date: form.birth_date || null,
+        age: form.age ? parseInt(form.age, 10) : null,
         email: form.email.trim() || null,
         phone: form.phone?.trim() || null,
-        address: `${form.city} - ${form.quartier}`,
-        city: form.city?.trim() || null,
-        quartier: form.quartier?.trim() || null,
-        location: form.location?.trim() || null,
+        latitude: form.latitude,
+        longitude: form.longitude,
+        location_address: form.location_address,
+        address: form.location_address, // Fallback
         expertise: form.expertise || null,
         photo: photoUrl || null  // Store URL in photo column
       };
-      
+
       // Add optional columns if they exist (after running SQL script)
       // These will be ignored if columns don't exist, but won't cause errors if they do
       if (photoUrl) {
@@ -243,26 +240,26 @@ export default function BebeSettingRegister() {
       }
       employeeData.status = 'pending';
       employeeData.is_active = true;
-      
+
       // Note: Additional fields like birth_date, age, auto_entrepreneur, etc.
       // are not stored as the table schema doesn't support them
-      
+
       console.log('[BebeSettingRegister] Submitting employee data to bebe_employees:', employeeData);
       console.log('[BebeSettingRegister] Note: id will be auto-generated by Supabase');
-      
+
       // Insert into Supabase bebe_employees table
       // Supabase will auto-generate the 'id' field
       const { data, error } = await supabase
         .from('bebe_employees')
         .insert([employeeData])
         .select();
-      
+
       if (error) {
         console.error('Supabase error:', error);
-        throw new Error(error.message || t('employees.register.submit_failed','فشل في إرسال النموذج'));
+        throw new Error(error.message || t('employees.register.submit_failed', 'فشل في إرسال النموذج'));
       }
-      
-      setMessage(t('employees.register.submit_success','تم إرسال النموذج بنجاح'));
+
+      setMessage(t('employees.register.submit_success', 'تم إرسال النموذج بنجاح'));
       setShowSuccess(true);
       setForm({
         first_name: '',
@@ -271,9 +268,9 @@ export default function BebeSettingRegister() {
         age: '',
         email: '',
         phone: '',
-        city: '',
-        quartier: '',
-        location: '',
+        latitude: null,
+        longitude: null,
+        location_address: '',
         expertise: '',
         photo: null,
         auto_entrepreneur: '',
@@ -286,14 +283,14 @@ export default function BebeSettingRegister() {
       setTimeout(() => setShowSuccess(false), 4000);
     } catch (e2) {
       console.error('Submit error:', e2);
-      setError(e2.message || t('common.unexpected_error','حدث خطأ غير متوقع'));
+      setError(e2.message || t('common.unexpected_error', 'حدث خطأ غير متوقع'));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div 
+    <div
       className="employee-register"
       style={{
         backgroundAttachment: 'fixed',
@@ -308,248 +305,199 @@ export default function BebeSettingRegister() {
             <div className="er-check" aria-hidden>✅</div>
             <h3 className="er-title">{t('employee_register.success_modal.title')}</h3>
             <div className="er-actions">
-              <button type="button" className="er-close" onClick={()=>setShowSuccess(false)}>{t('employee_register.success_modal.ok')}</button>
+              <button type="button" className="er-close" onClick={() => setShowSuccess(false)}>{t('employee_register.success_modal.ok')}</button>
             </div>
           </div>
         </div>
       )}
       {/* Back Button Container */}
       <div className="back-button-container">
-        <Link 
-          to="/employees/register" 
+        <Link
+          to="/employees/register"
           className="hand-workers-back-button"
           title={i18n.language === 'ar' ? 'العودة' : i18n.language === 'fr' ? 'Retour' : 'Back'}
         >
-          ← {i18n.language === 'ar' ? 'العودة' : 
-             i18n.language === 'fr' ? 'Retour' : 
-             'Back'}
+          ← {i18n.language === 'ar' ? 'العودة' :
+            i18n.language === 'fr' ? 'Retour' :
+              'Back'}
         </Link>
       </div>
       <div className="form-card" data-aos="fade-up">
-        <h1>{t('employees.register.join_team','انضم إلى فريقنا')}</h1>
-        <p className="subtitle">{t('employees.register.fill_form','يرجى ملء النموذج أدناه')}</p>
+        <h1>{t('employees.register.join_team', 'انضم إلى فريقنا')}</h1>
+        <p className="subtitle">{t('employees.register.fill_form', 'يرجى ملء النموذج أدناه')}</p>
 
         {error && <div className="alert error">{error}</div>}
         {message && <div className="alert success">{message}</div>}
 
         <form onSubmit={submit} className="form-grid">
           <div className="form-group">
-            <label>{t('employees.register.first_name','الاسم')}</label>
+            <label>{t('employee_register.form.first_name')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 21V19C16 16.7909 14.2091 15 12 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M16 21V19C16 16.7909 14.2091 15 12 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </span>
-              <input type="text" value={form.first_name || ''} onChange={(e)=>setForm({...form, first_name:e.target.value})} required />
+              <input type="text" value={form.first_name || ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} required />
             </div>
           </div>
           <div className="form-group">
-            <label>{t('employees.register.last_name','اللقب')}</label>
+            <label>{t('employee_register.form.last_name')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 21V19C16 16.7909 14.2091 15 12 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M16 21V19C16 16.7909 14.2091 15 12 15H8C5.79086 15 4 16.7909 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </span>
-              <input type="text" value={form.last_name || ''} onChange={(e)=>setForm({...form, last_name:e.target.value})} required />
+              <input type="text" value={form.last_name || ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} required />
             </div>
           </div>
           <div className="form-group">
-            <label>{t('employees.register.birth_date','تاريخ الميلاد')}</label>
+            <label>{t('employee_register.form.birth_date')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 2v3M16 2v3M3 9h18M5 13h2m4 0h2m4 0h2M5 17h2m4 0h2m4 0h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 2v3M16 2v3M3 9h18M5 13h2m4 0h2m4 0h2M5 17h2m4 0h2m4 0h2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <input type="date" value={form.birth_date || ''} onChange={(e)=>setForm({...form, birth_date:e.target.value})} required />
+              <input type="date" value={form.birth_date || ''} onChange={(e) => setForm({ ...form, birth_date: e.target.value })} required />
             </div>
           </div>
           <div className="form-group">
-            <label>{t('employees.register.age','العمر')}</label>
+            <label>{t('employees.register.age', 'العمر')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 8V12L14.5 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 8V12L14.5 14.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </span>
-              <input type="number" min="16" max="80" value={form.age || ''} onChange={(e)=>setForm({...form, age:e.target.value})} readOnly />
+              <input type="number" min="16" max="80" value={form.age || ''} onChange={(e) => setForm({ ...form, age: e.target.value })} readOnly />
             </div>
           </div>
           <div className="form-group">
-            <label>{t('employees.register.email','البريد الإلكتروني')}</label>
+            <label>{t('employee_register.form.email')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 6H20C21.1046 6 22 6.89543 22 8V16C22 17.1046 21.1046 18 20 18H4C2.89543 18 2 17.1046 2 16V8C2 6.89543 2.89543 6 4 6Z" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M22 8L12.971 13.514C12.3681 13.8847 11.6319 13.8847 11.029 13.514L2 8" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M4 6H20C21.1046 6 22 6.89543 22 8V16C22 17.1046 21.1046 18 20 18H4C2.89543 18 2 17.1046 2 16V8C2 6.89543 2.89543 6 4 6Z" stroke="currentColor" strokeWidth="2" />
+                  <path d="M22 8L12.971 13.514C12.3681 13.8847 11.6319 13.8847 11.029 13.514L2 8" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </span>
-              <input type="email" value={form.email || ''} onChange={(e)=>setForm({...form, email:e.target.value})} required />
+              <input type="email" value={form.email || ''} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
             </div>
           </div>
           <div className="form-group">
-            <label>{t('employees.register.phone','الهاتف')}</label>
+            <label>{t('employee_register.form.phone')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.73 19.73 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.12.89.3 1.76.54 2.59a2 2 0 0 1-.45 2.11l-.7.7a16 16 0 0 0 6.88 6.88l.7-.7a2 2 0 0 1 2.11-.45c.83.24 1.7.42 2.59.54A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.73 19.73 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.12.89.3 1.76.54 2.59a2 2 0 0 1-.45 2.11l-.7.7a16 16 0 0 0 6.88 6.88l.7-.7a2 2 0 0 1 2.11-.45c.83.24 1.7.42 2.59.54A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <input type="tel" value={form.phone || ''} onChange={(e)=>setForm({...form, phone:e.target.value})} placeholder={t('employees.register.phone_ph','مثال: +212 6 12 34 56 78')} />
+              <input type="tel" value={form.phone || ''} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t('employees.register.phone_ph', 'مثال: +212 6 12 34 56 78')} />
             </div>
           </div>
           <div className="form-group full">
-            <label>{t('multi_service_employees.city_label')}</label>
+            <label style={{ marginBottom: '15px', display: 'block' }}>
+              {t('employee_register.form.location_label')}
+            </label>
+            <LocationPicker
+              onLocationSelect={handleLocationSelect}
+              initialLocation={form.latitude && form.longitude ? { lat: form.latitude, lng: form.longitude } : null}
+            />
+            {form.location_address && (
+              <div style={{ marginTop: '10px', fontSize: '0.9rem', color: '#64748b' }}>
+                <strong>{t('employee_register.form.selected_address')}</strong> {form.location_address}
+              </div>
+            )}
+          </div>
+          <div className="form-group full">
+            <label>{t('employees.register.photo_optional', 'الصورة (اختياري)')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 21C12 21 5 14.9706 5 10.5C5 7.46243 7.46243 5 10.5 5C13.5376 5 16 7.46243 16 10.5C16 14.9706 12 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
+                  <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2" />
+                  <path d="M3 15L8 10L14 16L17 13L21 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <select
-                value={form.city || ''}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                required
-              >
-                <option value="">
-                  {t('multi_services.city_placeholder', 'اختر المدينة')}
-                </option>
-                {Object.keys(CITY_QUARTIERS).map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
+              <input type="file" accept="image/*" onChange={(e) => setForm({ ...form, photo: e.target.files?.[0] || null })} />
             </div>
           </div>
           <div className="form-group full">
-            <label>{t('multi_service_employees.quartier_label')}</label>
+            <label>{t('employees.register.expertise', 'مجال الخبرة')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 21C12 21 5 14.9706 5 10.5C5 7.46243 7.46243 5 10.5 5C13.5376 5 16 7.46243 16 10.5C16 14.9706 12 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <select
-                value={form.quartier || ''}
-                onChange={(e) => setForm({ ...form, quartier: e.target.value })}
-                disabled={!form.city || availableQuartiers.length === 0}
-                required
-              >
-                <option value="">
-                  {t('multi_services.quartier_placeholder', 'اختر الحي')}
-                </option>
-                {availableQuartiers.map((q) => (
-                  <option key={q} value={q}>
-                    {q}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="form-group full">
-            <label>{t('employees.register.location','الموقع')}</label>
-            <div className="input-with-icon">
-              <span className="ifi-icon" aria-hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 21C12 21 5 14.9706 5 10.5C5 7.46243 7.46243 5 10.5 5C13.5376 5 16 7.46243 16 10.5C16 14.9706 12 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="10.5" cy="10.5" r="2.5" stroke="currentColor" strokeWidth="2"/>
-                </svg>
-              </span>
-              <input type="text" value={form.location || ''} onChange={(e)=>setForm({...form, location:e.target.value})} />
-            </div>
-          </div>
-          <div className="form-group full">
-            <label>{t('employees.register.photo_optional','الصورة (اختياري)')}</label>
-            <div className="input-with-icon">
-              <span className="ifi-icon" aria-hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M3 15L8 10L14 16L17 13L21 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-              <input type="file" accept="image/*" onChange={(e)=>setForm({...form, photo: e.target.files?.[0] || null})} />
-            </div>
-          </div>
-          <div className="form-group full">
-            <label>{t('employees.register.expertise','مجال الخبرة')}</label>
-            <div className="input-with-icon">
-              <span className="ifi-icon" aria-hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </span>
-              <select value={form.expertise || ''} onChange={(e)=>setForm({...form, expertise:e.target.value})}>
-                <option value="">{t('employees.register.expertise_select','اختر مجال الخبرة')}</option>
+              <select value={form.expertise || ''} onChange={(e) => setForm({ ...form, expertise: e.target.value })}>
+                <option value="">{t('employees.register.expertise_select', 'اختر مجال الخبرة')}</option>
                 {expertiseOptions.map(opt => (<option key={opt} value={opt}>{opt}</option>))}
               </select>
             </div>
           </div>
 
           <div className="form-group full">
-            <label>{t('employees.register.auto_entrepreneur','مقاول ذاتي')}</label>
-            <div style={{display: 'flex', gap: '16px', flexDirection: 'row', alignItems: 'center', marginTop: '8px'}}>
-              <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0}}>
-                <input 
-                  type="radio" 
-                  name="auto_entrepreneur" 
-                  value="yes" 
+            <label>{t('employees.register.auto_entrepreneur', 'مقاول ذاتي')}</label>
+            <div style={{ display: 'flex', gap: '16px', flexDirection: 'row', alignItems: 'center', marginTop: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0 }}>
+                <input
+                  type="radio"
+                  name="auto_entrepreneur"
+                  value="yes"
                   checked={form.auto_entrepreneur === 'yes'}
-                  onChange={(e)=>setForm({...form, auto_entrepreneur:e.target.value})}
+                  onChange={(e) => setForm({ ...form, auto_entrepreneur: e.target.value })}
                 />
-                <span>{t('common.yes','نعم')}</span>
+                <span>{t('common.yes', 'نعم')}</span>
               </label>
-              <label style={{display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0}}>
-                <input 
-                  type="radio" 
-                  name="auto_entrepreneur" 
-                  value="no" 
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: 0 }}>
+                <input
+                  type="radio"
+                  name="auto_entrepreneur"
+                  value="no"
                   checked={form.auto_entrepreneur === 'no'}
-                  onChange={(e)=>setForm({...form, auto_entrepreneur:e.target.value})}
+                  onChange={(e) => setForm({ ...form, auto_entrepreneur: e.target.value })}
                 />
-                <span>{t('common.no','لا')}</span>
+                <span>{t('common.no', 'لا')}</span>
               </label>
             </div>
           </div>
 
           <div className="form-group full">
-            <label>{t('employees.register.last_experience','آخر تجربة عمل')}</label>
+            <label>{t('employee_register.form.last_experience')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <textarea placeholder={t('employees.register.last_experience_ph','وصف آخر تجربة عمل')} value={form.last_experience || ''} onChange={(e)=>setForm({...form, last_experience:e.target.value})} rows={3} style={{width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit', background: 'transparent', color: '#ffffff'}} />
+              <textarea placeholder={t('employee_register.form.last_experience_ph')} value={form.last_experience || ''} onChange={(e) => setForm({ ...form, last_experience: e.target.value })} rows={3} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #ddd', fontFamily: 'inherit', background: 'transparent', color: '#ffffff' }} />
             </div>
           </div>
 
           <div className="form-group full">
-            <label>{t('employees.register.company_name','اسم الشركة')}</label>
+            <label>{t('employee_register.form.company_name')}</label>
             <div className="input-with-icon">
               <span className="ifi-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M5 21V7L13 2L21 7V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M9 9V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M15 9V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 21H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M5 21V7L13 2L21 7V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M9 9V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M15 9V13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <input type="text" value={form.company_name || ''} onChange={(e)=>setForm({...form, company_name:e.target.value})} placeholder={t('employees.register.company_name_ph','أدخل اسم الشركة')} />
+              <input type="text" value={form.company_name || ''} onChange={(e) => setForm({ ...form, company_name: e.target.value })} placeholder={t('employee_register.form.company_name_ph')} />
             </div>
           </div>
 
           <div className="form-group full">
-            <label>{t('employee_register.form.preferred_work_time') || 'وقت العمل المفضل'}</label>
+            <label>{t('employee_register.form.preferred_work_time')}</label>
             <div className="preferred-work-time-buttons">
               <button
                 type="button"
@@ -558,11 +506,11 @@ export default function BebeSettingRegister() {
               >
                 <span className="btn-icon" aria-hidden>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M12 7V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2" />
+                    <path d="M12 7V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 </span>
-                {t('employee_register.form.work_morning') || 'أعمل كل يوم في الصباح'}
+                {t('employee_register.form.work_morning')}
               </button>
               <button
                 type="button"
@@ -571,10 +519,10 @@ export default function BebeSettingRegister() {
               >
                 <span className="btn-icon" aria-hidden>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </span>
-                {t('employee_register.form.work_night') || 'أعمل كل يوم في الليل'}
+                {t('employee_register.form.work_night')}
               </button>
             </div>
           </div>
@@ -594,7 +542,7 @@ export default function BebeSettingRegister() {
                     const key = DAY_KEYS[index];
                     const isActive = days[key]?.checked;
                     const hasError = timeErrors[key];
-                    
+
                     return (
                       <motion.div
                         key={key}
@@ -605,10 +553,10 @@ export default function BebeSettingRegister() {
                       >
                         <div className="day-header">
                           <label className="day-checkbox-modern">
-                            <input 
-                              type="checkbox" 
-                              checked={isActive} 
-                              onChange={() => handleDayToggle(index)} 
+                            <input
+                              type="checkbox"
+                              checked={isActive}
+                              onChange={() => handleDayToggle(index)}
                             />
                             <span className="checkbox-custom">
                               {isActive && <FiCheck className="check-icon" />}
@@ -616,7 +564,7 @@ export default function BebeSettingRegister() {
                             <span className="day-name">{day}</span>
                           </label>
                         </div>
-                        
+
                         <AnimatePresence>
                           {isActive && (
                             <motion.div
@@ -631,31 +579,31 @@ export default function BebeSettingRegister() {
                                   <label className="time-label-modern">{t('employee_register.days.start_time')}</label>
                                   <div className="time-input-wrapper">
                                     <FiClock className="time-icon" />
-                                    <input 
-                                      type="time" 
-                                      value={(days[key]?.start ?? '') || ''} 
-                                      onChange={(e) => handleTimeChange(index, 'start', e.target.value)} 
+                                    <input
+                                      type="time"
+                                      value={(days[key]?.start ?? '') || ''}
+                                      onChange={(e) => handleTimeChange(index, 'start', e.target.value)}
                                       placeholder={t('employee_register.days.start_placeholder')}
                                       className="time-input"
                                     />
                                   </div>
                                 </div>
-                                
+
                                 <div className="time-field-modern">
                                   <label className="time-label-modern">{t('employee_register.days.end_time')}</label>
                                   <div className="time-input-wrapper">
                                     <FiClock className="time-icon" />
-                                    <input 
-                                      type="time" 
-                                      value={(days[key]?.end ?? '') || ''} 
-                                      onChange={(e) => handleTimeChange(index, 'end', e.target.value)} 
+                                    <input
+                                      type="time"
+                                      value={(days[key]?.end ?? '') || ''}
+                                      onChange={(e) => handleTimeChange(index, 'end', e.target.value)}
                                       placeholder={t('employee_register.days.end_placeholder')}
                                       className="time-input"
                                     />
                                   </div>
                                 </div>
                               </div>
-                              
+
                               {hasError && (
                                 <motion.div
                                   className="time-error-message"
@@ -681,10 +629,10 @@ export default function BebeSettingRegister() {
             <button type="submit" className="submit-button" disabled={submitting}>
               <span className="btn-icon" aria-hidden>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              {submitting ? t('employee_register.submit.submitting') : t('common.submit','تسجيل')}
+              {submitting ? t('employee_register.buttons.submitting') : t('employee_register.buttons.submit_bebe')}
             </button>
           </div>
         </form>

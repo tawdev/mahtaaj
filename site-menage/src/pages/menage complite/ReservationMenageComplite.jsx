@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -8,9 +8,34 @@ export default function ReservationMenageComplite() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const serviceData = location.state?.type || null;
-  const serviceType = location.state?.serviceType || 'resort_hotel';
-  const formData = location.state?.reservationData || {};
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Get data from navigation state or sessionStorage (to preserve across login)
+  const [initialData, setInitialData] = useState(() => {
+    // 1. Try navigation state
+    if (location.state?.type) {
+      return {
+        type: location.state.type,
+        serviceType: location.state.serviceType || 'resort_hotel',
+        reservationData: location.state.reservationData || {}
+      };
+    }
+    // 2. Try sessionStorage
+    const saved = sessionStorage.getItem('menage_complite_pending_reservation_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing saved state:', e);
+      }
+    }
+    return null;
+  });
+
+  const serviceData = initialData?.type || null;
+  const serviceType = initialData?.serviceType || 'resort_hotel';
+  const formData = initialData?.reservationData || {};
 
   const [formValues, setFormValues] = useState({
     firstname: '',
@@ -21,6 +46,61 @@ export default function ReservationMenageComplite() {
     preferred_time: '',
     message: ''
   });
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        console.log('[ReservationMenageComplite] User found, autofilling:', user);
+
+        // Try to get first name from user metadata
+        let fullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+        let firstname = user.user_metadata?.first_name || '';
+
+        // If no first name but full name exists, use full name or split it
+        if (!firstname && fullName) {
+          firstname = fullName;
+        }
+
+        setFormValues(prev => ({
+          ...prev,
+          firstname: firstname || prev.firstname,
+          phone: user.user_metadata?.phone || prev.phone,
+          email: user.email || prev.email,
+          location: user.user_metadata?.location || user.user_metadata?.address || prev.location
+        }));
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('[ReservationMenageComplite] No session found, redirecting to login...');
+          // Save state to survive redirect
+          if (location.state) {
+            sessionStorage.setItem('menage_complite_pending_reservation_state', JSON.stringify(location.state));
+          }
+          localStorage.setItem('auth_return_url', location.pathname + location.search);
+          navigate('/login-register');
+          return;
+        }
+
+        // Session exists, check if we need to clean up sessionStorage
+        sessionStorage.removeItem('menage_complite_pending_reservation_state');
+      } catch (err) {
+        console.error('Auth check error:', err);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -36,7 +116,7 @@ export default function ReservationMenageComplite() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formValues.firstname.trim()) {
       setSubmitError(t('reservation_menage_complite.error_firstname', 'Veuillez entrer votre nom'));
@@ -98,14 +178,14 @@ export default function ReservationMenageComplite() {
           details: error.details,
           hint: error.hint
         });
-        
+
         // If select fails but insert might have succeeded, try without select
         if (error.code === 'PGRST301' || error.message?.includes('permission denied') || error.message?.includes('SELECT')) {
           console.log('[ReservationMenageComplite] Retrying without select...');
           const { error: insertError } = await supabase
             .from('menage_complet_reservations')
             .insert([reservationPayload]);
-          
+
           if (insertError) {
             throw insertError;
           }
@@ -123,14 +203,14 @@ export default function ReservationMenageComplite() {
     } catch (err) {
       console.error('[ReservationMenageComplite] Error submitting reservation:', err);
       let errorMessage = t('reservation_menage_complite.error_submit', 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.');
-      
+
       // Provide more specific error messages
       if (err?.code === 'PGRST301' || err?.message?.includes('permission denied') || err?.message?.includes('401')) {
         errorMessage = t('reservation_menage_complite.error_permission', 'Erreur de permission. Veuillez vérifier que la table existe et que les politiques RLS sont correctement configurées.');
       } else if (err?.message) {
         errorMessage = `${errorMessage} (${err.message})`;
       }
-      
+
       setSubmitError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -161,6 +241,10 @@ export default function ReservationMenageComplite() {
         navigate('/menage-complet');
     }
   };
+
+  if (isCheckingAuth) {
+    return <main className="reservation-menage-complite-page"><div className="reservation-loading">Vérification de l'authentification...</div></main>;
+  }
 
   if (!serviceData) {
     return (
@@ -348,7 +432,7 @@ export default function ReservationMenageComplite() {
             className="form-submit-btn"
             disabled={isSubmitting}
           >
-            {isSubmitting 
+            {isSubmitting
               ? t('reservation_menage_complite.submitting', 'Envoi en cours...')
               : t('reservation_menage_complite.submit', 'Envoyer la réservation')
             }

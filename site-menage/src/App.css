@@ -5,6 +5,14 @@
   /* Account for fixed navbar */
 }
 
+/* Specific pages where content/hero should start from the very top */
+.page-transition:has(.Home),
+.page-transition>.Home,
+.page-transition:has(.shop-page),
+.page-transition>.shop-page {
+  padding-top: 0 !important;
+}
+
 .page-transition.no-padding {
   padding-top: 0 !important;
 }
@@ -38,16 +46,14 @@
     /* Smaller navbar height on mobile */
   }
 
-  /* Remove padding-top for Home page on mobile to eliminate gap between Navbar and Hero */
-  .page-transition:has(.Home),
-  .page-transition>.Home {
-    padding-top: 0 !important;
-  }
+  /* Media query specific overrides */
 
   /* تقليل padding-top لصفحة Services في الموبايل - مسافة صغيرة فقط */
   .page-transition:has(.services-page),
-  .page-transition>.services-page {
-    padding-top: 0.5rem !important;
+  .page-transition>.services-page,
+  .page-transition:has(.shop-page),
+  .page-transition>.shop-page {
+    padding-top: 0 !important;
   }
 
   .admin-page {

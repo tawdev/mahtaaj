@@ -13,9 +13,9 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 		try {
 			setLoading(true);
 			setError('');
-			
+
 			console.log('[AdminHandWorkerEmployees] Loading registrations from hand_worker_employees table');
-			
+
 			// Load hand_worker_employees with category join
 			const { data, error } = await supabase
 				.from('hand_worker_employees')
@@ -30,13 +30,13 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 					)
 				`)
 				.order('created_at', { ascending: false });
-			
+
 			if (error) {
 				console.error('[AdminHandWorkerEmployees] Error loading registrations:', error);
 				setError('Erreur lors du chargement: ' + error.message);
 				return;
 			}
-			
+
 			// Transform data to match expected format
 			const transformedData = (data || []).map(item => {
 				const fullName = `${item.first_name || ''} ${item.last_name || ''}`.trim();
@@ -51,10 +51,10 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 					email: item.email || '-',
 					phone: item.phone || '-',
 					category: item.hand_worker_categories ? {
-						name: item.hand_worker_categories.name || 
-								   item.hand_worker_categories.name_fr || 
-								   item.hand_worker_categories.name_ar || 
-								   item.hand_worker_categories.name_en || '-'
+						name: item.hand_worker_categories.name ||
+							item.hand_worker_categories.name_fr ||
+							item.hand_worker_categories.name_ar ||
+							item.hand_worker_categories.name_en || '-'
 					} : null,
 					city: item.city || '-',
 					quartier: item.quartier || '-',
@@ -69,7 +69,7 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 					...item
 				};
 			});
-			
+
 			console.log('[AdminHandWorkerEmployees] Loaded registrations:', transformedData.length);
 			setItems(transformedData);
 		} catch (e) {
@@ -93,20 +93,20 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 	const approveRegistration = async (id) => {
 		try {
 			console.log('[AdminHandWorkerEmployees] Approving registration:', id);
-			
+
 			// First, get the employee data
 			const { data: employee, error: fetchError } = await supabase
 				.from('hand_worker_employees')
 				.select('*')
 				.eq('id', id)
 				.single();
-			
+
 			if (fetchError || !employee) {
 				console.error('[AdminHandWorkerEmployees] Error fetching employee:', fetchError);
 				alert('Erreur lors de la récupération des données: ' + (fetchError?.message || 'Employé non trouvé'));
 				return;
 			}
-			
+
 			// Insert into hand_worker_employees_valid table
 			const { error: insertError } = await supabase
 				.from('hand_worker_employees_valid')
@@ -126,29 +126,29 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 					employee_type: employee.employee_type,
 					is_available: true
 				}]);
-			
+
 			if (insertError) {
 				console.error('[AdminHandWorkerEmployees] Error inserting into valid table:', insertError);
 				alert('Erreur lors de l\'insertion dans la table validée: ' + insertError.message);
 				return;
 			}
-			
+
 			// Update the original employee record
 			const { error: updateError } = await supabase
 				.from('hand_worker_employees')
-				.update({ 
+				.update({
 					status: 'active',
 					is_available: true,
 					updated_at: new Date().toISOString()
 				})
 				.eq('id', id);
-			
+
 			if (updateError) {
 				console.error('[AdminHandWorkerEmployees] Error updating employee:', updateError);
 				alert('Erreur lors de la mise à jour: ' + updateError.message);
 				return;
 			}
-			
+
 			// Update local state
 			setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'approved', is_available: true } : i));
 			alert('Inscription approuvée ✅');
@@ -162,22 +162,22 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 		if (!window.confirm('Rejeter cette inscription ?')) return;
 		try {
 			console.log('[AdminHandWorkerEmployees] Rejecting registration:', id);
-			
+
 			const { error } = await supabase
 				.from('hand_worker_employees')
-				.update({ 
+				.update({
 					status: 'inactive',
 					is_available: false,
 					updated_at: new Date().toISOString()
 				})
 				.eq('id', id);
-			
+
 			if (error) {
 				console.error('[AdminHandWorkerEmployees] Error rejecting registration:', error);
 				alert('Erreur lors du rejet: ' + error.message);
 				return;
 			}
-			
+
 			// Update local state
 			setItems(prev => prev.map(i => i.id === id ? { ...i, status: 'rejected', is_available: false } : i));
 			alert('Inscription rejetée');
@@ -191,18 +191,18 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 		if (!window.confirm('Supprimer cette inscription ?')) return;
 		try {
 			console.log('[AdminHandWorkerEmployees] Deleting registration:', id);
-			
+
 			const { error } = await supabase
 				.from('hand_worker_employees')
 				.delete()
 				.eq('id', id);
-			
+
 			if (error) {
 				console.error('[AdminHandWorkerEmployees] Error deleting registration:', error);
 				alert('Erreur lors de la suppression: ' + error.message);
 				return;
 			}
-			
+
 			// Update local state
 			setItems(prev => prev.filter(i => i.id !== id));
 			alert('Inscription supprimée');
@@ -212,15 +212,22 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 		}
 	};
 
+	/* Add state for viewing employee */
+	const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+	const handleView = (employee) => {
+		setSelectedEmployee(employee);
+	};
+
 	return (
 		<main className="admin-page handworker-employees-page">
 			<div className="handworker-employees-header">
 				<h1>Employés Travaux Manuels</h1>
 				<div className="handworker-employees-actions">
-					<select 
+					<select
 						className="handworker-employees-filter"
-						value={filter} 
-						onChange={e=>setFilter(e.target.value)}
+						value={filter}
+						onChange={e => setFilter(e.target.value)}
 					>
 						<option value="all">Tous</option>
 						<option value="pending">En attente</option>
@@ -272,23 +279,24 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 									<td>{emp.quartier || '-'}</td>
 									<td>{emp.experience_years || 0} ans</td>
 									<td>{emp.employee_type || '-'}</td>
-									<td style={{maxWidth: '260px'}}>{emp.bio_short || '-'}</td>
+									<td style={{ maxWidth: '260px' }}>{emp.bio_short || '-'}</td>
 									<td>
 										<span className={`handworker-employees-status ${emp.status || 'pending'}`}>
-											{emp.status === 'pending' ? '⏳ En attente' : 
-											 emp.status === 'approved' ? '✓ Approuvé' : 
-											 emp.status === 'rejected' ? '✗ Rejeté' : 'Inconnu'}
+											{emp.status === 'pending' ? '⏳ En attente' :
+												emp.status === 'approved' ? '✓ Approuvé' :
+													emp.status === 'rejected' ? '✗ Rejeté' : 'Inconnu'}
 										</span>
 									</td>
 									<td>
-										<div style={{display:'flex', gap:8, flexWrap:'wrap'}}>
+										<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+											<button className="handworker-view-btn" onClick={() => handleView(emp)} title="Voir détails">👁️ Voir</button>
 											{emp.status === 'pending' && (
-												<button className="handworker-employees-approve-btn" onClick={()=>approveRegistration(emp.id)}>✅ Valider</button>
+												<button className="handworker-employees-approve-btn" onClick={() => approveRegistration(emp.id)} title="Valider">✅ Valider</button>
 											)}
 											{emp.status === 'pending' && (
-												<button className="handworker-employees-reject-btn" onClick={()=>rejectRegistration(emp.id)}>❌ Rejeter</button>
+												<button className="handworker-employees-reject-btn" onClick={() => rejectRegistration(emp.id)} title="Rejeter">❌ Rejeter</button>
 											)}
-											<button className="handworker-employees-delete-btn" onClick={()=>remove(emp.id)}>🗑️ Supprimer</button>
+											<button className="handworker-employees-delete-btn" onClick={() => remove(emp.id)} title="Supprimer">🗑️ Supprimer</button>
 										</div>
 									</td>
 								</tr>
@@ -300,6 +308,92 @@ export default function AdminHandWorkerEmployees({ token, onAuthError }) {
 							)}
 						</tbody>
 					</table>
+				</div>
+			)}
+
+			{/* Employee Details Modal */}
+			{selectedEmployee && (
+				<div className="handworker-details-overlay" onClick={() => setSelectedEmployee(null)}>
+					<div className="handworker-details-modal" onClick={e => e.stopPropagation()}>
+						<div className="handworker-details-header">
+							<h2>
+								📄 Détails de l'employé
+							</h2>
+							<button className="handworker-details-close-btn" onClick={() => setSelectedEmployee(null)}>
+								✕
+							</button>
+						</div>
+						<div className="handworker-details-content">
+							<div className="handworker-profile-header">
+								<img
+									src={selectedEmployee.photo_url || selectedEmployee.photo || 'https://via.placeholder.com/150?text=No+Photo'}
+									alt={selectedEmployee.full_name}
+									className="handworker-profile-image"
+									onError={(e) => {
+										e.target.onerror = null;
+										e.target.src = 'https://via.placeholder.com/150?text=No+Photo';
+									}}
+								/>
+								<div className="handworker-profile-info">
+									<h3 className="handworker-profile-name">{selectedEmployee.full_name}</h3>
+									<div className="handworker-profile-category">
+										{selectedEmployee.category?.name || 'Non catégorisé'}
+									</div>
+									<div className="handworker-profile-status-wrapper">
+										<span className={`handworker-employees-status ${selectedEmployee.status || 'pending'}`}>
+											{selectedEmployee.status === 'pending' ? '⏳ En attente' :
+												selectedEmployee.status === 'approved' ? '✓ Approuvé' :
+													selectedEmployee.status === 'rejected' ? '✗ Rejeté' : 'Inconnu'}
+										</span>
+									</div>
+								</div>
+							</div>
+
+							<div className="handworker-info-grid">
+								<div className="handworker-info-item">
+									<span className="handworker-info-label">Email</span>
+									<span className="handworker-info-value">{selectedEmployee.email || '-'}</span>
+								</div>
+								<div className="handworker-info-item">
+									<span className="handworker-info-label">Téléphone</span>
+									<span className="handworker-info-value">{selectedEmployee.phone || '-'}</span>
+								</div>
+								<div className="handworker-info-item">
+									<span className="handworker-info-label">Ville</span>
+									<span className="handworker-info-value">{selectedEmployee.city || '-'}</span>
+								</div>
+								<div className="handworker-info-item">
+									<span className="handworker-info-label">Quartier</span>
+									<span className="handworker-info-value">{selectedEmployee.quartier || '-'}</span>
+								</div>
+								<div className="handworker-info-item">
+									<span className="handworker-info-label">Adresse</span>
+									<span className="handworker-info-value">{selectedEmployee.address || '-'}</span>
+								</div>
+								<div className="handworker-info-item">
+									<span className="handworker-info-label">Années d'expérience</span>
+									<span className="handworker-info-value">{selectedEmployee.experience_years} ans</span>
+								</div>
+								<div className="handworker-info-item">
+									<span className="handworker-info-label">Type d'employé</span>
+									<span className="handworker-info-value">{selectedEmployee.employee_type || '-'}</span>
+								</div>
+								<div className="handworker-info-item">
+									<span className="handworker-info-label">Date d'inscription</span>
+									<span className="handworker-info-value">
+										{selectedEmployee.created_at ? new Date(selectedEmployee.created_at).toLocaleDateString() : '-'}
+									</span>
+								</div>
+							</div>
+
+							<div className="handworker-bio-section">
+								<h3>Biographie / Description</h3>
+								<div className="handworker-bio-text">
+									{selectedEmployee.bio || 'Aucune description fournie.'}
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			)}
 		</main>

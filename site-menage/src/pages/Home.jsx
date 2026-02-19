@@ -6,7 +6,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import TousLesServices from './TousLesServices';
-import GoogleOneTap from '../components/GoogleOneTap';
 
 
 export default function Home() {
@@ -163,7 +162,7 @@ export default function Home() {
     if (nameLower.includes('ménage') || nameLower.includes('menage') ||
       nameLower.includes('house') || nameOriginal.includes('تنظيف') ||
       nameOriginal.includes('منزل')) {
-      return '/services/menage';
+      return '/menage-et-cuisine';
     }
     // Sécurité / Security / الأمن
     if (nameLower.includes('sécurité') || nameLower.includes('security') ||
@@ -469,7 +468,6 @@ export default function Home() {
   if (!mounted) {
     return (
       <div className="Home">
-        <GoogleOneTap />
         <header className="home-hero">
           <div className="hero-background">
             <div className="background-image" style={{ background: '#1e293b' }} />
@@ -504,7 +502,6 @@ export default function Home() {
 
   return (
     <div className="Home">
-      <GoogleOneTap />
       <header className="home-hero">
         {/* Animated Background */}
         {/* Animated Background - Stable Structure */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -12,7 +12,7 @@ export default function ReservationCuisin() {
   const categoryData = location.state?.category || null;
   const serviceData = location.state?.service || null;
 
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = React.useState({
     firstname: '',
     phone: '',
     email: '',
@@ -22,9 +22,9 @@ export default function ReservationCuisin() {
     message: ''
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState('');
+  const [submitSuccess, setSubmitSuccess] = React.useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,22 +42,22 @@ export default function ReservationCuisin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formValues.firstname.trim()) {
-      setSubmitError(t('reservation_cuisin.error_firstname', 'Veuillez entrer votre nom'));
+      setSubmitError(t('reservation.error_firstname', 'Veuillez entrer votre nom'));
       return;
     }
     if (!formValues.phone.trim()) {
-      setSubmitError(t('reservation_cuisin.error_phone', 'Veuillez entrer votre numéro de téléphone'));
+      setSubmitError(t('reservation.error_phone', 'Veuillez entrer votre numéro de téléphone'));
       return;
     }
     if (!formValues.location.trim()) {
-      setSubmitError(t('reservation_cuisin.error_location', 'Veuillez entrer votre adresse'));
+      setSubmitError(t('reservation.error_location', 'Veuillez entrer votre adresse'));
       return;
     }
     if (selectedTypes.length === 0) {
-      setSubmitError(t('reservation_cuisin.error_types', 'Veuillez sélectionner au moins un type de cuisine'));
+      setSubmitError(t('reservation.error_types', 'Veuillez sélectionner au moins un type de cuisine'));
       return;
     }
 
@@ -106,14 +106,18 @@ export default function ReservationCuisin() {
           details: error.details,
           hint: error.hint
         });
-        setSubmitError(t('reservation_cuisin.error_submit', 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.'));
+        setSubmitError(t('reservation.error', 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.'));
         setIsSubmitting(false);
         return;
       }
 
       console.log('[ReservationCuisin] Reservation submitted successfully:', data);
+
+      // Clear pending contexts
+      sessionStorage.removeItem('cuisin_pending_context');
+
       setSubmitSuccess(true);
-      
+
       // Redirect after 3 seconds
       setTimeout(() => {
         navigate('/menage-et-cuisine');
@@ -132,9 +136,8 @@ export default function ReservationCuisin() {
         <div className="reservation-cuisin-container">
           <div className="reservation-cuisin-success">
             <div className="success-icon">✅</div>
-            <h2>{t('reservation_cuisin.success_title', 'Réservation envoyée avec succès!')}</h2>
-            <p>{t('reservation_cuisin.success_message', 'Votre demande de réservation a été enregistrée. Nous vous contacterons bientôt.')}</p>
-            <p className="redirect-message">{t('reservation_cuisin.redirect_message', 'Redirection en cours...')}</p>
+            <h2>{t('reservation.success', 'Réservation envoyée avec succès!')}</h2>
+            <p>{t('reservation.success_message', 'Votre demande de réservation a été enregistrée. Nous vous contacterons bientôt.')}</p>
           </div>
         </div>
       </main>
@@ -144,16 +147,16 @@ export default function ReservationCuisin() {
   return (
     <main className="reservation-cuisin-page">
       <div className="reservation-cuisin-container">
-        <button 
+        <button
           className="reservation-cuisin-back-button"
           onClick={() => navigate('/cuisin')}
-          title={t('reservation_cuisin.back', 'Retour')}
+          title={t('reservation.back', 'Retour')}
         >
-          ← {t('reservation_cuisin.back', 'Retour')}
+          ← {t('reservation.back', 'Retour')}
         </button>
 
         <div className="reservation-cuisin-header">
-          <h1>{t('reservation_cuisin.title', 'Réservation Cuisine')}</h1>
+          <h1>{t('reservation.title', 'Réservation Cuisine')}</h1>
           {categoryData && (
             <h2>{categoryData.name}</h2>
           )}
@@ -161,7 +164,7 @@ export default function ReservationCuisin() {
 
         {selectedTypes.length > 0 && (
           <div className="selected-types-summary">
-            <h3>{t('reservation_cuisin.selected_types', 'Types sélectionnés:')}</h3>
+            <h3>{t('reservation.selected_types', 'Types sélectionnés:')}</h3>
             <div className="types-list">
               {selectedTypes.map((type, index) => (
                 <div key={type.id || index} className="type-item">
@@ -173,7 +176,7 @@ export default function ReservationCuisin() {
               ))}
             </div>
             <div className="total-price">
-              <strong>{t('reservation_cuisin.total', 'Total:')} {calculateTotalPrice().toFixed(2)} DH</strong>
+              <strong>{t('reservation.total', 'Total:')} {calculateTotalPrice().toFixed(2)} DH</strong>
             </div>
           </div>
         )}
@@ -187,7 +190,7 @@ export default function ReservationCuisin() {
         <form onSubmit={handleSubmit} className="reservation-cuisin-form">
           <div className="form-group">
             <label htmlFor="firstname">
-              {t('reservation_cuisin.firstname', 'Nom complet')} <span className="required">*</span>
+              {t('reservation.firstname', 'Nom complet')} <span className="required">*</span>
             </label>
             <input
               type="text"
@@ -196,13 +199,13 @@ export default function ReservationCuisin() {
               value={formValues.firstname}
               onChange={handleInputChange}
               required
-              placeholder={t('reservation_cuisin.firstname_placeholder', 'Votre nom complet')}
+              placeholder={t('reservation.firstname_placeholder', 'Votre nom complet')}
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="phone">
-              {t('reservation_cuisin.phone', 'Téléphone')} <span className="required">*</span>
+              {t('reservation.phone', 'Téléphone')} <span className="required">*</span>
             </label>
             <input
               type="tel"
@@ -211,13 +214,13 @@ export default function ReservationCuisin() {
               value={formValues.phone}
               onChange={handleInputChange}
               required
-              placeholder={t('reservation_cuisin.phone_placeholder', 'Votre numéro de téléphone')}
+              placeholder={t('reservation.phone_placeholder', 'Votre numéro de téléphone')}
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="email">
-              {t('reservation_cuisin.email', 'Email')} <span className="optional">(optionnel)</span>
+              {t('reservation.email', 'Email')} <span className="optional">(optionnel)</span>
             </label>
             <input
               type="email"
@@ -225,13 +228,13 @@ export default function ReservationCuisin() {
               name="email"
               value={formValues.email}
               onChange={handleInputChange}
-              placeholder={t('reservation_cuisin.email_placeholder', 'Votre adresse email')}
+              placeholder={t('reservation.email_placeholder', 'Votre adresse email')}
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="location">
-              {t('reservation_cuisin.location', 'Adresse')} <span className="required">*</span>
+              {t('reservation.address', 'Adresse')} <span className="required">*</span>
             </label>
             <input
               type="text"
@@ -240,14 +243,14 @@ export default function ReservationCuisin() {
               value={formValues.location}
               onChange={handleInputChange}
               required
-              placeholder={t('reservation_cuisin.location_placeholder', 'Votre adresse complète')}
+              placeholder={t('reservation.address_placeholder', 'Votre adresse complète')}
             />
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="preferred_date">
-                {t('reservation_cuisin.preferred_date', 'Date préférée')}
+                {t('reservation.date', 'Date préférée')}
               </label>
               <input
                 type="date"
@@ -261,7 +264,7 @@ export default function ReservationCuisin() {
 
             <div className="form-group">
               <label htmlFor="preferred_time">
-                {t('reservation_cuisin.preferred_time', 'Heure préférée')}
+                {t('reservation.time', 'Heure préférée')}
               </label>
               <input
                 type="time"
@@ -275,7 +278,7 @@ export default function ReservationCuisin() {
 
           <div className="form-group">
             <label htmlFor="message">
-              {t('reservation_cuisin.message', 'Message')} <span className="optional">(optionnel)</span>
+              {t('reservation.message', 'Message')} <span className="optional">{t('reservation.optional', '(optionnel)')}</span>
             </label>
             <textarea
               id="message"
@@ -283,7 +286,7 @@ export default function ReservationCuisin() {
               value={formValues.message}
               onChange={handleInputChange}
               rows="4"
-              placeholder={t('reservation_cuisin.message_placeholder', 'Informations supplémentaires ou demandes spéciales...')}
+              placeholder={t('reservation.message_placeholder', 'Informations supplémentaires ou demandes spéciales...')}
             />
           </div>
 
@@ -292,9 +295,9 @@ export default function ReservationCuisin() {
             className="reservation-cuisin-submit-button"
             disabled={isSubmitting || selectedTypes.length === 0}
           >
-            {isSubmitting 
-              ? t('reservation_cuisin.submitting', 'Envoi en cours...') 
-              : t('reservation_cuisin.submit', 'Envoyer la réservation')}
+            {isSubmitting
+              ? t('reservation.submitting', 'Envoi en cours...')
+              : t('reservation.submit', 'Envoyer la réservation')}
           </button>
         </form>
       </div>

@@ -134,16 +134,22 @@
 
 .location-input-wrapper input {
   flex: 1;
+  min-width: 0;
+  /* Important for flex items to shrink below content width */
   margin: 0;
+  width: auto !important;
+  /* Prevent it from taking 100% and pushing button out */
 }
 
-.location-btn {
+.reservation-form-container .location-btn {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   border: none;
   border-radius: 10px;
   color: white;
   width: 48px;
   min-width: 48px;
+  flex-shrink: 0;
+  /* Ensure button doesn't shrink */
   height: auto;
   display: flex;
   align-items: center;
@@ -315,34 +321,47 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .reservation-form-container {
-    padding: 20px;
-    margin: 16px;
+    padding: 15px;
+    margin: 10px 5px;
+    width: auto;
+    max-width: 100%;
   }
-  
+
   .reservation-form-header h3 {
     font-size: 18px;
   }
-  
+
   .form-group input,
   .form-group select,
   .form-group textarea {
     padding: 10px 14px;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px;
+    /* Prevent zoom on iOS */
   }
-  
+
   .booking-type-selector {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .booking-type-btn {
     width: 100%;
+    padding: 14px 16px;
+    height: 54px;
+    /* Sufficient height for touch */
   }
-  
+
+  .location-input-wrapper {
+    display: flex;
+    flex-direction: row;
+    /* Ensure it stays a row even on small screens */
+    align-items: stretch;
+  }
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .btn {
     width: 100%;
     padding: 14px 24px;
@@ -351,14 +370,14 @@
 
 @media (max-width: 480px) {
   .reservation-form-container {
-    padding: 16px;
-    margin: 12px;
+    padding: 12px;
+    margin: 8px 4px;
   }
-  
+
   .price-summary {
     padding: 12px;
   }
-  
+
   .price-item,
   .price-total {
     font-size: 13px;

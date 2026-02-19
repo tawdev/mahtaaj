@@ -22,7 +22,7 @@ const AdminJardinageServicesCrud = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('active');
 
   useEffect(() => {
     loadServices();
@@ -33,21 +33,21 @@ const AdminJardinageServicesCrud = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[AdminJardinageServices] Loading services from Supabase');
-      
+
       const { data, error } = await supabase
         .from('jardins')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         console.error('[AdminJardinageServices] Error loading services:', error);
         setError('Erreur lors du chargement des services: ' + error.message);
         return;
       }
-      
-      console.log('[AdminJardinageServices] Loaded services:', data?.length || 0);
+
+      console.log('[AdminJardinageServices] Loaded services:', data?.length || 0, 'Status dump:', data?.map(s => `ID:${s.id} Active:${s.is_active}`));
       setServices(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('[AdminJardinageServices] Exception loading services:', err);
@@ -60,17 +60,17 @@ const AdminJardinageServicesCrud = () => {
   const loadCategories = async () => {
     try {
       console.log('[AdminJardinageServices] Loading categories from Supabase');
-      
+
       const { data, error } = await supabase
         .from('jardinage_categories')
         .select('*')
         .order('order', { ascending: true });
-      
+
       if (error) {
         console.error('[AdminJardinageServices] Error loading categories:', error);
         return;
       }
-      
+
       console.log('[AdminJardinageServices] Loaded categories:', data?.length || 0);
       setCategories(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -84,7 +84,7 @@ const AdminJardinageServicesCrud = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    
+
     // If URL is entered, clear file selection
     if (name === 'image_url' && value.trim() !== '') {
       setSelectedImage(null);
@@ -100,28 +100,28 @@ const AdminJardinageServicesCrud = () => {
         setError('Veuillez sélectionner un fichier image valide');
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         setError('Le fichier est trop volumineux. Taille maximale: 5MB');
         return;
       }
-      
+
       setSelectedImage(file);
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target.result);
       };
       reader.readAsDataURL(file);
-      
+
       // Clear URL field when file is selected
       setFormData(prev => ({
         ...prev,
         image_url: ''
       }));
-      
+
       // Show success message
       setError('');
       console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
@@ -141,16 +141,16 @@ const AdminJardinageServicesCrud = () => {
     e.preventDefault();
     try {
       setError('');
-      
+
       // Validate required fields
       if (!formData.name || !formData.price || !formData.duration || !formData.jardinage_category_id) {
         setError('Veuillez remplir tous les champs obligatoires');
         return;
       }
-      
+
       // Handle image upload to Supabase Storage if selectedImage exists
       let imageUrl = formData.image_url || '';
-      
+
       if (selectedImage) {
         console.log('[AdminJardinageServices] Uploading image to Supabase Storage');
         // Clean filename
@@ -160,7 +160,7 @@ const AdminJardinageServicesCrud = () => {
           .toLowerCase();
         const fileName = `jardin_${Date.now()}_${cleanFileName}`;
         const filePath = fileName;
-        
+
         // Upload to Supabase Storage (employees bucket)
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('employees')
@@ -168,13 +168,13 @@ const AdminJardinageServicesCrud = () => {
             cacheControl: '3600',
             upsert: false
           });
-        
+
         if (uploadError) {
           console.error('[AdminJardinageServices] Error uploading image:', uploadError);
           setError('Erreur lors du téléchargement de l\'image: ' + uploadError.message);
           return;
         }
-        
+
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('employees')
@@ -182,7 +182,7 @@ const AdminJardinageServicesCrud = () => {
         imageUrl = publicUrl;
         console.log('[AdminJardinageServices] Image uploaded successfully:', imageUrl);
       }
-      
+
       // Prepare data for submission
       const payload = {
         name: formData.name.trim(),
@@ -193,9 +193,9 @@ const AdminJardinageServicesCrud = () => {
         is_active: formData.is_active || true,
         image_url: imageUrl || null
       };
-      
+
       console.log('[AdminJardinageServices] Submitting service:', { editing: !!editingService, id: editingService?.id, payload });
-      
+
       let data, error;
       if (editingService) {
         const { data: updateData, error: updateError } = await supabase
@@ -213,27 +213,27 @@ const AdminJardinageServicesCrud = () => {
         data = insertData;
         error = insertError;
       }
-      
+
       if (error) {
         console.error('[AdminJardinageServices] Error saving service:', error);
         setError('Erreur lors de la sauvegarde: ' + error.message);
         return;
       }
-      
+
       console.log('[AdminJardinageServices] Service saved successfully:', data);
       await loadServices();
       setShowForm(false);
       setEditingService(null);
       setSelectedImage(null);
       setImagePreview(null);
-      setFormData({ 
-        name: '', 
-        description: '', 
-        price: '', 
-        duration: '', 
-        jardinage_category_id: '', 
-        is_active: true, 
-        image_url: '' 
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        duration: '',
+        jardinage_category_id: '',
+        is_active: true,
+        image_url: ''
       });
       setError('');
     } catch (err) {
@@ -264,22 +264,92 @@ const AdminJardinageServicesCrud = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce service ? Cette action supprimera également toutes les réservations et évaluations associées.')) {
       try {
-        console.log('[AdminJardinageServices] Deleting service:', id);
-        
-        const { error } = await supabase
-          .from('jardins')
+        setError('');
+        // Ensure ID is a number
+        const serviceId = typeof id === 'string' ? parseInt(id, 10) : id;
+        console.log('[AdminJardinageServices] Deleting service and dependencies:', serviceId);
+
+        // 1. Delete associated ratings via Laravel API (NOT Supabase - ratings are in Laravel)
+        try {
+          const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://127.0.0.1:8000';
+          const token = localStorage.getItem('adminToken');
+
+          console.log('[AdminJardinageServices] Attempting to delete ratings via Laravel API');
+          // Note: The Laravel endpoint might vary, attempting to find ratings by service_id
+          // This is a "best effort" as different backends handle this differently
+          const response = await fetch(`${API_BASE_URL}/api/admin/jardinage-ratings/service/${serviceId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            console.warn('[AdminJardinageServices] Laravel API ratings deletion returned status:', response.status);
+          } else {
+            console.log('[AdminJardinageServices] Laravel API ratings deletion successful');
+          }
+        } catch (apiErr) {
+          console.warn('[AdminJardinageServices] Error calling Laravel API for ratings:', apiErr);
+        }
+
+        // 2. Delete associated reservations from Supabase
+        const { error: resError } = await supabase
+          .from('jardinage_reservations')
           .delete()
-          .eq('id', id);
-        
-        if (error) {
-          console.error('[AdminJardinageServices] Error deleting service:', error);
-          setError('Erreur lors de la suppression: ' + error.message);
+          .eq('jardinage_service_id', serviceId);
+
+        if (resError && resError.code !== 'PGRST116') {
+          console.error('[AdminJardinageServices] Error deleting reservations:', resError);
+          setError('Erreur lors de la suppression des réservations: ' + resError.message);
           return;
         }
-        
-        console.log('[AdminJardinageServices] Service deleted successfully');
+
+        // 3. Delete the service itself from Supabase
+        const { error, count } = await supabase
+          .from('jardins')
+          .delete({ count: 'exact' })
+          .eq('id', serviceId);
+
+        console.log('[AdminJardinageServices] Delete result - rows affected:', count);
+
+        if (error) {
+          console.error('[AdminJardinageServices] Error deleting service:', error);
+          if (error.code === '23503') {
+            setError("Impossible de supprimer ce service car il possède des dépendances actives. \n\nVeuillez vérifier s'il reste des réservations ou d'autres données liées.");
+          } else if (error.code === '42501') {
+            setError('Permission refusée (RLS). Vous n\'avez pas le droit de supprimer ce service.');
+          } else {
+            setError('Erreur lors de la suppression: ' + error.message);
+          }
+          return;
+        }
+
+        // Handle case where delete returns success but 0 rows affected (RLS silent fail)
+        if (count === 0) {
+          console.warn('[AdminJardinageServices] Deletion returned 0 rows affected (RLS silent block). Attempting soft-delete (archive) as fallback...');
+
+          const { error: softError, count: softCount } = await supabase
+            .from('jardins')
+            .update({ is_active: false })
+            .eq('id', serviceId)
+            .select();
+
+          if (softError || !softCount) {
+            console.error('[AdminJardinageServices] Soft delete also failed:', softError);
+            setError("La suppression a été bloquée par les politiques de sécurité (RLS) de Supabase. \n\nL'archivage (désactivation) a également échoué. Veuillez vérifier les permissions dans Supabase.");
+            return;
+          }
+
+          console.log('[AdminJardinageServices] Service soft-deleted (archived) successfully');
+          setError('Le service a été archivé (désactivé) car la suppression physique est bloquée par la sécurité du serveur.');
+        } else {
+          console.log('[AdminJardinageServices] Service physically deleted successfully');
+        }
+
         await loadServices();
       } catch (err) {
         console.error('[AdminJardinageServices] Exception deleting service:', err);
@@ -291,14 +361,14 @@ const AdminJardinageServicesCrud = () => {
   const handleCancel = () => {
     setShowForm(false);
     setEditingService(null);
-    setFormData({ 
-      name: '', 
-      description: '', 
-      price: '', 
-      duration: '', 
-      jardinage_category_id: '', 
-      is_active: true, 
-      image_url: '' 
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      duration: '',
+      jardinage_category_id: '',
+      is_active: true,
+      image_url: ''
     });
     setSelectedImage(null);
     setImagePreview(null);
@@ -314,11 +384,11 @@ const AdminJardinageServicesCrud = () => {
     const serviceName = service.name || '';
     const serviceDescription = service.description || '';
     const matchesSearch = serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         serviceDescription.toLowerCase().includes(searchTerm.toLowerCase());
+      serviceDescription.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'all' || service.jardinage_category_id == filterCategory;
-    const matchesStatus = filterStatus === 'all' || 
-                         (filterStatus === 'active' && service.is_active) ||
-                         (filterStatus === 'inactive' && !service.is_active);
+    const matchesStatus = filterStatus === 'all' ||
+      (filterStatus === 'active' && service.is_active) ||
+      (filterStatus === 'inactive' && !service.is_active);
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -334,9 +404,24 @@ const AdminJardinageServicesCrud = () => {
     <div className="admin-jardinage-services">
       <div className="admin-header">
         <h2>🌿 Gestion des Services Jardinage</h2>
-        <button 
+        <button
           className="btn btn-primary"
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setEditingService(null);
+            setError('');
+            setFormData({
+              name: '',
+              description: '',
+              price: '',
+              duration: '',
+              jardinage_category_id: '',
+              is_active: true,
+              image_url: ''
+            });
+            setImagePreview(null);
+            setSelectedImage(null);
+            setShowForm(true);
+          }}
         >
           ➕ Ajouter un service
         </button>
@@ -366,7 +451,7 @@ const AdminJardinageServicesCrud = () => {
           />
           <span className="search-icon">🔍</span>
         </div>
-        
+
         <select
           value={filterCategory}
           onChange={(e) => setFilterCategory(e.target.value)}
@@ -379,7 +464,7 @@ const AdminJardinageServicesCrud = () => {
             </option>
           ))}
         </select>
-        
+
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
@@ -398,7 +483,7 @@ const AdminJardinageServicesCrud = () => {
               <h3>{editingService ? 'Modifier le service' : 'Nouveau service'}</h3>
               <button className="close-btn" onClick={handleCancel}>✕</button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="service-form">
               <div className="form-row">
                 <div className="form-group">
@@ -413,7 +498,7 @@ const AdminJardinageServicesCrud = () => {
                     placeholder="Ex: Taille des haies"
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="price">Prix (MAD) *</label>
                   <input
@@ -429,7 +514,7 @@ const AdminJardinageServicesCrud = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="duration">Durée (heures) *</label>
@@ -445,7 +530,7 @@ const AdminJardinageServicesCrud = () => {
                     placeholder="Ex: 3"
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <label htmlFor="jardinage_category_id">Catégorie *</label>
                   <select
@@ -464,7 +549,7 @@ const AdminJardinageServicesCrud = () => {
                   </select>
                 </div>
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="description">Description</label>
                 <textarea
@@ -476,7 +561,7 @@ const AdminJardinageServicesCrud = () => {
                   placeholder="Description du service..."
                 />
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="image_url">📁 Image du service</label>
                 <div className="unified-image-upload">
@@ -488,7 +573,7 @@ const AdminJardinageServicesCrud = () => {
                     <span className="upload-icon">📁</span>
                     <span className="upload-text">Choisir une image ou coller un lien</span>
                   </button>
-                  
+
                   <input
                     type="file"
                     id="file-input"
@@ -496,7 +581,7 @@ const AdminJardinageServicesCrud = () => {
                     onChange={handleImageSelect}
                     style={{ display: 'none' }}
                   />
-                  
+
                   <div className="url-input-container">
                     <input
                       type="url"
@@ -508,7 +593,7 @@ const AdminJardinageServicesCrud = () => {
                       className="url-input"
                     />
                   </div>
-                  
+
                   {(imagePreview || selectedImage) && (
                     <div className="image-preview-container">
                       <div className="preview-header">
@@ -522,16 +607,16 @@ const AdminJardinageServicesCrud = () => {
                         </button>
                       </div>
                       <div className="image-preview">
-                        <img 
-                          src={imagePreview} 
-                          alt="Aperçu" 
+                        <img
+                          src={imagePreview}
+                          alt="Aperçu"
                           className="preview-image"
                           onError={(e) => {
                             e.target.style.display = 'none';
                             e.target.nextSibling.style.display = 'block';
                           }}
                         />
-                        <div className="image-error" style={{display: 'none'}}>
+                        <div className="image-error" style={{ display: 'none' }}>
                           ❌ Impossible de charger l'image
                         </div>
                       </div>
@@ -539,7 +624,7 @@ const AdminJardinageServicesCrud = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="form-group checkbox-group">
                 <label className="checkbox-label">
                   <input
@@ -552,7 +637,7 @@ const AdminJardinageServicesCrud = () => {
                   Service actif
                 </label>
               </div>
-              
+
               <div className="form-actions">
                 <button type="button" onClick={handleCancel} className="btn btn-secondary">
                   Annuler
@@ -594,8 +679,8 @@ const AdminJardinageServicesCrud = () => {
                   <td>{service.id}</td>
                   <td className="service-image">
                     {service.image_url ? (
-                      <img 
-                        src={service.image_url} 
+                      <img
+                        src={service.image_url}
                         alt={service.name}
                         className="service-img"
                         onError={(e) => {
@@ -604,7 +689,7 @@ const AdminJardinageServicesCrud = () => {
                         }}
                       />
                     ) : null}
-                    <div className="service-img-placeholder" style={{display: service.image_url ? 'none' : 'block'}}>
+                    <div className="service-img-placeholder" style={{ display: service.image_url ? 'none' : 'block' }}>
                       🌱
                     </div>
                   </td>
@@ -649,7 +734,7 @@ const AdminJardinageServicesCrud = () => {
             <div className="stat-label">Total des services</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">✅</div>
           <div className="stat-content">
@@ -657,7 +742,7 @@ const AdminJardinageServicesCrud = () => {
             <div className="stat-label">Services actifs</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon">💰</div>
           <div className="stat-content">

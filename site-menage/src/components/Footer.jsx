@@ -33,10 +33,10 @@ export default function Footer() {
           <h3 className="footer-title">{t('footer.links_title')}</h3>
           <ul className="footer-links">
             <li><Link to="/">{t('nav.home')}</Link></li>
-            <li><Link to="/galerie">{t('nav.gallery')}</Link></li>
+            <li><Link to="/gallery">{t('nav.gallery')}</Link></li>
             <li><Link to="/shop">{t('nav.shop')}</Link></li>
             <li><Link to="/blog">{t('nav.blog')}</Link></li>
-            <li><Link to="/Support">{t('nav.info')}</Link></li>
+            <li><Link to="/support">{t('nav.info')}</Link></li>
           </ul>
         </div>
 
@@ -44,8 +44,8 @@ export default function Footer() {
         <div className="footer-column">
           <h3 className="footer-title">{t('footer.services_title')}</h3>
           <ul className="footer-links">
-            <li><Link to="/Services">{t('nav.house_keeping')}</Link></li>
-            <li><Link to="/Equipe-Securite">{t('nav.security')}</Link></li>
+            <li><Link to="/services">{t('nav.house_keeping')}</Link></li>
+            <li><Link to="/security">{t('nav.security')}</Link></li>
             <li><Link to="/bebe-setting">{t('nav.baby_setting')}</Link></li>
             <li><Link to="/jardinage">{t('nav.gardening')}</Link></li>
             <li><Link to="/hand-workers">{t('nav.hand_workers')}</Link></li>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -9,7 +9,7 @@ export default function HandWorkerAppointment() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const categoryId = searchParams.get('category');
-  
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -17,7 +17,33 @@ export default function HandWorkerAppointment() {
     date: '',
     duration: 1
   });
-  
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const fetchUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        console.log('[HandWorkerAppointment] User found, autofilling:', user);
+
+        const fullName = user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim();
+
+        setFormData(prev => ({
+          ...prev,
+          name: fullName || prev.name,
+          email: user.email || prev.email,
+          phone: user.user_metadata?.phone || prev.phone,
+        }));
+      }
+    } catch (err) {
+      console.error('Error fetching user for autofill:', err);
+    }
+  };
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -28,7 +54,7 @@ export default function HandWorkerAppointment() {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (error) {
       setError('');
@@ -37,18 +63,18 @@ export default function HandWorkerAppointment() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     setSubmitting(true);
     setError('');
 
     try {
       console.log('[HandWorkerAppointment] Starting submission...');
       console.log('[HandWorkerAppointment] Form data:', formData);
-      
+
       // Get user ID from Supabase session if available
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id || null;
-      
+
       // Prepare appointment data
       const appointmentData = {
         user_id: userId,
@@ -61,24 +87,24 @@ export default function HandWorkerAppointment() {
         status: 'pending',
         created_at: new Date().toISOString()
       };
-      
+
       console.log('[HandWorkerAppointment] Appointment data to insert:', appointmentData);
-      
+
       const { data, error: insertError } = await supabase
         .from('hand_worker_appointments')
         .insert(appointmentData)
         .select()
         .single();
-      
+
       if (insertError) {
         console.error('[HandWorkerAppointment] ❌ Error submitting appointment:', insertError);
         const errorMessage = insertError.message || insertError.details || t('hand_worker_appointment.submission_error', 'Erreur lors de la soumission. Veuillez réessayer.');
         setError(errorMessage);
         return;
       }
-      
+
       console.log('[HandWorkerAppointment] ✅ Appointment submitted successfully:', data);
-      
+
       setSuccess(true);
       // Reset form
       setFormData({
@@ -107,7 +133,7 @@ export default function HandWorkerAppointment() {
             </div>
             <h2>{t('hand_worker_appointment.success_title', 'Rendez-vous demandé avec succès!')}</h2>
             <p>{t('hand_worker_appointment.success_message', 'Votre demande de rendez-vous a été soumise. Nous vous contacterons bientôt pour confirmer les détails.')}</p>
-            <button 
+            <button
               className="back-to-home-button"
               onClick={() => {
                 // Navigate back to category details page if categoryId exists, otherwise to main page
@@ -140,9 +166,9 @@ export default function HandWorkerAppointment() {
             }
           }}
           className="back-button-top"
-          style={{ 
-            background: 'none', 
-            border: 'none', 
+          style={{
+            background: 'none',
+            border: 'none',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -173,7 +199,7 @@ export default function HandWorkerAppointment() {
         <form onSubmit={handleSubmit} className="appointment-form">
           <div className="form-section">
             <h3 className="section-title">{t('hand_worker_appointment.personal_info', 'Informations personnelles')}</h3>
-            
+
             <div className="form-group">
               <label className="form-label">{t('hand_worker_appointment.name', 'Nom complet')} *</label>
               <input
@@ -216,7 +242,7 @@ export default function HandWorkerAppointment() {
 
           <div className="form-section">
             <h3 className="section-title">{t('hand_worker_appointment.appointment_details', 'Détails du rendez-vous')}</h3>
-            
+
             <div className="form-group">
               <label className="form-label">{t('hand_worker_appointment.date', 'Date')} *</label>
               <input
@@ -247,8 +273,8 @@ export default function HandWorkerAppointment() {
           </div>
 
           <div className="form-actions">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-button"
               disabled={submitting}
             >

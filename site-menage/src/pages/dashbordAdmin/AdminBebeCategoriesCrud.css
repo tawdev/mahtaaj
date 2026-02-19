@@ -316,7 +316,7 @@
   color: #1e293b;
 }
 
-.category-description {
+.categories-table .category-description {
   color: #64748b;
   font-size: 14px;
   max-width: 200px;
@@ -414,43 +414,43 @@
   .admin-bebe-categories {
     padding: 16px;
   }
-  
+
   .admin-header {
     flex-direction: column;
     gap: 16px;
     text-align: center;
   }
-  
+
   .admin-header h2 {
     font-size: 20px;
   }
-  
+
   .filters-section {
     flex-direction: column;
   }
-  
+
   .categories-table-container {
     overflow-x: auto;
   }
-  
+
   .categories-table {
     min-width: 600px;
   }
-  
+
   .form-container {
     width: 95%;
     padding: 20px;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .btn {
     width: 100%;
     justify-content: center;
   }
-  
+
   .stats-section {
     grid-template-columns: 1fr;
   }
@@ -460,27 +460,27 @@
   .admin-bebe-categories {
     padding: 12px;
   }
-  
+
   .admin-header {
     padding: 16px;
   }
-  
+
   .categories-table th,
   .categories-table td {
     padding: 12px 8px;
     font-size: 14px;
   }
-  
+
   .stat-card {
     padding: 16px;
   }
-  
+
   .stat-icon {
     font-size: 24px;
     width: 48px;
     height: 48px;
   }
-  
+
   .stat-number {
     font-size: 20px;
   }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import './RatingSection.css';
 
 const RatingSection = ({ serviceId, serviceType }) => {
@@ -10,6 +11,8 @@ const RatingSection = ({ serviceId, serviceType }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUserRated, setHasUserRated] = useState(false);
   const [userRating, setUserRating] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [formData, setFormData] = useState({
     rating: 5,
     comment: ''
@@ -17,19 +20,42 @@ const RatingSection = ({ serviceId, serviceType }) => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
+    checkAuthentication();
     loadRatings();
-    checkUserRating();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceId]);
 
+  useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      checkUserRating();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, currentUser, serviceId]);
+
+  const checkAuthentication = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+    }
+  };
+
   const checkUserRating = async () => {
     try {
-      const userId = localStorage.getItem('userId');
+      if (!currentUser) {
+        setHasUserRated(false);
+        setUserRating(null);
+        return;
+      }
 
-      const endpoint = serviceType === 'bebe' 
+      const endpoint = serviceType === 'bebe'
         ? '/api/bebe/rating/check'
         : '/api/jardinage/rating/check';
-      
+
       const response = await fetch(`http://localhost:8000${endpoint}`, {
         method: 'POST',
         headers: {
@@ -37,13 +63,13 @@ const RatingSection = ({ serviceId, serviceType }) => {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          user_id: userId ? parseInt(userId) : null,
+          user_id: currentUser.id,
           [`${serviceType === 'bebe' ? 'bebe_setting_id' : 'jardinage_id'}`]: serviceId
         })
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setHasUserRated(data.has_rated);
         setUserRating(data.rating);
@@ -56,13 +82,13 @@ const RatingSection = ({ serviceId, serviceType }) => {
   const loadRatings = async () => {
     try {
       setIsLoading(true);
-      const endpoint = serviceType === 'bebe' 
+      const endpoint = serviceType === 'bebe'
         ? `/api/bebe/ratings/service/${serviceId}`
         : `/api/jardinage/ratings/service/${serviceId}`;
-      
+
       const response = await fetch(`http://localhost:8000${endpoint}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setRatings(data.data.ratings || []);
         setAverageRating(data.data.average_rating || 0);
@@ -81,7 +107,7 @@ const RatingSection = ({ serviceId, serviceType }) => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -100,37 +126,44 @@ const RatingSection = ({ serviceId, serviceType }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (formData.rating < 1 || formData.rating > 5) {
       newErrors.rating = 'Veuillez sélectionner une note';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
-      const endpoint = serviceType === 'bebe' 
-        ? '/api/bebe/rating' 
+      if (!isAuthenticated || !currentUser) {
+        setErrors({ general: 'Vous devez être connecté pour laisser un avis.' });
+        if (window.showToast) {
+          window.showToast('Vous devez être connecté pour laisser un avis.', 'error');
+        }
+        return;
+      }
+
+      const endpoint = serviceType === 'bebe'
+        ? '/api/bebe/rating'
         : '/api/jardinage/rating';
-      
-      const userId = localStorage.getItem('userId');
+
       const payload = {
         [`${serviceType === 'bebe' ? 'bebe_setting_id' : 'jardinage_id'}`]: serviceId,
-        user_id: userId ? parseInt(userId) : null,
+        user_id: currentUser.id,
         ...formData,
         rating: parseInt(formData.rating)
       };
-      
+
       const response = await fetch(`http://localhost:8000${endpoint}`, {
         method: 'POST',
         headers: {
@@ -139,9 +172,9 @@ const RatingSection = ({ serviceId, serviceType }) => {
         },
         body: JSON.stringify(payload)
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         // Reload ratings to show the new one
         await loadRatings();
@@ -152,7 +185,7 @@ const RatingSection = ({ serviceId, serviceType }) => {
           comment: ''
         });
         setErrors({});
-        
+
         // Show success toast
         if (window.showToast) {
           window.showToast('Évaluation ajoutée avec succès !', 'success');
@@ -259,12 +292,22 @@ const RatingSection = ({ serviceId, serviceType }) => {
       )}
 
       <div className="rating-form-section">
-        {hasUserRated ? (
+        {!isAuthenticated ? (
+          <div className="user-not-authenticated">
+            <div className="not-authenticated-content">
+              <span className="not-authenticated-icon">🔒</span>
+              <div className="not-authenticated-text">
+                <p className="not-authenticated-title">Vous devez être connecté pour laisser un avis</p>
+                <p className="not-authenticated-message">Connectez-vous pour partager votre expérience avec notre service.</p>
+              </div>
+            </div>
+          </div>
+        ) : hasUserRated ? (
           <div className="user-already-rated">
             <div className="already-rated-content">
               <span className="already-rated-icon">✅</span>
               <div className="already-rated-text">
-                <p className="already-rated-title">Vous avez déjà évalué ce produit</p>
+                <p className="already-rated-title">Vous avez déjà donné votre avis. Merci de votre contribution !</p>
                 {userRating && (
                   <div className="user-rating-display">
                     <span className="user-rating-stars">
@@ -289,8 +332,8 @@ const RatingSection = ({ serviceId, serviceType }) => {
           <div className="rating-form-container">
             <div className="rating-form-header">
               <h4>Votre avis compte !</h4>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="close-btn"
                 onClick={() => setShowForm(false)}
                 aria-label="Fermer le formulaire"
@@ -298,14 +341,14 @@ const RatingSection = ({ serviceId, serviceType }) => {
                 ✕
               </button>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="rating-form">
               {errors.general && (
                 <div className="error-message general-error">
                   {errors.general}
                 </div>
               )}
-              
+
               <div className="form-group">
                 <label>Votre note *</label>
                 <div className="rating-input">
@@ -322,7 +365,7 @@ const RatingSection = ({ serviceId, serviceType }) => {
                   <span className="error-text">{errors.rating}</span>
                 )}
               </div>
-              
+
               <div className="form-group">
                 <label htmlFor="comment">Votre commentaire (optionnel)</label>
                 <textarea
@@ -335,7 +378,7 @@ const RatingSection = ({ serviceId, serviceType }) => {
                   maxLength="500"
                 />
               </div>
-              
+
               <div className="form-actions">
                 <button
                   type="button"

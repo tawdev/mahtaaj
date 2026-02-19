@@ -1,32 +1,37 @@
-/* Admin HandWorker Employees Styles */
+/* Admin HandWorker Employees Styles - Premium White/Blue Theme */
 .handworker-employees-page {
   padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* Header */
 .handworker-employees-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #fef3e2 0%, #fed7aa 100%);
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .handworker-employees-header h1 {
   margin: 0;
-  color: #ea580c;
+  color: #0f172a;
   font-size: 28px;
   font-weight: 700;
   display: flex;
   align-items: center;
   gap: 12px;
+  background: transparent;
 }
 
+/* Removed the hammer emoji pseudo-element to look cleaner, 
+   or we can keep it but make it subtle. 
+   Let's remove it for a cleaner look as requested "don't like this style" */
 .handworker-employees-header h1::before {
-  content: '🔨';
-  font-size: 32px;
+  content: none;
 }
 
 .handworker-employees-actions {
@@ -35,311 +40,467 @@
   align-items: center;
 }
 
+/* Filter Dropdown */
 .handworker-employees-filter {
-  padding: 12px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   background: white;
-  color: #374151;
+  color: #1e293b;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 140px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .handworker-employees-filter:focus {
   outline: none;
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Refresh Button */
 .handworker-employees-refresh-btn {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 10px;
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  background: white;
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .handworker-employees-refresh-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
 }
 
-.handworker-employees-refresh-btn:active {
-  transform: translateY(0);
-}
-
-.handworker-employees-alert {
-  padding: 16px 20px;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.handworker-employees-alert.error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #dc2626;
-}
-
-.handworker-employees-loading {
-  text-align: center;
-  padding: 60px 20px;
-  color: #64748b;
-  font-size: 16px;
-  font-weight: 500;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
+/* Table Wrapper */
 .handworker-employees-table-wrapper {
   background: white;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e2e8f0;
   overflow-x: auto;
 }
 
 .handworker-employees-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 1000px;
 }
 
 .handworker-employees-table thead {
-  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  background: #f8fafc;
 }
 
 .handworker-employees-table th {
-  padding: 18px 20px;
+  padding: 16px 24px;
   text-align: left;
-  font-weight: 700;
-  font-size: 14px;
-  color: #ea580c;
-  border-bottom: 2px solid #fdba74;
+  font-weight: 600;
+  font-size: 12px;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .handworker-employees-table td {
-  padding: 18px 20px;
+  padding: 16px 24px;
   border-bottom: 1px solid #f1f5f9;
-  color: #374151;
+  color: #1e293b;
   font-size: 14px;
   vertical-align: middle;
 }
 
-.handworker-employees-table tbody tr {
-  transition: all 0.2s ease;
-}
-
 .handworker-employees-table tbody tr:hover {
-  background: #f9fafb;
-  transform: scale(1.001);
+  background: #f8fafc;
 }
 
 .handworker-employees-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.handworker-employees-delete-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
-}
-
-.handworker-employees-delete-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.handworker-employees-delete-btn:active {
-  transform: translateY(0);
-}
-
-.handworker-employees-approve-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-}
-
-.handworker-employees-approve-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.handworker-employees-approve-btn:active {
-  transform: translateY(0);
-}
-
-.handworker-employees-reject-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
-}
-
-.handworker-employees-reject-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-}
-
-.handworker-employees-reject-btn:active {
-  transform: translateY(0);
-}
-
-.handworker-employees-empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: #9ca3af;
-  font-style: italic;
-  font-size: 16px;
-}
-
-.handworker-employees-name {
-  font-weight: 600;
-  color: #1e293b;
-}
-
+/* Links */
 .handworker-employees-email {
-  color: #3b82f6;
+  color: #2563eb;
   text-decoration: none;
+  font-weight: 500;
 }
 
 .handworker-employees-email:hover {
   text-decoration: underline;
+  color: #1d4ed8;
 }
 
+/* Status Badges */
 .handworker-employees-status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
 }
 
 .handworker-employees-status.pending {
-  background: rgba(245, 158, 11, 0.1);
-  color: #d97706;
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #ffedd5;
 }
 
 .handworker-employees-status.approved {
-  background: rgba(16, 185, 129, 0.1);
-  color: #059669;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #dcfce7;
 }
 
 .handworker-employees-status.rejected {
-  background: rgba(239, 68, 68, 0.1);
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fee2e2;
+}
+
+/* Action Buttons in Table */
+.handworker-view-btn,
+.handworker-employees-approve-btn,
+.handworker-employees-reject-btn,
+.handworker-employees-delete-btn {
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* View Button */
+.handworker-view-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+}
+
+.handworker-view-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+/* Approve Button */
+.handworker-employees-approve-btn {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  box-shadow: none;
+}
+
+.handworker-employees-approve-btn:hover {
+  background: #bbf7d0;
+}
+
+/* Reject Button */
+.handworker-employees-reject-btn {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  box-shadow: none;
+}
+
+.handworker-employees-reject-btn:hover {
+  background: #fecaca;
+}
+
+/* Delete Button */
+.handworker-employees-delete-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #ef4444;
+}
+
+.handworker-employees-delete-btn:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
   color: #dc2626;
 }
 
-/* Responsive Design */
+/* Alerts and Loading */
+.handworker-employees-alert.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.handworker-employees-loading {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.handworker-employees-empty {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* Modal Styles */
+.handworker-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.4);
+  /* Darker, simpler dim */
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.handworker-details-modal {
+  background: white;
+  width: 100%;
+  max-width: 700px;
+  border-radius: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.handworker-details-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+  border-radius: 24px 24px 0 0;
+}
+
+.handworker-details-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #0f172a;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.handworker-details-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.handworker-details-close-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.handworker-details-content {
+  padding: 32px;
+}
+
+.handworker-profile-header {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  align-items: center;
+}
+
+.handworker-profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  /* Circle looks more modern for profiles */
+  object-fit: cover;
+  border: 4px solid #f8fafc;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  background: #f1f5f9;
+}
+
+.handworker-profile-info {
+  flex: 1;
+}
+
+.handworker-profile-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.handworker-profile-category {
+  display: inline-block;
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  border: 1px solid #dbeafe;
+}
+
+.handworker-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.handworker-info-item {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.handworker-info-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.handworker-info-value {
+  font-size: 15px;
+  color: #0f172a;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.handworker-bio-section {
+  background: #f8fafc;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+}
+
+.handworker-bio-section h3 {
+  font-size: 14px;
+  color: #334155;
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.handworker-bio-text {
+  color: #475569;
+  line-height: 1.7;
+  font-size: 15px;
+  white-space: pre-wrap;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media Queries */
 @media (max-width: 1024px) {
   .handworker-employees-table {
     min-width: 900px;
+    /* Force horizontal scroll on smaller screens */
   }
 }
 
 @media (max-width: 768px) {
-  .handworker-employees-page {
-    padding: 16px;
-  }
-  
   .handworker-employees-header {
     flex-direction: column;
     gap: 16px;
-    text-align: center;
-    padding: 16px 20px;
+    align-items: stretch;
   }
-  
-  .handworker-employees-header h1 {
-    font-size: 24px;
-  }
-  
+
   .handworker-employees-actions {
-    width: 100%;
     flex-direction: column;
   }
-  
+
   .handworker-employees-filter,
   .handworker-employees-refresh-btn {
     width: 100%;
+    justify-content: center;
   }
-  
-  .handworker-employees-table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .handworker-employees-table th,
-  .handworker-employees-table td {
-    padding: 14px 12px;
-    font-size: 13px;
-  }
-}
 
-@media (max-width: 480px) {
-  .handworker-employees-page {
-    padding: 12px;
-  }
-  
-  .handworker-employees-header {
-    padding: 12px 16px;
-  }
-  
-  .handworker-employees-header h1 {
-    font-size: 20px;
+  .handworker-profile-header {
     flex-direction: column;
-    gap: 8px;
+    text-align: center;
   }
-  
-  .handworker-employees-table th,
-  .handworker-employees-table td {
-    padding: 12px 8px;
-    font-size: 12px;
-  }
-  
-  .handworker-employees-delete-btn,
-  .handworker-employees-approve-btn,
-  .handworker-employees-reject-btn {
-    padding: 6px 12px;
-    font-size: 11px;
+
+  .handworker-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
-

@@ -1,0 +1,156 @@
+.bebe-reservation-page {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    padding: 40px 20px;
+}
+
+.bebe-reservation-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.back-link-top-container {
+    margin-bottom: 30px;
+}
+
+.back-link-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.back-link-top:hover {
+    color: #1e293b;
+    transform: translateX(-4px);
+}
+
+[dir="rtl"] .back-link-top:hover {
+    transform: translateX(4px);
+}
+
+.reservation-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.reservation-header h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    font-weight: 800;
+    margin: 0;
+}
+
+.category-summary {
+    background: #f1f5f9;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.category-summary h2 {
+    font-size: 1.25rem;
+    color: #334155;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.category-summary p {
+    color: #64748b;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 0;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #e2e8f0;
+    border-bottom-color: #3b82f6;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.error-container {
+    text-align: center;
+    padding: 40px 20px;
+    background: #fff1f2;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.error-message {
+    color: #e11d48;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.retry-button {
+    background: #e11d48;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.retry-button:hover {
+    background: #be123c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .bebe-reservation-page {
+        padding: 20px 10px;
+    }
+
+    .bebe-reservation-container {
+        padding: 15px;
+        border-radius: 12px;
+    }
+
+    .reservation-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .category-summary {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .category-summary h2 {
+        font-size: 1.1rem;
+    }
+
+    .reservation-form-wrapper {
+        padding: 0;
+    }
+}

@@ -41,7 +41,7 @@ export default function Shop() {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const { data: prodData } = await supabase.from('products').select('*');
+      const { data: prodData } = await supabase.from('products').select('*, category:categories(*)');
       const { data: catData } = await supabase.from('categories').select('*');
       setProducts(prodData || []);
       setCategories(catData || []);
@@ -52,10 +52,18 @@ export default function Shop() {
     }
   };
 
+  const getLocalizedText = (obj, field) => {
+    if (!obj) return '';
+    const lang = i18n.language || 'fr';
+    return obj[`${field}_${lang}`] || obj[field] || obj[`${field}_fr`] || '';
+  };
+
   const filteredProducts = products.filter(p => {
     const matchesCategory = !selectedCategory || p.category_id === selectedCategory;
-    const matchesSearch = p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const name = getLocalizedText(p, 'name');
+    const description = getLocalizedText(p, 'description');
+    const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -69,7 +77,7 @@ export default function Shop() {
       <div className="shop-hero-section">
         <div className="shop-container">
           <div className="shop-header-content">
-            <span className="shop-premium-tag">{t('shop_page.premium_tag', 'MAHTAAJ EXCLUSIVE')}</span>
+
             <h1 className="shop-main-title">{t('shop_page.title', 'Our Shop')}</h1>
             <p className="shop-hero-subtitle">
               {t('shop_page.subtitle', 'Professional grade cleaning solutions for a pristine environment.')}
@@ -108,7 +116,7 @@ export default function Shop() {
                   className={`filter-chip ${selectedCategory === cat.id ? 'active' : ''}`}
                   onClick={() => setSelectedCategory(cat.id)}
                 >
-                  {cat.name}
+                  {getLocalizedText(cat, 'name')}
                 </button>
               ))}
             </div>
@@ -140,15 +148,17 @@ export default function Shop() {
 
                 <div className="product-info-box">
                   <div className="product-meta-top">
-                    <span className="product-cat-name">{product.category_name || 'Cleaning'}</span>
+                    <span className="product-cat-name">
+                      {getLocalizedText(categories.find(c => c.id === product.category_id), 'name') || product.category_name || 'Cleaning'}
+                    </span>
                     <div className="product-rating">
                       <LuStar fill="#fbbf24" stroke="#fbbf24" size={14} />
                       <span>{product.rating || '4.5'}</span>
                     </div>
                   </div>
 
-                  <h3 className="product-item-name">{product.name}</h3>
-                  <p className="product-item-desc">{product.description}</p>
+                  <h3 className="product-item-name">{getLocalizedText(product, 'name')}</h3>
+                  <p className="product-item-desc">{getLocalizedText(product, 'description')}</p>
 
                   <div className="product-footer-actions">
                     <span className="product-item-price">{product.price} <small>MAD</small></span>

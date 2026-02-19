@@ -16,29 +16,30 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
 
   const load = async () => {
     try {
-      setLoading(true); 
+      setLoading(true);
       setError('');
-      
+
       console.log('[AdminSecurityRoles] Loading security roles from Supabase...');
-      
+
       const { data, error } = await supabase
         .from('security_roles')
         .select('*')
+        .eq('is_active', true)
         .order('order', { ascending: true });
-      
+
       if (error) {
         console.error('[AdminSecurityRoles] Error loading roles:', error);
         setError(`Erreur lors du chargement: ${error.message}`);
         return;
       }
-      
+
       console.log('[AdminSecurityRoles] Loaded roles:', data?.length || 0);
       setRoles(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error('[AdminSecurityRoles] Exception loading roles:', e);
       setError(`Erreur: ${e.message || 'Impossible de charger les rôles'}`);
-    } finally { 
-      setLoading(false); 
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,7 +49,7 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
   const uploadImage = async (file) => {
     try {
       setUploadingImage(true);
-      
+
       const cleanFileName = file.name
         .replace(/[^a-zA-Z0-9.-]/g, '_')
         .replace(/_{2,}/g, '_')
@@ -86,7 +87,7 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
         setImageFile(null);
         return publicUrl;
       }
-      
+
       throw new Error('Aucune URL d\'image retournée');
     } catch (err) {
       console.error('[AdminSecurityRoles] Erreur lors du téléchargement de l\'image:', err);
@@ -172,7 +173,7 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
     e.preventDefault();
     try {
       setError('');
-      
+
       // If a new file is selected but hasn't been uploaded yet, upload it first
       let imageUrl = form.image;
       if (imageFile && !uploadingImage) {
@@ -181,9 +182,9 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
           return; // Stop save if upload failed
         }
       }
-      
+
       console.log('[AdminSecurityRoles] Saving role:', { editing: !!editing, form, imageUrl });
-      
+
       // Build roleData with all fields including image
       const roleData = {
         name: form.name || null,
@@ -197,7 +198,7 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
         is_active: form.is_active,
         order: editing?.order || 0
       };
-      
+
       // Always include image field - use the uploaded URL or existing form image
       // Make sure we don't use null if we have a valid URL
       if (imageUrl && imageUrl.trim() !== '') {
@@ -207,52 +208,52 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
       } else {
         roleData.image = null;
       }
-      
+
       console.log('[AdminSecurityRoles] Role data to save:', roleData);
       console.log('[AdminSecurityRoles] Image value in roleData:', roleData.image);
       console.log('[AdminSecurityRoles] imageUrl value:', imageUrl);
       console.log('[AdminSecurityRoles] form.image value:', form.image);
-      
+
       // Update or insert without select first (to avoid empty array issues)
       if (editing) {
         // Update existing
         console.log('[AdminSecurityRoles] Updating role ID:', editing.id);
         console.log('[AdminSecurityRoles] Full roleData being sent:', JSON.stringify(roleData, null, 2));
-        
+
         // Try updating with explicit image field
         const updatePayload = { ...roleData };
         // Ensure image is explicitly set (not undefined)
         if (updatePayload.image === undefined) {
           updatePayload.image = roleData.image;
         }
-        
+
         const { error: updateError } = await supabase
           .from('security_roles')
           .update(updatePayload)
           .eq('id', editing.id);
-        
+
         if (updateError) {
           console.error('[AdminSecurityRoles] Update error:', updateError);
           console.error('[AdminSecurityRoles] Update error details:', JSON.stringify(updateError, null, 2));
           throw updateError;
         }
-        
+
         console.log('[AdminSecurityRoles] Update successful');
-        
+
         // Verify the update by fetching the updated record
         const { data: verifyData, error: verifyError } = await supabase
           .from('security_roles')
           .select('*')
           .eq('id', editing.id)
           .single();
-        
+
         if (verifyError) {
           console.warn('[AdminSecurityRoles] Could not verify update, but update succeeded:', verifyError);
         } else {
           console.log('[AdminSecurityRoles] Verified update, role data:', verifyData);
           console.log('[AdminSecurityRoles] All columns in verifyData:', Object.keys(verifyData || {}));
           console.log('[AdminSecurityRoles] Image URL we tried to save:', roleData.image);
-          
+
           // Check if image column exists and was saved
           if (verifyData && typeof verifyData === 'object') {
             if ('image' in verifyData) {
@@ -277,7 +278,7 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
           .from('security_roles')
           .insert(roleData)
           .select();
-        
+
         if (insertError) {
           console.error('[AdminSecurityRoles] Insert error:', insertError);
           // If select fails, try without select
@@ -286,7 +287,7 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
             const { error: insertError2 } = await supabase
               .from('security_roles')
               .insert(roleData);
-            
+
             if (insertError2) {
               console.error('[AdminSecurityRoles] Insert without select also failed:', insertError2);
               throw insertError2;
@@ -299,9 +300,9 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
           console.log('[AdminSecurityRoles] Insert successful, data:', insertData);
         }
       }
-      
+
       console.log('[AdminSecurityRoles] Save operation completed successfully');
-      
+
       await load();
       setShowForm(false);
       setEditing(null);
@@ -310,7 +311,7 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
     } catch (e2) {
       console.error('[AdminSecurityRoles] Error saving role:', e2);
       const errorMessage = e2.message || e2.code || String(e2) || 'Erreur lors de la sauvegarde';
-      
+
       // Check if it's a column error (image column might not exist)
       if (errorMessage.includes('column') && (errorMessage.includes('image') || errorMessage.includes('does not exist'))) {
         setError('❌ La colonne "image" n\'existe pas dans la table security_roles. Veuillez exécuter le script SQL add-image-to-security-roles.sql dans Supabase SQL Editor.');
@@ -324,22 +325,22 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
 
   const removeItem = async (role) => {
     if (!window.confirm('Supprimer ce rôle ?')) return;
-    
+
     try {
       console.log('[AdminSecurityRoles] Deleting role:', role.id);
-      
+
       const { error } = await supabase
         .from('security_roles')
-        .delete()
+        .update({ is_active: false })
         .eq('id', role.id);
-      
+
       if (error) {
-        console.error('[AdminSecurityRoles] Delete error:', error);
+        console.error('[AdminSecurityRoles] Soft delete error:', error);
         setError(`Erreur lors de la suppression: ${error.message}`);
         return;
       }
-      
-      console.log('[AdminSecurityRoles] Delete successful');
+
+      console.log('[AdminSecurityRoles] Soft delete successful');
       await load();
     } catch (e) {
       console.error('[AdminSecurityRoles] Exception during delete:', e);
@@ -351,15 +352,15 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
     <section className="admin-card">
       <div className="admin-toolbar">
         <h2>Rôles Sécurité</h2>
-        <div style={{display:'flex',gap:8}}>
-          <button className="admin-crud-add-button" onClick={load} disabled={loading}>{loading? 'Chargement…' : 'Actualiser'}</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="admin-crud-add-button" onClick={load} disabled={loading}>{loading ? 'Chargement…' : 'Actualiser'}</button>
           <button className="admin-crud-add-button" onClick={openCreate}>+ Nouveau</button>
         </div>
       </div>
 
       {error && (<div className="admin-crud-error">{error}</div>)}
 
-      <div style={{overflow:'auto'}}>
+      <div style={{ overflow: 'auto' }}>
         <table className="admin-table">
           <thead className="admin-thead">
             <tr>
@@ -377,9 +378,9 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
                 <td className="admin-td">{r.id}</td>
                 <td className="admin-td">
                   {r.image ? (
-                    <img 
-                      src={r.image} 
-                      alt={r.name || 'Role image'} 
+                    <img
+                      src={r.image}
+                      alt={r.name || 'Role image'}
                       style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
                       onError={(e) => {
                         e.target.style.display = 'none';
@@ -393,7 +394,7 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
                 <td className="admin-td">{r.description || r.description_fr || r.description_ar || r.description_en || '-'}</td>
                 <td className="admin-td">{r.is_active ? 'Actif' : 'Inactif'}</td>
                 <td className="admin-td">
-                  <div style={{display:'flex',gap:8}}>
+                  <div style={{ display: 'flex', gap: 8 }}>
                     <button className="security-edit-btn" onClick={() => openEdit(r)}>Éditer</button>
                     <button className="security-delete-btn" onClick={() => removeItem(r)}>Supprimer</button>
                   </div>
@@ -408,9 +409,9 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
         <div className="security-form-overlay">
           <div className="security-form">
             <div className="security-form-header">
-              <h3>{editing? `Modifier le rôle: ${editing.name}` : 'Nouveau rôle'}</h3>
-              <button className="security-modal-close" onClick={()=>{
-                setShowForm(false); 
+              <h3>{editing ? `Modifier le rôle: ${editing.name}` : 'Nouveau rôle'}</h3>
+              <button className="security-modal-close" onClick={() => {
+                setShowForm(false);
                 setEditing(null);
                 setImageFile(null);
                 setImagePreview(null);
@@ -419,10 +420,10 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
             <form onSubmit={save} className="security-form-grid">
               <div className="security-form-group">
                 <label>Nom</label>
-                <input value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required/>
+                <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
               </div>
 
-              <div className="security-form-group" style={{gridColumn:'1 / -1'}}>
+              <div className="security-form-group" style={{ gridColumn: '1 / -1' }}>
                 <LanguageFields
                   value={{
                     name_ar: form.name_ar,
@@ -432,24 +433,24 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
                     description_fr: form.description_fr,
                     description_en: form.description_en,
                   }}
-                  onChange={(v)=>setForm({...form, ...v})}
+                  onChange={(v) => setForm({ ...form, ...v })}
                   includeDescription={true}
                   required={false}
                 />
               </div>
 
-              <div className="security-form-group" style={{gridColumn:'1 / -1'}}>
+              <div className="security-form-group" style={{ gridColumn: '1 / -1' }}>
                 <label>Description</label>
-                <textarea value={form.description} onChange={(e)=>setForm({...form, description:e.target.value})}/>
+                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
 
-              <div className="security-form-group" style={{gridColumn:'1 / -1'}}>
+              <div className="security-form-group" style={{ gridColumn: '1 / -1' }}>
                 <label>Image</label>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                   <input
                     type="text"
                     value={form.image}
-                    onChange={(e)=>setForm({...form, image:e.target.value})}
+                    onChange={(e) => setForm({ ...form, image: e.target.value })}
                     placeholder="URL de l'image ou téléchargez un fichier"
                     style={{ flex: 1, minWidth: '200px', padding: '8px' }}
                   />
@@ -500,9 +501,9 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
                 </small>
                 {(imagePreview || form.image) && (
                   <div style={{ marginTop: '10px' }}>
-                    <img 
-                      src={imagePreview || form.image} 
-                      alt="Preview" 
+                    <img
+                      src={imagePreview || form.image}
+                      alt="Preview"
                       style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px', border: '1px solid #ddd' }}
                       onError={(e) => {
                         console.error('[AdminSecurityRoles] Preview image load error:', imagePreview || form.image);
@@ -515,14 +516,14 @@ export default function AdminSecurityRolesCrud({ token, onAuthError }) {
 
               <div className="security-form-group">
                 <label>Statut</label>
-                <select value={form.is_active? '1':'0'} onChange={(e)=>setForm({...form, is_active:e.target.value==='1'})}>
+                <select value={form.is_active ? '1' : '0'} onChange={(e) => setForm({ ...form, is_active: e.target.value === '1' })}>
                   <option value="1">Actif</option>
                   <option value="0">Inactif</option>
                 </select>
               </div>
               <div className="security-form-actions">
-                <button type="button" className="security-cancel-btn" onClick={()=>{
-                  setShowForm(false); 
+                <button type="button" className="security-cancel-btn" onClick={() => {
+                  setShowForm(false);
                   setEditing(null);
                   setImageFile(null);
                   setImagePreview(null);

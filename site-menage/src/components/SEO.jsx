@@ -38,7 +38,7 @@ const SEO = ({ title, description, image, type = 'website', keywords }) => {
         // 4. Standard Meta Tags
         const defaultDesc = 'Service de nettoyage professionnel au Maroc - Mahtaaj. Propreté, Sécurité et Qualité.';
         updateMeta('meta[name="description"]', 'name', 'description', description || defaultDesc);
-        updateMeta('meta[name="keywords"]', 'name', 'keywords', keywords || 'nettoyage Maroc, sécurité Rabat, jardinage, chauffeur privé, mahtaaj');
+        updateMeta('meta[name="keywords"]', 'name', 'keywords', keywords || 'nettoyage Maroc, nettoyage Marrakech, sécurité Marrakech, jardinage, chauffeur privé, mahtaaj');
 
         // 5. Canonical Link
         let canonical = document.querySelector('link[rel="canonical"]');

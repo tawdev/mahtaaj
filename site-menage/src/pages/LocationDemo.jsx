@@ -16,7 +16,7 @@ export default function LocationDemo() {
         address: ''
     });
 
-    const handleLocationSelect = (lat, lng, address) => {
+    const handleLocationSelect = ({ lat, lng, address }) => {
         console.log('Localisation sélectionnée:', { lat, lng, address });
 
         setLocationData({ lat, lng, address });

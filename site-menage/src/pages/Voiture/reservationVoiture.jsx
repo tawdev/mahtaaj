@@ -12,8 +12,9 @@ export default function ReservationVoiture() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
-  
-  // Get data from navigation state or localStorage
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Form data
   const [formData, setFormData] = useState({
     firstname: '',
     phone: '',
@@ -24,9 +25,32 @@ export default function ReservationVoiture() {
     preferred_time: '' // Optional time preference
   });
 
-  const reservationData = location.state?.selectedService || location.state?.type || null;
-  const serviceType = location.state?.serviceType || 'centre'; // 'centre' or 'domicile'
-  
+  // Get data from navigation state or sessionStorage (to preserve across login)
+  const [initialData, setInitialData] = useState(() => {
+    // 1. Try navigation state
+    if (location.state?.selectedService || location.state?.type) {
+      return {
+        selectedService: location.state.selectedService,
+        type: location.state.type,
+        serviceType: location.state.serviceType || 'centre'
+      };
+    }
+    // 2. Try sessionStorage
+    const saved = sessionStorage.getItem('voiture_pending_reservation_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing saved state:', e);
+      }
+    }
+    return null;
+  });
+
+  const reservationData = initialData?.selectedService || initialData?.type || null;
+  const serviceType = initialData?.serviceType || 'centre';
+
   // Determine back navigation based on serviceType
   const getBackRoute = () => {
     if (serviceType === 'centre') {
@@ -45,7 +69,7 @@ export default function ReservationVoiture() {
     }
     return t('reservation_voiture.back', 'Retour');
   };
-  
+
   // Calculate final price for display
   const [displayFinalPrice, setDisplayFinalPrice] = useState(0);
 
@@ -64,13 +88,52 @@ export default function ReservationVoiture() {
     } catch (err) {
       console.error('Error loading prefill:', err);
     }
-    
+
     // Calculate and display final price
     if (reservationData) {
       const calculatedPrice = parseFloat(reservationData.price) || 0;
       setDisplayFinalPrice(calculatedPrice);
     }
   }, [reservationData, serviceType]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('[ReservationVoiture] No session found, redirecting to login...');
+          // Save state to survive redirect
+          if (location.state) {
+            sessionStorage.setItem('voiture_pending_reservation_state', JSON.stringify(location.state));
+          }
+          localStorage.setItem('auth_return_url', location.pathname + location.search);
+          console.log('[ReservationVoiture] Saved auth_return_url:', location.pathname + location.search);
+          navigate('/login-register');
+          return;
+        }
+
+        // Session exists, check if we need to clean up sessionStorage
+        sessionStorage.removeItem('voiture_pending_reservation_state');
+
+        // Prefill user data if available
+        if (session.user) {
+          setFormData(prev => ({
+            ...prev,
+            firstname: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name || prev.firstname,
+            email: session.user.email || prev.email,
+            phone: session.user.user_metadata?.phone || prev.phone
+          }));
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -93,7 +156,7 @@ export default function ReservationVoiture() {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          
+
           // Use OpenStreetMap Nominatim API to reverse geocode
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
@@ -109,7 +172,7 @@ export default function ReservationVoiture() {
           }
 
           const data = await response.json();
-          
+
           if (data && data.display_name) {
             setFormData(prev => ({
               ...prev,
@@ -128,7 +191,7 @@ export default function ReservationVoiture() {
       (error) => {
         console.error('Geolocation error:', error);
         let errorMessage = t('reservation_voiture.location_error.general', 'Impossible d\'obtenir votre localisation');
-        
+
         switch (error.code) {
           case error.PERMISSION_DENIED:
             errorMessage = t('reservation_voiture.location_error.permission_denied', 'Permission de localisation refusée. Veuillez autoriser l\'accès à votre localisation.');
@@ -140,7 +203,7 @@ export default function ReservationVoiture() {
             errorMessage = t('reservation_voiture.location_error.timeout', 'La demande de localisation a expiré.');
             break;
         }
-        
+
         setError(errorMessage);
         setGettingLocation(false);
       },
@@ -212,7 +275,7 @@ export default function ReservationVoiture() {
 
       // Clear localStorage
       localStorage.removeItem('booking_prefill');
-      
+
       setSuccess(true);
       setTimeout(() => {
         navigate('/lavage-de-voiture');
@@ -224,6 +287,10 @@ export default function ReservationVoiture() {
       setLoading(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return <main className="reservation-voiture-page"><div className="reservation-voiture-loading">Vérification de l'authentification...</div></main>;
+  }
 
   if (success) {
     return (
@@ -242,7 +309,7 @@ export default function ReservationVoiture() {
     return (
       <main className="reservation-voiture-page">
         <div className="reservation-voiture-header">
-          <button 
+          <button
             onClick={() => navigate(getBackRoute())}
             className="reservation-voiture-back-btn"
             title={getBackButtonText()}
@@ -262,7 +329,7 @@ export default function ReservationVoiture() {
   return (
     <main className="reservation-voiture-page">
       <div className="reservation-voiture-header">
-        <button 
+        <button
           className="reservation-voiture-back-btn"
           onClick={() => navigate(getBackRoute())}
           title={getBackButtonText()}
@@ -408,7 +475,7 @@ export default function ReservationVoiture() {
               <div className="summary-item">
                 <span className="summary-label">{t('reservation_voiture.service_type', 'Type')}:</span>
                 <span className="summary-value">
-                  {serviceType === 'centre' 
+                  {serviceType === 'centre'
                     ? t('reservation_voiture.service_type_centre', 'Lavage en Centre')
                     : t('reservation_voiture.service_type_domicile', 'Lavage à Domicile')
                   }
@@ -434,8 +501,8 @@ export default function ReservationVoiture() {
             className="reservation-voiture-submit-btn"
             disabled={loading}
           >
-            {loading 
-              ? t('reservation_voiture.submitting', 'Envoi...') 
+            {loading
+              ? t('reservation_voiture.submitting', 'Envoi...')
               : t('reservation_voiture.submit', 'Confirmer la réservation')
             }
           </button>

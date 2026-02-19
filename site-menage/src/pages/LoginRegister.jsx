@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import AuthService from '../lib/authService';
 import './LoginRegister.css';
@@ -22,6 +23,8 @@ export default function LoginRegister() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
 
   // Récupérer l'URL de retour depuis les paramètres
   const returnUrl = location.state?.returnUrl || '/';
@@ -29,10 +32,19 @@ export default function LoginRegister() {
   // Store returnUrl in localStorage for the global auth listener (App.jsx)
   // This ensures redirect works even after page refreshes or from email confirmations
   useEffect(() => {
-    localStorage.setItem('auth_return_url', returnUrl);
-    return () => {
-      // Optional: don't clean up here as App.jsx will clean it up on redirect
-    };
+    // Only set if we have a non-default returnUrl or nothing is stored yet
+    const existing = localStorage.getItem('auth_return_url');
+
+    // Logic: 
+    // - If current returnUrl from state is NOT '/' (meaning it's specific), use it.
+    // - OR If nothing exists in localStorage yet, use current returnUrl (even if it's '/').
+    // - DO NOT overwrite a specific existing URL with a generic '/'.
+    if (returnUrl !== '/' || !existing || existing === '/') {
+      console.log('[LoginRegister] Storing auth_return_url:', returnUrl);
+      localStorage.setItem('auth_return_url', returnUrl);
+    } else {
+      console.log('[LoginRegister] Preserving existing auth_return_url:', existing);
+    }
   }, [returnUrl]);
 
   // Auto-login and autofill logic
@@ -167,7 +179,7 @@ export default function LoginRegister() {
     try {
       // Validation de l'email pour login et register
       if (!formData.email || !formData.email.trim()) {
-        setError('Veuillez entrer votre adresse email');
+        setError(t('auth.errors.email_required', 'Veuillez entrer votre adresse email'));
         return;
       }
 
@@ -178,7 +190,7 @@ export default function LoginRegister() {
       console.log('Email validation:', { email: trimmedEmail, isValid: emailIsValid });
 
       if (!emailIsValid) {
-        setError('Adresse email invalide. Veuillez vérifier votre email.\nExemples valides: nom@gmail.com, nom@yahoo.com, nom@example.com');
+        setError(t('auth.errors.invalid_email', 'Adresse email invalide. Veuillez vérifier votre email.\nExemples valides: nom@gmail.com, nom@yahoo.com, nom@example.com'));
         setIsLoading(false);
         return;
       }
@@ -191,7 +203,7 @@ export default function LoginRegister() {
         });
 
         if (error) {
-          setError(error.message || 'Erreur de connexion');
+          setError(error.message || t('auth.errors.server_error', 'Erreur de connexion'));
           return;
         }
 
@@ -199,7 +211,7 @@ export default function LoginRegister() {
           // Check if email is verified
           if (!data.user.email_confirmed_at) {
             await supabase.auth.signOut();
-            setError('❌ Votre email n\'est pas encore confirmé. Veuillez vérifier votre boîte de réception.');
+            setError(t('auth.errors.email_unconfirmed', '❌ Votre email n\'est pas encore confirmé. Veuillez vérifier votre boîte de réception.'));
             setIsLoading(false);
             return;
           }
@@ -238,24 +250,27 @@ export default function LoginRegister() {
             // Don't fail login if this fails
           }
 
-          setSuccess('Connexion réussie !');
-          // No manual navigate here - App.jsx handles the redirect when session is detected
+          setSuccess(t('auth.success.login_success', 'Connexion réussie !'));
+          // Manual redirect after data synchronization
+          setTimeout(() => {
+            navigate(returnUrl, { replace: true });
+          }, 100);
         }
       } else {
         // Inscription avec Supabase
         // Validation
         if (!formData.name || formData.name.trim().length < 2) {
-          setError('Le nom doit contenir au moins 2 caractères');
+          setError(t('auth.errors.name_required', 'Le nom doit contenir au moins 2 caractères'));
           return;
         }
 
         if (formData.password.length < 6) {
-          setError('Le mot de passe doit contenir au moins 6 caractères');
+          setError(t('auth.errors.password_short', 'Le mot de passe doit contenir au moins 6 caractères'));
           return;
         }
 
         if (formData.password !== formData.password_confirmation) {
-          setError('Les mots de passe ne correspondent pas');
+          setError(t('auth.errors.password_mismatch', 'Les mots de passe ne correspondent pas'));
           return;
         }
 
@@ -296,15 +311,15 @@ export default function LoginRegister() {
           // Traduire les messages d'erreur courants
           let errorMessage = error.message;
           if (error.message?.includes('already registered') || error.message?.includes('already exists') || error.message?.includes('User already registered')) {
-            errorMessage = 'Cet email est déjà enregistré. Veuillez vous connecter.';
+            errorMessage = t('auth.errors.already_registered', 'Cet email est déjà enregistré. Veuillez vous connecter.');
           } else if (error.message?.includes('Invalid email') || error.message?.includes('invalid') || error.message?.includes('Email address')) {
-            errorMessage = '❌ Adresse email invalide.\n\nSi votre email semble correct (ex: simo@gmail.com), vérifiez:\n\n1. Dans Supabase Dashboard:\n   • Authentication → Providers → Email (doit être activé)\n   • Authentication → Settings → Site URL (doit être http://localhost:3000)\n   • Authentication → URL Configuration → Redirect URLs (ajoutez http://localhost:3000)\n\n2. Vérifiez la console (F12) pour plus de détails\n\n3. Essayez un autre email pour tester';
+            errorMessage = t('auth.errors.invalid_email', '❌ Adresse email invalide.\n\nSi votre email semble correct (ex: simo@gmail.com), vérifiez:\n\n1. Dans Supabase Dashboard:\n   • Authentication → Providers → Email (doit être activé)\n   • Authentication → Settings → Site URL (doit être http://localhost:3000)\n   • Authentication → URL Configuration → Redirect URLs (ajoutez http://localhost:3000)\n\n2. Vérifiez la console (F12) pour plus de détails\n\n3. Essayez un autre email pour tester');
           } else if (error.message?.includes('Password') || error.message?.includes('password')) {
-            errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
+            errorMessage = t('auth.errors.password_short', 'Le mot de passe doit contenir au moins 6 caractères');
           } else if (error.message?.includes('rate limit')) {
-            errorMessage = 'Trop de tentatives. Veuillez réessayer plus tard.';
+            errorMessage = t('auth.errors.rate_limit', 'Trop de tentatives. Veuillez réessayer plus tard.');
           } else {
-            errorMessage = error.message || 'Erreur d\'inscription. Veuillez réessayer.';
+            errorMessage = error.message || t('auth.errors.generic_error', 'Erreur d\'inscription. Veuillez réessayer.');
           }
           setError(errorMessage);
           setIsLoading(false);
@@ -358,11 +373,13 @@ export default function LoginRegister() {
           // Vérifier si l'email confirmation est requise
           if (data.session) {
             // L'utilisateur est connecté directement
-            setSuccess('Inscription réussie ! Vous êtes maintenant connecté.');
-            // No manual navigate here - App.jsx handles the redirect when session is detected
+            setSuccess(t('auth.success.register_success', 'Inscription réussie ! Vous êtes maintenant connecté.'));
+            setTimeout(() => {
+              navigate(returnUrl, { replace: true });
+            }, 500);
           } else {
             // Email confirmation requise
-            setSuccess('Inscription réussie ! Veuillez vérifier votre email pour confirmer votre compte.');
+            setSuccess(t('auth.success.register_confirmation', 'Inscription réussie ! Veuillez vérifier votre email pour confirmer votre compte.'));
             setIsLogin(true);
           }
 
@@ -413,10 +430,7 @@ export default function LoginRegister() {
       // Keep remembered_email for easy re-login
       // localStorage.removeItem('remembered_email'); // Commented out to keep email
 
-      setSuccess('تم تسجيل الخروج بنجاح');
-      setTimeout(() => {
-        navigate('/');
-      }, 1000);
+      setSuccess(t('auth.success.logout_success', 'تم تسجيل الخروج بنجاح'));
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -426,25 +440,44 @@ export default function LoginRegister() {
     setIsLoading(true);
     setError('');
     try {
-      await AuthService.signInWithGoogle();
-      // The user will be redirected to Google, so we don't need much logic here
+      // Prioritize existing auth_return_url if it's more specific than '/'
+      const existing = localStorage.getItem('auth_return_url');
+      const finalReturnUrl = (existing && existing !== '/') ? existing : returnUrl;
+
+      console.log('[LoginRegister] Starting Google Login, returnUrl:', finalReturnUrl);
+      localStorage.setItem('auth_return_url', finalReturnUrl);
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
+        },
+      });
+
+      if (error) throw error;
+      // The user will be redirected to Google
     } catch (error) {
-      setError('Erreur d\'authentification avec Google');
+      console.error('Google login error:', error);
+      setError(t('auth.errors.google_error', 'Erreur d\'authentification avec Google'));
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="login-register-page">
+    <div className={`login-register-page ${isRTL ? 'rtl' : ''}`}>
       {/* Illustration Side */}
       <div className="auth-illustration-side">
         <img src="/galerie/b__A_wide-angle,_high-.png" alt="Auth Illustration" />
         <div className="illustration-overlay">
-          <h2>{isLogin ? "Bon retour parmi nous !" : "Rejoignez l'excellence"}</h2>
+          <h2>{isLogin ? t('auth.login_welcome') : t('auth.register_welcome')}</h2>
           <p>
             {isLogin
-              ? "Connectez-vous pour accéder à vos services de ménage et de sécurité en toute simplicité."
-              : "Créez votre compte pour bénéficier de nos services professionnels sur mesure."}
+              ? t('auth.login_desc')
+              : t('auth.register_desc')}
           </p>
         </div>
       </div>
@@ -455,17 +488,17 @@ export default function LoginRegister() {
           <div className="form-header">
             <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj Logo" className="auth-logo" />
             <h1 className="form-title">
-              {isLogin ? "Connexion" : "Inscription"}
+              {isLogin ? t('auth.login_title') : t('auth.register_title')}
             </h1>
             <p className="form-subtitle">
-              {isLogin ? "Entrez vos informations pour continuer" : "Remplissez le formulaire pour commencer"}
+              {isLogin ? t('auth.login_subtitle') : t('auth.register_subtitle')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
             {!isLogin && (
               <div className="form-group">
-                <label htmlFor="name" className="form-label">Nom complet</label>
+                <label htmlFor="name" className="form-label">{t('auth.fullname_label')}</label>
                 <div className="form-input-wrapper">
                   <input
                     type="text"
@@ -475,14 +508,14 @@ export default function LoginRegister() {
                     onChange={handleInputChange}
                     className="form-input"
                     required={!isLogin}
-                    placeholder="Votre nom complet"
+                    placeholder={t('auth.fullname_placeholder')}
                   />
                 </div>
               </div>
             )}
 
             <div className="form-group">
-              <label htmlFor="email" className="form-label">Email</label>
+              <label htmlFor="email" className="form-label">{t('auth.email_label')}</label>
               <div className="form-input-wrapper">
                 <input
                   type="email"
@@ -492,13 +525,13 @@ export default function LoginRegister() {
                   onChange={handleInputChange}
                   className="form-input"
                   required
-                  placeholder="votre@email.com"
+                  placeholder={t('auth.email_placeholder')}
                 />
               </div>
             </div>
 
             <div className="form-group">
-              <label htmlFor="password" className="form-label">Mot de passe</label>
+              <label htmlFor="password" className="form-label">{t('auth.password_label')}</label>
               <div className="password-input-container">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -508,7 +541,7 @@ export default function LoginRegister() {
                   onChange={handleInputChange}
                   className="form-input"
                   required
-                  placeholder="Votre mot de passe"
+                  placeholder={t('auth.password_placeholder')}
                   minLength="6"
                 />
                 <button
@@ -535,7 +568,7 @@ export default function LoginRegister() {
 
             {!isLogin && (
               <div className="form-group">
-                <label htmlFor="password_confirmation" className="form-label">Confirmer le mot de passe</label>
+                <label htmlFor="password_confirmation" className="form-label">{t('auth.confirm_password_label')}</label>
                 <div className="password-input-container">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -545,7 +578,7 @@ export default function LoginRegister() {
                     onChange={handleInputChange}
                     className="form-input"
                     required={!isLogin}
-                    placeholder="Confirmez votre mot de passe"
+                    placeholder={t('auth.confirm_password_placeholder')}
                     minLength="6"
                   />
                   <button
@@ -579,17 +612,17 @@ export default function LoginRegister() {
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                   />
-                  <span>Se souvenir de moi</span>
+                  <span>{t('auth.remember_me')}</span>
                 </label>
               </div>
             )}
 
             <button type="submit" className="submit-button" disabled={isLoading}>
-              {isLoading ? <div className="loading-spinner"></div> : (isLogin ? 'Se connecter' : 'S\'inscrire')}
+              {isLoading ? <div className="loading-spinner"></div> : (isLogin ? t('auth.login_btn') : t('auth.register_btn'))}
             </button>
 
             <div className="oauth-divider">
-              <span className="divider-text">ou avec</span>
+              <span className="divider-text">{t('auth.oauth_divider')}</span>
             </div>
 
             <button type="button" className="google-login-button" onClick={handleGoogleLogin} disabled={isLoading}>
@@ -599,16 +632,16 @@ export default function LoginRegister() {
                 <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
                 <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
               </svg>
-              <span>Continuer avec Google</span>
+              <span>{t('auth.google_btn')}</span>
             </button>
           </form>
 
           <div className="form-footer">
             <p className="toggle-text">
-              {isLogin ? "Vous n'avez pas de compte ?" : "Déjà l'un des nôtres ?"}
+              {isLogin ? t('auth.no_account') : t('auth.have_account')}
             </p>
             <button type="button" onClick={toggleMode} className="toggle-button">
-              {isLogin ? "Créer un compte" : "Se connecter"}
+              {isLogin ? t('auth.create_account_btn') : t('auth.login_btn')}
             </button>
           </div>
 
@@ -617,7 +650,7 @@ export default function LoginRegister() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M12 19L5 12L12 5" />
               </svg>
-              Retour à l'accueil
+              {t('auth.back_to_home')}
             </button>
           </div>
         </div>
@@ -627,7 +660,7 @@ export default function LoginRegister() {
         <div className="success-toast">
           <div className="success-icon">✓</div>
           <div className="success-content">
-            <h4 style={{ margin: 0, fontSize: '0.9rem' }}>Succès</h4>
+            <h4 style={{ margin: 0, fontSize: '0.9rem' }}>{t('auth.toast.success')}</h4>
             <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>{success}</p>
           </div>
           <button className="toast-close" onClick={() => setSuccess('')}>×</button>
@@ -638,7 +671,7 @@ export default function LoginRegister() {
         <div className="error-toast">
           <div className="error-icon-toast">⚠️</div>
           <div className="success-content">
-            <h4 style={{ margin: 0, fontSize: '0.9rem' }}>Erreur</h4>
+            <h4 style={{ margin: 0, fontSize: '0.9rem' }}>{t('auth.toast.error')}</h4>
             <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>{error}</p>
           </div>
           <button className="toast-close" onClick={() => setError('')}>×</button>

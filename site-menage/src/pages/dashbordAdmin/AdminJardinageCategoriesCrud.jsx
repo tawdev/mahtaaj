@@ -321,7 +321,13 @@ const AdminJardinageCategoriesCrud = () => {
 
         if (error) {
           console.error('[AdminJardinageCategories] Error deleting category:', error);
-          setError('Erreur lors de la suppression: ' + error.message);
+          if (error.code === '23503') {
+            setError('Impossible de supprimer cette catégorie car elle contient des services. Supprimez d\'abord les services associés ou désactivez la catégorie.');
+          } else if (error.code === '42501') {
+            setError('Permission refusée (RLS). Vous n\'avez pas le droit de supprimer cette catégorie.');
+          } else {
+            setError('Erreur lors de la suppression: ' + error.message);
+          }
           return;
         }
 
@@ -368,7 +374,27 @@ const AdminJardinageCategoriesCrud = () => {
         <h2>🌿 Gestion des Catégories Jardinage</h2>
         <button
           className="btn btn-primary"
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setEditingCategory(null);
+            setError('');
+            setFormData({
+              name: '',
+              name_ar: '',
+              name_fr: '',
+              name_en: '',
+              description: '',
+              description_ar: '',
+              description_fr: '',
+              description_en: '',
+              icon: '',
+              image: '',
+              is_active: true,
+              order: 0
+            });
+            setImagePreview(null);
+            setImageFile(null);
+            setShowForm(true);
+          }}
         >
           ➕ Ajouter une catégorie
         </button>

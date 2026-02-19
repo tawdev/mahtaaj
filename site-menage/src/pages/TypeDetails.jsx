@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTypeById, getCategoryHouseById, getTypeOptions, getTypes } from '../api-supabase';
-import './Services.css';
+import './TousLesServices.css';
 
 export default function TypeDetails() {
   const {
@@ -146,7 +146,7 @@ export default function TypeDetails() {
           console.log('Category loaded:', categoryResult);
           if (categoryResult) {
             setCategory(categoryResult);
-            
+
             // Check if this is a cuisine category and load all types for this category
             // Only load categoryTypes if we're on a TypeDetails page (typeSlug exists)
             // This prevents interference with CategoryHouseDetails page
@@ -162,7 +162,7 @@ export default function TypeDetails() {
                 (categoryResult.name_fr && categoryResult.name_fr.toLowerCase().includes('cuisine')) ||
                 (categoryResult.name_en && categoryResult.name_en.toLowerCase().includes('kitchen'))
               );
-              
+
               if (isCuisine) {
                 // Load all types for this category
                 try {
@@ -219,11 +219,11 @@ export default function TypeDetails() {
       // Pour la page booking/reservation, utiliser ce montant comme prix initial
       totalPrice: price || 0,
       choixtype_id: selectedOptions.length === 1 ? selectedOptions[0]?.id : undefined,
-      choixtype_name: selectedOptions.length === 1 
+      choixtype_name: selectedOptions.length === 1
         ? (selectedOptions[0].name || selectedOptions[0].name_fr || selectedOptions[0].name_ar || selectedOptions[0].name_en)
         : undefined,
       choixtype_ids: selectedOptions.length > 0 ? selectedOptions.map(opt => opt.id) : undefined,
-      choixtype_names: selectedOptions.length > 0 
+      choixtype_names: selectedOptions.length > 0
         ? selectedOptions.map(opt => opt.name || opt.name_fr || opt.name_ar || opt.name_en)
         : undefined,
       selectedKitchens: selectedOptions,
@@ -339,10 +339,10 @@ export default function TypeDetails() {
   const label = { color: '#64748b', fontSize: 12, marginBottom: 4 };
   const value = { color: '#0f172a', fontWeight: 600 };
   const formRow = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 };
-  const input = { 
-    width: '100%', 
-    padding: '10px 12px', 
-    border: '1px solid #e2e8f0', 
+  const input = {
+    width: '100%',
+    padding: '10px 12px',
+    border: '1px solid #e2e8f0',
     borderRadius: 8,
     fontSize: '16px',
     fontFamily: 'inherit',
@@ -452,22 +452,22 @@ export default function TypeDetails() {
     const typeName = (type?.name || '').toLowerCase();
     const typeNameAr = (type?.name_ar || '').toLowerCase();
     const typeNameEn = (type?.name_en || '').toLowerCase();
-    
+
     // Inclure tous les types de ménage : villa, hotel, maison d'hôte, maison, appartement, resort hotel, etc.
     const keywords = [
-      'villa', 
-      'hotel', 
+      'villa',
+      'hotel',
       'hôtel',
       'resort',
-      'maison d\'hôte', 
-      'maison d\'hote', 
+      'maison d\'hôte',
+      'maison d\'hote',
       'maison dhote',
       'maison',
       'appartement',
       'apartment',
       'riad'
     ];
-    return keywords.some(keyword => 
+    return keywords.some(keyword =>
       typeNameFr.includes(keyword) ||
       typeName.includes(keyword) ||
       typeNameAr.includes(keyword) ||
@@ -581,9 +581,9 @@ export default function TypeDetails() {
           <div style={{ color: '#475569', marginBottom: 16 }}>{error}</div>
           <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
             <button style={btnBack}>
-              {selectedLang === 'ar' ? '↩️ العودة' : 
-               selectedLang === 'fr' ? '↩️ Retour' : 
-               '↩️ Back'}
+              {selectedLang === 'ar' ? '↩️ العودة' :
+                selectedLang === 'fr' ? '↩️ Retour' :
+                  '↩️ Back'}
             </button>
           </Link>
         </div>
@@ -629,9 +629,9 @@ export default function TypeDetails() {
             </h1>
             <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
               <button style={btnBack}>
-                {selectedLang === 'ar' ? '↩️ العودة' : 
-                 selectedLang === 'fr' ? '↩️ Retour' : 
-                 '↩️ Back'}
+                {selectedLang === 'ar' ? '↩️ العودة' :
+                  selectedLang === 'fr' ? '↩️ Retour' :
+                    '↩️ Back'}
               </button>
             </Link>
           </div>
@@ -647,10 +647,10 @@ export default function TypeDetails() {
               {selectedLang === 'ar' ? '🖋️ الاسم والوصف المختصر' : selectedLang === 'fr' ? '🖋️ Nom et description courte' : '🖋️ Name and short description'}
               {' '}- {getLangLabel(selectedLang)}
             </div>
-            <div style={{ 
-              background: '#f8fafc', 
-              border: '1px solid #e2e8f0', 
-              borderRadius: 12, 
+            <div style={{
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderRadius: 12,
               padding: 20,
               display: 'grid',
               gap: 16,
@@ -659,9 +659,9 @@ export default function TypeDetails() {
                 <div style={{ ...label, marginBottom: 8, fontSize: 13, fontWeight: 600 }}>
                   {selectedLang === 'ar' ? 'الاسم' : selectedLang === 'fr' ? 'Nom' : 'Name'}
                 </div>
-                <div style={{ 
-                  ...value, 
-                  fontSize: 20, 
+                <div style={{
+                  ...value,
+                  fontSize: 20,
                   color: '#0f172a',
                   marginBottom: 16,
                 }}>
@@ -685,8 +685,8 @@ export default function TypeDetails() {
             <div>
               <div style={sectionTitle}>
                 {selectedLang === 'ar' ? '💰 السعر الأساسي' :
-                 selectedLang === 'fr' ? '💰 Prix de base' :
-                 '💰 Base price'}
+                  selectedLang === 'fr' ? '💰 Prix de base' :
+                    '💰 Base price'}
               </div>
               <div style={priceBox}>
                 {selectedLang === 'ar'
@@ -702,32 +702,32 @@ export default function TypeDetails() {
           {!isCuisineCategory() && serviceSlug !== 'lavage' && !isLargeTextileType() && !isClothesType() && (
             <div>
               <div style={sectionTitle}>
-                {selectedLang === 'ar' ? '📏 تقدير المساحة والسعر' : 
-                 selectedLang === 'fr' ? '📏 Estimation de la surface et du prix' : 
-                 '📏 Surface and Price Estimation'}
+                {selectedLang === 'ar' ? '📏 تقدير المساحة والسعر' :
+                  selectedLang === 'fr' ? '📏 Estimation de la surface et du prix' :
+                    '📏 Surface and Price Estimation'}
               </div>
               <div style={formRow}>
                 <div>
                   {/* Champ : nombre des chambres */}
                   <div style={{ ...label, marginBottom: 6 }}>
-                    {selectedLang === 'ar' ? 'عدد الغرف' : 
-                     selectedLang === 'fr' ? 'Nombre des chambres' : 
-                     'Number of rooms'}
+                    {selectedLang === 'ar' ? 'عدد الغرف' :
+                      selectedLang === 'fr' ? 'Nombre des chambres' :
+                        'Number of rooms'}
                   </div>
-                  <input 
-                    type="number" 
-                    min="0" 
+                  <input
+                    type="number"
+                    min="0"
                     step="1"
-                    value={numberOfRooms} 
+                    value={numberOfRooms}
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value === '' || /^\d+$/.test(value)) {
                         setNumberOfRooms(value);
                       }
                     }}
-                    placeholder={selectedLang === 'ar' ? 'أدخل عدد الغرف (مثلاً: 2)' : 
-                                 selectedLang === 'fr' ? 'Entrez le nombre de chambres (ex: 2)' : 
-                                 'Enter number of rooms (ex: 2)'} 
+                    placeholder={selectedLang === 'ar' ? 'أدخل عدد الغرف (مثلاً: 2)' :
+                      selectedLang === 'fr' ? 'Entrez le nombre de chambres (ex: 2)' :
+                        'Enter number of rooms (ex: 2)'}
                     style={input}
                     inputMode="numeric"
                     autoComplete="off"
@@ -744,35 +744,35 @@ export default function TypeDetails() {
                   {rooms.length > 0 && (
                     <div style={{ marginTop: 20 }}>
                       <div style={{ ...label, marginBottom: 12, fontSize: 13, fontWeight: 600 }}>
-                        {selectedLang === 'ar' ? 'مساحة كل غرفة (m²)' : 
-                         selectedLang === 'fr' ? 'Surface de chaque chambre (m²)' : 
-                         'Area of each room (m²)'}
+                        {selectedLang === 'ar' ? 'مساحة كل غرفة (m²)' :
+                          selectedLang === 'fr' ? 'Surface de chaque chambre (m²)' :
+                            'Area of each room (m²)'}
                       </div>
                       {rooms.map((room, index) => (
                         <div key={room.id} style={{ marginBottom: 12 }}>
                           <div style={{ ...label, marginBottom: 6, fontSize: 12 }}>
-                            {selectedLang === 'ar' ? `الغرفة ${index + 1}` : 
-                             selectedLang === 'fr' ? `Chambre ${index + 1}` : 
-                             `Room ${index + 1}`}
+                            {selectedLang === 'ar' ? `الغرفة ${index + 1}` :
+                              selectedLang === 'fr' ? `Chambre ${index + 1}` :
+                                `Room ${index + 1}`}
                           </div>
-                          <input 
-                            type="number" 
-                            min="0" 
+                          <input
+                            type="number"
+                            min="0"
                             step="any"
-                            value={room.surface} 
+                            value={room.surface}
                             onChange={(e) => {
                               const value = e.target.value;
                               if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                                setRooms(prevRooms => 
-                                  prevRooms.map(r => 
+                                setRooms(prevRooms =>
+                                  prevRooms.map(r =>
                                     r.id === room.id ? { ...r, surface: value } : r
                                   )
                                 );
                               }
                             }}
-                            placeholder={selectedLang === 'ar' ? `أدخل مساحة الغرفة ${index + 1} (m²)` : 
-                                         selectedLang === 'fr' ? `Entrez la surface de la chambre ${index + 1} (m²)` : 
-                                         `Enter area of room ${index + 1} (m²)`} 
+                            placeholder={selectedLang === 'ar' ? `أدخل مساحة الغرفة ${index + 1} (m²)` :
+                              selectedLang === 'fr' ? `Entrez la surface de la chambre ${index + 1} (m²)` :
+                                `Enter area of room ${index + 1} (m²)`}
                             style={input}
                             inputMode="decimal"
                             autoComplete="off"
@@ -795,9 +795,9 @@ export default function TypeDetails() {
                 </div>
                 <div>
                   <div style={{ ...label, marginBottom: 6 }}>
-                    {selectedLang === 'ar' ? 'السعر التقديري' : 
-                     selectedLang === 'fr' ? 'Prix estimé' : 
-                     'Estimated Price'}
+                    {selectedLang === 'ar' ? 'السعر التقديري' :
+                      selectedLang === 'fr' ? 'Prix estimé' :
+                        'Estimated Price'}
                   </div>
                   <div style={priceBox}>
                     {price.toFixed(2)} DH
@@ -823,8 +823,8 @@ export default function TypeDetails() {
                 {selectedLang === 'ar'
                   ? '📦 عدد القطع (Vêtements)'
                   : selectedLang === 'fr'
-                  ? '📦 Nombre de pièces (Vêtements)'
-                  : '📦 Number of pieces (Clothes)'}
+                    ? '📦 Nombre de pièces (Vêtements)'
+                    : '📦 Number of pieces (Clothes)'}
               </div>
               <div style={{ ...formRow, gridTemplateColumns: '1fr' }}>
                 <div>
@@ -832,8 +832,8 @@ export default function TypeDetails() {
                     {selectedLang === 'ar'
                       ? 'عدد القطع'
                       : selectedLang === 'fr'
-                      ? 'Nombre de pièces'
-                      : 'Number of pieces'}
+                        ? 'Nombre de pièces'
+                        : 'Number of pieces'}
                   </div>
                   <input
                     type="number"
@@ -846,16 +846,16 @@ export default function TypeDetails() {
                       selectedLang === 'ar'
                         ? 'أدخل عدد القطع'
                         : selectedLang === 'fr'
-                        ? 'Entrez le nombre de pièces'
-                        : 'Enter number of pieces'
+                          ? 'Entrez le nombre de pièces'
+                          : 'Enter number of pieces'
                     }
                   />
                   <div style={small}>
                     {selectedLang === 'ar'
                       ? 'سيتم إرسال عدد القطع مع تفاصيل الحجز.'
                       : selectedLang === 'fr'
-                      ? 'Le nombre de pièces sera envoyé avec les détails de la réservation.'
-                      : 'The number of pieces will be sent with the booking details.'}
+                        ? 'Le nombre de pièces sera envoyé avec les détails de la réservation.'
+                        : 'The number of pieces will be sent with the booking details.'}
                   </div>
                   {price > 0 && (
                     <div style={{ marginTop: 12 }}>
@@ -863,8 +863,8 @@ export default function TypeDetails() {
                         {selectedLang === 'ar'
                           ? 'السعر التقديري'
                           : selectedLang === 'fr'
-                          ? 'Prix estimé'
-                          : 'Estimated price'}
+                            ? 'Prix estimé'
+                            : 'Estimated price'}
                       </div>
                       <div style={priceBox}>{price.toFixed(2)} DH</div>
                     </div>
@@ -889,8 +889,8 @@ export default function TypeDetails() {
                 {selectedLang === 'ar'
                   ? '📏 قياس القطع (grands textiles)'
                   : selectedLang === 'fr'
-                  ? '📏 Mesures des pièces (grands textiles)'
-                  : '📏 Items measurements (grands textiles)'}
+                    ? '📏 Mesures des pièces (grands textiles)'
+                    : '📏 Items measurements (grands textiles)'}
               </div>
               <div
                 style={{
@@ -917,8 +917,8 @@ export default function TypeDetails() {
                         {selectedLang === 'ar'
                           ? `القطعة ${index + 1}`
                           : selectedLang === 'fr'
-                          ? `Pièce ${index + 1}`
-                          : `Item ${index + 1}`}
+                            ? `Pièce ${index + 1}`
+                            : `Item ${index + 1}`}
                       </div>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <div style={{ flex: '0 0 90px' }}>
@@ -926,8 +926,8 @@ export default function TypeDetails() {
                             {selectedLang === 'ar'
                               ? 'العدد'
                               : selectedLang === 'fr'
-                              ? 'Qté'
-                              : 'Qty'}
+                                ? 'Qté'
+                                : 'Qty'}
                           </div>
                           <input
                             type="number"
@@ -943,8 +943,8 @@ export default function TypeDetails() {
                             {selectedLang === 'ar'
                               ? 'الطول (م)'
                               : selectedLang === 'fr'
-                              ? 'Longueur (m)'
-                              : 'Length (m)'}
+                                ? 'Longueur (m)'
+                                : 'Length (m)'}
                           </div>
                           <input
                             type="number"
@@ -960,8 +960,8 @@ export default function TypeDetails() {
                             {selectedLang === 'ar'
                               ? 'العرض (م)'
                               : selectedLang === 'fr'
-                              ? 'Largeur (m)'
-                              : 'Width (m)'}
+                                ? 'Largeur (m)'
+                                : 'Width (m)'}
                           </div>
                           <input
                             type="number"
@@ -988,8 +988,8 @@ export default function TypeDetails() {
                             {selectedLang === 'ar'
                               ? 'حذف'
                               : selectedLang === 'fr'
-                              ? 'Supprimer'
-                              : 'Remove'}
+                                ? 'Supprimer'
+                                : 'Remove'}
                           </button>
                         </div>
                       </div>
@@ -1003,8 +1003,8 @@ export default function TypeDetails() {
                     {selectedLang === 'ar'
                       ? '➕ إضافة قطعة'
                       : selectedLang === 'fr'
-                      ? '➕ Ajouter une pièce'
-                      : '➕ Add item'}
+                        ? '➕ Ajouter une pièce'
+                        : '➕ Add item'}
                   </button>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -1014,16 +1014,16 @@ export default function TypeDetails() {
                         {selectedLang === 'ar'
                           ? 'المساحة الإجمالية:'
                           : selectedLang === 'fr'
-                          ? 'Surface totale :'
-                          : 'Total area:'}{' '}
+                            ? 'Surface totale :'
+                            : 'Total area:'}{' '}
                         {calculateTextileArea().toFixed(2)} m²
                       </div>
                       <div>
                         {selectedLang === 'ar'
                           ? 'السعر المقدر:'
                           : selectedLang === 'fr'
-                          ? 'Prix estimé :'
-                          : 'Estimated price:'}{' '}
+                            ? 'Prix estimé :'
+                            : 'Estimated price:'}{' '}
                         {(calculateTextileArea() * pricePerM2).toFixed(2)} DH
                       </div>
                     </div>
@@ -1035,15 +1035,15 @@ export default function TypeDetails() {
 
           <div style={actions}>
             <button onClick={handleReserve} style={btnReserve}>
-              {selectedLang === 'ar' ? '🔘 احجز' : 
-               selectedLang === 'fr' ? '🔘 Réserver' : 
-               '🔘 Book'}
+              {selectedLang === 'ar' ? '🔘 احجز' :
+                selectedLang === 'fr' ? '🔘 Réserver' :
+                  '🔘 Book'}
             </button>
             <Link to={getBackUrl()} style={{ textDecoration: 'none' }}>
               <button style={btnBack}>
-                {selectedLang === 'ar' ? '↩️ العودة' : 
-                 selectedLang === 'fr' ? '↩️ Retour' : 
-                 '↩️ Back'}
+                {selectedLang === 'ar' ? '↩️ العودة' :
+                  selectedLang === 'fr' ? '↩️ Retour' :
+                    '↩️ Back'}
               </button>
             </Link>
           </div>

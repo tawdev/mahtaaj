@@ -5,18 +5,18 @@ import { supabase } from '../../lib/supabase';
 import { getServices, getCategoryHouseById, getTypes } from '../../api-supabase';
 import './MénageCuisine.css';
 import '../menage complite/menageComplite.css';
-import '../Services.css';
+import '../TousLesServices.css';
 
 export default function MénageCuisine() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  
+
   // Menage state
   const [menageItems, setMenageItems] = useState([]);
   const [menageLoading, setMenageLoading] = useState(true);
   const [menageError, setMenageError] = useState('');
   const [selectedMenageItems, setSelectedMenageItems] = useState([]);
-  
+
   // Cuisine state
   const [service, setService] = useState(null);
   const [category, setCategory] = useState(null);
@@ -45,7 +45,7 @@ export default function MénageCuisine() {
             const nameFr = (m.name_fr || '').toLowerCase();
             const nameAr = (m.name_ar || '').toLowerCase();
             const nameEn = (m.name_en || '').toLowerCase();
-            
+
             // Exclude specific services
             const hasTapis = nameFr.includes('tapis') || nameAr.includes('سجاد') || nameEn.includes('carpet');
             const hasCanapes = nameFr.includes('canapé') || nameFr.includes('canapes') || nameAr.includes('كنب') || nameEn.includes('sofa');
@@ -55,11 +55,11 @@ export default function MénageCuisine() {
             const hasAirbnb = nameFr.includes('airbnb') || nameAr.includes('airbnb') || nameEn.includes('airbnb');
             const hasPiscine = nameFr.includes('piscine') || nameAr.includes('مسبح') || nameEn.includes('pool');
             const hasChaussures = nameFr.includes('chaussure') || nameAr.includes('حذاء') || nameEn.includes('shoe');
-            
+
             if (hasTapis || hasCanapes || hasVoiture || hasLavageRepassage || hasBureaux || hasAirbnb || hasPiscine || hasChaussures) {
               return false; // Skip specific services
             }
-            
+
             // Must be general "Ménage" or "Housekeeping"
             return (
               (nameFr.includes('ménage') && !nameFr.includes('tapis') && !nameFr.includes('voiture') && !nameFr.includes('lavage') && !nameFr.includes('bureaux')) ||
@@ -69,7 +69,7 @@ export default function MénageCuisine() {
               (nameEn.includes('cleaning') && !nameEn.includes('car'))
             );
           });
-          
+
           if (matchedMenage) {
             menageId = matchedMenage.id;
           } else {
@@ -97,7 +97,7 @@ export default function MénageCuisine() {
             const nameFr = (menage.name_fr || '').toLowerCase();
             const nameAr = (menage.name_ar || '').toLowerCase();
             const nameEn = (menage.name_en || '').toLowerCase();
-            
+
             // Exclude specific services
             const hasTapis = nameFr.includes('tapis') || nameAr.includes('سجاد') || nameEn.includes('carpet');
             const hasCanapes = nameFr.includes('canapé') || nameFr.includes('canapes') || nameAr.includes('كنب') || nameEn.includes('sofa');
@@ -107,11 +107,11 @@ export default function MénageCuisine() {
             const hasAirbnb = nameFr.includes('airbnb') || nameAr.includes('airbnb') || nameEn.includes('airbnb');
             const hasPiscine = nameFr.includes('piscine') || nameAr.includes('مسبح') || nameEn.includes('pool');
             const hasChaussures = nameFr.includes('chaussure') || nameAr.includes('حذاء') || nameEn.includes('shoe');
-            
+
             if (hasTapis || hasCanapes || hasVoiture || hasLavageRepassage || hasBureaux || hasAirbnb || hasPiscine || hasChaussures) {
               return false;
             }
-            
+
             // Must be general "Ménage"
             return (
               (nameFr.includes('ménage') && !nameFr.includes('tapis') && !nameFr.includes('voiture') && !nameFr.includes('lavage') && !nameFr.includes('bureaux')) ||
@@ -145,7 +145,7 @@ export default function MénageCuisine() {
           const nameFr = (item.name_fr || '').toLowerCase();
           const nameAr = (item.name_ar || '').toLowerCase();
           const nameEn = (item.name_en || '').toLowerCase();
-          
+
           // Exclude other services
           const hasTapis = nameFr.includes('tapis') || nameAr.includes('سجاد') || nameEn.includes('carpet');
           const hasCanapes = nameFr.includes('canapé') || nameFr.includes('canapes') || nameAr.includes('كنب') || nameEn.includes('sofa');
@@ -155,7 +155,7 @@ export default function MénageCuisine() {
           const hasAirbnb = nameFr.includes('airbnb') || nameAr.includes('airbnb') || nameEn.includes('airbnb');
           const hasPiscine = nameFr.includes('piscine') || nameAr.includes('مسبح') || nameEn.includes('pool');
           const hasChaussures = nameFr.includes('chaussure') || nameAr.includes('حذاء') || nameEn.includes('shoe');
-          
+
           return !hasTapis && !hasCanapes && !hasVoiture && !hasLavageRepassage && !hasBureaux && !hasAirbnb && !hasPiscine && !hasChaussures;
         });
 
@@ -181,8 +181,8 @@ export default function MénageCuisine() {
         // Get service (menage service, usually ID 1)
         const servicesData = await getServices(i18n.language);
         const servicesArray = Array.isArray(servicesData) ? servicesData : servicesData.data || [];
-        const foundService = servicesArray.find(s => 
-          s.id === 1 || 
+        const foundService = servicesArray.find(s =>
+          s.id === 1 ||
           (s.name && (s.name.toLowerCase().includes('menage') || s.name.toLowerCase().includes('cleaning')))
         );
 
@@ -247,10 +247,10 @@ export default function MénageCuisine() {
     const typeNameAr = (item.name_ar || '').toLowerCase().trim();
     const typeNameEn = (item.name_en || '').toLowerCase().trim();
 
-    const frHasResortHotel = (typeNameFr.includes('resort') && typeNameFr.includes('hôtel')) || 
-                             (typeNameFr.includes('resort') && typeNameFr.includes('hotel'));
+    const frHasResortHotel = (typeNameFr.includes('resort') && typeNameFr.includes('hôtel')) ||
+      (typeNameFr.includes('resort') && typeNameFr.includes('hotel'));
     const arHasResortHotel = (typeNameAr.includes('منتجع') && typeNameAr.includes('فندق')) ||
-                             (typeNameAr.includes('resort') && typeNameAr.includes('فندق'));
+      (typeNameAr.includes('resort') && typeNameAr.includes('فندق'));
     const enHasResortHotel = typeNameEn.includes('resort') && typeNameEn.includes('hotel');
 
     return frHasResortHotel || arHasResortHotel || enHasResortHotel;
@@ -261,7 +261,7 @@ export default function MénageCuisine() {
     const typeNameAr = (item.name_ar || '').toLowerCase().trim();
     const typeNameEn = (item.name_en || '').toLowerCase().trim();
 
-    const isMaisonDhote = 
+    const isMaisonDhote =
       (typeNameFr.includes('maison') && typeNameFr.includes('hôte')) ||
       typeNameFr.includes('maison d\'hôte') ||
       (typeNameAr.includes('بيت') && typeNameAr.includes('ضيافة')) ||
@@ -318,21 +318,21 @@ export default function MénageCuisine() {
     const typeNameAr = (item.name_ar || '').toLowerCase().trim();
     const typeNameEn = (item.name_en || '').toLowerCase().trim();
 
-    const isSimpleMaison = 
+    const isSimpleMaison =
       (typeNameFr.includes('maison') && !typeNameFr.includes('hôte') && !typeNameFr.includes('maison d\'hôte')) ||
       (typeNameAr.includes('منزل') && !typeNameAr.includes('ضيافة')) ||
       (typeNameEn.includes('house') && !typeNameEn.includes('host') && !typeNameEn.includes('guest'));
 
     if (isSimpleMaison) return false;
 
-    const frIsMaisonDhote = 
-      (typeNameFr.includes('maison') && typeNameFr.includes('hôte')) || 
+    const frIsMaisonDhote =
+      (typeNameFr.includes('maison') && typeNameFr.includes('hôte')) ||
       typeNameFr.includes('maison d\'hôte');
-    const arIsMaisonDhote = 
+    const arIsMaisonDhote =
       (typeNameAr.includes('بيت') && typeNameAr.includes('ضيافة')) ||
       typeNameAr.includes('بيت ضيافة');
-    const enIsMaisonDhote = 
-      typeNameEn.includes('guest house') || 
+    const enIsMaisonDhote =
+      typeNameEn.includes('guest house') ||
       (typeNameEn.includes('house') && typeNameEn.includes('host'));
 
     return frIsMaisonDhote || arIsMaisonDhote || enIsMaisonDhote;
@@ -373,9 +373,46 @@ export default function MénageCuisine() {
     return selectedTypes.some(t => t.id === type.id);
   };
 
-  const handleReserve = () => {
+  // Restore selection from storage if returning from login
+  useEffect(() => {
+    const savedContext = sessionStorage.getItem('menage_cuisine_pending_context');
+    if (savedContext) {
+      try {
+        const { selectedTypes, selectedMenageItems } = JSON.parse(savedContext);
+        if (selectedTypes) setSelectedTypes(selectedTypes);
+        if (selectedMenageItems) setSelectedMenageItems(selectedMenageItems);
+
+        // Clear logic context after restoring
+        sessionStorage.removeItem('menage_cuisine_pending_context');
+      } catch (e) {
+        console.error('Error restoring context:', e);
+      }
+    }
+  }, []);
+
+  const handleReserve = async () => {
     // Vérifier qu'exactement 1 type Ménage et au moins 1 type Cuisine sont sélectionnés
     if (selectedMenageItems.length !== 1 || selectedTypes.length < 1) {
+      return;
+    }
+
+    // Auth logic
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      // Save context
+      sessionStorage.setItem('menage_cuisine_pending_context', JSON.stringify({
+        selectedTypes,
+        selectedMenageItems,
+        category,
+        service
+      }));
+
+      // Redirect to login with returnUrl
+      localStorage.setItem('auth_return_url', '/menage-cuisine');
+      navigate('/login-register', {
+        state: { returnUrl: '/menage-cuisine' }
+      });
       return;
     }
 
@@ -399,14 +436,14 @@ export default function MénageCuisine() {
 
   return (
     <main className="menage-cuisine-page">
-      <button 
+      <button
         className="menage-cuisine-back-button"
         onClick={() => navigate('/menage-et-cuisine')}
         title={t('menage_page.back', 'Retour')}
       >
         ← {t('menage_page.back', 'Retour')}
       </button>
-      
+
       <h1 className="menage-cuisine-title">
         Ménage + Cuisine
       </h1>
@@ -428,9 +465,9 @@ export default function MénageCuisine() {
           color: '#1e293b',
           fontWeight: '500'
         }}>
-          {i18n.language === 'ar' ? 'يرجى اختيار نوع واحد فقط من Ménage ونوع واحد على الأقل من Cuisine للتمكن من الحجز' : 
-           i18n.language === 'fr' ? 'Veuillez sélectionner un seul type de Ménage et au moins un type de Cuisine pour pouvoir réserver.' : 
-           'Please select one type of Ménage only and at least one type of Cuisine to be able to reserve.'}
+          {i18n.language === 'ar' ? 'يرجى اختيار نوع واحد فقط من Ménage ونوع واحد على الأقل من Cuisine للتمكن من الحجز' :
+            i18n.language === 'fr' ? 'Veuillez sélectionner un seul type de Ménage et au moins un type de Cuisine pour pouvoir réserver.' :
+              'Please select one type of Ménage only and at least one type of Cuisine to be able to reserve.'}
         </p>
       </div>
 
@@ -439,10 +476,10 @@ export default function MénageCuisine() {
         <div style={{
           marginBottom: '32px',
           padding: '16px',
-          backgroundColor: (selectedMenageItems.length === 1 && selectedTypes.length >= 1) ? '#f0fdf4' : 
-                          (selectedMenageItems.length > 1) ? '#fef2f2' : '#fffbeb',
-          border: `1px solid ${(selectedMenageItems.length === 1 && selectedTypes.length >= 1) ? '#86efac' : 
-                              (selectedMenageItems.length > 1) ? '#fca5a5' : '#fde047'}`,
+          backgroundColor: (selectedMenageItems.length === 1 && selectedTypes.length >= 1) ? '#f0fdf4' :
+            (selectedMenageItems.length > 1) ? '#fef2f2' : '#fffbeb',
+          border: `1px solid ${(selectedMenageItems.length === 1 && selectedTypes.length >= 1) ? '#86efac' :
+            (selectedMenageItems.length > 1) ? '#fca5a5' : '#fde047'}`,
           borderRadius: '8px',
           maxWidth: '800px',
           margin: '0 auto 32px auto'
@@ -450,15 +487,15 @@ export default function MénageCuisine() {
           {/* Choix Ménage */}
           {selectedMenageItems.length > 0 && (
             <div style={{ marginBottom: selectedTypes.length > 0 ? '16px' : '0' }}>
-              <h4 style={{ 
-                margin: '0 0 12px 0', 
-                fontSize: '16px', 
+              <h4 style={{
+                margin: '0 0 12px 0',
+                fontSize: '16px',
                 fontWeight: 600,
                 color: selectedMenageItems.length === 1 ? '#166534' : '#991b1b'
               }}>
-                {i18n.language === 'ar' ? 'الخيارات المختارة (Ménage):' : 
-                 i18n.language === 'fr' ? 'Choix Ménage:' : 
-                 'Selected Ménage:'}
+                {i18n.language === 'ar' ? 'الخيارات المختارة (Ménage):' :
+                  i18n.language === 'fr' ? 'Choix Ménage:' :
+                    'Selected Ménage:'}
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {selectedMenageItems.map(item => {
@@ -486,15 +523,15 @@ export default function MénageCuisine() {
           {/* Choix Cuisine */}
           {selectedTypes.length > 0 && (
             <div>
-              <h4 style={{ 
-                margin: '0 0 12px 0', 
-                fontSize: '16px', 
+              <h4 style={{
+                margin: '0 0 12px 0',
+                fontSize: '16px',
                 fontWeight: 600,
                 color: '#166534'
               }}>
-                {i18n.language === 'ar' ? 'الخيارات المختارة (Cuisine):' : 
-                 i18n.language === 'fr' ? 'Choix Cuisine:' : 
-                 'Selected Cuisine:'}
+                {i18n.language === 'ar' ? 'الخيارات المختارة (Cuisine):' :
+                  i18n.language === 'fr' ? 'Choix Cuisine:' :
+                    'Selected Cuisine:'}
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {selectedTypes.map(type => (
@@ -524,9 +561,9 @@ export default function MénageCuisine() {
               color: '#991b1b',
               fontWeight: '500'
             }}>
-              {i18n.language === 'ar' ? '⚠️ يجب اختيار نوع واحد فقط من Ménage' : 
-               i18n.language === 'fr' ? '⚠️ Veuillez sélectionner un seul type de Ménage' : 
-               '⚠️ Please select only one Ménage type'}
+              {i18n.language === 'ar' ? '⚠️ يجب اختيار نوع واحد فقط من Ménage' :
+                i18n.language === 'fr' ? '⚠️ Veuillez sélectionner un seul type de Ménage' :
+                  '⚠️ Please select only one Ménage type'}
             </p>
           )}
           {selectedMenageItems.length === 1 && selectedTypes.length >= 1 && (
@@ -536,9 +573,9 @@ export default function MénageCuisine() {
               color: '#166534',
               fontWeight: '500'
             }}>
-              {i18n.language === 'ar' ? '✅ يمكنك الآن الحجز (Ménage + Cuisine sélectionnés)' : 
-               i18n.language === 'fr' ? '✅ Vous pouvez maintenant réserver (Ménage + Cuisine sélectionnés)' : 
-               '✅ You can now reserve (Ménage + Cuisine selected)'}
+              {i18n.language === 'ar' ? '✅ يمكنك الآن الحجز (Ménage + Cuisine sélectionnés)' :
+                i18n.language === 'fr' ? '✅ Vous pouvez maintenant réserver (Ménage + Cuisine sélectionnés)' :
+                  '✅ You can now reserve (Ménage + Cuisine selected)'}
             </p>
           )}
           {selectedMenageItems.length === 1 && selectedTypes.length === 0 && (
@@ -548,9 +585,9 @@ export default function MénageCuisine() {
               color: '#f59e0b',
               fontWeight: '500'
             }}>
-              {i18n.language === 'ar' ? '⚠️ يرجى اختيار نوع واحد على الأقل من Cuisine للتمكن من الحجز' : 
-               i18n.language === 'fr' ? '⚠️ Veuillez sélectionner au moins un type de Cuisine pour pouvoir réserver' : 
-               '⚠️ Please select at least one type of Cuisine to be able to reserve'}
+              {i18n.language === 'ar' ? '⚠️ يرجى اختيار نوع واحد على الأقل من Cuisine للتمكن من الحجز' :
+                i18n.language === 'fr' ? '⚠️ Veuillez sélectionner au moins un type de Cuisine pour pouvoir réserver' :
+                  '⚠️ Please select at least one type of Cuisine to be able to reserve'}
             </p>
           )}
         </div>
@@ -560,7 +597,7 @@ export default function MénageCuisine() {
         {/* Div 1: Menage (Left) */}
         <div className="menage-section">
           <h2 className="section-title">{t('menage_page.title', 'Ménage')}</h2>
-          
+
           {menageLoading ? (
             <div className="loading-state">Chargement des services ménage...</div>
           ) : menageError ? (
@@ -573,8 +610,8 @@ export default function MénageCuisine() {
                 const { name, description } = getLocalizedText(item);
                 const isSelected = isMenageItemSelected(item);
                 return (
-                  <article 
-                    key={item.id} 
+                  <article
+                    key={item.id}
                     className={`menage-complite-card ${isSelected ? 'menage-complite-card-selected' : ''}`}
                     onClick={() => handleMenageItemSelect(item)}
                     style={{ position: 'relative', cursor: 'pointer' }}
@@ -609,8 +646,8 @@ export default function MénageCuisine() {
                             justifyContent: 'center',
                             zIndex: 10,
                             transition: 'all 0.3s ease',
-                            boxShadow: isSelected 
-                              ? '0 2px 8px rgba(16, 185, 129, 0.4)' 
+                            boxShadow: isSelected
+                              ? '0 2px 8px rgba(16, 185, 129, 0.4)'
                               : '0 2px 6px rgba(0, 0, 0, 0.2)'
                           }}
                           onMouseEnter={(e) => {
@@ -658,7 +695,7 @@ export default function MénageCuisine() {
         {/* Div 2: Cuisine (Right) */}
         <div className="cuisine-section">
           <h2 className="section-title">{category?.name || 'Cuisine'}</h2>
-          
+
           {cuisineLoading ? (
             <div className="loading-state">{t('services_page.loading')}</div>
           ) : cuisineError || !category ? (
@@ -670,7 +707,7 @@ export default function MénageCuisine() {
               <div className="menage-complite-grid">
                 {types.map((type) => {
                   const selected = isTypeSelected(type);
-                  
+
                   // Get image URL (same logic as Cuisin.jsx)
                   let imageUrl = type.image_url || type.image || null;
                   if (imageUrl) {
@@ -682,9 +719,9 @@ export default function MénageCuisine() {
                       imageUrl = apiBase + imageUrl;
                     }
                   }
-                  
+
                   return (
-                    <article 
+                    <article
                       key={type.id}
                       className={`menage-complite-card ${selected ? 'menage-complite-card-selected' : ''}`}
                       onClick={() => handleTypeSelect(type)}
@@ -716,8 +753,8 @@ export default function MénageCuisine() {
                               justifyContent: 'center',
                               zIndex: 10,
                               transition: 'all 0.3s ease',
-                              boxShadow: selected 
-                                ? '0 2px 8px rgba(16, 185, 129, 0.4)' 
+                              boxShadow: selected
+                                ? '0 2px 8px rgba(16, 185, 129, 0.4)'
                                 : '0 2px 6px rgba(0, 0, 0, 0.2)'
                             }}
                             onClick={(e) => {
@@ -771,7 +808,7 @@ export default function MénageCuisine() {
                               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
                               zIndex: 5
                             }}>
-                              {parseFloat(type.price).toFixed(2)} DH 
+                              {parseFloat(type.price).toFixed(2)} DH
                             </div>
                           )}
                         </div>
@@ -798,36 +835,35 @@ export default function MénageCuisine() {
         }}>
           <button
             onClick={handleReserve}
+            className="menage-cuisine-reserve-button"
             style={{
-              padding: '16px 48px',
-              backgroundColor: '#10b981',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '12px',
-              cursor: 'pointer',
+              padding: '12px 32px',
               fontSize: '18px',
-              fontWeight: '600',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 16px rgba(16, 185, 129, 0.4)',
+              fontWeight: 'bold',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '10px'
+              gap: '10px',
+              boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.4), 0 2px 4px -1px rgba(16, 185, 129, 0.2)',
+              transition: 'all 0.3s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#059669';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.5)';
+              e.currentTarget.style.backgroundColor = '#059669';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(16, 185, 129, 0.4), 0 4px 6px -2px rgba(16, 185, 129, 0.2)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#10b981';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 16px rgba(16, 185, 129, 0.4)';
+              e.currentTarget.style.backgroundColor = '#10b981';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(16, 185, 129, 0.4), 0 2px 4px -1px rgba(16, 185, 129, 0.2)';
             }}
           >
             <span>📅</span>
-            {i18n.language === 'ar' ? 'احجز الآن' : 
-             i18n.language === 'fr' ? 'Réserver maintenant' : 
-             'Reserve now'}
+            {t('reservation.reserve_now', 'Réserver maintenant')}
           </button>
         </div>
       )}

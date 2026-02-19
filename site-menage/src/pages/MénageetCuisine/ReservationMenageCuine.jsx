@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
@@ -13,7 +13,7 @@ export default function ReservationMenageCuine() {
   const categoryData = location.state?.category || null;
   const serviceData = location.state?.service || null;
 
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = React.useState({
     firstname: '',
     phone: '',
     email: '',
@@ -24,7 +24,7 @@ export default function ReservationMenageCuine() {
   });
 
   // Dynamic fields based on Ménage type
-  const [menageFormData, setMenageFormData] = useState({
+  const [menageFormData, setMenageFormData] = React.useState({
     floor: 0,
     floors: 0, // For Villa
     rooms: [],
@@ -44,9 +44,9 @@ export default function ReservationMenageCuine() {
     garden: { length: '0', width: '0' }
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState('');
+  const [submitSuccess, setSubmitSuccess] = React.useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -72,7 +72,7 @@ export default function ReservationMenageCuine() {
     if (selectedMenageItems.length === 0) return null;
     const menageItem = selectedMenageItems[0];
     const name = getLocalizedText(menageItem).toLowerCase();
-    
+
     if (name.includes('hôtel') || name.includes('hotel')) {
       if (name.includes('resort')) return 'resort_hotel';
       return 'hotel';
@@ -195,14 +195,14 @@ export default function ReservationMenageCuine() {
 
   const calculateTotalPrice = () => {
     let total = 0;
-    
+
     // Ajouter le prix du type Ménage sélectionné (prix de base)
     if (selectedMenageItems.length > 0) {
       selectedMenageItems.forEach(item => {
         total += parseFloat(item.price) || 0;
       });
     }
-    
+
     // Calculer le prix basé sur les dimensions des chambres
     if (menageFormData.rooms && menageFormData.rooms.length > 0) {
       menageFormData.rooms.forEach(room => {
@@ -211,7 +211,7 @@ export default function ReservationMenageCuine() {
         }
       });
     }
-    
+
     // Calculer le prix basé sur les dimensions des salles de bain
     if (menageFormData.bathrooms && menageFormData.bathrooms.length > 0) {
       menageFormData.bathrooms.forEach(bathroom => {
@@ -220,7 +220,7 @@ export default function ReservationMenageCuine() {
         }
       });
     }
-    
+
     // Calculer le prix basé sur les dimensions des salons
     if (menageFormData.salons && menageFormData.salons.length > 0) {
       menageFormData.salons.forEach(salon => {
@@ -229,7 +229,7 @@ export default function ReservationMenageCuine() {
         }
       });
     }
-    
+
     // Calculer le prix basé sur les dimensions des suites (Maison d'hôte)
     if (menageFormData.suites && menageFormData.suites.length > 0) {
       menageFormData.suites.forEach(suite => {
@@ -238,58 +238,58 @@ export default function ReservationMenageCuine() {
         }
       });
     }
-    
+
     // Calculer le prix basé sur les dimensions du jardin
     if (menageFormData.hasGarden && menageFormData.garden && menageFormData.garden.length && menageFormData.garden.width) {
       total += calculateRoomPrice(menageFormData.garden.length, menageFormData.garden.width);
     }
-    
+
     // Calculer le prix basé sur les dimensions de la piscine
     if (menageFormData.hasPool && menageFormData.pool && menageFormData.pool.length && menageFormData.pool.width) {
       total += calculateRoomPrice(menageFormData.pool.length, menageFormData.pool.width);
     }
-    
+
     // Ajouter les prix des services supplémentaires
     // Breakfast pour Maison d'hôte (50 DH)
     if (menageFormData.hasBreakfast) {
       total += 50;
     }
-    
+
     // Sheets pour Maison d'hôte (30 DH)
     if (menageFormData.hasSheets && menageType === 'maison_dhote') {
       total += 30;
     }
-    
+
     // Ajouter les prix des types Cuisine sélectionnés
     total += selectedTypes.reduce((sum, type) => {
       return sum + (parseFloat(type.price) || 0);
     }, 0);
-    
+
     return Math.round(total * 100) / 100; // Round to 2 decimal places
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formValues.firstname.trim()) {
-      setSubmitError(t('reservation_menage_cuisine.error_firstname', 'Veuillez entrer votre nom'));
+      setSubmitError(t('reservation.error_firstname', 'Veuillez entrer votre nom'));
       return;
     }
     if (!formValues.phone.trim()) {
-      setSubmitError(t('reservation_menage_cuisine.error_phone', 'Veuillez entrer votre numéro de téléphone'));
+      setSubmitError(t('reservation.error_phone', 'Veuillez entrer votre numéro de téléphone'));
       return;
     }
     if (!formValues.location.trim()) {
-      setSubmitError(t('reservation_menage_cuisine.error_location', 'Veuillez entrer votre adresse'));
+      setSubmitError(t('reservation.error_location', 'Veuillez entrer votre adresse'));
       return;
     }
     if (selectedMenageItems.length !== 1) {
-      setSubmitError(t('reservation_menage_cuisine.error_menage', 'Veuillez sélectionner un type de Ménage'));
+      setSubmitError(t('reservation.error_menage', 'Veuillez sélectionner un type de Ménage'));
       return;
     }
     if (selectedTypes.length < 1) {
-      setSubmitError(t('reservation_menage_cuisine.error_cuisine', 'Veuillez sélectionner au moins un type de Cuisine'));
+      setSubmitError(t('reservation.error_cuisine', 'Veuillez sélectionner au moins un type de Cuisine'));
       return;
     }
 
@@ -301,7 +301,7 @@ export default function ReservationMenageCuine() {
       const { data: { user } } = await supabase.auth.getUser();
 
       const totalPrice = calculateTotalPrice();
-      
+
       // Préparer les informations Ménage
       const menageItem = selectedMenageItems[0];
       const menageInfo = menageItem ? {
@@ -356,14 +356,19 @@ export default function ReservationMenageCuine() {
           details: error.details,
           hint: error.hint
         });
-        setSubmitError(t('reservation_menage_cuisine.error_submit', 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.'));
+        setSubmitError(t('reservation.error', 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.'));
         setIsSubmitting(false);
         return;
       }
 
       console.log('[ReservationMenageCuine] Reservation submitted successfully:', data);
+
+      // Clear pending contexts
+      sessionStorage.removeItem('menage_cuisine_pending_context');
+      sessionStorage.removeItem('cuisin_pending_context');
+
       setSubmitSuccess(true);
-      
+
       // Redirect after 3 seconds
       setTimeout(() => {
         navigate('/menage-cuisine');
@@ -371,7 +376,7 @@ export default function ReservationMenageCuine() {
 
     } catch (err) {
       console.error('[ReservationMenageCuine] Exception during submission:', err);
-      setSubmitError(t('reservation_menage_cuisine.error_submit', 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.'));
+      setSubmitError(t('reservation.error', 'Erreur lors de l\'envoi de la réservation. Veuillez réessayer.'));
       setIsSubmitting(false);
     }
   };
@@ -382,9 +387,8 @@ export default function ReservationMenageCuine() {
         <div className="reservation-cuisin-container">
           <div className="reservation-cuisin-success">
             <div className="success-icon">✅</div>
-            <h2>{t('reservation_menage_cuisine.success_title', 'Réservation envoyée avec succès!')}</h2>
-            <p>{t('reservation_menage_cuisine.success_message', 'Votre demande de réservation a été enregistrée. Nous vous contacterons bientôt.')}</p>
-            <p className="redirect-message">{t('reservation_menage_cuisine.redirect_message', 'Redirection en cours...')}</p>
+            <h2>{t('reservation.success', 'Réservation envoyée avec succès!')}</h2>
+            <p>{t('reservation.success_message', 'Votre demande de réservation a été enregistrée. Nous vous contacterons bientôt.')}</p>
           </div>
         </div>
       </main>
@@ -394,28 +398,28 @@ export default function ReservationMenageCuine() {
   return (
     <main className="reservation-cuisin-page">
       <div className="reservation-cuisin-container">
-        <button 
+        <button
           className="reservation-cuisin-back-button"
           onClick={() => navigate('/menage-cuisine')}
-          title={t('reservation_menage_cuisine.back', 'Retour')}
+          title={t('reservation.back', 'Retour')}
         >
-          ← {t('reservation_menage_cuisine.back', 'Retour')}
+          ← {t('reservation.back', 'Retour')}
         </button>
 
         <div className="reservation-cuisin-header">
-          <h1>{t('reservation_menage_cuisine.title', 'Réservation Ménage + Cuisine')}</h1>
+          <h1>{t('reservation.title', 'Réservation Ménage + Cuisine')}</h1>
         </div>
 
         {/* Résumé de la réservation */}
         {(selectedMenageItems.length > 0 || selectedTypes.length > 0) && (
           <div className="selected-types-summary">
-            <h3>{t('reservation_menage_cuisine.selected_types', 'Résumé de la réservation:')}</h3>
-            
+            <h3>{t('reservation.selected_types', 'Résumé de la réservation:')}</h3>
+
             {/* Affichage Ménage */}
             {selectedMenageItems.length > 0 && (
               <div className="menage-section-summary" style={{ marginBottom: '16px' }}>
                 <h4 style={{ marginBottom: '8px', color: '#1e293b' }}>
-                  {t('reservation_menage_cuisine.menage_selected', 'Ménage sélectionné:')}
+                  {t('reservation.menage_selected', 'Ménage sélectionné:')}
                 </h4>
                 <div className="types-list">
                   {selectedMenageItems.map((item, index) => {
@@ -432,12 +436,12 @@ export default function ReservationMenageCuine() {
                 </div>
               </div>
             )}
-            
+
             {/* Affichage Cuisine */}
             {selectedTypes.length > 0 && (
               <div className="cuisine-section-summary">
                 <h4 style={{ marginBottom: '8px', color: '#1e293b' }}>
-                  {t('reservation_menage_cuisine.cuisine_selected', 'Cuisine sélectionnée:')}
+                  {t('reservation.cuisine_selected', 'Cuisine sélectionnée:')}
                 </h4>
                 <div className="types-list">
                   {selectedTypes.map((type, index) => (
@@ -451,78 +455,78 @@ export default function ReservationMenageCuine() {
                 </div>
               </div>
             )}
-            
-             <div className="total-price" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid #e2e8f0' }}>
-               {/* Détail du prix */}
-               <div style={{ marginBottom: '12px', fontSize: '14px', color: '#64748b' }}>
-                 {/* Prix Ménage de base */}
-                 {selectedMenageItems.length > 0 && selectedMenageItems[0].price && (
-                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                     <span>{getLocalizedText(selectedMenageItems[0])} (base):</span>
-                     <span>{parseFloat(selectedMenageItems[0].price || 0).toFixed(2)} DH</span>
-                   </div>
-                 )}
-                 
-                 {/* Prix des chambres */}
-                 {menageFormData.rooms.length > 0 && menageFormData.rooms.some(r => r && (parseFloat(r.length) > 0 || parseFloat(r.width) > 0)) && (
-                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                     <span>{i18n.language === 'ar' ? 'الغرف:' : i18n.language === 'fr' ? 'Chambres:' : 'Rooms:'}</span>
-                     <span>
-                       {menageFormData.rooms.reduce((sum, room) => {
-                         if (room && room.length && room.width) {
-                           return sum + calculateRoomPrice(room.length, room.width);
-                         }
-                         return sum;
-                       }, 0).toFixed(2)} DH
-                     </span>
-                   </div>
-                 )}
-                 
-                 {/* Prix des salons */}
-                 {menageFormData.salons.length > 0 && menageFormData.salons.some(s => s && (parseFloat(s.length) > 0 || parseFloat(s.width) > 0)) && (
-                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                     <span>{i18n.language === 'ar' ? 'الصالونات:' : i18n.language === 'fr' ? 'Salons:' : 'Salons:'}</span>
-                     <span>
-                       {menageFormData.salons.reduce((sum, salon) => {
-                         if (salon && salon.length && salon.width) {
-                           return sum + calculateRoomPrice(salon.length, salon.width);
-                         }
-                         return sum;
-                       }, 0).toFixed(2)} DH
-                     </span>
-                   </div>
-                 )}
-                 
-                 {/* Prix des salles de bain */}
-                 {menageFormData.bathrooms.length > 0 && menageFormData.bathrooms.some(b => b && (parseFloat(b.length) > 0 || parseFloat(b.width) > 0)) && (
-                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                     <span>{i18n.language === 'ar' ? 'الحمامات:' : i18n.language === 'fr' ? 'Salles de bain:' : 'Bathrooms:'}</span>
-                     <span>
-                       {menageFormData.bathrooms.reduce((sum, bathroom) => {
-                         if (bathroom && bathroom.length && bathroom.width) {
-                           return sum + calculateRoomPrice(bathroom.length, bathroom.width);
-                         }
-                         return sum;
-                       }, 0).toFixed(2)} DH
-                     </span>
-                   </div>
-                 )}
-                 
-                 {/* Prix Cuisine */}
-                 {selectedTypes.length > 0 && (
-                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                     <span>{i18n.language === 'ar' ? 'Cuisine:' : i18n.language === 'fr' ? 'Cuisine:' : 'Cuisine:'}</span>
-                     <span>
-                       {selectedTypes.reduce((sum, type) => sum + (parseFloat(type.price) || 0), 0).toFixed(2)} DH
-                     </span>
-                   </div>
-                 )}
-               </div>
-               
-               <div style={{ paddingTop: '12px', borderTop: '1px solid #e2e8f0', fontSize: '18px', fontWeight: 700 }}>
-                 <strong>{t('reservation_menage_cuisine.total', 'Total:')} {calculateTotalPrice().toFixed(2)} DH</strong>
-               </div>
-             </div>
+
+            <div className="total-price" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '2px solid #e2e8f0' }}>
+              {/* Détail du prix */}
+              <div style={{ marginBottom: '12px', fontSize: '14px', color: '#64748b' }}>
+                {/* Prix Ménage de base */}
+                {selectedMenageItems.length > 0 && selectedMenageItems[0].price && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span>{getLocalizedText(selectedMenageItems[0])} (base):</span>
+                    <span>{parseFloat(selectedMenageItems[0].price || 0).toFixed(2)} DH</span>
+                  </div>
+                )}
+
+                {/* Prix des chambres */}
+                {menageFormData.rooms.length > 0 && menageFormData.rooms.some(r => r && (parseFloat(r.length) > 0 || parseFloat(r.width) > 0)) && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span>{i18n.language === 'ar' ? 'الغرف:' : i18n.language === 'fr' ? 'Chambres:' : 'Rooms:'}</span>
+                    <span>
+                      {menageFormData.rooms.reduce((sum, room) => {
+                        if (room && room.length && room.width) {
+                          return sum + calculateRoomPrice(room.length, room.width);
+                        }
+                        return sum;
+                      }, 0).toFixed(2)} DH
+                    </span>
+                  </div>
+                )}
+
+                {/* Prix des salons */}
+                {menageFormData.salons.length > 0 && menageFormData.salons.some(s => s && (parseFloat(s.length) > 0 || parseFloat(s.width) > 0)) && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span>{i18n.language === 'ar' ? 'الصالونات:' : i18n.language === 'fr' ? 'Salons:' : 'Salons:'}</span>
+                    <span>
+                      {menageFormData.salons.reduce((sum, salon) => {
+                        if (salon && salon.length && salon.width) {
+                          return sum + calculateRoomPrice(salon.length, salon.width);
+                        }
+                        return sum;
+                      }, 0).toFixed(2)} DH
+                    </span>
+                  </div>
+                )}
+
+                {/* Prix des salles de bain */}
+                {menageFormData.bathrooms.length > 0 && menageFormData.bathrooms.some(b => b && (parseFloat(b.length) > 0 || parseFloat(b.width) > 0)) && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span>{i18n.language === 'ar' ? 'الحمامات:' : i18n.language === 'fr' ? 'Salles de bain:' : 'Bathrooms:'}</span>
+                    <span>
+                      {menageFormData.bathrooms.reduce((sum, bathroom) => {
+                        if (bathroom && bathroom.length && bathroom.width) {
+                          return sum + calculateRoomPrice(bathroom.length, bathroom.width);
+                        }
+                        return sum;
+                      }, 0).toFixed(2)} DH
+                    </span>
+                  </div>
+                )}
+
+                {/* Prix Cuisine */}
+                {selectedTypes.length > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span>{i18n.language === 'ar' ? 'Cuisine:' : i18n.language === 'fr' ? 'Cuisine:' : 'Cuisine:'}</span>
+                    <span>
+                      {selectedTypes.reduce((sum, type) => sum + (parseFloat(type.price) || 0), 0).toFixed(2)} DH
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ paddingTop: '12px', borderTop: '1px solid #e2e8f0', fontSize: '18px', fontWeight: 700 }}>
+                <strong>{t('reservation.total', 'Total:')} {calculateTotalPrice().toFixed(2)} DH</strong>
+              </div>
+            </div>
           </div>
         )}
 
@@ -535,7 +539,7 @@ export default function ReservationMenageCuine() {
         <form onSubmit={handleSubmit} className="reservation-cuisin-form">
           <div className="form-group">
             <label htmlFor="firstname">
-              {t('reservation_menage_cuisine.firstname', 'Nom complet')} <span className="required">*</span>
+              {t('reservation.firstname', 'Nom complet')} <span className="required">*</span>
             </label>
             <input
               type="text"
@@ -544,13 +548,13 @@ export default function ReservationMenageCuine() {
               value={formValues.firstname}
               onChange={handleInputChange}
               required
-              placeholder={t('reservation_menage_cuisine.firstname_placeholder', 'Votre nom complet')}
+              placeholder={t('reservation.firstname_placeholder', 'Votre nom complet')}
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="phone">
-              {t('reservation_menage_cuisine.phone', 'Téléphone')} <span className="required">*</span>
+              {t('reservation.phone', 'Téléphone')} <span className="required">*</span>
             </label>
             <input
               type="tel"
@@ -559,13 +563,13 @@ export default function ReservationMenageCuine() {
               value={formValues.phone}
               onChange={handleInputChange}
               required
-              placeholder={t('reservation_menage_cuisine.phone_placeholder', 'Votre numéro de téléphone')}
+              placeholder={t('reservation.phone_placeholder', 'Votre numéro de téléphone')}
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="email">
-              {t('reservation_menage_cuisine.email', 'Email')} <span className="optional">(optionnel)</span>
+              {t('reservation.email', 'Email')} <span className="optional">(optionnel)</span>
             </label>
             <input
               type="email"
@@ -573,13 +577,13 @@ export default function ReservationMenageCuine() {
               name="email"
               value={formValues.email}
               onChange={handleInputChange}
-              placeholder={t('reservation_menage_cuisine.email_placeholder', 'Votre adresse email')}
+              placeholder={t('reservation.email_placeholder', 'Votre adresse email')}
             />
           </div>
 
           <div className="form-group">
             <label htmlFor="location">
-              {t('reservation_menage_cuisine.location', 'Adresse')} <span className="required">*</span>
+              {t('reservation.address', 'Adresse')} <span className="required">*</span>
             </label>
             <input
               type="text"
@@ -588,7 +592,7 @@ export default function ReservationMenageCuine() {
               value={formValues.location}
               onChange={handleInputChange}
               required
-              placeholder={t('reservation_menage_cuisine.location_placeholder', 'Votre adresse complète')}
+              placeholder={t('reservation.address_placeholder', 'Votre adresse complète')}
             />
           </div>
 
@@ -596,9 +600,7 @@ export default function ReservationMenageCuine() {
           {menageType && (
             <div style={{ marginTop: '24px', padding: '20px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
               <h3 style={{ marginBottom: '20px', fontSize: '18px', fontWeight: 600, color: '#1e293b' }}>
-                {i18n.language === 'ar' ? 'تفاصيل Ménage:' : 
-                 i18n.language === 'fr' ? 'Détails Ménage:' : 
-                 'Ménage Details:'} {getLocalizedText(selectedMenageItems[0])}
+                {t('services.details', 'Détails')}: {getLocalizedText(selectedMenageItems[0])}
               </h3>
 
               {/* Hotel fields */}
@@ -606,9 +608,7 @@ export default function ReservationMenageCuine() {
                 <>
                   <div className="form-group">
                     <label>
-                      {i18n.language === 'ar' ? 'Numéro d\'étage:' : 
-                       i18n.language === 'fr' ? 'Numéro d\'étage:' : 
-                       'Floor number:'}
+                      {t('reservation.floor_number', 'Numéro d\'étage:')}
                     </label>
                     <input
                       type="number"
@@ -622,9 +622,7 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de chambres à nettoyer:' : 
-                       i18n.language === 'fr' ? 'Nombre de chambres à nettoyer:' : 
-                       'Number of rooms to clean:'}
+                      {t('reservation.rooms_number', 'Nombre de chambres à nettoyer:')}
                     </label>
                     <input
                       type="number"
@@ -639,16 +637,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.rooms.map((room, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Chambre ${index + 1}:` : 
-                               `Room ${index + 1}:`}
+                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` :
+                                i18n.language === 'fr' ? `Chambre ${index + 1}:` :
+                                  `Room ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -660,9 +658,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -681,9 +679,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' : 
-                       i18n.language === 'fr' ? 'Nombre de salles de bain:' : 
-                       'Number of bathrooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' :
+                        i18n.language === 'fr' ? 'Nombre de salles de bain:' :
+                          'Number of bathrooms:'}
                     </label>
                     <input
                       type="number"
@@ -698,16 +696,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.bathrooms.map((bathroom, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `حمام ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Salle de bain ${index + 1}:` : 
-                               `Bathroom ${index + 1}:`}
+                              {i18n.language === 'ar' ? `حمام ${index + 1}:` :
+                                i18n.language === 'fr' ? `Salle de bain ${index + 1}:` :
+                                  `Bathroom ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -719,9 +717,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -745,9 +743,9 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasSheets}
                         onChange={(e) => handleMenageFieldChange('hasSheets', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'Changement de draps ?' : 
-                       i18n.language === 'fr' ? 'Changement de draps ?' : 
-                       'Change sheets?'}
+                      {i18n.language === 'ar' ? 'Changement de draps ?' :
+                        i18n.language === 'fr' ? 'Changement de draps ?' :
+                          'Change sheets?'}
                     </label>
                   </div>
 
@@ -758,9 +756,9 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasTowels}
                         onChange={(e) => handleMenageFieldChange('hasTowels', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'Lavage de serviettes ?' : 
-                       i18n.language === 'fr' ? 'Lavage de serviettes ?' : 
-                       'Wash towels?'}
+                      {i18n.language === 'ar' ? 'Lavage de serviettes ?' :
+                        i18n.language === 'fr' ? 'Lavage de serviettes ?' :
+                          'Wash towels?'}
                     </label>
                   </div>
 
@@ -771,9 +769,9 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasWindows}
                         onChange={(e) => handleMenageFieldChange('hasWindows', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'Nettoyage des fenêtres ?' : 
-                       i18n.language === 'fr' ? 'Nettoyage des fenêtres ?' : 
-                       'Clean windows?'}
+                      {i18n.language === 'ar' ? 'Nettoyage des fenêtres ?' :
+                        i18n.language === 'fr' ? 'Nettoyage des fenêtres ?' :
+                          'Clean windows?'}
                     </label>
                   </div>
                 </>
@@ -784,9 +782,9 @@ export default function ReservationMenageCuine() {
                 <>
                   <div className="form-group">
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de chambres:' : 
-                       i18n.language === 'fr' ? 'Nombre de chambres:' : 
-                       'Number of rooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de chambres:' :
+                        i18n.language === 'fr' ? 'Nombre de chambres:' :
+                          'Number of rooms:'}
                     </label>
                     <input
                       type="number"
@@ -801,16 +799,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.rooms.map((room, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Chambre ${index + 1}:` : 
-                               `Room ${index + 1}:`}
+                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` :
+                                i18n.language === 'fr' ? `Chambre ${index + 1}:` :
+                                  `Room ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -822,9 +820,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -843,9 +841,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de salons:' : 
-                       i18n.language === 'fr' ? 'Nombre de salons:' : 
-                       'Number of salons:'}
+                      {i18n.language === 'ar' ? 'Nombre de salons:' :
+                        i18n.language === 'fr' ? 'Nombre de salons:' :
+                          'Number of salons:'}
                     </label>
                     <input
                       type="number"
@@ -860,16 +858,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.salons.map((salon, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `صالون ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Salon ${index + 1}:` : 
-                               `Salon ${index + 1}:`}
+                              {i18n.language === 'ar' ? `صالون ${index + 1}:` :
+                                i18n.language === 'fr' ? `Salon ${index + 1}:` :
+                                  `Salon ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -881,9 +879,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -902,9 +900,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' : 
-                       i18n.language === 'fr' ? 'Nombre de salles de bain:' : 
-                       'Number of bathrooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' :
+                        i18n.language === 'fr' ? 'Nombre de salles de bain:' :
+                          'Number of bathrooms:'}
                     </label>
                     <input
                       type="number"
@@ -919,16 +917,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.bathrooms.map((bathroom, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `حمام ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Salle de bain ${index + 1}:` : 
-                               `Bathroom ${index + 1}:`}
+                              {i18n.language === 'ar' ? `حمام ${index + 1}:` :
+                                i18n.language === 'fr' ? `Salle de bain ${index + 1}:` :
+                                  `Bathroom ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -940,9 +938,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -966,9 +964,9 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasKitchen}
                         onChange={(e) => handleMenageFieldChange('hasKitchen', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'Avez-vous une cuisine ?' : 
-                       i18n.language === 'fr' ? 'Avez-vous une cuisine ?' : 
-                       'Do you have a kitchen?'}
+                      {i18n.language === 'ar' ? 'Avez-vous une cuisine ?' :
+                        i18n.language === 'fr' ? 'Avez-vous une cuisine ?' :
+                          'Do you have a kitchen?'}
                     </label>
                   </div>
 
@@ -979,9 +977,9 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasLaundry}
                         onChange={(e) => handleMenageFieldChange('hasLaundry', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'Lavage de linge ?' : 
-                       i18n.language === 'fr' ? 'Lavage de linge ?' : 
-                       'Laundry?'}
+                      {i18n.language === 'ar' ? 'Lavage de linge ?' :
+                        i18n.language === 'fr' ? 'Lavage de linge ?' :
+                          'Laundry?'}
                     </label>
                   </div>
                 </>
@@ -992,9 +990,9 @@ export default function ReservationMenageCuine() {
                 <>
                   <div className="form-group">
                     <label>
-                      {i18n.language === 'ar' ? 'عدد الطوابق:' : 
-                       i18n.language === 'fr' ? 'Nombre d\'étages:' : 
-                       'Number of floors:'}
+                      {i18n.language === 'ar' ? 'عدد الطوابق:' :
+                        i18n.language === 'fr' ? 'Nombre d\'étages:' :
+                          'Number of floors:'}
                     </label>
                     <input
                       type="number"
@@ -1008,9 +1006,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de chambres:' : 
-                       i18n.language === 'fr' ? 'Nombre de chambres:' : 
-                       'Number of rooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de chambres:' :
+                        i18n.language === 'fr' ? 'Nombre de chambres:' :
+                          'Number of rooms:'}
                     </label>
                     <input
                       type="number"
@@ -1025,16 +1023,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.rooms.map((room, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Chambre ${index + 1}:` : 
-                               `Room ${index + 1}:`}
+                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` :
+                                i18n.language === 'fr' ? `Chambre ${index + 1}:` :
+                                  `Room ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1046,9 +1044,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1067,9 +1065,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' : 
-                       i18n.language === 'fr' ? 'Nombre de salles de bain:' : 
-                       'Number of bathrooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' :
+                        i18n.language === 'fr' ? 'Nombre de salles de bain:' :
+                          'Number of bathrooms:'}
                     </label>
                     <input
                       type="number"
@@ -1084,16 +1082,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.bathrooms.map((bathroom, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `حمام ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Salle de bain ${index + 1}:` : 
-                               `Bathroom ${index + 1}:`}
+                              {i18n.language === 'ar' ? `حمام ${index + 1}:` :
+                                i18n.language === 'fr' ? `Salle de bain ${index + 1}:` :
+                                  `Bathroom ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1105,9 +1103,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1126,9 +1124,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de salons:' : 
-                       i18n.language === 'fr' ? 'Nombre de salons:' : 
-                       'Number of salons:'}
+                      {i18n.language === 'ar' ? 'Nombre de salons:' :
+                        i18n.language === 'fr' ? 'Nombre de salons:' :
+                          'Number of salons:'}
                     </label>
                     <input
                       type="number"
@@ -1143,16 +1141,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.salons.map((salon, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `صالون ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Salon ${index + 1}:` : 
-                               `Salon ${index + 1}:`}
+                              {i18n.language === 'ar' ? `صالون ${index + 1}:` :
+                                i18n.language === 'fr' ? `Salon ${index + 1}:` :
+                                  `Salon ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1164,9 +1162,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1190,23 +1188,23 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasGarden}
                         onChange={(e) => handleMenageFieldChange('hasGarden', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'هل توجد حديقة؟' : 
-                       i18n.language === 'fr' ? 'Avez-vous un jardin ?' : 
-                       'Do you have a garden?'}
+                      {i18n.language === 'ar' ? 'هل توجد حديقة؟' :
+                        i18n.language === 'fr' ? 'Avez-vous un jardin ?' :
+                          'Do you have a garden?'}
                     </label>
                     {menageFormData.hasGarden && (
                       <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                         <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                          {i18n.language === 'ar' ? 'الحديقة:' : 
-                           i18n.language === 'fr' ? 'Jardin:' : 
-                           'Garden:'}
+                          {i18n.language === 'ar' ? 'الحديقة:' :
+                            i18n.language === 'fr' ? 'Jardin:' :
+                              'Garden:'}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'الطول (cm):' : 
-                               i18n.language === 'fr' ? 'Longueur (cm):' : 
-                               'Length (cm):'}
+                              {i18n.language === 'ar' ? 'الطول (cm):' :
+                                i18n.language === 'fr' ? 'Longueur (cm):' :
+                                  'Length (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1218,9 +1216,9 @@ export default function ReservationMenageCuine() {
                           </div>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'العرض (cm):' : 
-                               i18n.language === 'fr' ? 'Largeur (cm):' : 
-                               'Width (cm):'}
+                              {i18n.language === 'ar' ? 'العرض (cm):' :
+                                i18n.language === 'fr' ? 'Largeur (cm):' :
+                                  'Width (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1242,23 +1240,23 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasPool}
                         onChange={(e) => handleMenageFieldChange('hasPool', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'هل تريد تنظيف المسبح؟' : 
-                       i18n.language === 'fr' ? 'Voulez-vous nettoyer la piscine ?' : 
-                       'Do you want to clean the pool?'}
+                      {i18n.language === 'ar' ? 'هل تريد تنظيف المسبح؟' :
+                        i18n.language === 'fr' ? 'Voulez-vous nettoyer la piscine ?' :
+                          'Do you want to clean the pool?'}
                     </label>
                     {menageFormData.hasPool && (
                       <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                         <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                          {i18n.language === 'ar' ? 'المسبح:' : 
-                           i18n.language === 'fr' ? 'Piscine:' : 
-                           'Pool:'}
+                          {i18n.language === 'ar' ? 'المسبح:' :
+                            i18n.language === 'fr' ? 'Piscine:' :
+                              'Pool:'}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'الطول (cm):' : 
-                               i18n.language === 'fr' ? 'Longueur (cm):' : 
-                               'Length (cm):'}
+                              {i18n.language === 'ar' ? 'الطول (cm):' :
+                                i18n.language === 'fr' ? 'Longueur (cm):' :
+                                  'Length (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1270,9 +1268,9 @@ export default function ReservationMenageCuine() {
                           </div>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'العرض (cm):' : 
-                               i18n.language === 'fr' ? 'Largeur (cm):' : 
-                               'Width (cm):'}
+                              {i18n.language === 'ar' ? 'العرض (cm):' :
+                                i18n.language === 'fr' ? 'Largeur (cm):' :
+                                  'Width (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1294,9 +1292,9 @@ export default function ReservationMenageCuine() {
                 <>
                   <div className="form-group">
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de chambres:' : 
-                       i18n.language === 'fr' ? 'Nombre de chambres:' : 
-                       'Number of rooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de chambres:' :
+                        i18n.language === 'fr' ? 'Nombre de chambres:' :
+                          'Number of rooms:'}
                     </label>
                     <input
                       type="number"
@@ -1311,16 +1309,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.rooms.map((room, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Chambre ${index + 1}:` : 
-                               `Room ${index + 1}:`}
+                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` :
+                                i18n.language === 'fr' ? `Chambre ${index + 1}:` :
+                                  `Room ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1332,9 +1330,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1353,9 +1351,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' : 
-                       i18n.language === 'fr' ? 'Nombre de salles de bain:' : 
-                       'Number of bathrooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' :
+                        i18n.language === 'fr' ? 'Nombre de salles de bain:' :
+                          'Number of bathrooms:'}
                     </label>
                     <input
                       type="number"
@@ -1370,16 +1368,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.bathrooms.map((bathroom, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `حمام ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Salle de bain ${index + 1}:` : 
-                               `Bathroom ${index + 1}:`}
+                              {i18n.language === 'ar' ? `حمام ${index + 1}:` :
+                                i18n.language === 'fr' ? `Salle de bain ${index + 1}:` :
+                                  `Bathroom ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1391,9 +1389,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1412,9 +1410,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de salons:' : 
-                       i18n.language === 'fr' ? 'Nombre de salons:' : 
-                       'Number of salons:'}
+                      {i18n.language === 'ar' ? 'Nombre de salons:' :
+                        i18n.language === 'fr' ? 'Nombre de salons:' :
+                          'Number of salons:'}
                     </label>
                     <input
                       type="number"
@@ -1429,16 +1427,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.salons.map((salon, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `صالون ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Salon ${index + 1}:` : 
-                               `Salon ${index + 1}:`}
+                              {i18n.language === 'ar' ? `صالون ${index + 1}:` :
+                                i18n.language === 'fr' ? `Salon ${index + 1}:` :
+                                  `Salon ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1450,9 +1448,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1476,23 +1474,23 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasGarden}
                         onChange={(e) => handleMenageFieldChange('hasGarden', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'هل توجد حديقة؟' : 
-                       i18n.language === 'fr' ? 'Avez-vous un jardin ?' : 
-                       'Do you have a garden?'}
+                      {i18n.language === 'ar' ? 'هل توجد حديقة؟' :
+                        i18n.language === 'fr' ? 'Avez-vous un jardin ?' :
+                          'Do you have a garden?'}
                     </label>
                     {menageFormData.hasGarden && (
                       <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                         <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                          {i18n.language === 'ar' ? 'الحديقة:' : 
-                           i18n.language === 'fr' ? 'Jardin:' : 
-                           'Garden:'}
+                          {i18n.language === 'ar' ? 'الحديقة:' :
+                            i18n.language === 'fr' ? 'Jardin:' :
+                              'Garden:'}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'الطول (cm):' : 
-                               i18n.language === 'fr' ? 'Longueur (cm):' : 
-                               'Length (cm):'}
+                              {i18n.language === 'ar' ? 'الطول (cm):' :
+                                i18n.language === 'fr' ? 'Longueur (cm):' :
+                                  'Length (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1504,9 +1502,9 @@ export default function ReservationMenageCuine() {
                           </div>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'العرض (cm):' : 
-                               i18n.language === 'fr' ? 'Largeur (cm):' : 
-                               'Width (cm):'}
+                              {i18n.language === 'ar' ? 'العرض (cm):' :
+                                i18n.language === 'fr' ? 'Largeur (cm):' :
+                                  'Width (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1528,23 +1526,23 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasPool}
                         onChange={(e) => handleMenageFieldChange('hasPool', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'هل تريد تنظيف المسبح؟' : 
-                       i18n.language === 'fr' ? 'Voulez-vous nettoyer la piscine ?' : 
-                       'Do you want to clean the pool?'}
+                      {i18n.language === 'ar' ? 'هل تريد تنظيف المسبح؟' :
+                        i18n.language === 'fr' ? 'Voulez-vous nettoyer la piscine ?' :
+                          'Do you want to clean the pool?'}
                     </label>
                     {menageFormData.hasPool && (
                       <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                         <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                          {i18n.language === 'ar' ? 'المسبح:' : 
-                           i18n.language === 'fr' ? 'Piscine:' : 
-                           'Pool:'}
+                          {i18n.language === 'ar' ? 'المسبح:' :
+                            i18n.language === 'fr' ? 'Piscine:' :
+                              'Pool:'}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'الطول (cm):' : 
-                               i18n.language === 'fr' ? 'Longueur (cm):' : 
-                               'Length (cm):'}
+                              {i18n.language === 'ar' ? 'الطول (cm):' :
+                                i18n.language === 'fr' ? 'Longueur (cm):' :
+                                  'Length (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1556,9 +1554,9 @@ export default function ReservationMenageCuine() {
                           </div>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'العرض (cm):' : 
-                               i18n.language === 'fr' ? 'Largeur (cm):' : 
-                               'Width (cm):'}
+                              {i18n.language === 'ar' ? 'العرض (cm):' :
+                                i18n.language === 'fr' ? 'Largeur (cm):' :
+                                  'Width (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1580,9 +1578,9 @@ export default function ReservationMenageCuine() {
                 <>
                   <div className="form-group">
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de chambres:' : 
-                       i18n.language === 'fr' ? 'Nombre de chambres:' : 
-                       'Number of rooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de chambres:' :
+                        i18n.language === 'fr' ? 'Nombre de chambres:' :
+                          'Number of rooms:'}
                     </label>
                     <input
                       type="number"
@@ -1597,16 +1595,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.rooms.map((room, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Chambre ${index + 1}:` : 
-                               `Room ${index + 1}:`}
+                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` :
+                                i18n.language === 'fr' ? `Chambre ${index + 1}:` :
+                                  `Room ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1618,9 +1616,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1639,9 +1637,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' : 
-                       i18n.language === 'fr' ? 'Nombre de salles de bain:' : 
-                       'Number of bathrooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de salles de bain:' :
+                        i18n.language === 'fr' ? 'Nombre de salles de bain:' :
+                          'Number of bathrooms:'}
                     </label>
                     <input
                       type="number"
@@ -1656,16 +1654,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.bathrooms.map((bathroom, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `حمام ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Salle de bain ${index + 1}:` : 
-                               `Bathroom ${index + 1}:`}
+                              {i18n.language === 'ar' ? `حمام ${index + 1}:` :
+                                i18n.language === 'fr' ? `Salle de bain ${index + 1}:` :
+                                  `Bathroom ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1677,9 +1675,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1703,23 +1701,23 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasPool}
                         onChange={(e) => handleMenageFieldChange('hasPool', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'تنظيف المسابح؟' : 
-                       i18n.language === 'fr' ? 'Nettoyage de la piscine ?' : 
-                       'Pool cleaning?'}
+                      {i18n.language === 'ar' ? 'تنظيف المسابح؟' :
+                        i18n.language === 'fr' ? 'Nettoyage de la piscine ?' :
+                          'Pool cleaning?'}
                     </label>
                     {menageFormData.hasPool && (
                       <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                         <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                          {i18n.language === 'ar' ? 'المسبح:' : 
-                           i18n.language === 'fr' ? 'Piscine:' : 
-                           'Pool:'}
+                          {i18n.language === 'ar' ? 'المسبح:' :
+                            i18n.language === 'fr' ? 'Piscine:' :
+                              'Pool:'}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'الطول (cm):' : 
-                               i18n.language === 'fr' ? 'Longueur (cm):' : 
-                               'Length (cm):'}
+                              {i18n.language === 'ar' ? 'الطول (cm):' :
+                                i18n.language === 'fr' ? 'Longueur (cm):' :
+                                  'Length (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1731,9 +1729,9 @@ export default function ReservationMenageCuine() {
                           </div>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'العرض (cm):' : 
-                               i18n.language === 'fr' ? 'Largeur (cm):' : 
-                               'Width (cm):'}
+                              {i18n.language === 'ar' ? 'العرض (cm):' :
+                                i18n.language === 'fr' ? 'Largeur (cm):' :
+                                  'Width (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1755,9 +1753,9 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasOutdoor}
                         onChange={(e) => handleMenageFieldChange('hasOutdoor', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'تنظيف الأماكن الخارجية؟' : 
-                       i18n.language === 'fr' ? 'Nettoyage des espaces extérieurs ?' : 
-                       'Outdoor cleaning?'}
+                      {i18n.language === 'ar' ? 'تنظيف الأماكن الخارجية؟' :
+                        i18n.language === 'fr' ? 'Nettoyage des espaces extérieurs ?' :
+                          'Outdoor cleaning?'}
                     </label>
                   </div>
                 </>
@@ -1768,9 +1766,9 @@ export default function ReservationMenageCuine() {
                 <>
                   <div className="form-group">
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre de chambres:' : 
-                       i18n.language === 'fr' ? 'Nombre de chambres:' : 
-                       'Number of rooms:'}
+                      {i18n.language === 'ar' ? 'Nombre de chambres:' :
+                        i18n.language === 'fr' ? 'Nombre de chambres:' :
+                          'Number of rooms:'}
                     </label>
                     <input
                       type="number"
@@ -1785,16 +1783,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.rooms.map((room, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Chambre ${index + 1}:` : 
-                               `Room ${index + 1}:`}
+                              {i18n.language === 'ar' ? `غرفة ${index + 1}:` :
+                                i18n.language === 'fr' ? `Chambre ${index + 1}:` :
+                                  `Room ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1806,9 +1804,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1827,9 +1825,9 @@ export default function ReservationMenageCuine() {
 
                   <div className="form-group" style={{ marginTop: '16px' }}>
                     <label>
-                      {i18n.language === 'ar' ? 'Nombre d\'أجنحة:' : 
-                       i18n.language === 'fr' ? 'Nombre de suites:' : 
-                       'Number of suites:'}
+                      {i18n.language === 'ar' ? 'Nombre d\'أجنحة:' :
+                        i18n.language === 'fr' ? 'Nombre de suites:' :
+                          'Number of suites:'}
                     </label>
                     <input
                       type="number"
@@ -1844,16 +1842,16 @@ export default function ReservationMenageCuine() {
                         {menageFormData.suites.map((suite, index) => (
                           <div key={index} style={{ marginBottom: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                             <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                              {i18n.language === 'ar' ? `جناح ${index + 1}:` : 
-                               i18n.language === 'fr' ? `Suite ${index + 1}:` : 
-                               `Suite ${index + 1}:`}
+                              {i18n.language === 'ar' ? `جناح ${index + 1}:` :
+                                i18n.language === 'fr' ? `Suite ${index + 1}:` :
+                                  `Suite ${index + 1}:`}
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'الطول (cm):' : 
-                                   i18n.language === 'fr' ? 'Longueur (cm):' : 
-                                   'Length (cm):'}
+                                  {i18n.language === 'ar' ? 'الطول (cm):' :
+                                    i18n.language === 'fr' ? 'Longueur (cm):' :
+                                      'Length (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1865,9 +1863,9 @@ export default function ReservationMenageCuine() {
                               </div>
                               <div>
                                 <label style={{ fontSize: '14px' }}>
-                                  {i18n.language === 'ar' ? 'العرض (cm):' : 
-                                   i18n.language === 'fr' ? 'Largeur (cm):' : 
-                                   'Width (cm):'}
+                                  {i18n.language === 'ar' ? 'العرض (cm):' :
+                                    i18n.language === 'fr' ? 'Largeur (cm):' :
+                                      'Width (cm):'}
                                 </label>
                                 <input
                                   type="text"
@@ -1891,9 +1889,9 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasBreakfast}
                         onChange={(e) => handleMenageFieldChange('hasBreakfast', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'هل يشمل تجهيز الفطور؟' : 
-                       i18n.language === 'fr' ? 'Préparation du petit-déjeuner ?' : 
-                       'Breakfast preparation?'}
+                      {i18n.language === 'ar' ? 'هل يشمل تجهيز الفطور؟' :
+                        i18n.language === 'fr' ? 'Préparation du petit-déjeuner ?' :
+                          'Breakfast preparation?'}
                     </label>
                     {menageFormData.hasBreakfast && (
                       <div style={{ marginTop: '8px', fontSize: '14px', color: '#10b981', fontWeight: 600 }}>
@@ -1909,9 +1907,9 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasSheets}
                         onChange={(e) => handleMenageFieldChange('hasSheets', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'هل يشمل تغيير الشراشف؟' : 
-                       i18n.language === 'fr' ? 'Changement de draps ?' : 
-                       'Change sheets?'}
+                      {i18n.language === 'ar' ? 'هل يشمل تغيير الشراشف؟' :
+                        i18n.language === 'fr' ? 'Changement de draps ?' :
+                          'Change sheets?'}
                     </label>
                     {menageFormData.hasSheets && (
                       <div style={{ marginTop: '8px', fontSize: '14px', color: '#10b981', fontWeight: 600 }}>
@@ -1927,23 +1925,23 @@ export default function ReservationMenageCuine() {
                         checked={menageFormData.hasPool}
                         onChange={(e) => handleMenageFieldChange('hasPool', e.target.checked)}
                       />
-                      {i18n.language === 'ar' ? 'تنظيف المسبح؟' : 
-                       i18n.language === 'fr' ? 'Nettoyage de la piscine ?' : 
-                       'Pool cleaning?'}
+                      {i18n.language === 'ar' ? 'تنظيف المسبح؟' :
+                        i18n.language === 'fr' ? 'Nettoyage de la piscine ?' :
+                          'Pool cleaning?'}
                     </label>
                     {menageFormData.hasPool && (
                       <div style={{ marginTop: '12px', padding: '12px', backgroundColor: '#fff', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                         <div style={{ marginBottom: '8px', fontWeight: 600 }}>
-                          {i18n.language === 'ar' ? 'المسبح:' : 
-                           i18n.language === 'fr' ? 'Piscine:' : 
-                           'Pool:'}
+                          {i18n.language === 'ar' ? 'المسبح:' :
+                            i18n.language === 'fr' ? 'Piscine:' :
+                              'Pool:'}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'الطول (cm):' : 
-                               i18n.language === 'fr' ? 'Longueur (cm):' : 
-                               'Length (cm):'}
+                              {i18n.language === 'ar' ? 'الطول (cm):' :
+                                i18n.language === 'fr' ? 'Longueur (cm):' :
+                                  'Length (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1955,9 +1953,9 @@ export default function ReservationMenageCuine() {
                           </div>
                           <div>
                             <label style={{ fontSize: '14px' }}>
-                              {i18n.language === 'ar' ? 'العرض (cm):' : 
-                               i18n.language === 'fr' ? 'Largeur (cm):' : 
-                               'Width (cm):'}
+                              {i18n.language === 'ar' ? 'العرض (cm):' :
+                                i18n.language === 'fr' ? 'Largeur (cm):' :
+                                  'Width (cm):'}
                             </label>
                             <input
                               type="text"
@@ -1979,7 +1977,7 @@ export default function ReservationMenageCuine() {
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="preferred_date">
-                {t('reservation_menage_cuisine.preferred_date', 'Date préférée')}
+                {t('reservation.date', 'Date préférée')}
               </label>
               <input
                 type="date"
@@ -1993,7 +1991,7 @@ export default function ReservationMenageCuine() {
 
             <div className="form-group">
               <label htmlFor="preferred_time">
-                {t('reservation_menage_cuisine.preferred_time', 'Heure préférée')}
+                {t('reservation.time', 'Heure préférée')}
               </label>
               <input
                 type="time"
@@ -2007,7 +2005,7 @@ export default function ReservationMenageCuine() {
 
           <div className="form-group">
             <label htmlFor="message">
-              {t('reservation_menage_cuisine.message', 'Message')} <span className="optional">(optionnel)</span>
+              {t('reservation.message', 'Message')} <span className="optional">{t('reservation.optional', '(optionnel)')}</span>
             </label>
             <textarea
               id="message"
@@ -2015,7 +2013,7 @@ export default function ReservationMenageCuine() {
               value={formValues.message}
               onChange={handleInputChange}
               rows="4"
-              placeholder={t('reservation_menage_cuisine.message_placeholder', 'Informations supplémentaires ou demandes spéciales...')}
+              placeholder={t('reservation.message_placeholder', 'Informations supplémentaires ou demandes spéciales...')}
             />
           </div>
 
@@ -2024,9 +2022,9 @@ export default function ReservationMenageCuine() {
             className="reservation-cuisin-submit-button"
             disabled={isSubmitting || selectedMenageItems.length !== 1 || selectedTypes.length < 1}
           >
-            {isSubmitting 
-              ? t('reservation_menage_cuisine.submitting', 'Envoi en cours...') 
-              : t('reservation_menage_cuisine.submit', 'Envoyer la réservation')}
+            {isSubmitting
+              ? t('reservation.submitting', 'Envoi en cours...')
+              : t('reservation.submit', 'Envoyer la réservation')}
           </button>
         </form>
       </div>

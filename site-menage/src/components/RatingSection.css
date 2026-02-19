@@ -47,6 +47,44 @@
   font-style: italic;
 }
 
+/* User Not Authenticated Styles */
+.user-not-authenticated {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.not-authenticated-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.not-authenticated-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.not-authenticated-text {
+  text-align: left;
+}
+
+.not-authenticated-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.not-authenticated-message {
+  margin: 0;
+  font-size: 14px;
+  color: #b45309;
+}
+
 /* Rating Section Styles */
 .rating-section {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -403,41 +441,42 @@
     padding: 20px;
     margin-top: 20px;
   }
-  
+
   .rating-header {
     flex-direction: column;
     gap: 16px;
     align-items: flex-start;
   }
-  
+
   .rating-header h3 {
     font-size: 18px;
   }
-  
+
   .rating-item-header {
     flex-direction: column;
     gap: 8px;
     align-items: flex-start;
   }
-  
+
   .rating-form-container {
     padding: 20px;
   }
-  
+
   .rating-form-header h4 {
     font-size: 16px;
   }
-  
+
   .form-group input,
   .form-group textarea {
     padding: 10px 14px;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px;
+    /* Prevent zoom on iOS */
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .btn {
     width: 100%;
     padding: 14px 24px;
@@ -449,15 +488,15 @@
     padding: 16px;
     margin-top: 16px;
   }
-  
+
   .rating-form-container {
     padding: 16px;
   }
-  
+
   .rating-item {
     padding: 12px;
   }
-  
+
   .rating-comment {
     padding: 10px 12px;
     font-size: 13px;

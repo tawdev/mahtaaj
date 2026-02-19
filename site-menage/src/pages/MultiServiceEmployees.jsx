@@ -27,9 +27,6 @@ export default function MultiServiceEmployees() {
       {/* Services grid */}
       <div className="hand-workers-content">
         <div className="categories-section">
-          <h2 className="section-title">
-            {t('multi_services.services_title', 'الخدمات المتوفرة')}
-          </h2>
           <div className="categories-grid">
             {SERVICES.map((service) => (
               <button
@@ -39,8 +36,8 @@ export default function MultiServiceEmployees() {
                 onClick={() => navigate(`/multi-services-employees/${service.id}`)}
               >
                 <div className="category-image-container">
-                  <img 
-                    src={service.image || '/produitNettoyage.jpg'} 
+                  <img
+                    src={service.image || '/produitNettoyage.jpg'}
                     alt={service.label}
                     className="category-image"
                     onError={(e) => {
@@ -55,7 +52,7 @@ export default function MultiServiceEmployees() {
                       const currentSrc = e.target.src;
                       const currentIndex = defaultImages.findIndex(img => currentSrc.includes(img));
                       const nextIndex = currentIndex < defaultImages.length - 1 ? currentIndex + 1 : 0;
-                      
+
                       // Try next default image
                       if (currentSrc !== window.location.origin + defaultImages[nextIndex]) {
                         e.target.src = defaultImages[nextIndex];
@@ -69,7 +66,7 @@ export default function MultiServiceEmployees() {
                       }
                     }}
                   />
-                  <div 
+                  <div
                     className="multi-service-user-avatar"
                     style={{ display: 'none' }}
                   >

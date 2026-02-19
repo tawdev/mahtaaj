@@ -11,8 +11,9 @@ export default function ReservationAirbnb() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  
-  // Get data from navigation state or localStorage
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Form data
   const [formData, setFormData] = useState({
     firstname: '',
     phone: '',
@@ -22,9 +23,31 @@ export default function ReservationAirbnb() {
     preferred_date: ''
   });
 
-  const reservationData = location.state?.type || null;
-  const serviceType = location.state?.serviceType || 'nettoyage_rapide'; // 'nettoyage_rapide' or 'nettoyage_complet'
-  
+  // Get data from navigation state or sessionStorage (to preserve across login)
+  const [initialData, setInitialData] = useState(() => {
+    // 1. Try navigation state
+    if (location.state?.type) {
+      return {
+        type: location.state.type,
+        serviceType: location.state.serviceType || 'nettoyage_rapide'
+      };
+    }
+    // 2. Try sessionStorage
+    const saved = sessionStorage.getItem('airbnb_pending_reservation_state');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing saved state:', e);
+      }
+    }
+    return null;
+  });
+
+  const reservationData = initialData?.type || null;
+  const serviceType = initialData?.serviceType || 'nettoyage_rapide';
+
   // Determine back navigation based on serviceType
   const getBackRoute = () => {
     if (serviceType === 'nettoyage_complet') {
@@ -43,7 +66,7 @@ export default function ReservationAirbnb() {
     }
     return t('reservation_airbnb.back', 'Retour');
   };
-  
+
   // Calculate final price for display
   const [displayFinalPrice, setDisplayFinalPrice] = useState(0);
 
@@ -62,13 +85,50 @@ export default function ReservationAirbnb() {
     } catch (err) {
       console.error('Error loading prefill:', err);
     }
-    
+
     // Get final price from reservation data
     if (reservationData) {
       const finalPrice = parseFloat(reservationData.finalPrice) || parseFloat(reservationData.price) || 0;
       setDisplayFinalPrice(finalPrice);
     }
   }, [reservationData, serviceType]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('[ReservationAirbnb] No session found, redirecting to login...');
+          // Save state to survive redirect
+          if (location.state) {
+            sessionStorage.setItem('airbnb_pending_reservation_state', JSON.stringify(location.state));
+          }
+          localStorage.setItem('auth_return_url', location.pathname + location.search);
+          navigate('/login-register');
+          return;
+        }
+
+        // Session exists, check if we need to clean up sessionStorage
+        sessionStorage.removeItem('airbnb_pending_reservation_state');
+
+        // Prefill user data if available
+        if (session.user) {
+          setFormData(prev => ({
+            ...prev,
+            firstname: session.user.user_metadata?.first_name || session.user.user_metadata?.full_name || prev.firstname,
+            email: session.user.email || prev.email,
+            phone: session.user.user_metadata?.phone || prev.phone
+          }));
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -141,7 +201,7 @@ export default function ReservationAirbnb() {
 
       // Clear localStorage
       localStorage.removeItem('booking_prefill');
-      
+
       setSuccess(true);
       setTimeout(() => {
         navigate('/airbnb');
@@ -153,6 +213,10 @@ export default function ReservationAirbnb() {
       setLoading(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return <main className="reservation-airbnb-page"><div className="reservation-airbnb-loading">Vérification de l'authentification...</div></main>;
+  }
 
   if (success) {
     return (
@@ -171,7 +235,7 @@ export default function ReservationAirbnb() {
     return (
       <main className="reservation-airbnb-page">
         <div className="reservation-airbnb-header">
-          <button 
+          <button
             onClick={() => navigate(getBackRoute())}
             className="reservation-airbnb-back-btn"
             title={getBackButtonText()}
@@ -191,7 +255,7 @@ export default function ReservationAirbnb() {
   return (
     <main className="reservation-airbnb-page">
       <div className="reservation-airbnb-header">
-        <button 
+        <button
           className="reservation-airbnb-back-btn"
           onClick={() => navigate(getBackRoute())}
           title={getBackButtonText()}
@@ -308,7 +372,7 @@ export default function ReservationAirbnb() {
               <div className="summary-item">
                 <span className="summary-label">{t('reservation_airbnb.service_type', 'Type')}:</span>
                 <span className="summary-value">
-                  {serviceType === 'nettoyage_rapide' 
+                  {serviceType === 'nettoyage_rapide'
                     ? t('reservation_airbnb.service_type_rapide', 'Nettoyage Rapide')
                     : t('reservation_airbnb.service_type_complet', 'Nettoyage Complet')
                   }
@@ -334,8 +398,8 @@ export default function ReservationAirbnb() {
             className="reservation-airbnb-submit-btn"
             disabled={loading}
           >
-            {loading 
-              ? t('reservation_airbnb.submitting', 'Envoi...') 
+            {loading
+              ? t('reservation_airbnb.submitting', 'Envoi...')
               : t('reservation_airbnb.submit', 'Confirmer la réservation')
             }
           </button>

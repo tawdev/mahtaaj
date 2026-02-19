@@ -9,16 +9,37 @@ export default function HandWorkerCategoryDetails() {
   const { id } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  
+
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadCategory();
     }
-  }, [id]);
+
+    // Check for pending reservation context after login
+    const pending = sessionStorage.getItem('handworker_pending_context');
+    if (pending) {
+      try {
+        const { pendingReservation, categoryId, type } = JSON.parse(pending);
+        if (pendingReservation && categoryId === id) {
+          console.log(`[HandWorkerCategoryDetails] Post-login: Redirecting to ${type} for category ${id}`);
+          sessionStorage.removeItem('handworker_pending_context');
+
+          if (type === 'appointment') {
+            navigate(`/hand-workers/appointment?category=${id}`);
+          } else {
+            navigate(`/hand-workers/booking?category=${id}`);
+          }
+        }
+      } catch (err) {
+        console.error('Error parsing pending context:', err);
+      }
+    }
+  }, [id, navigate]);
 
   const getCurrentLang = () => (localStorage.getItem('currentLang') || i18n.language || 'fr').split(/[-_]/)[0].toLowerCase();
 
@@ -69,12 +90,12 @@ export default function HandWorkerCategoryDetails() {
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    
+
     // If it's already a Supabase URL, return it
     if (imagePath.includes('supabase.co/storage')) {
       return imagePath;
     }
-    
+
     // If it's an old Laravel path, extract filename and try to get from Supabase
     if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/') || imagePath.startsWith('/images/') || imagePath.startsWith('/uploads/')) {
       const filename = imagePath.split('/').pop();
@@ -86,7 +107,7 @@ export default function HandWorkerCategoryDetails() {
       }
       return null;
     }
-    
+
     // If it's just a filename, try to get from Supabase Storage
     if (!imagePath.includes('/') && !imagePath.includes('http')) {
       const { data: { publicUrl } } = supabase.storage
@@ -94,12 +115,12 @@ export default function HandWorkerCategoryDetails() {
         .getPublicUrl(imagePath);
       return publicUrl;
     }
-    
+
     // Return as-is if it's a valid URL
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
+
     return null;
   };
 
@@ -124,27 +145,27 @@ export default function HandWorkerCategoryDetails() {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[HandWorkerCategoryDetails] Loading category with ID:', id);
-      
+
       const { data, error } = await supabase
         .from('hand_worker_categories')
         .select('*')
         .eq('id', id)
         .eq('is_active', true)
         .single();
-      
+
       if (error) {
         console.error('[HandWorkerCategoryDetails] Error loading category:', error);
         setError(t('hand_workers.loading_error') || 'Error loading category');
         return;
       }
-      
+
       if (!data) {
         setError('Category not found');
         return;
       }
-      
+
       console.log('[HandWorkerCategoryDetails] Category loaded:', data);
       setCategory(data);
     } catch (e) {
@@ -155,10 +176,41 @@ export default function HandWorkerCategoryDetails() {
     }
   };
 
+  const handleReserve = async (type) => {
+    // Check authentication
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      // Set pending context to re-trigger after login
+      sessionStorage.setItem('handworker_pending_context', JSON.stringify({
+        pendingReservation: true,
+        categoryId: id,
+        type: type // 'appointment' or 'booking'
+      }));
+
+      // Store returnUrl as the current page
+      localStorage.setItem('auth_return_url', `/hand-workers/category/${id}`);
+
+      // Short delay for stability and feedback
+      setIsProcessing(true);
+      setTimeout(() => {
+        navigate('/login-register');
+      }, 500);
+      return;
+    }
+
+    // If authenticated, navigate to the requested page
+    if (type === 'appointment') {
+      navigate(`/hand-workers/appointment?category=${id}`);
+    } else {
+      navigate(`/hand-workers/booking?category=${id}`);
+    }
+  };
+
   if (loading) {
     return (
       <main className="hand-workers-page">
-        <div className="loading-state" style={{textAlign: 'center', margin: '40px 0'}}>
+        <div className="loading-state" style={{ textAlign: 'center', margin: '40px 0' }}>
           <div style={{
             display: 'inline-block',
             width: '40px',
@@ -169,7 +221,7 @@ export default function HandWorkerCategoryDetails() {
             animation: 'spin 1s linear infinite',
             marginBottom: '16px'
           }}></div>
-          <p style={{color: '#64748b', fontSize: '0.95rem'}}>{t('hand_workers.loading') || 'Chargement...'}</p>
+          <p style={{ color: '#64748b', fontSize: '0.95rem' }}>{t('hand_workers.loading') || 'Chargement...'}</p>
           <style>{`
             @keyframes spin {
               0% { transform: rotate(0deg); }
@@ -195,7 +247,7 @@ export default function HandWorkerCategoryDetails() {
           {error || 'Category not found'}
         </div>
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <button 
+          <button
             onClick={() => navigate('/hand-workers')}
             className="back-button"
             style={{
@@ -223,10 +275,10 @@ export default function HandWorkerCategoryDetails() {
     <main className="hand-workers-page">
       <div className="category-details-section">
         <div className="category-header">
-          <button 
-            className="back-button" 
+          <button
+            className="back-button"
             onClick={() => navigate('/hand-workers')}
-            data-aos="fade-up" 
+            data-aos="fade-up"
             data-aos-delay="100"
           >
             ← {t('hand_workers.back_to_categories') || 'Retour aux Catégories'}
@@ -253,7 +305,7 @@ export default function HandWorkerCategoryDetails() {
                       }
                     }}
                   />
-                  <div className="category-info-icon" style={{display: 'none'}}>
+                  <div className="category-info-icon" style={{ display: 'none' }}>
                     {category.icon ? (
                       <i className={category.icon}></i>
                     ) : (
@@ -288,12 +340,13 @@ export default function HandWorkerCategoryDetails() {
             {!shouldHideMonthlyMessage(category) && category.minimum_jours > 1 && (
               <div className="category-info-message">
                 <p className="message-text">{t('hand_workers.less_than_month_booking_message', 'أقل من شهر — المرجو الضغط على هذا الزر لحجز موعد')}</p>
-                <Link 
-                  to={`/hand-workers/appointment?category=${category.id}`}
+                <button
+                  onClick={() => handleReserve('appointment')}
                   className="booking-button-inline"
+                  disabled={isProcessing}
                 >
                   {t('hand_workers.book_appointment', 'Réserver un rendez-vous')}
-                </Link>
+                </button>
               </div>
             )}
           </div>
@@ -303,12 +356,13 @@ export default function HandWorkerCategoryDetails() {
           <div className="reservation-card">
             <h3>{t('hand_workers.book_service')}</h3>
             <p>{t('hand_workers.book_service_description')}</p>
-            <Link 
-              to={`/hand-workers/booking?category=${category.id}`}
+            <button
+              onClick={() => handleReserve('booking')}
               className="booking-button"
+              disabled={isProcessing}
             >
               {t('hand_workers.book_now')}
-            </Link>
+            </button>
           </div>
         </div>
       </div>

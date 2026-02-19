@@ -991,12 +991,22 @@ function calculateRatingStats(ratings) {
     .map(r => ({
       rating: r.rating,
       comment: r.comment,
-      created_at: r.created_at
+      created_at: r.created_at,
+      name: r.name // Get name from ratings table
     }));
+
+  // Calculate distribution
+  const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  ratings.forEach(r => {
+    if (r.rating >= 1 && r.rating <= 5) {
+      distribution[Math.floor(r.rating)]++;
+    }
+  });
 
   return {
     total_ratings: totalRatings,
     average_rating: averageRating,
+    distribution: distribution,
     recent_comments: recentComments
   };
 }
@@ -1010,7 +1020,10 @@ export async function getRatings() {
       .is('product_id', null)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error('[getRatings] Error:', error);
+      throw error;
+    }
 
     // Calculate stats and return in expected format
     const stats = calculateRatingStats(data);
@@ -1078,8 +1091,16 @@ export async function submitRating(ratingData) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Require authentication for submitting ratings
+    if (!user) {
+      return {
+        success: false,
+        message: 'Vous devez être connecté pour laisser un avis.'
+      };
+    }
+
     // Check if user has already rated the site (for site ratings, product_id should be null)
-    if (user && !ratingData.product_id) {
+    if (!ratingData.product_id) {
       const { data: existingRating, error: checkError } = await supabase
         .from('ratings')
         .select('*')
@@ -1094,7 +1115,7 @@ export async function submitRating(ratingData) {
       if (existingRating) {
         return {
           success: false,
-          message: 'Vous avez déjà soumis une évaluation. Vous ne pouvez évaluer qu\'une seule fois.'
+          message: 'Vous avez déjà donné votre avis. Merci de votre contribution !'
         };
       }
     }
@@ -1119,7 +1140,8 @@ export async function submitRating(ratingData) {
       .from('ratings')
       .insert([{
         ...ratingData,
-        user_id: user?.id || null,
+        user_id: user.id, // Always use authenticated user ID
+        name: user.user_metadata?.name || user.email?.split('@')[0] || 'Utilisateur', // Store name from metadata
         user_ip: userIp,
         user_agent: navigator.userAgent,
         product_id: ratingData.product_id || null, // Ensure product_id is null for site ratings
@@ -1132,7 +1154,7 @@ export async function submitRating(ratingData) {
       if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
         return {
           success: false,
-          message: 'Vous avez déjà soumis une évaluation. Vous ne pouvez évaluer qu\'une seule fois.'
+          message: 'Vous avez déjà donné votre avis. Merci de votre contribution !'
         };
       }
       // For other database errors, throw to be caught by outer catch

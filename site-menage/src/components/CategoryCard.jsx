@@ -76,48 +76,46 @@ export default function CategoryCard({ category, onClick, index }) {
     >
       <div className="category-image-container">
         {category.imageUrl && !imageError ? (
-          <>
-            <img
-              src={category.imageUrl}
-              alt={category.name}
-              className="category-image"
-              onError={(e) => {
-                setImageError(true);
-                e.target.style.display = 'none';
-              }}
-            />
-            <div className="category-name-overlay">
-              <h3 className="category-title">{category.name}</h3>
-            </div>
-          </>
+          <img
+            src={category.imageUrl}
+            alt={category.name}
+            className="category-image"
+            onError={(e) => {
+              setImageError(true);
+              e.target.style.display = 'none';
+            }}
+          />
         ) : (
-          <>
-            <div className="category-icon">
-              {category.icon ? (
-                <i className={category.icon}></i>
-              ) : (
-                <i className="fas fa-tools"></i>
-              )}
-            </div>
-            <div className="category-name-overlay">
-              <h3 className="category-title">{category.name}</h3>
-            </div>
-          </>
+          <div className="category-icon-placeholder">
+            {category.icon ? (
+              <i className={category.icon}></i>
+            ) : (
+              <i className="fas fa-tools"></i>
+            )}
+          </div>
         )}
+        <div className="category-name-overlay">
+          <h3 className="category-title">{category.name}</h3>
+        </div>
       </div>
-      
+
       <div className="category-footer">
-        <div className="category-price">
-          <span className="price-label">{t('hand_workers.price_per_day') || 'Prix par jour'}</span>
-          <span className="price-value">{formatPrice(category.price_per_day || category.price_per_hour)}</span>
+        <div className="category-stats">
+          <div className="category-price">
+            <span className="price-label">{t('hand_workers.price_per_day') || 'PRIX PAR JOUR'}</span>
+            <span className="price-value">{formatPrice(category.price_per_day || category.price_per_hour)}</span>
+          </div>
+          <div className="category-minimum">
+            <span className="minimum-label">{t('hand_workers.minimum_jours') || 'Jours minimum'}</span>
+            <span className="minimum-value">{formatMinimumJours(category.minimum_jours)}</span>
+          </div>
         </div>
-        <div className="category-minimum">
-          <span className="minimum-label">{t('hand_workers.minimum_jours') || 'Jours minimum'}</span>
-          <span className="minimum-value">{formatMinimumJours(category.minimum_jours)}</span>
-        </div>
+
         {!shouldHideMonthlyMessage(category) && category.minimum_jours > 1 && (
           <div className="category-message">
-            <p className="message-text">{t('hand_workers.less_than_month_message', { defaultValue: 'أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة' })}</p>
+            <p className="message-text">
+              {t('hand_workers.less_than_month_message', { defaultValue: 'أقل من شهر المرجو التواصل معنا للتفاوض حسب المدة' })}
+            </p>
           </div>
         )}
       </div>

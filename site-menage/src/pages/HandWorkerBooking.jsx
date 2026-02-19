@@ -10,7 +10,7 @@ export default function HandWorkerBooking() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   const [categories, setCategories] = useState([]);
   const [handWorkers, setHandWorkers] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -43,7 +43,8 @@ export default function HandWorkerBooking() {
 
   useEffect(() => {
     loadCategories();
-    
+    fetchUser();
+
     // Pre-select category if provided in URL
     const categoryId = searchParams.get('category');
     if (categoryId) {
@@ -51,13 +52,47 @@ export default function HandWorkerBooking() {
     }
   }, [searchParams]);
 
+  const fetchUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        console.log('[HandWorkerBooking] User found, autofilling form:', user);
+
+        let firstName = user.user_metadata?.first_name || '';
+        let lastName = user.user_metadata?.last_name || '';
+
+        // If first/last names aren't in metadata, try to split full_name
+        if (!firstName && !lastName) {
+          const fullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
+          if (fullName) {
+            const parts = fullName.trim().split(' ');
+            firstName = parts[0];
+            lastName = parts.slice(1).join(' ') || '';
+          }
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          client_first_name: firstName || prev.client_first_name,
+          client_last_name: lastName || prev.client_last_name,
+          client_email: user.email || prev.client_email,
+          client_phone: user.user_metadata?.phone || prev.client_phone,
+          // We don't autofill location/address as it might change per service
+        }));
+      }
+    } catch (error) {
+      console.error('[HandWorkerBooking] Error fetching user:', error);
+    }
+  };
+
   // Recharger les catégories quand la langue change
   useEffect(() => {
     if (categories.length > 0) {
       const currentLanguage = i18n.language || 'fr';
       const translatedCategories = translateHandWorkerCategories(categories, currentLanguage);
       setCategories(translatedCategories);
-      
+
       // Mettre à jour la catégorie sélectionnée si elle existe
       if (selectedCategory) {
         const updatedCategory = translatedCategories.find(cat => cat.id === selectedCategory.id);
@@ -72,28 +107,28 @@ export default function HandWorkerBooking() {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[HandWorkerBooking] Loading categories from Supabase...');
-      
+
       const { data, error } = await supabase
         .from('hand_worker_categories')
         .select('*')
         .eq('is_active', true)
         .order('order', { ascending: true });
-      
+
       if (error) {
         console.error('[HandWorkerBooking] Error loading categories:', error);
         setError(t('hand_worker_booking.loading_error'));
         return;
       }
-      
+
       console.log('[HandWorkerBooking] Loaded categories:', data?.length || 0);
-      
+
       // Appliquer les traductions selon la langue actuelle
       const currentLanguage = i18n.language || 'fr';
       const translatedCategories = translateHandWorkerCategories(data || [], currentLanguage);
       setCategories(translatedCategories);
-      
+
       // Auto-select category if provided in URL
       const categoryId = searchParams.get('category');
       if (categoryId) {
@@ -114,19 +149,19 @@ export default function HandWorkerBooking() {
   const loadHandWorkers = async (categoryId) => {
     try {
       console.log('[HandWorkerBooking] Loading hand workers for category:', categoryId);
-      
+
       const { data, error } = await supabase
         .from('hand_workers')
         .select('*')
         .eq('category_id', categoryId)
         .eq('is_available', true)
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         console.error('[HandWorkerBooking] Error loading hand workers:', error);
         return;
       }
-      
+
       console.log('[HandWorkerBooking] Loaded hand workers:', data?.length || 0);
       setHandWorkers(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -156,11 +191,11 @@ export default function HandWorkerBooking() {
     const category = categories.find(cat => cat.id == categoryId);
     setSelectedCategory(category);
     const isExcluded = isExcludedCategory(category);
-    const defaultDuration = isExcluded 
-      ? (category?.minimum_jours || 1) 
+    const defaultDuration = isExcluded
+      ? (category?.minimum_jours || 1)
       : (category?.minimum_jours && category.minimum_jours >= 30 ? category.minimum_jours : 30);
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       category_id: categoryId,
       hand_worker_id: '',
       duration_days: defaultDuration
@@ -170,13 +205,13 @@ export default function HandWorkerBooking() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Validate duration_days: minimum 30 days (except for excluded categories)
     if (name === 'duration_days') {
       const days = parseFloat(value);
       const isExcluded = isExcludedCategory(selectedCategory);
       const minDays = isExcluded ? (selectedCategory?.minimum_jours || 1) : 30;
-      
+
       if (value && !isNaN(days) && days < minDays) {
         if (isExcluded) {
           setDurationError(t('hand_worker_booking.minimum_duration_error', `الحد الأدنى لمدة الخدمة هو ${minDays} يوماً`));
@@ -187,7 +222,7 @@ export default function HandWorkerBooking() {
         setDurationError('');
       }
     }
-    
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -210,7 +245,7 @@ export default function HandWorkerBooking() {
       });
 
       const { latitude, longitude } = position.coords;
-      
+
       // Use reverse geocoding to get address
       // Using Nominatim (OpenStreetMap) as a free geocoding service
       try {
@@ -222,37 +257,37 @@ export default function HandWorkerBooking() {
             }
           }
         );
-        
+
         if (response.ok) {
           const data = await response.json();
           if (data.address) {
             // Build address string from components
             const addressParts = [];
-            
+
             // Try to get street/house number
             const street = data.address.road || data.address.street;
             const houseNumber = data.address.house_number;
             if (street) {
               addressParts.push(houseNumber ? `${houseNumber} ${street}` : street);
             }
-            
+
             // Try to get city/town/village
             const city = data.address.city || data.address.town || data.address.village || data.address.municipality;
             if (city) {
               setFormData(prev => ({ ...prev, city: city }));
             }
-            
+
             // Try to get region/state
             const region = data.address.region || data.address.state;
             if (region && !addressParts.includes(region)) {
               addressParts.push(region);
             }
-            
+
             // Build full address
-            const fullAddress = addressParts.length > 0 
+            const fullAddress = addressParts.length > 0
               ? addressParts.join(', ')
               : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-            
+
             setFormData(prev => ({
               ...prev,
               address: fullAddress,
@@ -283,7 +318,7 @@ export default function HandWorkerBooking() {
     } catch (error) {
       console.error('[HandWorkerBooking] Geolocation error:', error);
       let errorMessage = t('hand_worker_booking.geolocation_error') || 'Erreur lors de la récupération de la localisation';
-      
+
       switch (error.code) {
         case error.PERMISSION_DENIED:
           errorMessage = t('hand_worker_booking.geolocation_permission_denied') || 'Permission de géolocalisation refusée. Veuillez autoriser l\'accès à votre position.';
@@ -298,7 +333,7 @@ export default function HandWorkerBooking() {
           errorMessage = t('hand_worker_booking.geolocation_error') || 'Impossible de récupérer votre localisation. Veuillez entrer votre adresse manuellement.';
           break;
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsGettingLocation(false);
@@ -309,13 +344,13 @@ export default function HandWorkerBooking() {
     if (selectedCategory && formData.duration_days) {
       const days = parseFloat(formData.duration_days);
       const isExcluded = isExcludedCategory(selectedCategory);
-      
+
       // For excluded categories, always calculate price using category's price_per_day
       if (isExcluded) {
         const pricePerDay = selectedCategory.price_per_day || selectedCategory.price_per_hour * 8 || 0;
         return pricePerDay * days;
       }
-      
+
       // For other categories, calculate price if 30 days or more (170 DH per day)
       if (days >= 30) {
         const pricePerDay = 170; // Fixed price per day
@@ -331,12 +366,12 @@ export default function HandWorkerBooking() {
     if (formData.duration_days && selectedCategory) {
       const days = parseFloat(formData.duration_days);
       const isExcluded = isExcludedCategory(selectedCategory);
-      
+
       // For excluded categories, always show price breakdown (no minimum 30 days requirement)
       if (isExcluded) {
         return true;
       }
-      
+
       // For other categories, check if 30 days or more
       return days >= 30;
     }
@@ -345,7 +380,7 @@ export default function HandWorkerBooking() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!selectedCategory) {
       const errorMsg = t('hand_worker_booking.select_category_error');
       console.error('[HandWorkerBooking] Error: No category selected');
@@ -357,9 +392,9 @@ export default function HandWorkerBooking() {
     const days = parseFloat(formData.duration_days);
     const isExcluded = isExcludedCategory(selectedCategory);
     const minDays = isExcluded ? (selectedCategory?.minimum_jours || 1) : 30;
-    
+
     if (!formData.duration_days || isNaN(days) || days < minDays) {
-      const errorMsg = isExcluded 
+      const errorMsg = isExcluded
         ? t('hand_worker_booking.minimum_duration_error', `الحد الأدنى لمدة الخدمة هو ${minDays} يوماً`)
         : t('hand_worker_booking.minimum_duration_error', 'الحد الأدنى لمدة الخدمة هو 30 يوماً');
       setDurationError(errorMsg);
@@ -375,21 +410,21 @@ export default function HandWorkerBooking() {
       console.log('[HandWorkerBooking] Starting submission...');
       console.log('[HandWorkerBooking] Form data:', formData);
       console.log('[HandWorkerBooking] Selected category:', selectedCategory);
-      
+
       // Get user ID from Supabase session if available
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError) {
         console.error('[HandWorkerBooking] Session error:', sessionError);
       }
-      
+
       const userId = session?.user?.id || null;
       console.log('[HandWorkerBooking] User ID:', userId);
-      
+
       // Calculate total price (will be null if <= 30 days, but we still allow submission)
       const totalPrice = calculateTotalPrice();
       console.log('[HandWorkerBooking] Calculated total price:', totalPrice);
-      
+
       // Prepare reservation data
       const reservationData = {
         user_id: userId,
@@ -410,15 +445,15 @@ export default function HandWorkerBooking() {
         status: 'pending',
         client_notes: formData.client_notes || null
       };
-      
+
       console.log('[HandWorkerBooking] Reservation data to insert:', reservationData);
-      
+
       const { data, error } = await supabase
         .from('hand_worker_reservations')
         .insert(reservationData)
         .select()
         .single();
-      
+
       if (error) {
         console.error('[HandWorkerBooking] ❌ Error submitting reservation:', error);
         console.error('[HandWorkerBooking] Error details:', {
@@ -431,9 +466,9 @@ export default function HandWorkerBooking() {
         setError(errorMessage);
         return;
       }
-      
+
       console.log('[HandWorkerBooking] ✅ Reservation submitted successfully:', data);
-      
+
       setSuccess(true);
       // Reset form
       setFormData({
@@ -481,7 +516,7 @@ export default function HandWorkerBooking() {
           </div>
           <h2>{t('hand_worker_booking.success_title')}</h2>
           <p>{t('hand_worker_booking.success_message')}</p>
-          <button 
+          <button
             className="back-to-home-button"
             onClick={() => {
               // Navigate back to category details page if categoryId exists, otherwise to main page
@@ -513,17 +548,6 @@ export default function HandWorkerBooking() {
             }
           }}
           className="back-button-top"
-          style={{ 
-            background: 'none', 
-            border: 'none', 
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: 0,
-            color: 'inherit',
-            textDecoration: 'none'
-          }}
         >
           <span className="back-icon">←</span>
           {t('hand_worker_booking.back_to_hand_workers', 'Retour aux services')}
@@ -764,7 +788,7 @@ export default function HandWorkerBooking() {
                   <div className="price-item">
                     <span>{t('hand_worker_booking.monthly_rate') || 'السعر الشهري (170 DH لكل يوم)'}</span>
                     <span>
-                      {isExcludedCategory(selectedCategory) 
+                      {isExcludedCategory(selectedCategory)
                         ? `${selectedCategory.price_per_day || selectedCategory.price_per_hour * 8 || 0} DH`
                         : '170 DH'}
                     </span>

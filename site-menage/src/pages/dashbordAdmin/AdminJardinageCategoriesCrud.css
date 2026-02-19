@@ -347,7 +347,7 @@
   font-size: 14px;
 }
 
-.category-description {
+.categories-table .category-description {
   color: #64748b;
   font-size: 14px;
   white-space: normal;
@@ -389,7 +389,8 @@
 .actions {
   display: flex;
   gap: 6px;
-  min-width: 120px; /* ensure space for edit/delete */
+  min-width: 120px;
+  /* ensure space for edit/delete */
 }
 
 /* Harmonise la taille des petits boutons d’action (✏️ ⚙️ 🗑️) */
@@ -400,7 +401,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px; /* taille lisible pour les icônes emoji */
+  font-size: 12px;
+  /* taille lisible pour les icônes emoji */
 }
 
 /* Keep Actions column visible (stick to left) when scrolling horizontally */
@@ -570,44 +572,44 @@
   .admin-jardinage-categories {
     padding: 16px;
   }
-  
+
   .admin-header {
     flex-direction: column;
     gap: 16px;
     text-align: center;
   }
-  
+
   .admin-header h2 {
     font-size: 20px;
   }
-  
+
   .filters-section {
     flex-direction: column;
   }
-  
+
   .categories-table-container {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .categories-table {
     min-width: 1200px;
   }
-  
+
   .form-container {
     width: 95%;
     padding: 20px;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .btn {
     width: 100%;
     justify-content: center;
   }
-  
+
   .stats-section {
     grid-template-columns: 1fr;
   }
@@ -617,27 +619,27 @@
   .admin-jardinage-categories {
     padding: 12px;
   }
-  
+
   .admin-header {
     padding: 16px;
   }
-  
+
   .categories-table th,
   .categories-table td {
     padding: 12px 8px;
     font-size: 14px;
   }
-  
+
   .stat-card {
     padding: 16px;
   }
-  
+
   .stat-icon {
     font-size: 24px;
     width: 48px;
     height: 48px;
   }
-  
+
   .stat-number {
     font-size: 20px;
   }

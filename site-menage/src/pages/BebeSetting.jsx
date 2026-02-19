@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import ReservationForm from '../components/ReservationForm';
 import { supabase } from '../lib/supabase';
 import './BebeSetting.css';
 
 export default function BebeSetting() {
   const { t, i18n } = useTranslation();
-  
+  const navigate = useNavigate();
+
   // Use backend-provided localized fields directly
 
   const [categories, setCategories] = useState([]);
@@ -19,6 +20,18 @@ export default function BebeSetting() {
   const [selectedService, setSelectedService] = useState(null);
   const [showServiceDetails, setShowServiceDetails] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [initialClientName, setInitialClientName] = useState('');
+
+  // Fetch user session for auto-fill
+  useEffect(() => {
+    const fetchUserSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.user_metadata?.full_name) {
+        setInitialClientName(session.user.user_metadata.full_name);
+      }
+    };
+    fetchUserSession();
+  }, []);
 
   useEffect(() => {
     // Set direction based on language
@@ -39,6 +52,23 @@ export default function BebeSetting() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i18n.language]);
 
+  // Check for pending reservation after login
+  useEffect(() => {
+    const pending = sessionStorage.getItem('bebe_pending_context');
+    if (pending) {
+      try {
+        const { pendingReservation, categoryId } = JSON.parse(pending);
+        if (pendingReservation) {
+          console.log('[BebeSetting] Auto-redirecting to reservation page for category:', categoryId);
+          sessionStorage.removeItem('bebe_pending_context');
+          navigate(`/bebe-setting/reservation/${categoryId}`);
+        }
+      } catch (err) {
+        console.error('Error parsing pending context:', err);
+      }
+    }
+  }, [navigate]);
+
   // Load first service automatically when categories are loaded
   useEffect(() => {
     const loadFirstServiceAuto = async () => {
@@ -51,14 +81,14 @@ export default function BebeSetting() {
           .eq('is_active', true)
           .order('order', { ascending: true })
           .limit(1);
-        
+
         if (data && data.length > 0) {
           setSelectedService(data[0]);
           setSelectedCategory(firstCategory);
         }
       }
     };
-    
+
     if (categories.length > 0) {
       loadFirstServiceAuto();
     }
@@ -68,12 +98,12 @@ export default function BebeSetting() {
   // Helper function to get image URL from Supabase Storage
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
-    
+
     // If it's already a Supabase URL, return it
     if (imagePath.includes('supabase.co/storage')) {
       return imagePath;
     }
-    
+
     // If it's an old Laravel path, extract filename and try to get from Supabase
     if (imagePath.includes('127.0.0.1:8000') || imagePath.includes('localhost:8000') || imagePath.startsWith('/storage/') || imagePath.startsWith('/images/')) {
       const filename = imagePath.split('/').pop();
@@ -88,7 +118,7 @@ export default function BebeSetting() {
       }
       return null;
     }
-    
+
     // If it's just a filename, try to get from Supabase Storage
     if (!imagePath.includes('/') && !imagePath.includes('http')) {
       const { data: { publicUrl } } = supabase.storage
@@ -96,12 +126,12 @@ export default function BebeSetting() {
         .getPublicUrl(imagePath);
       return publicUrl;
     }
-    
+
     // Return as-is if it's a valid URL
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
     }
-    
+
     return null;
   };
 
@@ -109,9 +139,9 @@ export default function BebeSetting() {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('[BebeSetting] Loading categories from Supabase');
-      
+
       const { data, error } = await supabase
         .from('bebe_categories')
         .select('*')
@@ -138,9 +168,9 @@ export default function BebeSetting() {
     try {
       setLoadingDetails(true);
       setError('');
-      
+
       console.log('[BebeSetting] Loading category details for category_id:', categoryId);
-      
+
       const { data, error } = await supabase
         .from('bebe_settings')
         .select('*')
@@ -170,7 +200,7 @@ export default function BebeSetting() {
       }
       setSettings(Array.isArray(data) ? data : []);
       setSelectedCategory(categories.find(cat => cat.id === categoryId));
-      
+
       // Auto-select first service if available
       if (data && data.length > 0) {
         setSelectedService(data[0]);
@@ -200,11 +230,11 @@ export default function BebeSetting() {
         .eq('is_active', true)
         .order('order', { ascending: true })
         .limit(1);
-      
+
       if (error) {
         console.error('[BebeSetting] Error loading first service:', error);
       }
-      
+
       if (data && data.length > 0) {
         console.log('[BebeSetting] Setting selectedService:', {
           id: data[0].id,
@@ -217,6 +247,30 @@ export default function BebeSetting() {
         setSelectedService(null);
       }
     }
+  };
+
+  const handleReserve = async (categoryId) => {
+    // Check authentication
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      // Set pending context to re-trigger after login
+      sessionStorage.setItem('bebe_pending_context', JSON.stringify({
+        pendingReservation: true,
+        categoryId: categoryId
+      }));
+
+      // Store returnUrl as the current page
+      localStorage.setItem('auth_return_url', '/bebe-setting');
+
+      // Use a short delay to allow context to be stored securely
+      setTimeout(() => {
+        navigate('/login-register', { state: { returnUrl: '/bebe-setting' } });
+      }, 500);
+      return;
+    }
+
+    navigate(`/bebe-setting/reservation/${categoryId}`);
   };
 
   const handleBackToCategories = () => {
@@ -236,7 +290,7 @@ export default function BebeSetting() {
   };
 
   const handleReservationCancel = () => {
-    setShowReservationForm(false);
+    // No longer used in modal context, but keeping function for logic consistency if needed elsewhere
   };
 
   // Helper function to get localized description
@@ -245,9 +299,9 @@ export default function BebeSetting() {
       console.warn('[BebeSetting] getLocalizedDescription: setting is null/undefined');
       return t('bebe_setting.description_not_available');
     }
-    
+
     const lang = (i18n.language || 'fr').toString().split(/[-_]/)[0].toLowerCase();
-    
+
     // Try language-specific description first
     if (lang === 'ar' && setting.description_ar && setting.description_ar.trim()) {
       if (process.env.NODE_ENV === 'development') {
@@ -267,7 +321,7 @@ export default function BebeSetting() {
       }
       return setting.description_en.trim();
     }
-    
+
     // Fallback to main description field
     if (setting.description && setting.description.trim()) {
       if (process.env.NODE_ENV === 'development') {
@@ -275,7 +329,7 @@ export default function BebeSetting() {
       }
       return setting.description.trim();
     }
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.warn('[BebeSetting] No description found for setting:', setting.id, 'Available fields:', {
         description: setting.description,
@@ -314,34 +368,25 @@ export default function BebeSetting() {
 
   return (
     <main className="bebe-setting-page">
+      {/* Back Button Container */}
+      <div className="back-button-top-container">
+        <button
+          type="button"
+          className="back-button-top"
+          onClick={() => window.history.back()}
+          title={t('bebe_setting.back_to_categories')}
+        >
+          <span className="back-icon">←</span>
+          {t('bebe_setting.back_to_categories')}
+        </button>
+      </div>
+
       {!showServiceDetails && (
         <>
-          {/* Back Button Container */}
-          <div className="back-button-container">
-            <button
-              type="button"
-              className="hand-workers-back-button"
-              onClick={() => window.history.back()}
-              title={i18n.language === 'ar' ? 'رجوع' : i18n.language === 'fr' ? 'Retour' : 'Back'}
-            >
-              ← {i18n.language === 'ar' ? 'رجوع' : 
-                 i18n.language === 'fr' ? 'Retour' : 
-                 'Back'}
-            </button>
-          </div>
-
           <div className="bebe-setting-header">
             <div className="header-content">
-              <h1 className="page-title">
-                {i18n.language === 'ar' ? 'رعاية الأطفال' : 
-                 i18n.language === 'fr' ? 'soins pour les enfants' : 
-                 'Childcare'}
-              </h1>
-              <p className="page-subtitle">
-                {i18n.language === 'ar' ? 'تجهيز وتزيين غرفة الطفل' : 
-                 i18n.language === 'fr' ? 'Aménagement et décoration de chambre pour bébé' : 
-                 'Baby room setup and decoration'}
-              </p>
+              <h1 className="page-title">{t('bebe_setting.title')}</h1>
+              <p className="page-subtitle">{t('bebe_setting.subtitle')}</p>
             </div>
           </div>
 
@@ -370,30 +415,30 @@ export default function BebeSetting() {
                   // Try to get image from selectedService first
                   let imagePath = null;
                   if (selectedService) {
-                    imagePath = Array.isArray(selectedService.photo) 
-                      ? selectedService.photo[0] 
+                    imagePath = Array.isArray(selectedService.photo)
+                      ? selectedService.photo[0]
                       : (selectedService.photo || selectedService.image);
                   }
-                  
+
                   // If no service image, try to get from selectedCategory
                   if (!imagePath && selectedCategory) {
                     imagePath = selectedCategory.image;
                   }
-                  
+
                   // If still no image, try first category image
                   if (!imagePath && categories.length > 0) {
                     imagePath = categories[0].image;
                   }
-                  
+
                   const imageUrl = imagePath ? getImageUrl(imagePath) : null;
                   const defaultImage = '/serveces/a_مربية_أطفال_مغربية_ت.png';
-                  
+
                   return (
                     <img
                       src={imageUrl || defaultImage}
-                      alt={i18n.language === 'ar' ? 'رعاية الأطفال' : 
-                           i18n.language === 'fr' ? 'soins pour les enfants' : 
-                           'Childcare'}
+                      alt={i18n.language === 'ar' ? 'رعاية الأطفال' :
+                        i18n.language === 'fr' ? 'soins pour les enfants' :
+                          'Childcare'}
                       style={{
                         width: '100%',
                         height: 'auto',
@@ -415,20 +460,16 @@ export default function BebeSetting() {
                 marginBottom: '16px',
                 color: '#1f2937'
               }}>
-                {i18n.language === 'ar' ? 'رعاية الأطفال' : 
-                 i18n.language === 'fr' ? 'soins pour les enfants' : 
-                 'Childcare'}
+                {t('bebe_setting.title')}
               </h2>
-              
+
               <p style={{
                 fontSize: '18px',
                 color: '#6b7280',
                 marginBottom: '32px',
                 lineHeight: '1.6'
               }}>
-                {i18n.language === 'ar' ? 'تجهيز وتزيين غرفة الطفل' : 
-                 i18n.language === 'fr' ? 'Aménagement et décoration de chambre pour bébé' : 
-                 'Baby room setup and decoration'}
+                {t('bebe_setting.subtitle')}
               </p>
 
               <div style={{
@@ -449,9 +490,7 @@ export default function BebeSetting() {
                     color: '#6b7280',
                     fontWeight: '500'
                   }}>
-                    {i18n.language === 'ar' ? 'السعر:' : 
-                     i18n.language === 'fr' ? 'Prix:' : 
-                     'Price:'}
+                    {t('bebe_setting.price_label')}
                   </span>
                   <span style={{
                     fontSize: '24px',
@@ -461,7 +500,7 @@ export default function BebeSetting() {
                     250 DH
                   </span>
                 </div>
-                
+
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
@@ -473,55 +512,22 @@ export default function BebeSetting() {
                     color: '#6b7280',
                     fontWeight: '500'
                   }}>
-                    {i18n.language === 'ar' ? 'المدة:' : 
-                     i18n.language === 'fr' ? 'Durée:' : 
-                     'Duration:'}
+                    {t('bebe_setting.duration_label')}
                   </span>
                   <span style={{
                     fontSize: '24px',
                     fontWeight: '700',
                     color: '#3b82f6'
                   }}>
-                    {i18n.language === 'ar' ? '7 ساعات' : 
-                     i18n.language === 'fr' ? '7 heures' : 
-                     '7 hours'}
+                    7 {t('reservation_form.unit_hours')}
                   </span>
                 </div>
               </div>
 
-              <button 
+              <button
                 className="reserve-button"
-                onClick={async () => {
-                  // Load first service if not already loaded
-                  if (!selectedService && categories.length > 0) {
-                    const firstCategory = categories[0];
-                    await handleCategoryClick(firstCategory.id);
-                  }
-                  
-                  if (selectedService) {
-                    setShowReservationForm(true);
-                  } else {
-                    // If no service found, try to load the first one
-                    const loadFirstService = async () => {
-                      if (categories.length > 0) {
-                        const firstCategory = categories[0];
-                        const { data } = await supabase
-                          .from('bebe_settings')
-                          .select('*')
-                          .eq('category_id', firstCategory.id)
-                          .eq('is_active', true)
-                          .order('order', { ascending: true })
-                          .limit(1);
-                        
-                        if (data && data.length > 0) {
-                          setSelectedService(data[0]);
-                          setSelectedCategory(firstCategory);
-                          setShowReservationForm(true);
-                        }
-                      }
-                    };
-                    loadFirstService();
-                  }
+                onClick={() => {
+                  handleReserve(selectedService?.category_id || selectedCategory?.id);
                 }}
                 style={{
                   padding: '16px 32px',
@@ -547,9 +553,7 @@ export default function BebeSetting() {
                 }}
               >
                 <span>📅</span>
-                {i18n.language === 'ar' ? 'احجز' : 
-                 i18n.language === 'fr' ? 'Réserver' : 
-                 'Reserve'}
+                {t('bebe_setting.reserve_button')}
               </button>
             </div>
           </div>
@@ -571,7 +575,7 @@ export default function BebeSetting() {
         <div className="service-details-page">
           <div className="service-details-container">
             {/* Back Button */}
-            <button 
+            <button
               className="back-to-services-button"
               onClick={() => setShowServiceDetails(false)}
             >
@@ -589,8 +593,8 @@ export default function BebeSetting() {
               <img
                 src={
                   (() => {
-                    const imagePath = Array.isArray(selectedService.photo) 
-                      ? selectedService.photo[0] 
+                    const imagePath = Array.isArray(selectedService.photo)
+                      ? selectedService.photo[0]
                       : (selectedService.photo || selectedService.image);
                     const imageUrl = imagePath ? getImageUrl(imagePath) : null;
                     return imageUrl || '/serveces/a_مربية_أطفال_مغربية_ت.png';
@@ -618,10 +622,10 @@ export default function BebeSetting() {
 
             {/* Reserve Button */}
             <div className="service-details-actions">
-              <button 
+              <button
                 className="reserve-caregiver-button"
                 onClick={() => {
-                  setShowReservationForm(true);
+                  handleReserve(selectedService.category_id || selectedCategory?.id);
                 }}
               >
                 🍼 {t('bebe_setting.details.reserve_caregiver')}
@@ -631,21 +635,7 @@ export default function BebeSetting() {
         </div>
       )}
 
-      {/* Reservation Form Modal */}
-      {showReservationForm && selectedService && (
-        <div className="reservation-modal">
-          <div className="modal-backdrop" onClick={handleReservationCancel}></div>
-          <div className="modal-content">
-            <ReservationForm
-              serviceId={selectedService.id}
-              categoryId={selectedService.category_id || selectedCategory?.id || null}
-              serviceType="bebe"
-              onSuccess={handleReservationSuccess}
-              onCancel={handleReservationCancel}
-            />
-          </div>
-        </div>
-      )}
+      {/* Reservation section removed - moved to separate page */}
     </main>
   );
 }

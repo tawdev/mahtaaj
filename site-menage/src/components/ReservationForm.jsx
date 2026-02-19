@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ReservationForm.css';
 import { supabase } from '../lib/supabase';
 
-const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCancel }) => {
+const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCancel, initialClientName = '' }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     client_name: '',
     client_phone: '',
@@ -18,6 +20,16 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
     days: 1,
     notes: ''
   });
+
+  // Pre-fill client name if provided
+  useEffect(() => {
+    if (initialClientName) {
+      setFormData(prev => ({
+        ...prev,
+        client_name: initialClientName
+      }));
+    }
+  }, [initialClientName]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -27,7 +39,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
     const basePrice = 250; // Prix de base pour 7 heures
     const extraHourRate = 40; // Prix par heure supplémentaire après 7 heures
     const dayRate = 300; // Prix par jour (8 heures = 250 + 1*40 = 290, arrondi à 300)
-    
+
     if (bookingType === 'heures') {
       // Si ≤ 7 heures: prix de base
       if (duration <= 7) {
@@ -48,7 +60,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -84,7 +96,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
       });
 
       const { latitude, longitude } = position.coords;
-      
+
       // Use reverse geocoding to get address
       // Using Nominatim (OpenStreetMap) as a free geocoding service
       try {
@@ -96,33 +108,33 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             }
           }
         );
-        
+
         if (response.ok) {
           const data = await response.json();
           if (data.address) {
             // Build address string from components
             const addressParts = [];
-            
+
             // Try to get city/town/village
             const city = data.address.city || data.address.town || data.address.village || data.address.municipality;
             if (city) addressParts.push(city);
-            
+
             // Try to get region/state
             const region = data.address.region || data.address.state;
             if (region && !addressParts.includes(region)) {
               addressParts.push(region);
             }
-            
+
             // Try to get country
             const country = data.address.country;
             if (country && !addressParts.includes(country)) {
               addressParts.push(country);
             }
-            
-            const locationString = addressParts.length > 0 
+
+            const locationString = addressParts.length > 0
               ? addressParts.join(', ')
               : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-            
+
             setFormData(prev => ({
               ...prev,
               location: locationString
@@ -152,22 +164,22 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
     } catch (error) {
       console.error('[ReservationForm] Geolocation error:', error);
       let errorMessage = 'Erreur lors de la récupération de la localisation';
-      
+
       switch (error.code) {
         case error.PERMISSION_DENIED:
-          errorMessage = 'Permission de géolocalisation refusée. Veuillez autoriser l\'accès à votre position.';
+          errorMessage = t('reservation_form.errors.geolocation_denied');
           break;
         case error.POSITION_UNAVAILABLE:
-          errorMessage = 'Position indisponible. Veuillez entrer votre localisation manuellement.';
+          errorMessage = t('reservation_form.errors.geolocation_unavailable');
           break;
         case error.TIMEOUT:
-          errorMessage = 'Délai d\'attente dépassé. Veuillez réessayer.';
+          errorMessage = t('reservation_form.errors.geolocation_timeout');
           break;
         default:
-          errorMessage = 'Impossible de récupérer votre localisation. Veuillez entrer votre localisation manuellement.';
+          errorMessage = t('reservation_form.errors.geolocation_error');
           break;
       }
-      
+
       setErrors(prev => ({
         ...prev,
         location: errorMessage
@@ -179,90 +191,90 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.client_name.trim()) {
-      newErrors.client_name = 'Le nom est requis';
+      newErrors.client_name = t('reservation_form.errors.name_required');
     }
-    
+
     if (!formData.client_phone.trim()) {
-      newErrors.client_phone = 'Le téléphone est requis';
+      newErrors.client_phone = t('reservation_form.errors.phone_required');
     } else if (!/^[0-9+\-\s()]+$/.test(formData.client_phone)) {
-      newErrors.client_phone = 'Format de téléphone invalide';
+      newErrors.client_phone = t('reservation_form.errors.phone_invalid');
     }
-    
+
     if (!formData.location.trim()) {
-      newErrors.location = 'Le lieu est requis';
+      newErrors.location = t('reservation_form.errors.location_required');
     }
-    
+
     // Validate based on booking type
     if (formData.booking_type === 'heures') {
       if (!formData.start_date) {
-        newErrors.start_date = 'La date de début est requise';
+        newErrors.start_date = t('reservation_form.errors.start_date_required');
       } else {
         const selectedDate = new Date(formData.start_date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         if (selectedDate < today) {
-          newErrors.start_date = 'La date doit être aujourd\'hui ou dans le futur';
+          newErrors.start_date = t('reservation_form.errors.date_future');
         }
       }
-      
+
       if (!formData.start_time) {
-        newErrors.start_time = 'L\'heure de début est requise';
+        newErrors.start_time = t('reservation_form.errors.start_time_required');
       }
-      
+
       if (formData.hours < 1 || formData.hours > 24) {
-        newErrors.hours = 'Le nombre d\'heures doit être entre 1 et 24';
+        newErrors.hours = t('reservation_form.errors.invalid_hours');
       }
     } else {
       if (!formData.start_date_jours) {
-        newErrors.start_date_jours = 'La date de début est requise';
+        newErrors.start_date_jours = t('reservation_form.errors.start_date_required');
       } else {
         const selectedDate = new Date(formData.start_date_jours);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         if (selectedDate < today) {
-          newErrors.start_date_jours = 'La date de début doit être aujourd\'hui ou dans le futur';
+          newErrors.start_date_jours = t('reservation_form.errors.date_future');
         }
       }
-      
+
       if (!formData.end_date_jours) {
-        newErrors.end_date_jours = 'La date de fin est requise';
+        newErrors.end_date_jours = t('reservation_form.errors.end_date_required');
       } else if (formData.start_date_jours) {
         const startDate = new Date(formData.start_date_jours);
         const endDate = new Date(formData.end_date_jours);
-        
+
         if (endDate < startDate) {
-          newErrors.end_date_jours = 'La date de fin doit être après la date de début';
+          newErrors.end_date_jours = t('reservation_form.errors.end_after_start');
         }
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
     setErrors({});
-    
+
     try {
       // Get user ID from Supabase session if available
       const { data: { session } } = await supabase.auth.getSession();
       const userId = session?.user?.id || null;
-      
+
       // Calculate total price based on booking type
       let duration;
       let reservationDate;
-      
+
       if (formData.booking_type === 'heures') {
         duration = parseInt(formData.hours);
         reservationDate = formData.start_date;
@@ -278,9 +290,9 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
         }
         reservationDate = formData.start_date_jours;
       }
-      
+
       const totalPrice = calculatePrice(formData.booking_type, duration, formData.start_date_jours, formData.end_date_jours);
-      
+
       if (serviceType === 'jardinage') {
         // Insert jardinage reservation into Supabase
         const reservationData = {
@@ -305,24 +317,24 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
           status: 'pending',
           notes: formData.notes.trim() || null
         };
-        
+
         console.log('[ReservationForm] Submitting jardinage reservation:', reservationData);
-        
+
         const { data, error } = await supabase
           .from('jardinage_reservations')
           .insert(reservationData)
           .select()
           .single();
-        
+
         if (error) {
           console.error('[ReservationForm] Error submitting reservation:', error);
           setErrors({ general: error.message || 'Erreur lors de la création de la réservation' });
           return;
         }
-        
+
         console.log('[ReservationForm] Reservation submitted successfully:', data);
         onSuccess({ success: true, data });
-        
+
         // Reset form
         setFormData({
           client_name: '',
@@ -361,16 +373,16 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
           status: 'pending',
           notes: formData.notes.trim() || null
         };
-        
+
         console.log('[ReservationForm] Submitting bebe reservation to bebe_reservations:', reservationData);
-        
+
         // Insert into bebe_reservations table
         const { data, error } = await supabase
           .from('bebe_reservations')
           .insert(reservationData)
           .select()
           .single();
-        
+
         if (error) {
           console.error('[ReservationForm] Error submitting to bebe_reservations:', error);
           // If table doesn't exist, try general reservations table as fallback
@@ -390,20 +402,20 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             })
             .select()
             .single();
-          
+
           if (altError) {
             console.error('[ReservationForm] Error submitting reservation:', altError);
             setErrors({ general: altError.message || 'Erreur lors de la création de la réservation. Veuillez vérifier que le tableau bebe_reservations existe dans Supabase.' });
             return;
           }
-          
+
           console.log('[ReservationForm] Reservation submitted successfully to reservations table (fallback):', altData);
           onSuccess({ success: true, data: altData });
         } else {
           console.log('[ReservationForm] Reservation submitted successfully to bebe_reservations:', data);
           onSuccess({ success: true, data });
         }
-        
+
         // Reset form
         setFormData({
           client_name: '',
@@ -448,26 +460,26 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
   return (
     <div className="reservation-form-container">
       <div className="reservation-form-header">
-        <h3>📅 Réserver ce service</h3>
-        <button 
-          type="button" 
+        <h3>📅 {t('reservation_form.title')}</h3>
+        <button
+          type="button"
           className="close-btn"
           onClick={onCancel}
-          aria-label="Fermer le formulaire"
+          aria-label={t('reservation_form.close')}
         >
           ✕
         </button>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="reservation-form">
         {errors.general && (
           <div className="error-message general-error">
             {errors.general}
           </div>
         )}
-        
+
         <div className="form-group">
-          <label htmlFor="client_name">Nom complet *</label>
+          <label htmlFor="client_name">{t('reservation_form.client_name_label')}</label>
           <input
             type="text"
             id="client_name"
@@ -475,16 +487,16 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             value={formData.client_name}
             onChange={handleInputChange}
             className={errors.client_name ? 'error' : ''}
-            placeholder="Votre nom complet"
+            placeholder={t('reservation_form.client_name_placeholder')}
             required
           />
           {errors.client_name && (
             <span className="error-text">{errors.client_name}</span>
           )}
         </div>
-        
+
         <div className="form-group">
-          <label htmlFor="client_phone">Numéro de téléphone *</label>
+          <label htmlFor="client_phone">{t('reservation_form.client_phone_label')}</label>
           <input
             type="tel"
             id="client_phone"
@@ -492,7 +504,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             value={formData.client_phone}
             onChange={handleInputChange}
             className={errors.client_phone ? 'error' : ''}
-            placeholder="Ex: +212 6 12 34 56 78"
+            placeholder={t('reservation_form.client_phone_placeholder')}
             required
           />
           {errors.client_phone && (
@@ -501,7 +513,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
         </div>
 
         <div className="form-group">
-          <label htmlFor="location">📍 Lieu de la prestation *</label>
+          <label htmlFor="location">📍 {t('reservation_form.location_label')}</label>
           <div className="location-input-wrapper">
             <input
               type="text"
@@ -510,7 +522,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
               value={formData.location}
               onChange={handleInputChange}
               className={errors.location ? 'error' : ''}
-              placeholder="Ex: Casablanca, Rabat, Marrakech..."
+              placeholder={t('reservation_form.location_placeholder')}
               required
             />
             <button
@@ -518,7 +530,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
               className="location-btn"
               onClick={handleGetLocation}
               disabled={isGettingLocation}
-              title="Obtenir ma localisation automatiquement"
+              title={t('reservation_form.get_location')}
             >
               {isGettingLocation ? '⏳' : '📍'}
             </button>
@@ -527,10 +539,10 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             <span className="error-text">{errors.location}</span>
           )}
         </div>
-        
+
         {/* Booking Type Selection */}
         <div className="form-group">
-          <label>Type de réservation *</label>
+          <label>{t('reservation_form.booking_type_label')}</label>
           <div className="booking-type-selector">
             <button
               type="button"
@@ -548,7 +560,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
                 }
               }}
             >
-              ⏰ Par heures
+              ⏰ {t('reservation_form.booking_type_hours')}
             </button>
             <button
               type="button"
@@ -567,7 +579,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
                 }
               }}
             >
-              📅 Par jours
+              📅 {t('reservation_form.booking_type_days')}
             </button>
           </div>
         </div>
@@ -577,7 +589,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
           <>
             {/* Date and Time for heures booking */}
             <div className="form-group">
-              <label htmlFor="start_date">📅 Date de début *</label>
+              <label htmlFor="start_date">📅 {t('reservation_form.start_date_label')}</label>
               <input
                 type="date"
                 id="start_date"
@@ -594,7 +606,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             </div>
 
             <div className="form-group">
-              <label htmlFor="start_time">⏰ Heure de début *</label>
+              <label htmlFor="start_time">⏰ {t('reservation_form.start_time_label')}</label>
               <input
                 type="time"
                 id="start_time"
@@ -610,7 +622,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             </div>
 
             <div className="form-group">
-              <label htmlFor="hours">⏰ Nombre d'heures *</label>
+              <label htmlFor="hours">⏳ {t('reservation_form.hours_label')}</label>
               <select
                 id="hours"
                 name="hours"
@@ -621,7 +633,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
               >
                 {Array.from({ length: 24 }, (_, i) => i + 1).map(hour => (
                   <option key={hour} value={hour}>
-                    {hour} heure{hour > 1 ? 's' : ''}
+                    {hour} {hour > 1 ? t('reservation_form.unit_hours') : t('reservation_form.unit_hour')}
                   </option>
                 ))}
               </select>
@@ -634,7 +646,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
           <>
             {/* Date range for jours booking */}
             <div className="form-group">
-              <label htmlFor="start_date_jours">📅 Date de début *</label>
+              <label htmlFor="start_date_jours">📅 {t('reservation_form.start_date_label')}</label>
               <input
                 type="date"
                 id="start_date_jours"
@@ -651,7 +663,7 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             </div>
 
             <div className="form-group">
-              <label htmlFor="end_date_jours">📅 Date de fin *</label>
+              <label htmlFor="end_date_jours">📅 {t('reservation_form.end_date_label')}</label>
               <input
                 type="date"
                 id="end_date_jours"
@@ -667,32 +679,32 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
               )}
               {formData.start_date_jours && formData.end_date_jours && (
                 <span className="info-text">
-                  Durée: {(() => {
+                  {t('reservation_form.duration_label')}: {(() => {
                     const start = new Date(formData.start_date_jours);
                     const end = new Date(formData.end_date_jours);
                     const diffTime = Math.abs(end - start);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                    return `${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+                    return `${diffDays} ${diffDays > 1 ? t('reservation_form.unit_days') : t('reservation_form.unit_day')}`;
                   })()}
                 </span>
               )}
             </div>
           </>
         )}
-        
+
         <div className="form-group">
-          <label htmlFor="notes">Notes supplémentaires (optionnel)</label>
+          <label htmlFor="notes">📝 {t('reservation_form.message_label')}</label>
           <textarea
             id="notes"
             name="notes"
             value={formData.notes}
             onChange={handleInputChange}
-            placeholder="Informations supplémentaires..."
+            placeholder={t('reservation_form.message_placeholder')}
             rows="3"
             maxLength="500"
           />
         </div>
-        
+
         <div className="price-summary">
           <div className="price-breakdown">
             {formData.booking_type === 'heures' ? (
@@ -700,42 +712,42 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
                 {displayDuration <= 7 ? (
                   <>
                     <div className="price-item">
-                      <span>Prix de base (7h):</span>
-                      <span>250 MAD</span>
+                      <span>{t('reservation_form.base_price_label')}:</span>
+                      <span>250 {t('reservation_form.currency')}</span>
                     </div>
                     <div className="price-item price-extra-info">
-                      <span>Après 7h, chaque heure supplémentaire = 40 MAD</span>
+                      <span>{t('reservation_form.extra_hour_info')}</span>
                     </div>
                   </>
                 ) : (
                   <>
                     <div className="price-item">
-                      <span>Prix de base (7h):</span>
-                      <span>250 MAD</span>
+                      <span>{t('reservation_form.base_price_label')}:</span>
+                      <span>250 {t('reservation_form.currency')}</span>
                     </div>
                     <div className="price-item">
-                      <span>Heures supplémentaires ({displayDuration - 7} × 40 MAD):</span>
-                      <span>{(displayDuration - 7) * 40} MAD</span>
+                      <span>{t('reservation_form.extra_hours_label')} ({displayDuration - 7} × 40 MAD):</span>
+                      <span>{(displayDuration - 7) * 40} {t('reservation_form.currency')}</span>
                     </div>
                     <div className="price-item price-extra-info">
-                      <span>Après 7h, chaque heure supplémentaire = 40 MAD</span>
+                      <span>{t('reservation_form.extra_hour_info')}</span>
                     </div>
                   </>
                 )}
               </>
             ) : (
               <div className="price-item">
-                <span>Prix par jour ({displayDuration} jour{displayDuration > 1 ? 's' : ''} × 300 MAD):</span>
-                <span>{displayDuration * 300} MAD</span>
+                <span>{t('reservation_form.price_per_day_label')} ({displayDuration} {displayDuration > 1 ? t('reservation_form.unit_days') : t('reservation_form.unit_day')} × 300 MAD):</span>
+                <span>{displayDuration * 300} {t('reservation_form.currency')}</span>
               </div>
             )}
             <div className="price-total">
-              <span>Total:</span>
-              <span>{totalPrice} MAD</span>
+              <span>{t('reservation_form.total_label')}:</span>
+              <span className="total-amount">{totalPrice} {t('reservation_form.currency')}</span>
             </div>
           </div>
         </div>
-        
+
         <div className="form-actions">
           <button
             type="button"
@@ -743,18 +755,18 @@ const ReservationForm = ({ serviceId, categoryId, serviceType, onSuccess, onCanc
             className="btn btn-secondary"
             disabled={isSubmitting}
           >
-            Annuler
+            {t('reservation_form.cancel_button')}
           </button>
           <button
             type="submit"
             className="btn btn-primary"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Enregistrement...' : 'Réserver maintenant'}
+            {isSubmitting ? t('reservation_form.submitting') : t('reservation_form.submit_button')}
           </button>
         </div>
       </form>
-    </div>
+    </div >
   );
 };
 
