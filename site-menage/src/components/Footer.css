@@ -33,7 +33,7 @@
 }
 
 .footer-logo {
-  height: 60px;
+  height: 80px;
   width: auto;
   object-fit: contain;
   transition: transform 0.3s ease;
@@ -175,6 +175,30 @@
 }
 
 /* Responsive Design */
+@media (min-width: 1920px) {
+  .footer-container {
+    gap: 100px;
+    grid-template-columns: 1.8fr 1fr 1fr 1.5fr;
+  }
+
+  .footer-column.brand-col {
+    padding-right: 40px;
+  }
+
+  .footer-column.contact-col {
+    padding-left: 40px;
+  }
+
+  .footer-about {
+    font-size: 16px;
+    max-width: 400px;
+  }
+
+  .footer-title {
+    font-size: 20px;
+  }
+}
+
 @media (max-width: 1024px) {
   .footer-container {
     grid-template-columns: 1fr 1fr;

@@ -5,6 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import LocationPicker from '../components/LocationPicker/LocationPicker';
+import { sanitizeInput } from '../utils/sanitize';
+import { validateEmail, validatePhone } from '../utils/validators';
+import logger from '../utils/logger';
 import './EmployeeRegister.css';
 // The CITY_QUARTIERS import is no longer directly used for form state management,
 // but might be used elsewhere or for reference, so keeping it for now.
@@ -71,9 +74,8 @@ export default function EmployeeRegister() {
   useEffect(() => {
     (async () => {
       try {
-        console.log('[EmployeeRegister] Loading services & types from Supabase');
+        logger.log('[EmployeeRegister] Loading services & types from Supabase');
 
-        // Load services from Supabase
         const { data: servicesData, error: servicesError } = await supabase
           .from('services')
           .select('*')
@@ -82,28 +84,27 @@ export default function EmployeeRegister() {
           .order('order', { ascending: true });
 
         if (servicesError) {
-          console.error('[EmployeeRegister] Error loading services:', servicesError);
+          logger.error('[EmployeeRegister] Error loading services');
           setServices([]);
         } else {
-          console.log('[EmployeeRegister] Loaded services:', servicesData?.length || 0);
+          logger.log('[EmployeeRegister] Loaded services:', servicesData?.length || 0);
           setServices(Array.isArray(servicesData) ? servicesData : []);
         }
 
-        // Load types from Supabase (for Cuisine domain)
         const { data: typesData, error: typesError } = await supabase
           .from('types')
           .select('*')
           .order('created_at', { ascending: true });
 
         if (typesError) {
-          console.error('[EmployeeRegister] Error loading types:', typesError);
+          logger.error('[EmployeeRegister] Error loading types');
           setTypes([]);
         } else {
-          console.log('[EmployeeRegister] Loaded types:', typesData?.length || 0);
+          logger.log('[EmployeeRegister] Loaded types:', typesData?.length || 0);
           setTypes(Array.isArray(typesData) ? typesData : []);
         }
       } catch (err) {
-        console.error('[EmployeeRegister] Exception loading services/types:', err);
+        logger.error('[EmployeeRegister] Exception loading services/types');
         setServices([]);
         setTypes([]);
       }
@@ -277,6 +278,14 @@ export default function EmployeeRegister() {
     ) {
       return t('employee_register.validation.all_fields_required');
     }
+    // ✅ SECURITY: validate email format
+    const emailErr = validateEmail(form.email);
+    if (emailErr) return emailErr;
+    // ✅ SECURITY: validate phone if provided
+    if (form.phone) {
+      const phoneErr = validatePhone(form.phone);
+      if (phoneErr) return phoneErr;
+    }
     // Only require days if preferred_work_time is not selected
     if (!form.preferred_work_time && Object.keys(selectedDaysPayload).length === 0) return t('employee_register.validation.select_at_least_one_day');
     return null;
@@ -290,10 +299,34 @@ export default function EmployeeRegister() {
     try {
       setSubmitting(true);
 
+      // ✅ SECURITY: Validate and check photo file
+      if (form.photo instanceof File) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(form.photo.type)) {
+          setError('Type de fichier non autorisé. Utilisez JPG, PNG ou WebP.');
+          setSubmitting(false);
+          return;
+        }
+        if (form.photo.size > 5 * 1024 * 1024) {
+          setError('La photo ne doit pas dépasser 5 Mo.');
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      // ✅ SECURITY: Sanitize all text inputs before sending
+      const safeName = sanitizeInput(form.name, 100);
+      const safePrenom = sanitizeInput(form.prenom, 100);
+      const safeEmail = sanitizeInput(form.email, 254).toLowerCase();
+      const safePhone = sanitizeInput(form.phone || '', 20);
+      const safeExpertise = sanitizeInput(form.expertise || '', 200);
+      const safeLastExp = sanitizeInput(form.last_experience || '', 1000);
+      const safeCompany = sanitizeInput(form.company_name || '', 200);
+
       // Upload photo to Supabase Storage if provided
       let photoUrl = '';
       if (form.photo instanceof File) {
-        console.log('[EmployeeRegister] Uploading photo to Supabase Storage');
+        logger.log('[EmployeeRegister] Uploading photo to Supabase Storage');
         const cleanFileName = form.photo.name
           .replace(/[^a-zA-Z0-9.-]/g, '_')
           .replace(/_{2,}/g, '_')
@@ -309,47 +342,42 @@ export default function EmployeeRegister() {
           });
 
         if (uploadError) {
-          console.error('[EmployeeRegister] Error uploading photo:', uploadError);
-          throw new Error('Erreur lors du téléchargement de la photo: ' + uploadError.message);
+          logger.error('[EmployeeRegister] Error uploading photo');
+          throw new Error('Erreur lors du téléchargement de la photo');
         }
 
-        // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('employees')
           .getPublicUrl(filePath);
         photoUrl = publicUrl;
-        console.log('[EmployeeRegister] Photo uploaded successfully:', photoUrl);
+        logger.log('[EmployeeRegister] Photo uploaded successfully');
       }
 
-      // Prepare data for Supabase
-      // Note: Store additional fields in metadata JSONB since employees table has limited columns
+      // ✅ SECURITY: Use sanitized values in the payload
       const employeeData = {
-        full_name: `${form.name} ${form.prenom}`.trim(),
+        full_name: `${safeName} ${safePrenom}`.trim(),
         birth_date: form.birth_date || null,
         age: form.age ? parseInt(form.age, 10) : null,
-        email: form.email.trim() || null,
-        phone: form.phone?.trim() || null,
+        email: safeEmail || null,
+        phone: safePhone || null,
         latitude: form.latitude,
         longitude: form.longitude,
-        location_address: form.location_address,
-        address: form.location_address, // Fallback for old address field
-        expertise: form.expertise || null,
+        location_address: sanitizeInput(form.location_address, 300),
+        address: sanitizeInput(form.location_address, 300),
+        expertise: safeExpertise || null,
         photo_url: photoUrl || null,
         status: 'pending',
         metadata: {
-          name: form.name,
-          prenom: form.prenom,
+          name: safeName,
+          prenom: safePrenom,
           birth_date: form.birth_date,
           age: Number(form.age),
-          // Menage: first selected as main id, and full array for multi-choice
           competency_id: Array.isArray(form.competency_ids) && form.competency_ids.length
             ? form.competency_ids[0]
             : null,
           competency_ids: Array.isArray(form.competency_ids) && form.competency_ids.length
             ? form.competency_ids
             : null,
-          // Cuisine: store first selected as main id for backward compatibility,
-          // and full list as an array.
           cuisine_type_id: Array.isArray(form.cuisine_type_ids) && form.cuisine_type_ids.length
             ? form.cuisine_type_ids[0]
             : null,
@@ -357,28 +385,27 @@ export default function EmployeeRegister() {
             ? form.cuisine_type_ids
             : null,
           auto_entrepreneur: form.auto_entrepreneur || null,
-          last_experience: form.last_experience || null,
-          company_name: form.company_name || null,
+          last_experience: safeLastExp || null,
+          company_name: safeCompany || null,
           preferred_work_time: form.preferred_work_time || null,
           jours_disponibles: Object.keys(selectedDaysPayload).length > 0 ? selectedDaysPayload : null,
           latitude: form.latitude,
           longitude: form.longitude,
-          location_address: form.location_address,
-          expertise: form.expertise || null,
+          location_address: sanitizeInput(form.location_address, 300),
+          expertise: safeExpertise || null,
         },
       };
 
-      console.log('[EmployeeRegister] Submitting employee data:', employeeData);
+      logger.log('[EmployeeRegister] Submitting employee data');
 
-      // Insert into Supabase
       const { error: insertError } = await supabase
         .from('employees')
         .insert(employeeData)
         .select();
 
       if (insertError) {
-        console.error('[EmployeeRegister] Error inserting employee:', insertError);
-        throw new Error(insertError.message || 'Erreur lors de l\'inscription');
+        logger.error('[EmployeeRegister] Error inserting employee');
+        throw new Error('Erreur lors de l\'inscription. Veuillez réessayer.');
       }
 
       setMessage('Inscription réussie!');
@@ -406,17 +433,13 @@ export default function EmployeeRegister() {
       // Auto-hide after 4s
       setTimeout(() => setShowSuccess(false), 4000);
     } catch (e2) {
-      // Better error handling for validation errors
       let errorMessage = e2.message;
-
-      // If error contains validation errors, format them nicely
-      if (errorMessage.includes('Validation errors:')) {
+      if (errorMessage?.includes('Validation errors:')) {
         setError(errorMessage);
       } else {
         setError(errorMessage || t('employee_register.submit.error'));
       }
-
-      console.error('Submit error:', e2);
+      logger.error('Submit error:', e2?.message);
     } finally {
       setSubmitting(false);
     }
@@ -472,7 +495,7 @@ export default function EmployeeRegister() {
                   <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </span>
-              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required maxLength={100} autoComplete="family-name" />
             </div>
           </div>
           <div className="form-group">
@@ -484,7 +507,7 @@ export default function EmployeeRegister() {
                   <circle cx="10" cy="8" r="4" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </span>
-              <input type="text" value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} required />
+              <input type="text" value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} required maxLength={100} autoComplete="given-name" />
             </div>
           </div>
           <div className="form-group">
@@ -519,7 +542,7 @@ export default function EmployeeRegister() {
                   <path d="M22 8L12.971 13.514C12.3681 13.8847 11.6319 13.8847 11.029 13.514L2 8" stroke="currentColor" strokeWidth="2" />
                 </svg>
               </span>
-              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+              <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required maxLength={254} autoComplete="email" />
             </div>
           </div>
           <div className="form-group">
@@ -530,7 +553,7 @@ export default function EmployeeRegister() {
                   <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.73 19.73 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.12.89.3 1.76.54 2.59a2 2 0 0 1-.45 2.11l-.7.7a16 16 0 0 0 6.88 6.88l.7-.7a2 2 0 0 1 2.11-.45c.83.24 1.7.42 2.59.54A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t('employee_register.form.phone_placeholder')} />
+              <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t('employee_register.form.phone_placeholder')} maxLength={20} autoComplete="tel" />
             </div>
           </div>
           <div className="form-group full">

@@ -6,6 +6,18 @@ import SEO from '../components/SEO';
 import { blogPosts } from '../data/blogData';
 import './Blog.css';
 
+/**
+ * ✅ SECURITY: safeHtml() strips all HTML tags except a safe whitelist.
+ * Blog content comes from static blogData.js (not user input), but we
+ * apply this layer as defence-in-depth in case content is ever made dynamic.
+ */
+function safeBlogHtml(str) {
+    if (typeof str !== 'string') return { __html: '' };
+    // Allow safe formatting tags only
+    const allowPattern = /<(?!\/?(b|i|br|p|strong|em|h3|h4|blockquote|ul|ol|li|span)\b)[^>]+>/gi;
+    return { __html: str.replace(allowPattern, '') };
+}
+
 export default function BlogPost() {
     const { slug } = useParams();
     const { t, i18n } = useTranslation();
@@ -58,9 +70,10 @@ export default function BlogPost() {
                         <img src={post.image} alt={content.title} />
                     </div>
 
+                    {/* ✅ SECURITY: safeHtml strips any injected tags. Content from blogData.js only. */}
                     <div
                         className="post-body"
-                        dangerouslySetInnerHTML={{ __html: content.content }}
+                        dangerouslySetInnerHTML={safeBlogHtml(content.content)}
                     />
 
                     <footer className="post-footer">

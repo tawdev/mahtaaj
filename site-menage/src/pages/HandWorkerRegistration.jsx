@@ -5,6 +5,9 @@ import { translateHandWorkerCategories } from '../services/handWorkerTranslation
 import { supabase } from '../lib/supabase';
 import { CITY_QUARTIERS } from '../constants/cities';
 import LocationPicker from '../components/LocationPicker/LocationPicker';
+import { sanitizeInput } from '../utils/sanitize';
+import { validateEmail, validatePhone, validateText } from '../utils/validators';
+import logger from '../utils/logger';
 import './HandWorkerRegistration.css';
 
 export default function HandWorkerRegistration() {
@@ -47,7 +50,7 @@ export default function HandWorkerRegistration() {
       setLoading(true);
       setError('');
 
-      console.log('[HandWorkerRegistration] Loading categories from Supabase');
+      logger.log('[HandWorkerRegistration] Loading categories from Supabase');
 
       const { data, error } = await supabase
         .from('hand_worker_categories')
@@ -56,12 +59,12 @@ export default function HandWorkerRegistration() {
         .order('order', { ascending: true });
 
       if (error) {
-        console.error('[HandWorkerRegistration] Error loading categories:', error);
+        logger.error('[HandWorkerRegistration] Error loading categories');
         setError(t('hand_worker_registration.loading_error') || 'Erreur lors du chargement des catégories. Veuillez réessayer.');
         return;
       }
 
-      console.log('[HandWorkerRegistration] Loaded categories:', data?.length || 0);
+      logger.log('[HandWorkerRegistration] Loaded categories:', data?.length || 0);
 
       if (data && Array.isArray(data) && data.length > 0) {
         const currentLanguage = i18n.language || 'fr';
@@ -69,10 +72,10 @@ export default function HandWorkerRegistration() {
         setCategories(translatedCategories);
       } else {
         setCategories([]);
-        console.warn('[HandWorkerRegistration] No categories found');
+        logger.log('[HandWorkerRegistration] No categories found');
       }
     } catch (e) {
-      console.error('[HandWorkerRegistration] Exception loading categories:', e);
+      logger.error('[HandWorkerRegistration] Exception loading categories');
       setError(t('hand_worker_registration.loading_error') || 'Erreur lors du chargement des catégories. Veuillez réessayer.');
     } finally {
       setLoading(false);
@@ -103,25 +106,22 @@ export default function HandWorkerRegistration() {
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.full_name.trim()) {
-      errors.full_name = t('hand_worker_registration.full_name_required');
-    }
+    // ✅ SECURITY: use shared validators for consistent rules
+    const nameErr = validateText((formData.full_name || '').trim(), 'Nom complet', { min: 2, max: 150 });
+    if (nameErr) errors.full_name = nameErr;
 
-    if (!formData.email.trim()) {
-      errors.email = t('hand_worker_registration.email_required');
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = t('hand_worker_registration.email_invalid');
-    }
+    const emailErr = validateEmail(formData.email);
+    if (emailErr) errors.email = emailErr;
 
-    if (!formData.phone.trim()) {
-      errors.phone = t('hand_worker_registration.phone_required');
-    }
+    const phoneErr = validatePhone(formData.phone, { required: true });
+    if (phoneErr) errors.phone = phoneErr;
 
     if (!formData.category_id) {
       errors.category_id = t('hand_worker_registration.category_required');
     }
 
-    if (formData.experience_years < 0) {
+    const expYears = parseInt(formData.experience_years, 10);
+    if (isNaN(expYears) || expYears < 0 || expYears > 60) {
       errors.experience_years = t('hand_worker_registration.experience_invalid');
     }
 
@@ -150,9 +150,8 @@ export default function HandWorkerRegistration() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prevent double submission
     if (submitting) {
-      console.warn('[HandWorkerRegistration] Submission already in progress, ignoring duplicate submit');
+      logger.log('[HandWorkerRegistration] Submission already in progress, ignoring duplicate submit');
       return;
     }
 
@@ -164,16 +163,33 @@ export default function HandWorkerRegistration() {
     setError('');
 
     try {
-      console.log('[HandWorkerRegistration] Submitting registration to Supabase');
+      logger.log('[HandWorkerRegistration] Submitting registration to Supabase');
 
-      // Upload photo to Supabase Storage if provided
+      // ✅ SECURITY: Sanitize all text inputs before sending
+      const safeName = sanitizeInput(formData.full_name, 150);
+      const safeEmail = sanitizeInput(formData.email, 254).toLowerCase();
+      const safePhone = sanitizeInput(formData.phone, 20);
+      const safeBio = sanitizeInput(formData.bio || '', 1000);
+
       let photoUrl = null;
       if (formData.photo) {
+        // ✅ SECURITY: Validate file type and size
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(formData.photo.type)) {
+          setError('Type de fichier non autorisé. Utilisez JPG, PNG ou WebP.');
+          setSubmitting(false);
+          return;
+        }
+        if (formData.photo.size > 5 * 1024 * 1024) {
+          setError('La photo ne doit pas dépasser 5 Mo.');
+          setSubmitting(false);
+          return;
+        }
         try {
           const photoFile = formData.photo;
           const fileName = `hand_worker_${Date.now()}_${Math.random().toString(36).substring(7)}.${photoFile.name.split('.').pop()}`;
 
-          console.log('[HandWorkerRegistration] Uploading photo:', fileName);
+          logger.log('[HandWorkerRegistration] Uploading photo:', fileName);
 
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('employees')
@@ -183,8 +199,8 @@ export default function HandWorkerRegistration() {
             });
 
           if (uploadError) {
-            console.error('[HandWorkerRegistration] Photo upload error:', uploadError);
-            throw new Error('Erreur lors du téléchargement de la photo: ' + uploadError.message);
+            logger.error('[HandWorkerRegistration] Photo upload error');
+            throw new Error('Erreur lors du téléchargement de la photo');
           }
 
           const { data: { publicUrl } } = supabase.storage
@@ -192,40 +208,39 @@ export default function HandWorkerRegistration() {
             .getPublicUrl(fileName);
 
           photoUrl = publicUrl;
-          console.log('[HandWorkerRegistration] Photo uploaded successfully:', photoUrl);
+          logger.log('[HandWorkerRegistration] Photo uploaded successfully');
         } catch (uploadErr) {
-          console.error('[HandWorkerRegistration] Error uploading photo:', uploadErr);
-          setError('Erreur lors du téléchargement de la photo: ' + uploadErr.message);
+          logger.error('[HandWorkerRegistration] Error uploading photo');
+          setError('Erreur lors du téléchargement de la photo');
           setSubmitting(false);
           return;
         }
       }
 
-      // Prepare data for Supabase hand_worker_employees table
-      const [firstName, ...lastNameParts] = (formData.full_name || '').split(' ');
+      // ✅ SECURITY: Use sanitized values in the payload
+      const [firstName, ...lastNameParts] = safeName.split(' ');
       const lastName = lastNameParts.join(' ') || '';
 
-      // Build worker data object for hand_worker_employees table
       const workerData = {
-        first_name: (firstName || formData.full_name || '').trim(),
+        first_name: (firstName || safeName || '').trim(),
         last_name: (lastName || '').trim(),
-        email: (formData.email || '').trim() || null,
-        phone: (formData.phone || '').trim() || null,
+        email: safeEmail || null,
+        phone: safePhone || null,
         category_id: formData.category_id ? parseInt(formData.category_id, 10) : null,
         latitude: formData.latitude,
         longitude: formData.longitude,
-        location_address: formData.location_address,
-        address: formData.location_address, // Fallback
+        location_address: sanitizeInput(formData.location_address, 300),
+        address: sanitizeInput(formData.location_address, 300),
         photo: photoUrl || null,
         photo_url: photoUrl || null,
-        bio: (formData.bio || '').trim() || null,
+        bio: safeBio || null,
         experience_years: parseInt(formData.experience_years, 10) || 0,
         employee_type: formData.employee_type || null,
-        status: 'pending', // New registrations start as pending
-        is_available: false // Not available until approved
+        status: 'pending',
+        is_available: false
       };
 
-      // Remove null/empty string values for optional fields to avoid issues
+      // Remove null/empty string values for optional fields
       Object.keys(workerData).forEach(key => {
         if (workerData[key] === '' || workerData[key] === undefined) {
           if (key !== 'experience_years' && key !== 'status' && key !== 'is_available' && key !== 'employee_type') {
@@ -234,7 +249,7 @@ export default function HandWorkerRegistration() {
         }
       });
 
-      console.log('[HandWorkerRegistration] Inserting worker data to hand_worker_employees:', JSON.stringify(workerData, null, 2));
+      logger.log('[HandWorkerRegistration] Inserting worker data');
 
       const { data, error } = await supabase
         .from('hand_worker_employees')
@@ -242,15 +257,14 @@ export default function HandWorkerRegistration() {
         .select();
 
       if (error) {
-        console.error('[HandWorkerRegistration] Error inserting worker:', error);
+        logger.error('[HandWorkerRegistration] Error inserting worker');
 
-        // Handle specific error cases
         if (error.code === '23505' || error.message?.includes('duplicate key')) {
           throw new Error('Un enregistrement avec ces informations existe déjà. Veuillez vérifier vos données.');
         } else if (error.code === '23503' || error.message?.includes('foreign key')) {
           throw new Error('La catégorie sélectionnée n\'est pas valide.');
         } else {
-          throw new Error(error.message || 'Erreur lors de l\'enregistrement. Veuillez réessayer.');
+          throw new Error('Erreur lors de l\'enregistrement. Veuillez réessayer.');
         }
       }
 
@@ -258,7 +272,7 @@ export default function HandWorkerRegistration() {
         throw new Error('Aucune donnée retournée après l\'enregistrement');
       }
 
-      console.log('[HandWorkerRegistration] Worker registered successfully:', data);
+      logger.log('[HandWorkerRegistration] Worker registered successfully');
       setSuccess(true);
 
       // Reset form
@@ -277,7 +291,7 @@ export default function HandWorkerRegistration() {
         employee_type: '',
       });
     } catch (e) {
-      console.error('[HandWorkerRegistration] Error submitting registration:', e);
+      logger.error('[HandWorkerRegistration] Error submitting registration');
       setError(e.message || t('hand_worker_registration.submission_error') || 'Erreur lors de l\'enregistrement');
     } finally {
       setSubmitting(false);
@@ -359,6 +373,8 @@ export default function HandWorkerRegistration() {
                 onChange={handleInputChange}
                 className={formErrors.full_name ? 'error' : ''}
                 placeholder={t('hand_worker_registration.full_name_placeholder', 'Votre nom complet')}
+                maxLength={150}
+                autoComplete="name"
                 required
               />
             </div>
@@ -380,6 +396,8 @@ export default function HandWorkerRegistration() {
                 onChange={handleInputChange}
                 className={formErrors.email ? 'error' : ''}
                 placeholder={t('hand_worker_registration.email_placeholder', 'votre@email.com')}
+                maxLength={254}
+                autoComplete="email"
                 required
               />
             </div>
@@ -400,6 +418,8 @@ export default function HandWorkerRegistration() {
                 onChange={handleInputChange}
                 className={formErrors.phone ? 'error' : ''}
                 placeholder={t('hand_worker_registration.phone_placeholder', '+212...')}
+                maxLength={20}
+                autoComplete="tel"
                 required
               />
             </div>
@@ -490,6 +510,7 @@ export default function HandWorkerRegistration() {
                 value={formData.bio}
                 onChange={handleInputChange}
                 rows="4"
+                maxLength={1000}
                 placeholder={t('hand_worker_registration.bio_placeholder', 'Décrivez votre expérience et vos compétences...')}
                 style={{ width: '100%', padding: '12px', borderRadius: '8px', border: 'none', fontFamily: 'inherit', background: 'transparent', color: '#1e293b', resize: 'vertical' }}
               />

@@ -53,9 +53,9 @@ code {
 /* Utility classes */
 .container {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 24px;
 }
 
 .text-center {
@@ -89,6 +89,146 @@ code {
 @media (max-width: 768px) {
   .container {
     padding: 0 12px;
+  }
+}
+
+/* Large screen optimisation */
+.container,
+.gallery-container,
+.hand-workers-content,
+.shop-container,
+.blog-container,
+.menage-page,
+.voiture-page,
+.tous-les-services,
+.tapis-canapes-page,
+.support-container,
+.pisin-page,
+.order-summary-container,
+.menage-et-cuisine-page,
+.lavage-page,
+.ropassage-page,
+.lavage-et-ropassage-page,
+.jardinage-page,
+.bebe-page,
+.bebe-reservation-page,
+.chassures-page,
+.airbnb-page,
+.security-page,
+.centre-page,
+.adomicile-page,
+.service-details-container,
+.profile-container,
+.footer-container,
+.rating-container,
+.about-container,
+.expertise-content,
+.process-steps,
+.support-wrapper,
+.profile-layout,
+.tous-les-services-container,
+.main-content,
+.gallery-slider,
+.expertise,
+.process,
+.user-rating-section,
+.rating-section {
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
+@media (min-width: 1440px) {
+
+  .container,
+  .gallery-container,
+  .hand-workers-content,
+  .shop-container,
+  .blog-container,
+  .menage-page,
+  .voiture-page,
+  .tous-les-services,
+  .tapis-canapes-page,
+  .support-container,
+  .pisin-page,
+  .order-summary-container,
+  .menage-et-cuisine-page,
+  .lavage-page,
+  .ropassage-page,
+  .lavage-et-ropassage-page,
+  .jardinage-page,
+  .bebe-page,
+  .bebe-reservation-page,
+  .chassures-page,
+  .airbnb-page,
+  .security-page,
+  .centre-page,
+  .adomicile-page,
+  .service-details-container,
+  .profile-container,
+  .footer-container,
+  .rating-container,
+  .about-container,
+  .expertise-content,
+  .process-steps,
+  .support-wrapper,
+  .profile-layout,
+  .main-content,
+  .gallery-slider,
+  .expertise,
+  .process,
+  .user-rating-section,
+  .rating-section {
+    max-width: 1400px !important;
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+  }
+}
+
+@media (min-width: 1920px) {
+
+  .container,
+  .gallery-container,
+  .hand-workers-content,
+  .shop-container,
+  .blog-container,
+  .menage-page,
+  .voiture-page,
+  .tous-les-services,
+  .tapis-canapes-page,
+  .support-container,
+  .pisin-page,
+  .order-summary-container,
+  .menage-et-cuisine-page,
+  .lavage-page,
+  .ropassage-page,
+  .lavage-et-ropassage-page,
+  .jardinage-page,
+  .bebe-page,
+  .bebe-reservation-page,
+  .chassures-page,
+  .airbnb-page,
+  .security-page,
+  .centre-page,
+  .adomicile-page,
+  .service-details-container,
+  .profile-container,
+  .footer-container,
+  .rating-container,
+  .about-container,
+  .expertise-content,
+  .process-steps,
+  .support-wrapper,
+  .profile-layout,
+  .tous-les-services-container,
+  .main-content,
+  .gallery-slider,
+  .expertise,
+  .process,
+  .user-rating-section,
+  .rating-section {
+    max-width: 1600px !important;
+    padding-left: 48px !important;
+    padding-right: 48px !important;
   }
 }
 

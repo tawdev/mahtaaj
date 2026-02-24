@@ -2350,3 +2350,34 @@ section>h2 {
     height: 24px;
   }
 }
+/* Large screen optimisation */
+@media (min-width: 1440px) {
+  .home-hero-content {
+    max-width: 1100px;
+  }
+  .home-services-grid {
+    max-width: 1400px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+  .home-testimonials-grid {
+    max-width: 1200px;
+  }
+  main section {
+    padding: 80px 32px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .home-hero-content {
+    max-width: 1200px;
+  }
+  .home-services-grid {
+    max-width: 1600px;
+  }
+  main section {
+    padding: 100px 48px;
+  }
+  section > h2 {
+    font-size: clamp(32px, 2.5vw, 48px);
+  }
+}

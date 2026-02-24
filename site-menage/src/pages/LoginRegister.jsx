@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import AuthService from '../lib/authService';
+import { sanitizeInput } from '../utils/sanitize';
+import { validateEmail, validateText, validatePassword, validatePasswordConfirmation } from '../utils/validators';
+import logger from '../utils/logger';
 import './LoginRegister.css';
 
 export default function LoginRegister() {
@@ -30,20 +33,10 @@ export default function LoginRegister() {
   const returnUrl = location.state?.returnUrl || '/';
 
   // Store returnUrl in localStorage for the global auth listener (App.jsx)
-  // This ensures redirect works even after page refreshes or from email confirmations
   useEffect(() => {
-    // Only set if we have a non-default returnUrl or nothing is stored yet
     const existing = localStorage.getItem('auth_return_url');
-
-    // Logic: 
-    // - If current returnUrl from state is NOT '/' (meaning it's specific), use it.
-    // - OR If nothing exists in localStorage yet, use current returnUrl (even if it's '/').
-    // - DO NOT overwrite a specific existing URL with a generic '/'.
     if (returnUrl !== '/' || !existing || existing === '/') {
-      console.log('[LoginRegister] Storing auth_return_url:', returnUrl);
       localStorage.setItem('auth_return_url', returnUrl);
-    } else {
-      console.log('[LoginRegister] Preserving existing auth_return_url:', existing);
     }
   }, [returnUrl]);
 
@@ -54,51 +47,30 @@ export default function LoginRegister() {
       setIsAutoLoginAttempted(true);
 
       try {
-        // Check for saved email first
         const savedEmail = localStorage.getItem('remembered_email');
         if (savedEmail) {
           setFormData(prev => ({ ...prev, email: savedEmail }));
           setRememberMe(true);
         }
 
-        // Check for Supabase session
         const { data: { session }, error } = await supabase.auth.getSession();
-
         if (session && !error) {
-          // Session is valid, auto-login
           const user = session.user;
-          localStorage.setItem('user_data', JSON.stringify({
-            id: user.id,
-            name: user.user_metadata?.name || user.email,
-            email: user.email
-          }));
-          localStorage.setItem('user', JSON.stringify({
-            id: user.id,
-            name: user.user_metadata?.name || user.email,
-            email: user.email
-          }));
-
-          // We disable auto-redirect so the user can see they are on the login page
-          // navigate(returnUrl);
-          // return;
+          // Only store minimal, non-sensitive data
+          const userData = { id: user.id, name: user.user_metadata?.name || user.email, email: user.email };
+          localStorage.setItem('user_data', JSON.stringify(userData));
+          localStorage.setItem('user', JSON.stringify(userData));
         }
 
-        // No valid session, clean up old Laravel tokens if any
         localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_data');
-        localStorage.removeItem('user');
-      } catch (error) {
-        console.log('Auto-login failed:', error);
-        // Clean up invalid tokens
+      } catch (_) {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('user_data');
         localStorage.removeItem('user');
       }
     };
 
-    if (isLogin) {
-      attemptAutoLogin();
-    }
+    if (isLogin) attemptAutoLogin();
   }, [isLogin, navigate, returnUrl, isAutoLoginAttempted]);
 
   const handleInputChange = (e) => {
@@ -120,55 +92,8 @@ export default function LoginRegister() {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  // Fonction de validation d'email améliorée
-  const isValidEmail = (email) => {
-    // Regex plus strict pour valider l'email
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-    // Vérifier le format de base
-    if (!emailRegex.test(email)) {
-      return false;
-    }
-
-    // Vérifier que le domaine a au moins 2 caractères après le point
-    const parts = email.split('@');
-    if (parts.length !== 2) {
-      return false;
-    }
-
-    const domain = parts[1];
-    const domainParts = domain.split('.');
-    if (domainParts.length < 2) {
-      return false;
-    }
-
-    // Vérifier que le TLD (top-level domain) a au moins 2 caractères
-    const tld = domainParts[domainParts.length - 1];
-    if (tld.length < 2) {
-      return false;
-    }
-
-    // Vérifier qu'il n'y a pas de caractères invalides
-    if (email.includes('..') || email.includes('@@')) {
-      return false;
-    }
-
-    // Vérifier que le domaine n'est pas vide ou trop court
-    const domainName = domainParts[0];
-    if (!domainName || domainName.length < 2) {
-      return false;
-    }
-
-    // Liste des TLDs communs (optionnel, pour validation supplémentaire)
-    const commonTlds = ['com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'uk', 'fr', 'de', 'es', 'it', 'nl', 'be', 'ch', 'at', 'se', 'no', 'dk', 'fi', 'pl', 'cz', 'gr', 'pt', 'ie', 'au', 'ca', 'nz', 'jp', 'cn', 'in', 'br', 'mx', 'ar', 'za', 'ae', 'sa', 'eg', 'ma', 'dz', 'tn', 'ly', 'sd', 'ye', 'iq', 'jo', 'lb', 'sy', 'ps', 'kw', 'qa', 'bh', 'om'];
-
-    // Vérifier que le TLD est valide (au moins 2 caractères et alphabétique)
-    if (!/^[a-zA-Z]{2,}$/.test(tld)) {
-      return false;
-    }
-
-    return true;
-  };
+  // ✅ SECURITY: Replaced with shared validator from utils/validators.js
+  // No more inline regex that could be inconsistent with backend rules
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -177,20 +102,14 @@ export default function LoginRegister() {
     setSuccess('');
 
     try {
-      // Validation de l'email pour login et register
-      if (!formData.email || !formData.email.trim()) {
-        setError(t('auth.errors.email_required', 'Veuillez entrer votre adresse email'));
-        return;
-      }
+      // ✅ SECURITY: Sanitize inputs before validation/submission
+      const trimmedEmail = sanitizeInput(formData.email, 254).toLowerCase();
+      const trimmedName = sanitizeInput(formData.name, 100);
 
-      const trimmedEmail = formData.email.trim().toLowerCase();
-
-      // Validation de l'email
-      const emailIsValid = isValidEmail(trimmedEmail);
-      console.log('Email validation:', { email: trimmedEmail, isValid: emailIsValid });
-
-      if (!emailIsValid) {
-        setError(t('auth.errors.invalid_email', 'Adresse email invalide. Veuillez vérifier votre email.\nExemples valides: nom@gmail.com, nom@yahoo.com, nom@example.com'));
+      // ✅ SECURITY: Use shared validator (consistent with backend rules)
+      const emailErr = validateEmail(trimmedEmail);
+      if (emailErr) {
+        setError(t('auth.errors.invalid_email', emailErr));
         setIsLoading(false);
         return;
       }
@@ -246,7 +165,7 @@ export default function LoginRegister() {
               .update({ last_login: new Date().toISOString() })
               .eq('id', data.user.id);
           } catch (loginUpdateErr) {
-            console.error('Error updating last_login:', loginUpdateErr);
+            logger.error('Error updating last_login');
             // Don't fail login if this fails
           }
 
@@ -258,42 +177,43 @@ export default function LoginRegister() {
         }
       } else {
         // Inscription avec Supabase
-        // Validation
-        if (!formData.name || formData.name.trim().length < 2) {
-          setError(t('auth.errors.name_required', 'Le nom doit contenir au moins 2 caractères'));
+        // ✅ SECURITY: Validate register fields using shared validators
+        const nameErr = validateText(trimmedName, 'Nom complet', { min: 2, max: 100 });
+        if (nameErr) {
+          setError(t('auth.errors.name_required', nameErr));
+          setIsLoading(false);
           return;
         }
 
-        if (formData.password.length < 6) {
-          setError(t('auth.errors.password_short', 'Le mot de passe doit contenir au moins 6 caractères'));
+        const passwordErr = validatePassword(formData.password, { minLength: 6 });
+        if (passwordErr) {
+          setError(t('auth.errors.password_short', passwordErr));
+          setIsLoading(false);
           return;
         }
 
         if (formData.password !== formData.password_confirmation) {
           setError(t('auth.errors.password_mismatch', 'Les mots de passe ne correspondent pas'));
+          setIsLoading(false);
           return;
         }
 
         // Log des données avant l'envoi
-        console.log('Attempting signup with:', {
-          email: trimmedEmail,
+        logger.log('Attempting signup with:', {
           emailLength: trimmedEmail.length,
           passwordLength: formData.password.length,
-          name: formData.name.trim()
         });
 
-        // Essayer sans emailRedirectTo d'abord
         const signUpOptions = {
           email: trimmedEmail,
           password: formData.password,
           options: {
             data: {
-              name: formData.name.trim()
+              name: trimmedName  // ✅ Use sanitized name
             }
           }
         };
 
-        // Ajouter emailRedirectTo seulement si Site URL est configuré
         if (window.location.origin) {
           signUpOptions.options.emailRedirectTo = window.location.origin;
         }
@@ -301,25 +221,20 @@ export default function LoginRegister() {
         const { data, error } = await supabase.auth.signUp(signUpOptions);
 
         if (error) {
-          console.error('Supabase signup error:', error);
-          console.error('Error details:', {
-            message: error.message,
-            status: error.status,
-            email: trimmedEmail
-          });
+          // ✅ SECURITY: logger only outputs in dev, never in production
+          logger.error('Signup error code:', error.status);
 
-          // Traduire les messages d'erreur courants
           let errorMessage = error.message;
           if (error.message?.includes('already registered') || error.message?.includes('already exists') || error.message?.includes('User already registered')) {
             errorMessage = t('auth.errors.already_registered', 'Cet email est déjà enregistré. Veuillez vous connecter.');
           } else if (error.message?.includes('Invalid email') || error.message?.includes('invalid') || error.message?.includes('Email address')) {
-            errorMessage = t('auth.errors.invalid_email', '❌ Adresse email invalide.\n\nSi votre email semble correct (ex: simo@gmail.com), vérifiez:\n\n1. Dans Supabase Dashboard:\n   • Authentication → Providers → Email (doit être activé)\n   • Authentication → Settings → Site URL (doit être http://localhost:3000)\n   • Authentication → URL Configuration → Redirect URLs (ajoutez http://localhost:3000)\n\n2. Vérifiez la console (F12) pour plus de détails\n\n3. Essayez un autre email pour tester');
+            errorMessage = t('auth.errors.invalid_email', 'Adresse email invalide.');
           } else if (error.message?.includes('Password') || error.message?.includes('password')) {
             errorMessage = t('auth.errors.password_short', 'Le mot de passe doit contenir au moins 6 caractères');
           } else if (error.message?.includes('rate limit')) {
             errorMessage = t('auth.errors.rate_limit', 'Trop de tentatives. Veuillez réessayer plus tard.');
           } else {
-            errorMessage = error.message || t('auth.errors.generic_error', 'Erreur d\'inscription. Veuillez réessayer.');
+            errorMessage = t('auth.errors.generic_error', 'Erreur d\'inscription. Veuillez réessayer.');
           }
           setError(errorMessage);
           setIsLoading(false);
@@ -327,10 +242,10 @@ export default function LoginRegister() {
         }
 
         if (data.user) {
-          // Save user data in localStorage
+          // ✅ SECURITY: Only store minimal user data
           const userData = {
             id: data.user.id,
-            name: formData.name.trim(),
+            name: trimmedName,  // ✅ Use sanitized name
             email: data.user.email
           };
 
@@ -344,30 +259,18 @@ export default function LoginRegister() {
             localStorage.removeItem('remembered_email');
           }
 
-          // Save user data in the users table
           try {
-            const { error: userTableError } = await supabase
+            await supabase
               .from('users')
               .upsert({
                 id: data.user.id,
-                full_name: formData.name.trim(),
-                email_verified: data.user.email_confirmed_at ? true : false,
+                full_name: trimmedName,  // ✅ Use sanitized name
+                email_verified: !!data.user.email_confirmed_at,
                 is_active: true,
-                language_preference: 'fr' // Default language
-              }, {
-                onConflict: 'id'
-              });
-
-            if (userTableError) {
-              console.error('Error saving user to users table:', userTableError);
-              // Don't fail the registration if this fails, just log it
-              // The trigger should handle it, but we try to save explicitly
-            } else {
-              console.log('User data saved to users table successfully');
-            }
-          } catch (userTableErr) {
-            console.error('Exception saving user to users table:', userTableErr);
-            // Continue with registration even if this fails
+                language_preference: 'fr'
+              }, { onConflict: 'id' });
+          } catch (_) {
+            // Don't fail registration if users table insert fails
           }
 
           // Vérifier si l'email confirmation est requise
@@ -392,7 +295,7 @@ export default function LoginRegister() {
         }
       }
     } catch (err) {
-      console.error('Error:', err);
+      logger.error('Auth error:', err?.message);
       setError('Erreur de connexion au serveur');
     } finally {
       setIsLoading(false);
@@ -413,26 +316,18 @@ export default function LoginRegister() {
     setIsAutoLoginAttempted(false);
   };
 
-  // Safe logout function - removes token but keeps email
   const handleLogout = async () => {
     try {
-      // Sign out from Supabase
       await supabase.auth.signOut();
-
-      // Remove authentication data
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user_data');
       localStorage.removeItem('user');
       sessionStorage.removeItem('auth_token');
       sessionStorage.removeItem('user_data');
       sessionStorage.removeItem('user');
-
-      // Keep remembered_email for easy re-login
-      // localStorage.removeItem('remembered_email'); // Commented out to keep email
-
       setSuccess(t('auth.success.logout_success', 'تم تسجيل الخروج بنجاح'));
-    } catch (error) {
-      console.error('Logout error:', error);
+    } catch (_) {
+      // Fail silently
     }
   };
 
@@ -440,11 +335,8 @@ export default function LoginRegister() {
     setIsLoading(true);
     setError('');
     try {
-      // Prioritize existing auth_return_url if it's more specific than '/'
       const existing = localStorage.getItem('auth_return_url');
       const finalReturnUrl = (existing && existing !== '/') ? existing : returnUrl;
-
-      console.log('[LoginRegister] Starting Google Login, returnUrl:', finalReturnUrl);
       localStorage.setItem('auth_return_url', finalReturnUrl);
 
       const { error } = await supabase.auth.signInWithOAuth({
@@ -459,9 +351,7 @@ export default function LoginRegister() {
       });
 
       if (error) throw error;
-      // The user will be redirected to Google
-    } catch (error) {
-      console.error('Google login error:', error);
+    } catch (_) {
       setError(t('auth.errors.google_error', 'Erreur d\'authentification avec Google'));
       setIsLoading(false);
     }
@@ -500,6 +390,7 @@ export default function LoginRegister() {
               <div className="form-group">
                 <label htmlFor="name" className="form-label">{t('auth.fullname_label')}</label>
                 <div className="form-input-wrapper">
+                  {/* ✅ SECURITY: maxLength attr prevents oversized payload at browser level */}
                   <input
                     type="text"
                     id="name"
@@ -509,6 +400,8 @@ export default function LoginRegister() {
                     className="form-input"
                     required={!isLogin}
                     placeholder={t('auth.fullname_placeholder')}
+                    maxLength={100}
+                    autoComplete="name"
                   />
                 </div>
               </div>
@@ -526,6 +419,8 @@ export default function LoginRegister() {
                   className="form-input"
                   required
                   placeholder={t('auth.email_placeholder')}
+                  maxLength={254}
+                  autoComplete="email"
                 />
               </div>
             </div>
@@ -543,6 +438,8 @@ export default function LoginRegister() {
                   required
                   placeholder={t('auth.password_placeholder')}
                   minLength="6"
+                  maxLength={128}
+                  autoComplete={isLogin ? 'current-password' : 'new-password'}
                 />
                 <button
                   type="button"

@@ -487,7 +487,7 @@ export default function Admin() {
     <main className="admin-page">
       <header className="admin-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj" style={{ height: '50px', width: 'auto' }} />
+          <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj" style={{ height: '65px', width: 'auto' }} />
           <div>
             <h1 className="admin-title">Tableau de bord</h1>
             <p className="admin-subtitle">

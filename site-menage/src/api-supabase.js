@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './lib/supabase';
+import logger from './utils/logger';
 // supabaseAdmin removed - usage replaced with RLS-secured standard client
 
 
@@ -24,27 +25,20 @@ const getLocalizedField = (obj, field, locale) => {
 };
 
 // Global error handler
+// ✅ SECURITY FIX: No longer leaks DB schema, table names, or SQL hints to the browser console in production.
 const handleApiError = (error) => {
-  // Log detailed error information
-  console.error('API Error:', error);
-  console.error('Error code:', error?.code);
-  console.error('Error message:', error?.message);
-  console.error('Error details:', error?.details);
-  console.error('Error hint:', error?.hint);
+  // Only log detailed errors in development
+  logger.error('API Error:', error?.message);
 
   if (error?.message?.includes('JWT') || error?.code === 'PGRST301') {
-    // Clear tokens and redirect to login
+    // Clear legacy tokens and signal auth error
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminData');
     window.dispatchEvent(new CustomEvent('adminAuthError'));
   }
 
-  // Provide more helpful error messages for common issues
-  if (error?.code === '42703' || error?.message?.includes('column') || error?.message?.includes('does not exist')) {
-    console.error('⚠️ Database schema mismatch detected. Please run update-driver-reservation-table.sql in Supabase SQL Editor.');
-  }
-
-  throw error;
+  // Throw a generic error — never expose DB internals to the client in production
+  throw new Error('Une erreur est survenue. Veuillez réessayer.');
 };
 
 // ============================================
@@ -54,42 +48,43 @@ const handleApiError = (error) => {
 /**
  * Admin Authentication
  */
+// ✅ SECURITY FIX: adminLogin now uses real Supabase Auth.
+// Password is verified by Supabase (bcrypt), and the token is a real signed JWT.
+// The 'password' parameter is actually used now.
 export async function adminLogin(email, password) {
   try {
-    // Note: Admin should use Supabase Auth (signInWithPassword) using the 'admins' table via RLS or standard auth
-    // For now, replacing admin-specific query with standard client (assuming RLS allows public read or specific access)
-    const { data, error } = await supabase
+    // Step 1: Real password check via Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError || !authData?.session) {
+      throw new Error('Identifiants invalides');
+    }
+
+    // Step 2: Verify the user is an active admin in our admins table
+    const { data: adminData, error: adminError } = await supabase
       .from('admins')
-      .select('*')
+      .select('id, name, email, role, is_active') // ← never select '*'
       .eq('email', email)
       .eq('is_active', true)
       .single();
 
-    if (error || !data) {
-      throw new Error('Invalid credentials');
+    if (adminError || !adminData) {
+      // Not an admin — revoke the Supabase session immediately
+      await supabase.auth.signOut();
+      throw new Error('Accès refusé');
     }
-
-    // In production, use Supabase Auth or verify password hash
-    // For now, this is a placeholder - you'll need to implement proper password verification
-    // You might want to use Supabase Auth with custom user metadata instead
-
-    // Create a session token (in production, use Supabase Auth)
-    const token = btoa(JSON.stringify({ id: data.id, email: data.email }));
 
     return {
       message: 'Login successful',
-      admin: {
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        role: data.role,
-        is_active: data.is_active,
-      },
-      token: token,
+      admin: adminData,
+      token: authData.session.access_token, // ← REAL signed JWT from Supabase
     };
   } catch (error) {
-    handleApiError(error);
-    throw error;
+    // Generic message — don't reveal why login failed
+    throw new Error('Identifiants invalides');
   }
 }
 
@@ -105,30 +100,21 @@ export async function adminLogout() {
   }
 }
 
+// ✅ SECURITY FIX: Uses real Supabase session instead of decoding a fake btoa token.
 export async function adminProfile() {
   try {
-    const token = localStorage.getItem('adminToken');
-    if (!token) throw new Error('Not authenticated');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Not authenticated');
 
-    // Decode token and get admin data
-    const adminData = JSON.parse(atob(token));
     const { data, error } = await supabase
       .from('admins')
-      .select('*')
-      .eq('id', adminData.id)
+      .select('id, name, email, role, is_active')
+      .eq('email', session.user.email)
       .single();
 
     if (error) throw error;
 
-    return {
-      admin: {
-        id: data.id,
-        name: data.name,
-        email: data.email,
-        role: data.role,
-        is_active: data.is_active,
-      }
-    };
+    return { admin: data };
   } catch (error) {
     handleApiError(error);
     throw error;
@@ -199,15 +185,34 @@ export async function userLogout() {
 // CONTACTS
 // ============================================
 
+// ✅ SECURITY FIX: Added input validation and sanitization before DB insert.
+const sanitize = (str) => String(str || '').trim().replace(/<[^>]*>/g, '');
+
 export async function postContact(form) {
   try {
+    // Validate required fields
+    if (!form.name || form.name.trim().length < 2 || form.name.trim().length > 100) {
+      throw new Error('Le nom doit contenir entre 2 et 100 caractères.');
+    }
+    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      throw new Error('Adresse email invalide.');
+    }
+    if (form.phone && !/^[+\d\s\-()]{7,20}$/.test(form.phone)) {
+      throw new Error('Numéro de téléphone invalide.');
+    }
+    if (!form.message || form.message.trim().length < 5 || form.message.trim().length > 2000) {
+      throw new Error('Le message doit contenir entre 5 et 2000 caractères.');
+    }
+    // Honeypot check (set honeypot field name to 'website' in your form)
+    if (form.website) return { success: true }; // silently drop bot submissions
+
     const { data, error } = await supabase
       .from('contact_submissions')
       .insert([{
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        message: form.message,
+        name: sanitize(form.name),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone ? sanitize(form.phone) : null,
+        message: sanitize(form.message),
       }])
       .select()
       .single();
@@ -215,8 +220,8 @@ export async function postContact(form) {
     if (error) throw error;
     return data;
   } catch (error) {
-    handleApiError(error);
-    throw error;
+    if (error.message && !error.message.includes('supabase')) throw error;
+    throw new Error('Échec de l\'envoi. Veuillez réessayer.');
   }
 }
 
@@ -376,12 +381,12 @@ export async function createServiceAdmin(token, serviceData) {
       .single();
 
     if (error) {
-      console.error('Error creating service:', error);
+      logger.error('Error creating service');
       throw new Error(error.message || 'Erreur lors de la création du service');
     }
     return data;
   } catch (error) {
-    console.error('Exception in createServiceAdmin:', error);
+    logger.error('Exception in createServiceAdmin');
     handleApiError(error);
     throw error;
   }
@@ -409,12 +414,12 @@ export async function updateServiceAdmin(token, id, serviceData) {
       .single();
 
     if (error) {
-      console.error('Error updating service:', error);
+      logger.error('Error updating service');
       throw new Error(error.message || 'Erreur lors de la mise à jour du service');
     }
     return data;
   } catch (error) {
-    console.error('Exception in updateServiceAdmin:', error);
+    logger.error('Exception in updateServiceAdmin');
     handleApiError(error);
     throw error;
   }
@@ -426,7 +431,7 @@ export async function deleteServiceAdmin(token, id) {
       throw new Error('ID du service requis pour la suppression');
     }
 
-    console.log('Attempting to delete service with ID:', id, 'Type:', typeof id);
+    logger.log('Attempting to delete service with ID:', typeof id);
 
     // Ensure ID is a number
     const serviceId = typeof id === 'string' ? parseInt(id, 10) : id;
@@ -438,10 +443,9 @@ export async function deleteServiceAdmin(token, id) {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session && !token) {
-      console.warn('No Supabase session or token found');
-      // Try to use token if provided
+      logger.warn('No Supabase session or token found');
       if (token) {
-        console.log('Using provided token for authentication');
+        logger.log('Using provided token for authentication');
       } else {
         throw new Error('Session expirée. Veuillez vous reconnecter.');
       }
@@ -456,20 +460,17 @@ export async function deleteServiceAdmin(token, id) {
 
     // If deletion succeeded (returned data)
     if (deletedData && deletedData.length > 0) {
-      console.log('Service deleted successfully:', deletedData);
+      logger.log('Service deleted successfully');
       return { message: 'Service supprimé avec succès', deleted: true, data: deletedData };
     }
 
     // If there's an error, check if it's RLS-related or session-related
     if (deleteError) {
-      console.error('Delete error:', deleteError);
-      console.error('Error code:', deleteError.code);
-      console.error('Error message:', deleteError.message);
-      console.error('Error details:', deleteError);
+      logger.error('Delete error code:', deleteError.code);
 
       // Check for 406 Not Acceptable (usually means no session or RLS issue)
       if (deleteError.code === 'PGRST301' || deleteError.message?.includes('406') || deleteError.message?.includes('Not Acceptable')) {
-        console.log('406 error detected - likely RLS or session issue, attempting soft delete...');
+        logger.log('406 error detected - attempting soft delete...');
 
         // Try soft delete: set is_active to false
         const { data: softDeleteData, error: softDeleteError } = await supabase
@@ -480,12 +481,12 @@ export async function deleteServiceAdmin(token, id) {
           .single();
 
         if (softDeleteError) {
-          console.error('Soft delete also failed:', softDeleteError);
+          logger.error('Soft delete also failed');
           throw new Error('Impossible de supprimer le service. Vérifiez que vous êtes connecté et que les permissions RLS sont correctes.');
         }
 
         if (softDeleteData) {
-          console.log('Service soft deleted (is_active = false)');
+          logger.log('Service soft deleted (is_active = false)');
           return {
             message: 'Service désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète',
             deleted: true,
@@ -497,7 +498,7 @@ export async function deleteServiceAdmin(token, id) {
 
       // If RLS error, try soft delete as fallback
       if (deleteError.code === '42501' || deleteError.message?.includes('permission') || deleteError.message?.includes('policy') || deleteError.message?.includes('row-level security')) {
-        console.log('RLS permission error detected, attempting soft delete...');
+        logger.log('RLS permission error detected, attempting soft delete...');
 
         // Try soft delete: set is_active to false
         const { data: softDeleteData, error: softDeleteError } = await supabase
@@ -508,12 +509,12 @@ export async function deleteServiceAdmin(token, id) {
           .single();
 
         if (softDeleteError) {
-          console.error('Soft delete also failed:', softDeleteError);
+          logger.error('Soft delete also failed');
           throw new Error('Impossible de supprimer le service. Vérifiez les permissions RLS dans Supabase.');
         }
 
         if (softDeleteData) {
-          console.log('Service soft deleted (is_active = false)');
+          logger.log('Service soft deleted (is_active = false)');
           return {
             message: 'Service désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète',
             deleted: true,
@@ -537,13 +538,13 @@ export async function deleteServiceAdmin(token, id) {
 
     // If service doesn't exist (PGRST116 = not found), deletion was successful
     if (verifyError && verifyError.code === 'PGRST116') {
-      console.log('Service verified as deleted (not found after delete)');
+      logger.log('Service verified as deleted (not found after delete)');
       return { message: 'Service supprimé avec succès', deleted: true };
     }
 
     // If service still exists and no error, deletion failed silently
     if (verifyData) {
-      console.warn('Service still exists after delete - no error but service persists');
+      logger.warn('Service still exists after delete - no error but service persists');
       // Try soft delete as fallback
       const { data: softDeleteData, error: softDeleteError } = await supabase
         .from('services')
@@ -564,10 +565,10 @@ export async function deleteServiceAdmin(token, id) {
     }
 
     // If no verifyData and no error, assume deletion succeeded
-    console.log('Service deleted successfully (no verification data)');
+    logger.log('Service deleted successfully (no verification data)');
     return { message: 'Service supprimé avec succès', deleted: true };
   } catch (error) {
-    console.error('Exception in deleteServiceAdmin:', error);
+    logger.error('Exception in deleteServiceAdmin');
     handleApiError(error);
     throw error;
   }
@@ -682,7 +683,7 @@ export async function deleteTypeAdmin(token, id) {
       throw new Error('ID du type requis pour la suppression');
     }
 
-    console.log('[deleteTypeAdmin] Attempting to delete type with ID:', id, 'Type:', typeof id);
+    logger.log('[deleteTypeAdmin] Attempting to delete type with ID:', typeof id);
 
     // Ensure ID is a number
     const typeId = typeof id === 'string' ? parseInt(id, 10) : id;
@@ -694,12 +695,12 @@ export async function deleteTypeAdmin(token, id) {
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session && !token) {
-      console.warn('[deleteTypeAdmin] No Supabase session or token found');
+      logger.warn('[deleteTypeAdmin] No Supabase session or token found');
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
 
     // First, delete all type_options associated with this type
-    console.log('[deleteTypeAdmin] Deleting associated type_options...');
+    logger.log('[deleteTypeAdmin] Deleting associated type_options...');
     const { data: deletedOptions, error: optionsDeleteError } = await supabase
       .from('type_options')
       .delete()
@@ -707,9 +708,9 @@ export async function deleteTypeAdmin(token, id) {
       .select();
 
     if (optionsDeleteError) {
-      console.warn('[deleteTypeAdmin] Error deleting type_options (may not exist):', optionsDeleteError);
+      logger.warn('[deleteTypeAdmin] Error deleting type_options (may not exist)');
     } else {
-      console.log('[deleteTypeAdmin] Deleted type_options, count:', deletedOptions?.length || 0);
+      logger.log('[deleteTypeAdmin] Deleted type_options, count:', deletedOptions?.length || 0);
     }
 
     // Try to delete the type directly
@@ -721,13 +722,13 @@ export async function deleteTypeAdmin(token, id) {
 
     // If deletion succeeded (returned data)
     if (deletedData && deletedData.length > 0) {
-      console.log('[deleteTypeAdmin] Type deleted successfully:', deletedData);
+      logger.log('[deleteTypeAdmin] Type deleted successfully');
       return { message: 'Type supprimé avec succès', deleted: true, data: deletedData };
     }
 
     // If there's an error, check if it's RLS-related
     if (deleteError) {
-      console.error('[deleteTypeAdmin] Error deleting type:', deleteError);
+      logger.error('[deleteTypeAdmin] Error deleting type - code:', deleteError.code);
 
       // Check if it's a permission/RLS error
       if (deleteError.code === '42501' ||
@@ -736,7 +737,7 @@ export async function deleteTypeAdmin(token, id) {
         deleteError.message?.includes('policy') ||
         deleteError.message?.includes('row-level security') ||
         deleteError.message?.includes('RLS')) {
-        console.log('[deleteTypeAdmin] RLS permission error detected, attempting soft delete...');
+        logger.log('[deleteTypeAdmin] RLS permission error detected, attempting soft delete...');
 
         // Try soft delete: set is_active to false
         const { data: softDeleteData, error: softDeleteError } = await supabase
@@ -747,7 +748,7 @@ export async function deleteTypeAdmin(token, id) {
           .single();
 
         if (softDeleteError) {
-          console.error('[deleteTypeAdmin] Soft delete also failed:', softDeleteError);
+          logger.error('[deleteTypeAdmin] Soft delete also failed');
           const errorMsg = softDeleteError.message || String(softDeleteError);
           const errorCode = softDeleteError.code || softDeleteError.status || '';
 
@@ -759,7 +760,7 @@ export async function deleteTypeAdmin(token, id) {
         }
 
         if (softDeleteData) {
-          console.log('[deleteTypeAdmin] Type soft deleted (is_active = false)');
+          logger.log('[deleteTypeAdmin] Type soft deleted (is_active = false)');
           return {
             message: 'Type désactivé (soft delete) - Vérifiez les permissions RLS pour la suppression complète',
             deleted: true,
@@ -782,13 +783,13 @@ export async function deleteTypeAdmin(token, id) {
 
     // If type doesn't exist (PGRST116 = not found), deletion was successful
     if (verifyError && verifyError.code === 'PGRST116') {
-      console.log('[deleteTypeAdmin] Type verified as deleted (not found after delete)');
+      logger.log('[deleteTypeAdmin] Type verified as deleted (not found after delete)');
       return { message: 'Type supprimé avec succès', deleted: true };
     }
 
     // If type still exists and no error, deletion failed silently
     if (verifyData) {
-      console.warn('[deleteTypeAdmin] Type still exists after delete - no error but type persists');
+      logger.warn('[deleteTypeAdmin] Type still exists after delete - no error but type persists');
       // Try soft delete as fallback
       const { data: softDeleteData, error: softDeleteError } = await supabase
         .from('types')
@@ -807,7 +808,7 @@ export async function deleteTypeAdmin(token, id) {
 
       // If soft delete also failed, provide detailed error
       if (softDeleteError) {
-        console.error('[deleteTypeAdmin] Soft delete failed:', softDeleteError);
+        logger.error('[deleteTypeAdmin] Soft delete failed');
         const errorMsg = softDeleteError.message || String(softDeleteError);
         const errorCode = softDeleteError.code || softDeleteError.status || '';
 
@@ -822,10 +823,10 @@ export async function deleteTypeAdmin(token, id) {
     }
 
     // If no verifyData and no error, assume deletion succeeded
-    console.log('[deleteTypeAdmin] Type deleted successfully (no verification data)');
+    logger.log('[deleteTypeAdmin] Type deleted successfully (no verification data)');
     return { message: 'Type supprimé avec succès', deleted: true };
   } catch (error) {
-    console.error('[deleteTypeAdmin] Exception in deleteTypeAdmin:', error);
+    logger.error('[deleteTypeAdmin] Exception in deleteTypeAdmin');
     handleApiError(error);
     throw error;
   }
@@ -1021,7 +1022,7 @@ export async function getRatings() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('[getRatings] Error:', error);
+      logger.error('[getRatings] Error');
       throw error;
     }
 
@@ -1133,7 +1134,7 @@ export async function submitRating(ratingData) {
       }
     } catch (ipError) {
       // IP fetch failed, continue with 'unknown'
-      console.warn('Could not fetch user IP:', ipError);
+      logger.warn('Could not fetch user IP');
     }
 
     const { data, error } = await supabase
@@ -1169,7 +1170,7 @@ export async function submitRating(ratingData) {
       .order('created_at', { ascending: false });
 
     if (statsError) {
-      console.warn('Could not fetch stats after rating submission:', statsError);
+      logger.warn('Could not fetch stats after rating submission');
     }
 
     // Calculate stats
@@ -1674,8 +1675,7 @@ export async function createDriverReservation(reservationData) {
   try {
     const db = supabase;
 
-    // Log the data being sent for debugging
-    console.log('[createDriverReservation] Inserting data:', reservationData);
+    logger.log('[createDriverReservation] Inserting data');
 
     const { data, error } = await db
       .from('driver_reservation')
@@ -1684,7 +1684,7 @@ export async function createDriverReservation(reservationData) {
       .single();
 
     if (error) {
-      console.error('[createDriverReservation] Supabase error:', error);
+      logger.error('[createDriverReservation] Supabase error - code:', error.code);
       // Provide more helpful error messages
       if (error.code === '42703' || error.message?.includes('column') || error.message?.includes('does not exist')) {
         throw new Error('Les colonnes de la table driver_reservation ne sont pas à jour. Veuillez exécuter le script SQL update-driver-reservation-table.sql dans Supabase.');
@@ -1692,7 +1692,7 @@ export async function createDriverReservation(reservationData) {
       throw error;
     }
 
-    console.log('[createDriverReservation] Success:', data);
+    logger.log('[createDriverReservation] Success');
     return data;
   } catch (error) {
     handleApiError(error);

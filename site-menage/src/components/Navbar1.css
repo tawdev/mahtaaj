@@ -10,7 +10,7 @@
   border-bottom: 1px solid rgba(148, 163, 184, 0.2) !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
   transition: all 0.3s ease !important;
-  height: 70px !important;
+  height: 85px !important;
   display: flex !important;
   align-items: center !important;
   /* Removed properties that create a containing block for fixed elements:
@@ -198,9 +198,9 @@
 }
 
 .navbar1__inner {
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 24px;
   display: flex !important;
   align-items: center;
   justify-content: space-between;
@@ -209,6 +209,21 @@
   gap: 20px;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+/* Large screen — keep navbar content centred */
+@media (min-width: 1440px) {
+  .navbar1__inner {
+    max-width: 1400px;
+    padding: 0 32px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .navbar1__inner {
+    max-width: 1600px;
+    padding: 0 48px;
+  }
 }
 
 /* Ensure hamburger and nav work together harmoniously */
@@ -319,7 +334,7 @@
 }
 
 .navbar1__logo {
-  height: 40px;
+  height: 120px;
   width: auto;
   object-fit: contain;
   transition: transform 0.3s ease;

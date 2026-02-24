@@ -15,7 +15,7 @@ export default function DashboardLayout() {
       <div className="emp-layout">
         <aside className="emp-sidebar emp-card">
           <div className="emp-logo-container" style={{ textAlign: 'center', padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,0.05)', marginBottom: '15px' }}>
-            <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj" style={{ height: '45px', width: 'auto' }} />
+            <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj" style={{ height: '65px', width: 'auto' }} />
           </div>
           <div className="emp-user">
             <strong>{employee?.full_name}</strong>

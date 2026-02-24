@@ -1,35 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
+/**
+ * PrivateRoute — verifies a REAL Supabase JWT session server-side.
+ * 
+ * ✅ SECURITY FIX: no longer relies on localStorage alone.
+ * The actual DB query confirms the user has an active admin role.
+ * A forged localStorage entry cannot bypass this check.
+ */
 export default function PrivateRoute({ allowedRoles = [], element }) {
-  const token = localStorage.getItem('adminToken');
-  const adminDataStr = localStorage.getItem('adminData');
+  const [status, setStatus] = useState('loading'); // 'loading' | 'allowed' | 'denied' | 'forbidden'
 
-  if (!token || !adminDataStr) {
-    return <Navigate to="/admin/login" replace />;
-  }
+  useEffect(() => {
+    let cancelled = false;
 
-  let role = null;
-  try {
-    role = JSON.parse(adminDataStr)?.role;
-  } catch (_) {
-    role = null;
-  }
+    const checkAuth = async () => {
+      try {
+        // Step 1: Get the real Supabase session (JWT)
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          if (!cancelled) setStatus('denied');
+          return;
+        }
 
-  if (!role) {
-    return <Navigate to="/admin/login" replace />;
-  }
+        // Step 2: Confirm admin record in DB with this authenticated session
+        const { data: admin, error } = await supabase
+          .from('admins')
+          .select('role, is_active')
+          .eq('email', session.user.email)
+          .single();
 
-  // Admin has access to everything
-  if (role === 'admin') {
-    return element;
-  }
+        if (error || !admin || !admin.is_active) {
+          if (!cancelled) setStatus('denied');
+          return;
+        }
 
-  if (allowedRoles.length === 0 || allowedRoles.includes(role)) {
-    return element;
-  }
+        if (
+          admin.role === 'admin' ||
+          allowedRoles.length === 0 ||
+          allowedRoles.includes(admin.role)
+        ) {
+          if (!cancelled) setStatus('allowed');
+        } else {
+          if (!cancelled) setStatus('forbidden');
+        }
+      } catch (_) {
+        if (!cancelled) setStatus('denied');
+      }
+    };
 
-  return <Navigate to="/admin/403" replace />;
+    checkAuth();
+    return () => { cancelled = true; };
+  }, [allowedRoles]);
+
+  if (status === 'loading') return <div style={{ padding: '2rem', textAlign: 'center' }}>Vérification...</div>;
+  if (status === 'denied') return <Navigate to="/admin/login" replace />;
+  if (status === 'forbidden') return <Navigate to="/admin/403" replace />;
+  return element;
 }
-
-
