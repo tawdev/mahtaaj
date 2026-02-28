@@ -320,3 +320,124 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Modal Styling - Premium Overrides */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 24px;
+  animation: modalOverlayFade 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 40px 100px -20px rgba(15, 23, 42, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  animation: modalScaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-header {
+  padding: 24px 32px;
+  background: white !important; /* Force white background to fix dark leak */
+  border-bottom: 1px solid var(--dash-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--dash-text-main) !important;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.modal-close {
+  background: #f1f5f9 !important;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--dash-text-muted) !important;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: #e2e8f0 !important;
+  color: var(--dash-text-main) !important;
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 32px;
+}
+
+.modal-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--dash-border);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--dash-text-muted);
+}
+
+.detail-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dash-text-main);
+}
+
+@keyframes modalOverlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
