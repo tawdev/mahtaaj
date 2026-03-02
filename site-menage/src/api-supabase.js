@@ -60,30 +60,39 @@ export async function adminLogin(email, password) {
     });
 
     if (authError || !authData?.session) {
-      throw new Error('Identifiants invalides');
+      if (authError?.message?.includes('invalid_credentials') || authError?.status === 400) {
+        throw new Error('Identifiants invalides');
+      }
+      logger.error('Auth error during admin login:', authError);
+      throw new Error('Erreur d\'authentification. Veuillez réessayer.');
     }
 
     // Step 2: Verify the user is an active admin in our admins table
     const { data: adminData, error: adminError } = await supabase
       .from('admins')
-      .select('id, name, email, role, is_active') // ← never select '*'
+      .select('id, name, email, role, is_active')
       .eq('email', email)
       .eq('is_active', true)
       .single();
 
     if (adminError || !adminData) {
+      logger.error('Admin verification error:', adminError);
       // Not an admin — revoke the Supabase session immediately
       await supabase.auth.signOut();
-      throw new Error('Accès refusé');
+      throw new Error('Accès refusé. Ce compte n\'est pas un administrateur actif.');
     }
 
     return {
       message: 'Login successful',
       admin: adminData,
-      token: authData.session.access_token, // ← REAL signed JWT from Supabase
+      token: authData.session.access_token,
     };
   } catch (error) {
-    // Generic message — don't reveal why login failed
+    logger.error('Login error detail:', error);
+    // If it's one of our thrown errors, pass it through
+    if (error.message === 'Identifiants invalides' || error.message.includes('Accès refusé')) {
+      throw error;
+    }
     throw new Error('Identifiants invalides');
   }
 }
