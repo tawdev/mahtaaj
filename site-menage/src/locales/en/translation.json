@@ -2310,10 +2310,63 @@
     "superviseur_securite": "Security Supervisor"
   },
   "employee_register": {
+    "title": "Join Our Team",
+    "subtitle": "Please fill out the form below to apply",
     "form": {
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "name": "Last Name",
+      "birth_date": "Birth Date",
+      "age": "Age",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "full_name": "Full Name",
+      "cin_number": "CIN Number",
+      "photo": "Photo",
+      "expertise": "Expertise",
+      "auto_entrepreneur": "Self-employed",
+      "last_experience": "Last experience",
+      "last_experience_ph": "Describe your last work experience",
+      "company_name": "Company Name",
+      "company_name_ph": "Enter company name",
+      "available_days": "Available Days",
+      "location_label": "Location (GPS)",
+      "selected_address": "Selected Address:",
+      "phone_placeholder": "Ex: 06 12 34 56 78",
+      "preferred_work_time": "Preferred work time",
+      "work_morning": "I work every day in the morning",
+      "work_night": "I work every day at night",
       "competency": "Competency area (Housekeeping)",
       "select_competency": "Select...",
       "competency_cuisine": "Competency area (Cuisine)"
+    },
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "validation": {
+      "all_fields_required": "Please fill in all fields, including map location.",
+      "select_at_least_one_day": "Please select at least one day.",
+      "end_time_after_start": "End time must be after start time"
+    },
+    "success_modal": {
+      "title": "Thank you for your application, we will contact you soon!",
+      "ok": "OK"
+    },
+    "buttons": {
+      "submit": "Submit Application",
+      "submit_security": "Submit Application (Security)",
+      "submit_bebe": "Submit Application (Nanny)",
+      "submit_jardinage": "Submit Application (Gardener)",
+      "submit_driver": "Submit Application (Driver)",
+      "submit_handworker": "Submit Application (Handworker)",
+      "submitting": "Submitting..."
     }
   }
 }

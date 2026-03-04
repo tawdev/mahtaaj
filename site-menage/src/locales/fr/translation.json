@@ -2024,7 +2024,10 @@
       "phone_placeholder": "Ex: 06 12 34 56 78",
       "preferred_work_time": "Moment de travail préféré",
       "work_morning": "Je travaille tous les jours le matin",
-      "work_night": "Je travaille tous les jours le soir"
+      "work_night": "Je travaille tous les jours le soir",
+      "competency": "Domaine de compétence (Ménage)",
+      "select_competency": "Sélectionner…",
+      "competency_cuisine": "Domaine de compétence (Cuisine)"
     },
     "days": {
       "monday": "Lundi",
@@ -2315,13 +2318,6 @@
       "not_supported": "La géolocalisation n'est pas supportée par votre navigateur",
       "fetch_failed": "Impossible de récupérer l'adresse. Veuillez la saisir manuellement.",
       "general": "Impossible d'obtenir votre localisation"
-    }
-  },
-  "employee_register": {
-    "form": {
-      "competency": "Domaine de compétence (Ménage)",
-      "select_competency": "Sélectionner…",
-      "competency_cuisine": "Domaine de compétence (Cuisine)"
     }
   }
 }

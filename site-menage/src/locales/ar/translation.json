@@ -2290,7 +2290,10 @@
       "phone_placeholder": "مثال: 06 12 34 56 78",
       "preferred_work_time": "وقت العمل المفضل",
       "work_morning": "أعمل كل يوم في الصباح",
-      "work_night": "أعمل كل يوم في الليل"
+      "work_night": "أعمل كل يوم في الليل",
+      "competency": "مجال الكفاءة (التنظيف)",
+      "select_competency": "اختر...",
+      "competency_cuisine": "مجال الكفاءة (المطبخ)"
     },
     "days": {
       "monday": "الإثنين",
@@ -2508,12 +2511,5 @@
     "agent_de_surete": "عنصر سلامة",
     "agent_de_securite": "عنصر أمن",
     "superviseur_securite": "مشرف أمن"
-  },
-  "employee_register": {
-    "form": {
-      "competency": "مجال الكفاءة (التنظيف)",
-      "select_competency": "اختر...",
-      "competency_cuisine": "مجال الكفاءة (المطبخ)"
-    }
   }
 }

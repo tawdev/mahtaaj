@@ -12,6 +12,7 @@ import {
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import './ProductStats.css';
+import { supabase } from '../../lib/supabase';
 
 ChartJS.register(
   CategoryScale,
@@ -39,64 +40,115 @@ export default function ProductStats({ token, onAuthError }) {
   });
 
   useEffect(() => {
-    fetchProductStats();
-    fetchChartData();
+    fetchData();
   }, []);
 
-  const fetchProductStats = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/stats/products', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      setLoading(true);
+      setError('');
+
+      // 1. Fetch all products
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('*');
+
+      if (productsError) throw productsError;
+
+      // 2. Fetch all orders with their items
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select('id, items, created_at, status')
+        .neq('status', 'cancelled');
+
+      if (ordersError) throw ordersError;
+
+      // 3. Process products and orders to calculate stats
+      let totalSalesCount = 0;
+      let totalRevenueSum = 0;
+
+      const statsMap = products.map(product => {
+        let productSales = 0;
+        let productRevenue = 0;
+        const salesHistory = [];
+
+        orders.forEach(order => {
+          const items = Array.isArray(order.items) ? order.items : [];
+          const productItem = items.find(item =>
+            parseInt(item.product_id) === product.id ||
+            item.name === product.name
+          );
+
+          if (productItem) {
+            const qty = parseInt(productItem.quantity || 1);
+            const price = parseFloat(productItem.price || product.price || 0);
+            const subtotal = price * qty;
+
+            productSales += qty;
+            productRevenue += subtotal;
+
+            salesHistory.push({
+              date: new Date(order.created_at).toISOString().split('T')[0],
+              datetime: new Date(order.created_at).toLocaleString(),
+              quantity: qty,
+              price: price
+            });
+          }
+        });
+
+        totalSalesCount += productSales;
+        totalRevenueSum += productRevenue;
+
+        return {
+          ...product,
+          total_sales: productSales,
+          total_revenue: productRevenue,
+          sales: salesHistory
+        };
       });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          onAuthError();
-          return;
-        }
-        throw new Error('Erreur lors de la récupération des statistiques');
-      }
+      setProductStats(statsMap);
+      setSummary({
+        total_products: products.length,
+        total_sales: totalSalesCount,
+        total_revenue: totalRevenueSum
+      });
 
-      const data = await response.json();
-      if (data.success) {
-        setProductStats(data.data);
-        setSummary(data.summary);
-      } else {
-        setError(data.message);
-      }
+      // 4. Prepare chart data (History for last 30 days)
+      const last30Days = [...Array(30)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (29 - i));
+        return d.toISOString().split('T')[0];
+      });
+
+      const processedChartData = statsMap
+        .filter(p => p.total_sales > 0)
+        .slice(0, 5) // Show top 5 products in chart to avoid clutter
+        .map(product => {
+          const dailyData = last30Days.map(date => {
+            const daySales = product.sales
+              .filter(s => s.date === date)
+              .reduce((sum, s) => sum + s.quantity, 0);
+            return { date, sales: daySales };
+          });
+
+          return {
+            name: product.name,
+            data: dailyData
+          };
+        });
+
+      setChartData(processedChartData);
+
     } catch (err) {
-      setError(err.message);
+      console.error('Migration error:', err);
+      setError('Erreur lors de la récupération des données Supabase: ' + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchChartData = async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/stats/products/evolution', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          onAuthError();
-          return;
-        }
-        throw new Error('Erreur lors de la récupération des données de graphique');
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setChartData(data.data);
-      }
-    } catch (err) {
-      console.error('Erreur lors de la récupération des données de graphique:', err);
-    }
-  };
+  const fetchProductStats = fetchData; // Keep compatible name if needed
 
   const handleSort = (field) => {
     if (sortBy === field) {
@@ -109,7 +161,7 @@ export default function ProductStats({ token, onAuthError }) {
 
   const sortedProducts = [...productStats].sort((a, b) => {
     let aValue, bValue;
-    
+
     switch (sortBy) {
       case 'name':
         aValue = a.name.toLowerCase();

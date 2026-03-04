@@ -187,17 +187,15 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
       delete payload.created_at;
       delete payload.updated_at;
 
+      // Always update base name/description from the active language or French fallback to keep cards in sync
       const activeLang = (localStorage.getItem('currentLang') || localStorage.getItem('i18nextLng') || 'fr').split(/[-_]/)[0].toLowerCase();
-      if (!payload.name) {
-        if (activeLang === 'ar' && payload.name_ar) payload.name = payload.name_ar;
-        if (activeLang === 'fr' && payload.name_fr) payload.name = payload.name_fr;
-        if (activeLang === 'en' && payload.name_en) payload.name = payload.name_en;
-      }
-      if (!payload.description) {
-        if (activeLang === 'ar' && payload.description_ar) payload.description = payload.description_ar;
-        if (activeLang === 'fr' && payload.description_fr) payload.description = payload.description_fr;
-        if (activeLang === 'en' && payload.description_en) payload.description = payload.description_en;
-      }
+
+      const getBaseHeader = (field) => {
+        return payload[`${field}_${activeLang}`] || payload[`${field}_fr`] || payload[`${field}_ar`] || payload[`${field}_en`] || payload[field];
+      };
+
+      payload.name = getBaseHeader('name');
+      payload.description = getBaseHeader('description');
 
       // Convert price_per_day to number (handle empty strings)
       if (payload.price_per_day !== '' && payload.price_per_day !== null && payload.price_per_day !== undefined) {
@@ -395,7 +393,8 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
     }
   };
 
-  const handleEdit = (category) => {
+  const handleEdit = (e, category) => {
+    if (e) e.stopPropagation();
     if (!category || !category.id) {
       console.error('[AdminHandWorkerCategories] Cannot edit: invalid category', category);
       alert('❌ Erreur: Catégorie invalide');
@@ -431,59 +430,55 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (e, id) => {
+    if (e) e.stopPropagation();
     if (!id) {
       console.error('[AdminHandWorkerCategories] Cannot delete: no ID provided');
       alert('❌ Erreur: ID de catégorie manquant');
       return;
     }
 
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action est irréversible.')) {
+    if (!window.confirm(tr('Êtes-vous sûr de vouloir supprimer cette catégorie ?', 'هل أنت متأكد من حذف هذه الفئة؟', 'Are you sure you want to delete this category?'))) {
       return;
     }
 
     try {
+      setLoading(true);
       setError('');
       console.log('[AdminHandWorkerCategories] Deleting category:', id);
 
-      // First check if category exists
-      const { data: categoryData, error: checkError } = await supabase
-        .from('hand_worker_categories')
-        .select('id, name')
-        .eq('id', id)
-        .single();
-
-      if (checkError || !categoryData) {
-        console.error('[AdminHandWorkerCategories] Category not found:', checkError);
-        setError('Catégorie non trouvée');
-        alert('❌ Catégorie non trouvée');
-        return;
-      }
-
-      // Delete the category
-      // Use admin client for delete operation to bypass RLS
-      const writeClient = supabase;
-      const { error } = await writeClient
+      // Delete the category directly
+      const { data, error: deleteError } = await supabase
         .from('hand_worker_categories')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
-      if (error) {
-        console.error('[AdminHandWorkerCategories] Error deleting category:', error);
-        const errorMessage = error.message || 'Erreur inconnue';
+      if (deleteError) {
+        console.error('[AdminHandWorkerCategories] Error deleting category:', deleteError);
+        const errorMessage = deleteError.message || 'Erreur inconnue';
         setError('Erreur lors de la suppression: ' + errorMessage);
-        alert('❌ Erreur lors de la suppression: ' + errorMessage);
+        alert(`❌ Erreur: ${errorMessage}`);
         return;
       }
 
-      console.log('[AdminHandWorkerCategories] Category deleted successfully');
+      if (!data || data.length === 0) {
+        console.warn('[AdminHandWorkerCategories] No rows deleted - category may not exist');
+        setError('Catégorie non trouvée ou déjà supprimée');
+        alert('⚠️ Catégorie non trouvée ou déjà supprimée');
+      } else {
+        console.log('[AdminHandWorkerCategories] Category deleted successfully');
+        alert('✔️ ' + tr('Catégorie supprimée avec succès', 'تم حذف الفئة بنجاح', 'Category deleted successfully'));
+      }
+
       await loadCategories();
-      alert('✔️ Catégorie supprimée avec succès');
     } catch (e) {
       console.error('[AdminHandWorkerCategories] Exception deleting category:', e);
       const errorMessage = e.message || 'Erreur inconnue';
       setError('Erreur lors de la suppression: ' + errorMessage);
-      alert('❌ Erreur: ' + errorMessage);
+      alert(`❌ Erreur: ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -694,25 +689,25 @@ export default function AdminHandWorkerCategoriesCrud({ token, onAuthError }) {
                   </div>
                   <div className="category-actions">
                     <button
-                      className="edit-button"
-                      onClick={() => handleEdit(category)}
-                      title="Modifier"
+                      className="edit-button-modern"
+                      onClick={(e) => handleEdit(e, category)}
+                      title={tr('Modifier', 'تعديل', 'Edit')}
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                      ✏️
                     </button>
                     <button
-                      className="delete-button"
-                      onClick={() => handleDelete(category.id)}
-                      title="Supprimer"
+                      className="delete-button-modern"
+                      onClick={(e) => handleDelete(e, category.id)}
+                      title={tr('Supprimer', 'حذف', 'Delete')}
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      🗑️
                     </button>
                   </div>
                 </div>
 
                 <div className="category-content">
-                  <h3>{category.name}</h3>
-                  <p>{category.description}</p>
+                  <h3>{tr(category.name_fr, category.name_ar, category.name_en) || category.name}</h3>
+                  <p>{tr(category.description_fr, category.description_ar, category.description_en) || category.description}</p>
 
                   <div className="category-details">
                     <div className="detail-item">

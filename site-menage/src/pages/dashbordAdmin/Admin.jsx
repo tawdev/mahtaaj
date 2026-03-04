@@ -302,6 +302,8 @@ export default function Admin() {
     setAdminData(null);
   };
 
+  const isAdmin = adminData?.role === 'admin';
+
   // Helper function to check if admin has required role
   const hasRole = (requiredRole) => {
     if (!adminData) return false;
@@ -484,1405 +486,1222 @@ export default function Admin() {
   if (error) return <main className="admin-page"><p style={{ color: '#b91c1c' }}>{error}</p></main>;
 
   return (
-    <main className="admin-page">
-      <header className="admin-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj" style={{ height: '65px', width: 'auto' }} />
-          <div>
-            <h1 className="admin-title">Tableau de bord</h1>
-            <p className="admin-subtitle">
-              {adminData?.name || 'Admin'} ({adminData?.role || 'admin'}) - {adminData?.email}
-            </p>
-          </div>
+    <div className="admin-layout">
+      <aside className="admin-sidebar">
+        <div className="sidebar-header">
+          <img src="/galerie/logooomahtaaj.png" alt="Mahtaaj" className="sidebar-logo" />
+          <h2 className="sidebar-brand">Mahtaaj Admin</h2>
         </div>
-        <div className="admin-kpis">
-          <button onClick={handleLogout} className="admin-logout-button">
-            Déconnexion
+
+        <nav className="sidebar-nav">
+          <div className="nav-section">
+            <h3 className="nav-section-title">Principal</h3>
+            <button
+              className={`sidebar-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
+              onClick={navigateToDashboard}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span>Tableau de bord</span>
+            </button>
+
+            {isAdmin && (
+              <button
+                className={`sidebar-nav-item ${activeTab === 'admins' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('admins'); navigate('/admin/accounts'); }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Administrateurs</span>
+              </button>
+            )}
+          </div>
+
+          <div className="nav-section">
+            <h3 className="nav-section-title">Gestion des Services</h3>
+            {hasAnyRole('adminHouseKeeping') && (
+              <button
+                className={`sidebar-nav-item ${location.pathname.startsWith('/admin/housekeeping') ? 'active' : ''}`}
+                onClick={() => navigate('/admin/housekeeping')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <span>Ménage</span>
+              </button>
+            )}
+
+            {(isAdmin || hasRole('adminHandWorker')) && (
+              <button
+                className={`sidebar-nav-item ${location.pathname.startsWith('/admin/handworker') ? 'active' : ''}`}
+                onClick={() => navigate('/admin/handworker')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Travaux Manuels</span>
+              </button>
+            )}
+
+            {(isAdmin || hasRole('adminBebe')) && (
+              <button
+                className={`sidebar-nav-item ${location.pathname.startsWith('/admin/adminBebe') ? 'active' : ''}`}
+                onClick={() => navigate('/admin/adminBebe')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Bébé & Enfants</span>
+              </button>
+            )}
+
+            {(isAdmin || hasRole('adminJardinaje')) && (
+              <button
+                className={`sidebar-nav-item ${location.pathname.startsWith('/admin/adminJardinaje') ? 'active' : ''}`}
+                onClick={() => navigate('/admin/adminJardinaje')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Jardinage</span>
+              </button>
+            )}
+          </div>
+
+          <div className="nav-section">
+            <h3 className="nav-section-title">Sécurité & Transport</h3>
+            {(isAdmin || hasRole('adminSecurity')) && (
+              <button
+                className={`sidebar-nav-item ${location.pathname.startsWith('/admin/security') ? 'active' : ''}`}
+                onClick={() => navigate('/admin/security')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <span>Sécurité</span>
+              </button>
+            )}
+
+            {(isAdmin || hasRole('adminDriver') || hasRole('driver')) && (
+              <button
+                className={`sidebar-nav-item ${location.pathname.startsWith('/admin/driver') ? 'active' : ''}`}
+                onClick={() => navigate('/admin/driver')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="3" width="15" height="13" stroke="currentColor" strokeWidth="2" />
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="5.5" cy="18.5" r="2.5" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="18.5" cy="18.5" r="2.5" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <span>Chauffeurs</span>
+              </button>
+            )}
+          </div>
+
+          {isAdmin && (
+            <div className="nav-section">
+              <h3 className="nav-section-title">Commerce & Contenu</h3>
+              <button
+                className={`sidebar-nav-item ${activeTab === 'products' ? 'active' : ''}`}
+                onClick={() => setActiveTab('products')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M3 6h18M16 10a4 4 0 0 1-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Produits</span>
+              </button>
+
+              <button
+                className={`sidebar-nav-item ${activeTab === 'orders' ? 'active' : ''}`}
+                onClick={() => setActiveTab('orders')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 11l3 3L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Commandes</span>
+              </button>
+
+              <button
+                className={`sidebar-nav-item ${activeTab === 'gallery' ? 'active' : ''}`}
+                onClick={() => setActiveTab('gallery')}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" strokeWidth="2" />
+                  <path d="M21 15l-5-5L5 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span>Galerie</span>
+              </button>
+            </div>
+          )}
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="admin-info">
+            <div className="admin-avatar">
+              {adminData?.name?.charAt(0) || 'A'}
+            </div>
+            <div className="admin-details">
+              <span className="admin-name">{adminData?.name || 'Admin'}</span>
+              <span className="admin-role">{adminData?.role}</span>
+            </div>
+          </div>
+          <button onClick={handleLogout} className="sidebar-logout-button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span>Déconnexion</span>
           </button>
         </div>
-      </header>
+      </aside>
 
-
-
-      {activeTab === 'dashboard' && !location.pathname.startsWith('/admin/housekeeping') && (
-        <DashboardStats
-          token={localStorage.getItem('adminToken')}
-          onAuthError={handleAuthError}
-          onCardClick={handleCardClick}
-          role={adminData?.role}
-        />
-      )}
-
-      {activeTab === 'contacts' && (
-        <>
-          <div className="admin-contacts-toolbar">
-            <div className="admin-contacts-view-toggle">
-              <button
-                className={`admin-view-button ${contactsView === 'list' ? 'active' : ''}`}
-                onClick={() => setContactsView('list')}
-              >
-                Liste
-              </button>
-              <button
-                className={`admin-view-button ${contactsView === 'crud' ? 'active' : ''}`}
-                onClick={() => setContactsView('crud')}
-              >
-                Gestion
-              </button>
-            </div>
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
+      <main className="admin-main">
+        <header className="main-header">
+          <h1 className="main-title">
+            {activeTab === 'dashboard' ? 'Vue d\'ensemble' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+          </h1>
+          <div className="header-actions">
+            <span className="current-date">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
           </div>
+        </header>
 
-          {contactsView === 'list' && (
-            <section className="admin-card">
-              <div className="admin-toolbar">
-                <input
-                  placeholder="Rechercher (nom, tel, lieu, service, message)"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="admin-search"
-                />
-              </div>
-              <div style={{ overflow: 'auto' }}>
-                <table className="admin-table">
-                  <thead className="admin-thead">
-                    <tr>
-                      <th className="admin-th">Prénom</th>
-                      <th className="admin-th">Téléphone</th>
-                      <th className="admin-th">Lieu</th>
-                      <th className="admin-th">Service</th>
-                      <th className="admin-th">Message</th>
-                      <th className="admin-th">Créé</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((c, i) => (
-                      <tr key={c.id || i} className={i % 2 ? 'admin-row-alt' : undefined}>
-                        <td className="admin-td">{c.firstname}</td>
-                        <td className="admin-td">{c.phone}</td>
-                        <td className="admin-td">{c.location}</td>
-                        <td className="admin-td">
-                          <span className="admin-badge">{c.service}</span>
-                        </td>
-                        <td className="admin-td">
-                          <div className="admin-ellipsis" title={c.message}>{c.message}</div>
-                        </td>
-                        <td className="admin-td">{c.created_at ? new Date(c.created_at).toLocaleString() : ''}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+        <div className="main-content">
+
+
+
+          {activeTab === 'dashboard' && !location.pathname.startsWith('/admin/housekeeping') && (
+            <DashboardStats
+              token={localStorage.getItem('adminToken')}
+              onAuthError={handleAuthError}
+              onCardClick={handleCardClick}
+              role={adminData?.role}
+            />
           )}
 
-          {contactsView === 'crud' && (
-            <ContactCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+          {activeTab === 'contacts' && (
+            <>
+              <div className="admin-contacts-toolbar">
+                <div className="admin-contacts-view-toggle">
+                  <button
+                    className={`admin-view-button ${contactsView === 'list' ? 'active' : ''}`}
+                    onClick={() => setContactsView('list')}
+                  >
+                    Liste
+                  </button>
+                  <button
+                    className={`admin-view-button ${contactsView === 'crud' ? 'active' : ''}`}
+                    onClick={() => setContactsView('crud')}
+                  >
+                    Gestion
+                  </button>
+                </div>
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={navigateToDashboard}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+
+              {contactsView === 'list' && (
+                <section className="admin-card">
+                  <div className="admin-toolbar">
+                    <input
+                      placeholder="Rechercher (nom, tel, lieu, service, message)"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      className="admin-search"
+                    />
+                  </div>
+                  <div style={{ overflow: 'auto' }}>
+                    <table className="admin-table">
+                      <thead className="admin-thead">
+                        <tr>
+                          <th className="admin-th">Prénom</th>
+                          <th className="admin-th">Téléphone</th>
+                          <th className="admin-th">Lieu</th>
+                          <th className="admin-th">Service</th>
+                          <th className="admin-th">Message</th>
+                          <th className="admin-th">Créé</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filtered.map((c, i) => (
+                          <tr key={c.id || i} className={i % 2 ? 'admin-row-alt' : undefined}>
+                            <td className="admin-td">{c.firstname}</td>
+                            <td className="admin-td">{c.phone}</td>
+                            <td className="admin-td">{c.location}</td>
+                            <td className="admin-td">
+                              <span className="admin-badge">{c.service}</span>
+                            </td>
+                            <td className="admin-td">
+                              <div className="admin-ellipsis" title={c.message}>{c.message}</div>
+                            </td>
+                            <td className="admin-td">{c.created_at ? new Date(c.created_at).toLocaleString() : ''}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
+
+              {contactsView === 'crud' && (
+                <ContactCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+              )}
+            </>
           )}
-        </>
-      )}
 
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <section className="admin-card">
-            <div className="admin-toolbar">
-              <h2>HouseKeeping</h2>
-            </div>
-            <div className="stats-grid">
-              <div className="stat-card services-card clickable" onClick={() => navigate('/admin/housekeeping/services')}>
-                <div className="stat-icon services-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Services</h3>
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping' && (
+            <>
+              <section className="admin-card">
+                <div className="admin-toolbar">
+                  <h2>HouseKeeping</h2>
                 </div>
-              </div>
-              <div className="stat-card employees-card clickable" onClick={() => navigate('/admin/housekeeping/employees')}>
-                <div className="stat-icon employees-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Employés</h3>
-                </div>
-              </div>
-              <div className="stat-card confirmed-employees-card clickable" onClick={() => navigate('/admin/housekeeping/confirmed-employees')}>
-                <div className="stat-icon confirmed-employees-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Employés Confirmés</h3>
-                </div>
-              </div>
-              <div className="stat-card categories-card clickable" onClick={() => navigate('/admin/housekeeping/categories')}>
-                <div className="stat-icon categories-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Catégories</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Réservations</h3>
-                </div>
-              </div>
-              <div className="stat-card types-card clickable" onClick={() => navigate('/admin/housekeeping/types')}>
-                <div className="stat-icon types-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Types</h3>
-                </div>
-              </div>
-              <div className="stat-card categories-house-card clickable" onClick={() => navigate('/admin/housekeeping/categories-house')}>
-                <div className="stat-icon categories-house-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Catégories House</h3>
-                </div>
-              </div>
-              <div className="stat-card categories-card clickable" onClick={() => navigate('/admin/housekeeping/menage')}>
-                <div className="stat-icon categories-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Ménage</h3>
-                </div>
-              </div>
-              <div className="stat-card types-card clickable" onClick={() => navigate('/admin/housekeeping/types-menage')}>
-                <div className="stat-icon types-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Types Ménage</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/tapis-canapes')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Tapis & Canapés</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/piscine')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Piscine</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/menage-cuisine')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Ménage & Cuisine</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/menage-complet')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Ménage Complet</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/lavage-repassage')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Lavage & Repassage</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/cuisine')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Cuisine</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/chaussures')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Chaussures</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/bureaux-usine')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Bureaux & Usine</h3>
-                </div>
-              </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/airbnb')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Airbnb</h3>
-                </div>
-              </div>
-            </div>
-          </section>
-        </>
-      )}
-
-      {activeTab === 'services' && hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/services' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminServicesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/employees' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminEmployeesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/confirmed-employees' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminConfirmedEmployeesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/categories' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminReservationCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/types' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminTypesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/categories-house' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminCategoryHouseCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/menage' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminMenageCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/types-menage' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminTypesMenageCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {/* Housekeeping Reservations Sections */}
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/tapis-canapes' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="tapis_canapes_reservations"
-            title="Réservations Tapis & Canapés"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/piscine' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="piscine_reservations"
-            title="Réservations Piscine"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/menage-cuisine' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="menage_cuisine_reservations"
-            title="Réservations Ménage & Cuisine"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/menage-complet' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="menage_complet_reservations"
-            title="Réservations Ménage Complet"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/lavage-repassage' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="lavage_ropassage_reservations"
-            title="Réservations Lavage & Repassage"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/cuisine' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="cuisine_reservations"
-            title="Réservations Cuisine"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/chaussures' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="chaussures_reservations"
-            title="Réservations Chaussures"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/bureaux-usine' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="bureaux_usin_reservations"
-            title="Réservations Bureaux & Usine"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/airbnb' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/housekeeping')}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHousekeepingReservations
-            tableName="airbnb_reservations"
-            title="Réservations Airbnb"
-            token={localStorage.getItem('adminToken')}
-            onAuthError={handleAuthError}
-          />
-        </>
-      )}
-
-      {activeTab === 'reservations' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminReservationCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'ratings' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminRatingCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'products' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminProductCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'product-types' && hasRole('admin') && location.pathname === '/admin/product-types' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => {
-                setActiveTab('dashboard');
-                navigate('/admin/dashboard');
-              }}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminProductTypesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'product_stats' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <ProductStats token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'employees' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminEmployeesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'promotions' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminPromotionsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'confirmed_employees' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminConfirmedEmployeesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {location.pathname === '/admin/security' && hasAnyRole('adminSecurity') && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <section className="admin-card">
-            <div className="admin-toolbar">
-              <h2>Gestion Sécurité</h2>
-            </div>
-            <div className="stats-grid">
-              <div className="stat-card securities-card clickable" onClick={() => navigate('/admin/security/agents')}>
-                <div className="stat-icon securities-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Agents de Sécurité</h3>
-                  <div className="stat-main-value">CRUD</div>
-                </div>
-              </div>
-              <div className="stat-card clickable" onClick={() => navigate('/admin/security/employees')}>
-                <div className="stat-icon">
-                  👮
-                </div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Employés Sécurité</h3>
-                  <div className="stat-main-value">CRUD</div>
-                </div>
-              </div>
-              <div className="stat-card security-reservations-card clickable" onClick={() => navigate('/admin/security/reservations')}>
-                <div className="stat-icon security-reservations-icon">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" />
-                    <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" />
-                  </svg>
-                </div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Réservations Sécurité</h3>
-                  <div className="stat-main-value">Liste</div>
-                </div>
-              </div>
-              <div className="stat-card security-roles-card clickable" onClick={() => navigate('/admin/security/roles')}>
-                <div className="stat-icon">
-                  🛡️
-                </div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Rôles Sécurité</h3>
-                  <div className="stat-main-value">CRUD</div>
-                </div>
-              </div>
-              <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/employees')}>
-                <div className="stat-icon bebe-services-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🍼 Employés Bébé</h3>
-                </div>
-              </div>
-              <div className="stat-card clickable" onClick={() => navigate('/admin/security/employees-valid')}>
-                <div className="stat-icon">✅</div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Employés Sécurité Validés</h3>
-                  <div className="stat-main-value">Liste</div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </>
-      )}
-
-      {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/agents' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminSecurityCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/employees' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminSecurityEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/employees-valid' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminSecurityEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'security-roles' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/roles' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminSecurityRolesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {hasAnyRole('adminSecurity') && location.pathname === '/admin/security/reservations' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminSecurityReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'orders' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminOrdersCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'admins' && hasRole('admin') && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {/* Bébé Setting Sections */}
-      {hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <section className="admin-card">
-            <div className="admin-toolbar">
-              <h2>Bébé Setting</h2>
-            </div>
-            <div className="stats-grid">
-              <div className="stat-card bebe-categories-card clickable" onClick={() => navigate('/admin/adminBebe/categories')}>
-                <div className="stat-icon bebe-categories-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🍼 Catégories Bébé</h3>
-                </div>
-              </div>
-              <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/services')}>
-                <div className="stat-icon bebe-services-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🍼 Services Bébé</h3>
-                </div>
-              </div>
-              <div className="stat-card bebe-reservations-card clickable" onClick={() => navigate('/admin/adminBebe/reservations')}>
-                <div className="stat-icon bebe-reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🍼 Réservations Bébé</h3>
-                </div>
-              </div>
-              <div className="stat-card bebe-ratings-card clickable" onClick={() => navigate('/admin/adminBebe/ratings')}>
-                <div className="stat-icon bebe-ratings-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🍼 Avis Bébé</h3>
-                </div>
-              </div>
-              <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/employees')}>
-                <div className="stat-icon bebe-services-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🍼 Employés Bébé</h3>
-                </div>
-              </div>
-              <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/employees-valid')}>
-                <div className="stat-icon bebe-services-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🍼 Employés Validés</h3>
-                </div>
-              </div>
-            </div>
-          </section>
-        </>
-      )}
-
-      {activeTab === 'bebe-categories' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/categories' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminBebeCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'bebe-services' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/services' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminBebeServicesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'bebe-reservations' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/reservations' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminBebeReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'bebe-ratings' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/ratings' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminBebeRatingsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'bebe-employees' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/employees' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminBebeEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'bebe-employees-valid' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/employees-valid' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminBebeEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {/* Jardinage Sections */}
-      {hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <section className="admin-card">
-            <div className="admin-toolbar">
-              <h2>Jardinage</h2>
-            </div>
-            <div className="stats-grid">
-              <div className="stat-card jardinage-categories-card clickable" onClick={() => navigate('/admin/adminJardinaje/categories')}>
-                <div className="stat-icon jardinage-categories-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🌿 Catégories Jardinage</h3>
-                </div>
-              </div>
-              <div className="stat-card jardinage-services-card clickable" onClick={() => navigate('/admin/adminJardinaje/services')}>
-                <div className="stat-icon jardinage-services-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🌿 Services Jardinage</h3>
-                </div>
-              </div>
-              <div className="stat-card jardinage-reservations-card clickable" onClick={() => navigate('/admin/adminJardinaje/reservations')}>
-                <div className="stat-icon jardinage-reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🌿 Réservations Jardinage</h3>
-                </div>
-              </div>
-              <div className="stat-card jardinage-ratings-card clickable" onClick={() => navigate('/admin/adminJardinaje/ratings')}>
-                <div className="stat-icon jardinage-ratings-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🌿 Avis Jardinage</h3>
-                </div>
-              </div>
-              <div className="stat-card jardinage-services-card clickable" onClick={() => navigate('/admin/adminJardinaje/employees-manage')}>
-                <div className="stat-icon jardinage-services-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🌿 Employés Jardinage</h3>
-                </div>
-              </div>
-              <div className="stat-card jardinage-services-card clickable" onClick={() => navigate('/admin/adminJardinaje/employees-valid')}>
-                <div className="stat-icon jardinage-services-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">🌿 Employés Validés</h3>
-                </div>
-              </div>
-            </div>
-          </section>
-        </>
-      )}
-
-      {activeTab === 'jardinage-categories' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/categories' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminJardinageCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'jardinage-services' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/services' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminJardinageServicesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'jardinage-reservations' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/reservations' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminJardinageReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'jardinage-ratings' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/ratings' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminJardinageRatingsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'jardinage-employees' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/employees-manage' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminJardinageEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'jardinage-employees-valid' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/employees-valid' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminJardinageEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {/* Hand Workers Sections */}
-      {hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <section className="admin-card">
-            <div className="handworker-dashboard-container">
-              <div className="handworker-dashboard-header">
-                <h2>Travaux Manuels</h2>
-                <p className="admin-subtitle">Gérez vos catégories, employés et réservations</p>
-              </div>
-
-              <div className="handworker-grid">
-                {/* Categories Card */}
-                <div className="handworker-card card-categories" onClick={() => navigate('/admin/handworker/categories')}>
-                  <div className="handworker-card-icon-wrapper">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 3h7v7H3z" />
-                      <path d="M14 3h7v7h-7z" />
-                      <path d="M14 14h7v7h-7z" />
-                      <path d="M3 14h7v7H3z" />
-                    </svg>
+                <div className="stats-grid">
+                  <div className="stat-card services-card clickable" onClick={() => navigate('/admin/housekeeping/services')}>
+                    <div className="stat-icon services-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Services</h3>
+                    </div>
                   </div>
-                  <div className="handworker-card-content">
-                    <h3>Catégories</h3>
-                    <p>Gérer les types de travaux</p>
+                  <div className="stat-card employees-card clickable" onClick={() => navigate('/admin/housekeeping/employees')}>
+                    <div className="stat-icon employees-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Employés</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card confirmed-employees-card clickable" onClick={() => navigate('/admin/housekeeping/confirmed-employees')}>
+                    <div className="stat-icon confirmed-employees-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Employés Confirmés</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card categories-card clickable" onClick={() => navigate('/admin/housekeeping/categories')}>
+                    <div className="stat-icon categories-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Catégories</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Réservations</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card types-card clickable" onClick={() => navigate('/admin/housekeeping/types')}>
+                    <div className="stat-icon types-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Types</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card categories-house-card clickable" onClick={() => navigate('/admin/housekeeping/categories-house')}>
+                    <div className="stat-icon categories-house-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Catégories House</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card categories-card clickable" onClick={() => navigate('/admin/housekeeping/menage')}>
+                    <div className="stat-icon categories-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Ménage</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card types-card clickable" onClick={() => navigate('/admin/housekeeping/types-menage')}>
+                    <div className="stat-icon types-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Types Ménage</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/tapis-canapes')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Tapis & Canapés</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/piscine')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Piscine</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/menage-cuisine')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Ménage & Cuisine</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/menage-complet')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Ménage Complet</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/lavage-repassage')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Lavage & Repassage</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/cuisine')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Cuisine</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/chaussures')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Chaussures</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/bureaux-usine')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Bureaux & Usine</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/housekeeping/reservations/airbnb')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Airbnb</h3>
+                    </div>
                   </div>
                 </div>
+              </section>
+            </>
+          )}
 
-                {/* Employees Card */}
-                <div className="handworker-card card-employees" onClick={() => navigate('/admin/handworker/employees')}>
-                  <div className="handworker-card-icon-wrapper">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
-                  </div>
-                  <div className="handworker-card-content">
-                    <h3>Employés</h3>
-                    <p>Gérer les profils et disponibilités</p>
-                  </div>
-                </div>
+          {activeTab === 'services' && hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/services' && (
+            <>
+              <AdminServicesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
 
-                {/* Reservations Card */}
-                <div className="handworker-card card-reservations" onClick={() => navigate('/admin/handworker/reservations')}>
-                  <div className="handworker-card-icon-wrapper">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                  </div>
-                  <div className="handworker-card-content">
-                    <h3>Réservations</h3>
-                    <p>Suivi des commandes et plannings</p>
-                  </div>
-                </div>
-
-                {/* Validated Employees Card */}
-                <div className="handworker-card card-validated" onClick={() => navigate('/admin/handworker/validated')}>
-                  <div className="handworker-card-icon-wrapper">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                  </div>
-                  <div className="handworker-card-content">
-                    <h3>Employés Validés</h3>
-                    <p>Liste des professionnels vérifiés</p>
-                  </div>
-                </div>
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/employees' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
               </div>
-            </div>
-          </section>
-        </>
-      )}
+              <AdminEmployeesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
 
-      {activeTab === 'hand-worker-categories' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/categories' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHandWorkerCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'hand-workers' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/employees' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHandWorkerEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'hand-worker-reservations' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/reservations' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHandWorkerReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'hand-worker-registrations' && hasAnyRole('adminHandWorker') && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminHandWorkerRegistrationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {activeTab === 'valide-hand-worker-reservations' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/validated' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminValideHandWorkerReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-
-      {/* Driver Sections */}
-      {hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <section className="admin-card">
-            <div className="admin-toolbar">
-              <h2>Chauffeurs</h2>
-            </div>
-            <div className="stats-grid">
-              <div className="stat-card employees-card clickable" onClick={() => navigate('/admin/driver/employees')}>
-                <div className="stat-icon employees-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Employés</h3>
-                </div>
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/confirmed-employees' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
               </div>
-              <div className="stat-card confirmed-employees-card clickable" onClick={() => navigate('/admin/driver/employees-valid')}>
-                <div className="stat-icon confirmed-employees-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Employés Validés</h3>
-                </div>
+              <AdminConfirmedEmployeesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/categories' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
               </div>
-              <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/driver/reservations')}>
-                <div className="stat-icon reservations-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Réservations</h3>
-                </div>
+              <AdminCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
               </div>
-              <div className="stat-card categories-card clickable" onClick={() => navigate('/admin/driver/categories')}>
-                <div className="stat-icon categories-icon"></div>
-                <div className="stat-content">
-                  <h3 className="stat-title">Catégories</h3>
-                </div>
+              <AdminReservationCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/types' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
               </div>
-            </div>
-          </section>
-        </>
-      )}
+              <AdminTypesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
 
-      {activeTab === 'driver-employees' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/employees' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/driver')}
-            >
-              ← Retour
-            </button>
-          </div>
-          <AdminDriverEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/categories-house' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminCategoryHouseCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
 
-      {activeTab === 'driver-employees-valid' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/employees-valid' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/driver')}
-            >
-              ← Retour
-            </button>
-          </div>
-          <AdminDriverEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/menage' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminMenageCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
 
-      {activeTab === 'driver-reservations' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/reservations' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/driver')}
-            >
-              ← Retour
-            </button>
-          </div>
-          <AdminDriverReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/types-menage' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminTypesMenageCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
 
-      {activeTab === 'driver-categories' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/categories' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={() => navigate('/admin/driver')}
-            >
-              ← Retour
-            </button>
-          </div>
-          <AdminDriverCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
+          {/* Housekeeping Reservations Sections */}
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/tapis-canapes' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="tapis_canapes_reservations"
+                title="Réservations Tapis & Canapés"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
 
-      {/* Gallery Sections */}
-      {activeTab === 'gallery-types' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminTypeCategoryGalleryCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/piscine' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="piscine_reservations"
+                title="Réservations Piscine"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
 
-      {activeTab === 'gallery-categories' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminCategoryGalleryCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/menage-cuisine' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="menage_cuisine_reservations"
+                title="Réservations Ménage & Cuisine"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
 
-      {activeTab === 'gallery' && (
-        <>
-          <div className="admin-page-header">
-            <button
-              className="admin-back-to-dashboard"
-              onClick={navigateToDashboard}
-            >
-              📊 Statistiques du Site
-            </button>
-          </div>
-          <AdminGalleryCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
-        </>
-      )}
-    </main>
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/menage-complet' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="menage_complet_reservations"
+                title="Réservations Ménage Complet"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
+
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/lavage-repassage' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="lavage_ropassage_reservations"
+                title="Réservations Lavage & Repassage"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
+
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/cuisine' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="cuisine_reservations"
+                title="Réservations Cuisine"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
+
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/chaussures' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="chaussures_reservations"
+                title="Réservations Chaussures"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
+
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/bureaux-usine' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="bureaux_usin_reservations"
+                title="Réservations Bureaux & Usine"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
+
+          {hasAnyRole('adminHouseKeeping') && location.pathname === '/admin/housekeeping/reservations/airbnb' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => navigate('/admin/housekeeping')}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminHousekeepingReservations
+                tableName="airbnb_reservations"
+                title="Réservations Airbnb"
+                token={localStorage.getItem('adminToken')}
+                onAuthError={handleAuthError}
+              />
+            </>
+          )}
+
+          {activeTab === 'reservations' && (
+            <>
+              <AdminReservationCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'ratings' && (
+            <>
+              <AdminRatingCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'products' && (
+            <>
+              <AdminProductCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'product-types' && hasRole('admin') && location.pathname === '/admin/product-types' && (
+            <>
+              <div className="admin-page-header">
+                <button
+                  className="admin-back-to-dashboard"
+                  onClick={() => {
+                    setActiveTab('dashboard');
+                    navigate('/admin/dashboard');
+                  }}
+                >
+                  📊 Statistiques du Site
+                </button>
+              </div>
+              <AdminProductTypesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'product_stats' && (
+            <>
+              <ProductStats token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'employees' && (
+            <>
+              <AdminEmployeesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'promotions' && (
+            <>
+              <AdminPromotionsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'confirmed_employees' && (
+            <>
+              <AdminConfirmedEmployeesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {location.pathname === '/admin/security' && hasAnyRole('adminSecurity') && (
+            <>
+              <section className="admin-card">
+                <div className="admin-toolbar">
+                  <h2>Gestion Sécurité</h2>
+                </div>
+                <div className="stats-grid">
+                  <div className="stat-card securities-card clickable" onClick={() => navigate('/admin/security/agents')}>
+                    <div className="stat-icon securities-icon">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Agents de Sécurité</h3>
+                      <div className="stat-main-value">CRUD</div>
+                    </div>
+                  </div>
+                  <div className="stat-card clickable" onClick={() => navigate('/admin/security/employees')}>
+                    <div className="stat-icon">
+                      👮
+                    </div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Employés Sécurité</h3>
+                      <div className="stat-main-value">CRUD</div>
+                    </div>
+                  </div>
+                  <div className="stat-card security-reservations-card clickable" onClick={() => navigate('/admin/security/reservations')}>
+                    <div className="stat-icon security-reservations-icon">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" strokeWidth="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="2" />
+                        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                    </div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Réservations Sécurité</h3>
+                      <div className="stat-main-value">Liste</div>
+                    </div>
+                  </div>
+                  <div className="stat-card security-roles-card clickable" onClick={() => navigate('/admin/security/roles')}>
+                    <div className="stat-icon">
+                      🛡️
+                    </div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Rôles Sécurité</h3>
+                      <div className="stat-main-value">CRUD</div>
+                    </div>
+                  </div>
+                  <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/employees')}>
+                    <div className="stat-icon bebe-services-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🍼 Employés Bébé</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card clickable" onClick={() => navigate('/admin/security/employees-valid')}>
+                    <div className="stat-icon">✅</div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Employés Sécurité Validés</h3>
+                      <div className="stat-main-value">Liste</div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/agents' && (
+            <>
+              <AdminSecurityCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/employees' && (
+            <>
+              <AdminSecurityEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'security' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/employees-valid' && (
+            <>
+              <AdminSecurityEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'security-roles' && hasAnyRole('adminSecurity') && location.pathname === '/admin/security/roles' && (
+            <>
+              <AdminSecurityRolesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {hasAnyRole('adminSecurity') && location.pathname === '/admin/security/reservations' && (
+            <>
+              <AdminSecurityReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'orders' && (
+            <>
+              <AdminOrdersCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'admins' && hasRole('admin') && (
+            <>
+              <AdminCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {/* Bébé Setting Sections */}
+          {hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe' && (
+            <>
+              <section className="admin-card">
+                <div className="admin-toolbar">
+                  <h2>Bébé Setting</h2>
+                </div>
+                <div className="stats-grid">
+                  <div className="stat-card bebe-categories-card clickable" onClick={() => navigate('/admin/adminBebe/categories')}>
+                    <div className="stat-icon bebe-categories-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🍼 Catégories Bébé</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/services')}>
+                    <div className="stat-icon bebe-services-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🍼 Services Bébé</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card bebe-reservations-card clickable" onClick={() => navigate('/admin/adminBebe/reservations')}>
+                    <div className="stat-icon bebe-reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🍼 Réservations Bébé</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card bebe-ratings-card clickable" onClick={() => navigate('/admin/adminBebe/ratings')}>
+                    <div className="stat-icon bebe-ratings-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🍼 Avis Bébé</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/employees')}>
+                    <div className="stat-icon bebe-services-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🍼 Employés Bébé</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/employees-valid')}>
+                    <div className="stat-icon bebe-services-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🍼 Employés Validés</h3>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {activeTab === 'bebe-categories' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/categories' && (
+            <>
+              <AdminBebeCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'bebe-services' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/services' && (
+            <>
+              <AdminBebeServicesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'bebe-reservations' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/reservations' && (
+            <>
+              <AdminBebeReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'bebe-ratings' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/ratings' && (
+            <>
+              <AdminBebeRatingsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'bebe-employees' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/employees' && (
+            <>
+              <AdminBebeEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'bebe-employees-valid' && hasAnyRole('adminBebe') && location.pathname === '/admin/adminBebe/employees-valid' && (
+            <>
+              <AdminBebeEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {/* Jardinage Sections */}
+          {hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje' && (
+            <>
+              <section className="admin-card">
+                <div className="admin-toolbar">
+                  <h2>Jardinage</h2>
+                </div>
+                <div className="stats-grid">
+                  <div className="stat-card jardinage-categories-card clickable" onClick={() => navigate('/admin/adminJardinaje/categories')}>
+                    <div className="stat-icon jardinage-categories-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🌿 Catégories Jardinage</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card jardinage-services-card clickable" onClick={() => navigate('/admin/adminJardinaje/services')}>
+                    <div className="stat-icon jardinage-services-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🌿 Services Jardinage</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card jardinage-reservations-card clickable" onClick={() => navigate('/admin/adminJardinaje/reservations')}>
+                    <div className="stat-icon jardinage-reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🌿 Réservations Jardinage</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card jardinage-ratings-card clickable" onClick={() => navigate('/admin/adminJardinaje/ratings')}>
+                    <div className="stat-icon jardinage-ratings-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🌿 Avis Jardinage</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card jardinage-services-card clickable" onClick={() => navigate('/admin/adminJardinaje/employees-manage')}>
+                    <div className="stat-icon jardinage-services-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🌿 Employés Jardinage</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card jardinage-services-card clickable" onClick={() => navigate('/admin/adminJardinaje/employees-valid')}>
+                    <div className="stat-icon jardinage-services-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">🌿 Employés Validés</h3>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {activeTab === 'jardinage-categories' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/categories' && (
+            <>
+              <AdminJardinageCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'jardinage-services' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/services' && (
+            <>
+              <AdminJardinageServicesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'jardinage-reservations' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/reservations' && (
+            <>
+              <AdminJardinageReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'jardinage-ratings' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/ratings' && (
+            <>
+              <AdminJardinageRatingsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'jardinage-employees' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/employees-manage' && (
+            <>
+              <AdminJardinageEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'jardinage-employees-valid' && hasAnyRole('adminJardinaje') && location.pathname === '/admin/adminJardinaje/employees-valid' && (
+            <>
+              <AdminJardinageEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {/* Hand Workers Sections */}
+          {hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker' && (
+            <>
+              <section className="admin-card">
+                <div className="handworker-dashboard-container">
+                  <div className="handworker-dashboard-header">
+                    <h2>Travaux Manuels</h2>
+                    <p className="admin-subtitle">Gérez vos catégories, employés et réservations</p>
+                  </div>
+
+                  <div className="handworker-grid">
+                    {/* Categories Card */}
+                    <div className="handworker-card card-categories" onClick={() => navigate('/admin/handworker/categories')}>
+                      <div className="handworker-card-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 3h7v7H3z" />
+                          <path d="M14 3h7v7h-7z" />
+                          <path d="M14 14h7v7h-7z" />
+                          <path d="M3 14h7v7H3z" />
+                        </svg>
+                      </div>
+                      <div className="handworker-card-content">
+                        <h3>Catégories</h3>
+                        <p>Gérer les types de travaux</p>
+                      </div>
+                    </div>
+
+                    {/* Employees Card */}
+                    <div className="handworker-card card-employees" onClick={() => navigate('/admin/handworker/employees')}>
+                      <div className="handworker-card-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                      </div>
+                      <div className="handworker-card-content">
+                        <h3>Employés</h3>
+                        <p>Gérer les profils et disponibilités</p>
+                      </div>
+                    </div>
+
+                    {/* Reservations Card */}
+                    <div className="handworker-card card-reservations" onClick={() => navigate('/admin/handworker/reservations')}>
+                      <div className="handworker-card-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                      </div>
+                      <div className="handworker-card-content">
+                        <h3>Réservations</h3>
+                        <p>Suivi des commandes et plannings</p>
+                      </div>
+                    </div>
+
+                    {/* Validated Employees Card */}
+                    <div className="handworker-card card-validated" onClick={() => navigate('/admin/handworker/validated')}>
+                      <div className="handworker-card-icon-wrapper">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                          <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                      </div>
+                      <div className="handworker-card-content">
+                        <h3>Employés Validés</h3>
+                        <p>Liste des professionnels vérifiés</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {activeTab === 'hand-worker-categories' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/categories' && (
+            <>
+              <AdminHandWorkerCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'hand-workers' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/employees' && (
+            <>
+              <AdminHandWorkerEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'hand-worker-reservations' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/reservations' && (
+            <>
+              <AdminHandWorkerReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'hand-worker-registrations' && hasAnyRole('adminHandWorker') && (
+            <>
+              <AdminHandWorkerRegistrationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'valide-hand-worker-reservations' && hasAnyRole('adminHandWorker') && location.pathname === '/admin/handworker/validated' && (
+            <>
+              <AdminValideHandWorkerReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {/* Driver Sections */}
+          {hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver' && (
+            <>
+              <section className="admin-card">
+                <div className="admin-toolbar">
+                  <h2>Chauffeurs</h2>
+                </div>
+                <div className="stats-grid">
+                  <div className="stat-card employees-card clickable" onClick={() => navigate('/admin/driver/employees')}>
+                    <div className="stat-icon employees-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Employés</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card confirmed-employees-card clickable" onClick={() => navigate('/admin/driver/employees-valid')}>
+                    <div className="stat-icon confirmed-employees-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Employés Validés</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card reservations-card clickable" onClick={() => navigate('/admin/driver/reservations')}>
+                    <div className="stat-icon reservations-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Réservations</h3>
+                    </div>
+                  </div>
+                  <div className="stat-card categories-card clickable" onClick={() => navigate('/admin/driver/categories')}>
+                    <div className="stat-icon categories-icon"></div>
+                    <div className="stat-content">
+                      <h3 className="stat-title">Catégories</h3>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {activeTab === 'driver-employees' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/employees' && (
+            <>
+              <AdminDriverEmployees token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'driver-employees-valid' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/employees-valid' && (
+            <>
+              <AdminDriverEmployeesValid token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'driver-reservations' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/reservations' && (
+            <>
+              <AdminDriverReservationsCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'driver-categories' && hasAnyRole('adminDriver', 'driver') && location.pathname === '/admin/driver/categories' && (
+            <>
+              <AdminDriverCategoriesCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {/* Gallery Sections */}
+          {activeTab === 'gallery-types' && (
+            <>
+              <AdminTypeCategoryGalleryCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'gallery-categories' && (
+            <>
+              <AdminCategoryGalleryCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+
+          {activeTab === 'gallery' && (
+            <>
+              <AdminGalleryCrud token={localStorage.getItem('adminToken')} onAuthError={handleAuthError} />
+            </>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }
 
