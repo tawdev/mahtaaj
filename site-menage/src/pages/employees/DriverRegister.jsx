@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { CITY_QUARTIERS } from '../../constants/cities';
 import LocationPicker from '../../components/LocationPicker/LocationPicker';
+import PhoneInput from '../../components/PhoneInput/PhoneInput';
 import './driverRegister.css';
 
 export default function DriverRegister() {
@@ -37,10 +38,9 @@ export default function DriverRegister() {
     if (!form.full_name || !form.phone || !form.cin_number || !form.latitude || !form.longitude) {
       return t('employee_register.validation.all_fields_required', 'جميع الحقول مطلوبة');
     }
-    // Validate phone format
-    const phoneRegex = /^(\+212|0)[0-9\s\-]{6,}$/;
-    if (!phoneRegex.test(form.phone)) {
-      return t('employee_register.validation.invalid_phone', 'رقم الهاتف غير صحيح');
+    // Validate phone for presence
+    if (!form.phone) {
+      return t('employee_register.validation.phone_required', 'رقم الهاتف مطلوب');
     }
     // Validate CIN number (should be alphanumeric, typically 8-12 characters)
     if (form.cin_number.length < 6 || form.cin_number.length > 20) {
@@ -172,20 +172,11 @@ export default function DriverRegister() {
 
           <div className="form-group">
             <label>{t('employee_register.form.phone')} *</label>
-            <div className="input-with-icon">
-              <span className="ifi-icon" aria-hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.73 19.73 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.12.89.3 1.76.54 2.59a2 2 0 0 1-.45 2.11l-.7.7a16 16 0 0 0 6.88 6.88l.7-.7a2 2 0 0 1 2.11-.45c.83.24 1.7.42 2.59.54A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <input
-                type="tel"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                required
-                placeholder={t('employee_register.form.phone_placeholder')}
-              />
-            </div>
+            <PhoneInput
+              value={form.phone}
+              onChange={(val) => setForm({ ...form, phone: val || '' })}
+              placeholder={t('employee_register.form.phone_placeholder')}
+            />
           </div>
 
           <div className="form-group">

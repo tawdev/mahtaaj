@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import LocationPicker from '../components/LocationPicker/LocationPicker';
+import PhoneInput from '../components/PhoneInput/PhoneInput';
 import { sanitizeInput } from '../utils/sanitize';
 import { validateEmail, validatePhone } from '../utils/validators';
 import logger from '../utils/logger';
@@ -547,14 +548,11 @@ export default function EmployeeRegister() {
           </div>
           <div className="form-group">
             <label>{t('employee_register.form.phone')}</label>
-            <div className="input-with-icon">
-              <span className="ifi-icon" aria-hidden>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.73 19.73 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.12.89.3 1.76.54 2.59a2 2 0 0 1-.45 2.11l-.7.7a16 16 0 0 0 6.88 6.88l.7-.7a2 2 0 0 1 2.11-.45c.83.24 1.7.42 2.59.54A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder={t('employee_register.form.phone_placeholder')} maxLength={20} autoComplete="tel" />
-            </div>
+            <PhoneInput
+              value={form.phone}
+              onChange={(val) => setForm({ ...form, phone: val || '' })}
+              placeholder={t('employee_register.form.phone_placeholder')}
+            />
           </div>
           <div className="form-group full">
             <label style={{ marginBottom: '15px', display: 'block' }}>
