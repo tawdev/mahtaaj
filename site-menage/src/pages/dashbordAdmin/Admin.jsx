@@ -51,6 +51,7 @@ import DashboardStats from './DashboardStats';
 import ProductStats from './ProductStats';
 import './Admin.css';
 import './AdminHandWorker.css';
+import { LuBaby, LuLayers, LuCalendarRange, LuStar, LuUsers, LuUserCheck } from 'react-icons/lu';
 import AdminSecurityRolesCrud from './AdminSecurityRolesCrud';
 import AdminHousekeepingReservations from './AdminHousekeepingReservations';
 
@@ -1351,39 +1352,51 @@ export default function Admin() {
                 </div>
                 <div className="stats-grid">
                   <div className="stat-card bebe-categories-card clickable" onClick={() => navigate('/admin/adminBebe/categories')}>
-                    <div className="stat-icon bebe-categories-icon"></div>
+                    <div className="stat-icon bebe-categories-icon">
+                      <LuBaby />
+                    </div>
                     <div className="stat-content">
-                      <h3 className="stat-title">🍼 Catégories Bébé</h3>
+                      <h3 className="stat-title">Catégories Bébé</h3>
                     </div>
                   </div>
                   <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/services')}>
-                    <div className="stat-icon bebe-services-icon"></div>
+                    <div className="stat-icon bebe-services-icon">
+                      <LuLayers />
+                    </div>
                     <div className="stat-content">
-                      <h3 className="stat-title">🍼 Services Bébé</h3>
+                      <h3 className="stat-title">Services Bébé</h3>
                     </div>
                   </div>
                   <div className="stat-card bebe-reservations-card clickable" onClick={() => navigate('/admin/adminBebe/reservations')}>
-                    <div className="stat-icon bebe-reservations-icon"></div>
+                    <div className="stat-icon bebe-reservations-icon">
+                      <LuCalendarRange />
+                    </div>
                     <div className="stat-content">
-                      <h3 className="stat-title">🍼 Réservations Bébé</h3>
+                      <h3 className="stat-title">Réservations Bébé</h3>
                     </div>
                   </div>
                   <div className="stat-card bebe-ratings-card clickable" onClick={() => navigate('/admin/adminBebe/ratings')}>
-                    <div className="stat-icon bebe-ratings-icon"></div>
+                    <div className="stat-icon bebe-ratings-icon">
+                      <LuStar />
+                    </div>
                     <div className="stat-content">
-                      <h3 className="stat-title">🍼 Avis Bébé</h3>
+                      <h3 className="stat-title">Avis Bébé</h3>
                     </div>
                   </div>
-                  <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/employees')}>
-                    <div className="stat-icon bebe-services-icon"></div>
+                  <div className="stat-card bebe-employees-card clickable" onClick={() => navigate('/admin/adminBebe/employees')}>
+                    <div className="stat-icon bebe-employees-icon">
+                      <LuUsers />
+                    </div>
                     <div className="stat-content">
-                      <h3 className="stat-title">🍼 Employés Bébé</h3>
+                      <h3 className="stat-title">Employés Bébé</h3>
                     </div>
                   </div>
-                  <div className="stat-card bebe-services-card clickable" onClick={() => navigate('/admin/adminBebe/employees-valid')}>
-                    <div className="stat-icon bebe-services-icon"></div>
+                  <div className="stat-card bebe-employees-valid-card clickable" onClick={() => navigate('/admin/adminBebe/employees-valid')}>
+                    <div className="stat-icon bebe-employees-valid-icon">
+                      <LuUserCheck />
+                    </div>
                     <div className="stat-content">
-                      <h3 className="stat-title">🍼 Employés Validés</h3>
+                      <h3 className="stat-title">Employés Validés</h3>
                     </div>
                   </div>
                 </div>
