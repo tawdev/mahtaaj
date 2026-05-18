@@ -1,0 +1,41 @@
+name: Build and Deploy React App to Hostinger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: 🔍 Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js environment
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: site-menage/package-lock.json
+
+      # 3. Install dependencies and build the project
+      - name: 📦 Build React Project
+        run: |
+          cd site-menage
+          npm install
+          npm run build
+
+      # 4. Deploy compiled build folder to Hostinger via FTP
+      - name: 🚀 Deploy to Hostinger via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: site-menage/build/
+          server-dir: public_html/
+          dangerous-clean-slate: false
