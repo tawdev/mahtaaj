@@ -495,133 +495,92 @@ export default function BebeSettingRegister() {
           </div>
 
           <div className="form-group full">
-            <label>{t('employee_register.form.preferred_work_time')}</label>
-            <div className="preferred-work-time-buttons">
-              <button
-                type="button"
-                className={`preferred-time-btn ${form.preferred_work_time === 'morning' ? 'active' : ''}`}
-                onClick={() => setForm(prev => ({ ...prev, preferred_work_time: prev.preferred_work_time === 'morning' ? '' : 'morning' }))}
-              >
-                <span className="btn-icon" aria-hidden>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2" />
-                    <path d="M12 7V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </span>
-                {t('employee_register.form.work_morning')}
-              </button>
-              <button
-                type="button"
-                className={`preferred-time-btn ${form.preferred_work_time === 'night' ? 'active' : ''}`}
-                onClick={() => setForm(prev => ({ ...prev, preferred_work_time: prev.preferred_work_time === 'night' ? '' : 'night' }))}
-              >
-                <span className="btn-icon" aria-hidden>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                {t('employee_register.form.work_night')}
-              </button>
-            </div>
-          </div>
+            <label>{t('employee_register.form.available_days')}</label>
+            <div className="days-grid-modern">
+              {DAYS.map((day, index) => {
+                const key = DAY_KEYS[index];
+                const isActive = days[key]?.checked;
+                const hasError = timeErrors[key];
 
-          <AnimatePresence>
-            {!form.preferred_work_time && (
-              <motion.div
-                className="form-group full"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-              >
-                <label>{t('employee_register.form.available_days')}</label>
-                <div className="days-grid-modern">
-                  {DAYS.map((day, index) => {
-                    const key = DAY_KEYS[index];
-                    const isActive = days[key]?.checked;
-                    const hasError = timeErrors[key];
+                return (
+                  <motion.div
+                    key={key}
+                    className={`day-card ${isActive ? 'active' : ''} ${hasError ? 'error' : ''}`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="day-header">
+                      <label className="day-checkbox-modern">
+                        <input
+                          type="checkbox"
+                          checked={isActive}
+                          onChange={() => handleDayToggle(index)}
+                        />
+                        <span className="checkbox-custom">
+                          {isActive && <FiCheck className="check-icon" />}
+                        </span>
+                        <span className="day-name">{day}</span>
+                      </label>
+                    </div>
 
-                    return (
-                      <motion.div
-                        key={key}
-                        className={`day-card ${isActive ? 'active' : ''} ${hasError ? 'error' : ''}`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="day-header">
-                          <label className="day-checkbox-modern">
-                            <input
-                              type="checkbox"
-                              checked={isActive}
-                              onChange={() => handleDayToggle(index)}
-                            />
-                            <span className="checkbox-custom">
-                              {isActive && <FiCheck className="check-icon" />}
-                            </span>
-                            <span className="day-name">{day}</span>
-                          </label>
-                        </div>
-
-                        <AnimatePresence>
-                          {isActive && (
-                            <motion.div
-                              className="time-fields-modern"
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.3, ease: 'easeInOut' }}
-                            >
-                              <div className="time-inputs-row">
-                                <div className="time-field-modern">
-                                  <label className="time-label-modern">{t('employee_register.days.start_time')}</label>
-                                  <div className="time-input-wrapper">
-                                    <FiClock className="time-icon" />
-                                    <input
-                                      type="time"
-                                      value={(days[key]?.start ?? '') || ''}
-                                      onChange={(e) => handleTimeChange(index, 'start', e.target.value)}
-                                      placeholder={t('employee_register.days.start_placeholder')}
-                                      className="time-input"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="time-field-modern">
-                                  <label className="time-label-modern">{t('employee_register.days.end_time')}</label>
-                                  <div className="time-input-wrapper">
-                                    <FiClock className="time-icon" />
-                                    <input
-                                      type="time"
-                                      value={(days[key]?.end ?? '') || ''}
-                                      onChange={(e) => handleTimeChange(index, 'end', e.target.value)}
-                                      placeholder={t('employee_register.days.end_placeholder')}
-                                      className="time-input"
-                                    />
-                                  </div>
-                                </div>
+                    <AnimatePresence>
+                      {isActive && (
+                        <motion.div
+                          className="time-fields-modern"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        >
+                          <div className="time-inputs-row">
+                            <div className="time-field-modern">
+                              <label className="time-label-modern">{t('employee_register.days.start_time')}</label>
+                              <div className="time-input-wrapper">
+                                <FiClock className="time-icon" />
+                                <input
+                                  type="time"
+                                  value={(days[key]?.start ?? '') || ''}
+                                  onChange={(e) => handleTimeChange(index, 'start', e.target.value)}
+                                  placeholder={t('employee_register.days.start_placeholder')}
+                                  className="time-input"
+                                />
                               </div>
+                            </div>
 
-                              {hasError && (
-                                <motion.div
-                                  className="time-error-message"
-                                  initial={{ opacity: 0, y: -10 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: -10 }}
-                                >
-                                  {hasError}
-                                </motion.div>
-                              )}
+                            <div className="time-field-modern">
+                              <label className="time-label-modern">{t('employee_register.days.end_time')}</label>
+                              <div className="time-input-wrapper">
+                                <FiClock className="time-icon" />
+                                <input
+                                  type="time"
+                                  value={(days[key]?.end ?? '') || ''}
+                                  onChange={(e) => handleTimeChange(index, 'end', e.target.value)}
+                                  placeholder={t('employee_register.days.end_placeholder')}
+                                  className="time-input"
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {hasError && (
+                            <motion.div
+                              className="time-error-message"
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                            >
+                              {hasError}
                             </motion.div>
                           )}
-                        </AnimatePresence>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
 
           <div className="actions">
             <button type="submit" className="submit-button" disabled={submitting}>
